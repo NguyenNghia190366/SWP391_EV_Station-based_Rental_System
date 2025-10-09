@@ -1,208 +1,238 @@
--- 1. Station
-CREATE TABLE Station (
-    station_id INT IDENTITY(1,1) PRIMARY KEY,
+
+/* ===================== 1. Station ===================== */
+CREATE TABLE dbo.Station (
+    station_id   INT IDENTITY(1,1) PRIMARY KEY,
     station_name NVARCHAR(255) NOT NULL,
-    address NVARCHAR(500) NOT NULL,
-    latitude DECIMAL(10,8),
-    longitude DECIMAL(11,8),
-    status NVARCHAR(10) NOT NULL CHECK (status IN ('ACTIVE','INACTIVE')),
-    created_at DATETIME2 NOT NULL DEFAULT SYSUTCDATETIME(),
-    capacity INT NOT NULL DEFAULT 0
+    address      NVARCHAR(500) NOT NULL,
+    latitude     DECIMAL(10,8) NULL,
+    longitude    DECIMAL(11,8) NULL,
+    status       NVARCHAR(10)  NOT NULL
+                 CHECK (status IN (N'ACTIVE', N'INACTIVE')),
+    capacity     INT NOT NULL DEFAULT 0,
+    created_at   DATETIME2(3) NOT NULL DEFAULT SYSUTCDATETIME()
 );
 GO
 
--- 2. Vehicle_Model
-CREATE TABLE Vehicle_Model (
+/* ===================== 2. Vehicle_Model ===================== */
+CREATE TABLE dbo.Vehicle_Model (
     vehicle_model_id INT IDENTITY(1,1) PRIMARY KEY,
-    brand_name NVARCHAR(100) NOT NULL,
-    vehicle_color NVARCHAR(50),
-    number_of_seats INT NOT NULL DEFAULT 1,
-    mileage INT
+    brand_name       NVARCHAR(100) NOT NULL,
+    vehicle_color    NVARCHAR(50)  NULL,
+    number_of_seats  INT NOT NULL DEFAULT 1
+                     CHECK (number_of_seats > 0),
+    mileage          INT NULL
 );
 GO
 
--- 3. Vehicle
-CREATE TABLE Vehicle (
-    vehicle_id INT IDENTITY(1,1) PRIMARY KEY,
-    license_plate NVARCHAR(50) NOT NULL UNIQUE,
+/* ===================== 3. Vehicle ===================== */
+CREATE TABLE dbo.Vehicle (
+    vehicle_id       INT IDENTITY(1,1) PRIMARY KEY,
+    license_plate    NVARCHAR(50)  NOT NULL UNIQUE,
     vehicle_model_id INT NOT NULL,
-    model NVARCHAR(100) NOT NULL,
-    release_year INT,
-    battery_capacity INT,
-    current_mileage INT DEFAULT 0,
-    img_car_url NVARCHAR(255),
-    condition NVARCHAR(20) DEFAULT 'GOOD', -- GOOD, IN_REPAIR, DAMAGED
-    is_available BIT DEFAULT 1,
-    station_id INT,
-    created_at DATETIME2 NOT NULL DEFAULT SYSUTCDATETIME(),
-    FOREIGN KEY (station_id) REFERENCES Station(station_id),
-    FOREIGN KEY (vehicle_model_id) REFERENCES Vehicle_Model(vehicle_model_id)
+    model            NVARCHAR(100) NOT NULL,
+    release_year     INT NULL CHECK (release_year IS NULL OR release_year BETWEEN 1970 AND YEAR(SYSUTCDATETIME())+1),
+    battery_capacity INT NULL,
+    current_mileage  INT NOT NULL DEFAULT 0 CHECK (current_mileage >= 0),
+    img_car_url      NVARCHAR(255) NULL,
+    [condition]      NVARCHAR(20)  NOT NULL DEFAULT N'GOOD'
+                     CHECK ([condition] IN (N'GOOD', N'IN_REPAIR', N'DAMAGED')),
+    is_available     BIT NOT NULL DEFAULT 1,
+    station_id       INT NULL,
+    created_at       DATETIME2(3) NOT NULL DEFAULT SYSUTCDATETIME(),
+    CONSTRAINT FK_Vehicle_Station
+        FOREIGN KEY (station_id) REFERENCES dbo.Station(station_id)
+        ON DELETE SET NULL,
+    CONSTRAINT FK_Vehicle_VehicleModel
+        FOREIGN KEY (vehicle_model_id) REFERENCES dbo.Vehicle_Model(vehicle_model_id)
 );
 GO
 
--- 4. Users
-CREATE TABLE Users (
-    user_id INT IDENTITY(1,1) PRIMARY KEY,
-    full_name NVARCHAR(255) NOT NULL,
-    user_name NVARCHAR(255) NOT NULL,
-    email NVARCHAR(255) NOT NULL UNIQUE,
-    phone_number NVARCHAR(20),
-    role NVARCHAR(10) NOT NULL DEFAULT 'RENTER' CHECK (role IN ('RENTER','STAFF','ADMIN')),
-    status NVARCHAR(10) NOT NULL DEFAULT 'Active' CHECK (status IN ('Active','Inactive','Blocked')),
+/* ===================== 4. Users ===================== */
+CREATE TABLE dbo.Users (
+    user_id       INT IDENTITY(1,1) PRIMARY KEY,
+    full_name     NVARCHAR(255) NOT NULL,
+    email         NVARCHAR(255) NOT NULL UNIQUE,
+    phone_number  NVARCHAR(20)  NULL,
+    role          NVARCHAR(10)  NOT NULL DEFAULT N'RENTER'
+                  CHECK (role IN (N'RENTER', N'STAFF', N'ADMIN')),
+    [status]      NVARCHAR(10)  NOT NULL DEFAULT N'Active'
+                  CHECK ([status] IN (N'Active', N'Inactive', N'Blocked')),
     password_hash NVARCHAR(255) NOT NULL,
-    last_login DATETIME2,
-    created_at DATETIME2 NOT NULL DEFAULT SYSUTCDATETIME()
+    date_of_birth DATE NOT NULL,
+    last_login    DATETIME2(3) NULL,
+    created_at    DATETIME2(3) NOT NULL DEFAULT SYSUTCDATETIME()
 );
 GO
 
--- 5. Staff
-CREATE TABLE Staff (
-    staff_id INT IDENTITY(1,1) PRIMARY KEY,
-    user_id INT NOT NULL,
-    position NVARCHAR(50) NOT NULL,
-    station_id INT,
-    hire_date DATETIME2 NOT NULL DEFAULT SYSUTCDATETIME(),
-    FOREIGN KEY (user_id) REFERENCES Users(user_id),
-    FOREIGN KEY (station_id) REFERENCES Station(station_id)
+/* ===================== 5. Staff ===================== */
+CREATE TABLE dbo.Staff (
+    staff_id   INT IDENTITY(1,1) PRIMARY KEY,
+    user_id    INT NOT NULL UNIQUE,
+    station_id INT NULL,
+    CONSTRAINT FK_Staff_User
+        FOREIGN KEY (user_id) REFERENCES dbo.Users(user_id)
+        ON DELETE CASCADE,
+    CONSTRAINT FK_Staff_Station
+        FOREIGN KEY (station_id) REFERENCES dbo.Station(station_id)
+        ON DELETE SET NULL
 );
 GO
 
--- 6. Renter
-CREATE TABLE Renter (
-    renter_id INT IDENTITY(1,1) PRIMARY KEY,
-    user_id INT NOT NULL,
-    url_cccd_cmnd NVARCHAR(255),
-    id_card_number NVARCHAR(50) NOT NULL UNIQUE,
-    url_driver_license NVARCHAR(255),
-    driver_license_number NVARCHAR(50) NOT NULL UNIQUE,
-    date_of_birth DATE,
-    address NVARCHAR(255),
-    registration_date DATETIME2 DEFAULT SYSUTCDATETIME(),
-    is_verified BIT DEFAULT 0,
-    FOREIGN KEY (user_id) REFERENCES Users(user_id)
+/* ===================== 6. Renter ===================== */
+CREATE TABLE dbo.Renter (
+    renter_id          INT IDENTITY(1,1) PRIMARY KEY,
+    user_id            INT NOT NULL UNIQUE,
+    current_address    NVARCHAR(255) NULL,
+    registration_date  DATETIME2(3) NOT NULL DEFAULT SYSUTCDATETIME(),
+    is_verified        BIT NOT NULL DEFAULT 0,
+    CONSTRAINT FK_Renter_User
+        FOREIGN KEY (user_id) REFERENCES dbo.Users(user_id)
+        ON DELETE CASCADE
 );
 GO
 
--- 7. RentalOrder
-CREATE TABLE RentalOrder (
-    order_id INT IDENTITY(1,1) PRIMARY KEY,
-    renter_id INT NOT NULL,
-    vehicle_id INT NOT NULL,
-    pickup_station_id INT,
-    return_station_id INT,
-    start_time DATETIME2 NOT NULL,
-    end_time DATETIME2,
-    total_amount DECIMAL(12,2) DEFAULT 0,
-    deposit_amount DECIMAL(12,2) DEFAULT 0,
-    payment_status NVARCHAR(20) DEFAULT 'UNPAID' CHECK (payment_status IN ('PAID','UNPAID','REFUNDED')),
-    status NVARCHAR(50) DEFAULT 'BOOKED' CHECK (status IN ('BOOKED','IN_USE','COMPLETED','CANCELED')),
-    created_at DATETIME2 DEFAULT SYSUTCDATETIME(),
-    FOREIGN KEY (renter_id) REFERENCES Renter(renter_id),
-    FOREIGN KEY (vehicle_id) REFERENCES Vehicle(vehicle_id),
-    FOREIGN KEY (pickup_station_id) REFERENCES Station(station_id),
-    FOREIGN KEY (return_station_id) REFERENCES Station(station_id)
+/* ---- 6.1 CCCD (ID card) ---- */
+CREATE TABLE dbo.CCCD (
+    renter_id       INT PRIMARY KEY,
+    url_cccd_cmnd   NVARCHAR(255) NULL,
+    id_card_number  NVARCHAR(50)  NOT NULL UNIQUE,
+    CONSTRAINT FK_CCCD_Renter
+        FOREIGN KEY (renter_id) REFERENCES dbo.Renter(renter_id)
+        ON DELETE CASCADE
 );
 GO
 
--- 8. Contract
-CREATE TABLE Contract (
-    contract_id INT IDENTITY(1,1) PRIMARY KEY,
-    order_id INT NOT NULL,
-    signed_date DATETIME2 DEFAULT SYSUTCDATETIME(),
-    contract_content NVARCHAR(MAX),
-    contract_pdf_url NVARCHAR(255),
-    FOREIGN KEY (order_id) REFERENCES RentalOrder(order_id)
+/* ---- 6.2 Driver License ---- */
+CREATE TABLE dbo.Driver_License (
+    renter_id               INT PRIMARY KEY,
+    url_driver_license      NVARCHAR(255) NULL,
+    driver_license_number   NVARCHAR(50)  NOT NULL UNIQUE,
+    CONSTRAINT FK_DriverLicense_Renter
+        FOREIGN KEY (renter_id) REFERENCES dbo.Renter(renter_id)
+        ON DELETE CASCADE
 );
 GO
 
--- 9. Payment
-CREATE TABLE Payment (
-    payment_id INT IDENTITY(1,1) PRIMARY KEY,
-    order_id INT NOT NULL,
-    amount DECIMAL(12,2) NOT NULL,
-    payment_method NVARCHAR(50), -- Cash, Card, E-Wallet
-    payment_date DATETIME2 DEFAULT SYSUTCDATETIME(),
-    external_ref NVARCHAR(255),
-    FOREIGN KEY (order_id) REFERENCES RentalOrder(order_id)
+/* ===================== 7. RentalOrder ===================== */
+CREATE TABLE dbo.RentalOrder (
+    order_id            INT IDENTITY(1,1) PRIMARY KEY,
+    renter_id           INT NOT NULL,
+    vehicle_id          INT NOT NULL,
+    pickup_station_id   INT NULL,
+    return_station_id   INT NULL,
+    start_time          DATETIME2(3) NOT NULL,
+    end_time            DATETIME2(3) NULL,
+    total_amount        DECIMAL(12,2) NOT NULL DEFAULT 0,
+    deposit_amount      DECIMAL(12,2) NOT NULL DEFAULT 0,
+    payment_status      NVARCHAR(20)  NOT NULL DEFAULT N'UNPAID'
+                        CHECK (payment_status IN (N'PAID', N'UNPAID', N'REFUNDED')),
+    [status]            NVARCHAR(50)  NOT NULL DEFAULT N'BOOKED'
+                        CHECK ([status] IN (N'BOOKED', N'IN_USE', N'COMPLETED', N'CANCELED')),
+    img_vehicle_before_URL NVARCHAR(255) NULL,
+    img_vehicle_after_URL  NVARCHAR(255) NULL,
+    created_at          DATETIME2(3) NOT NULL DEFAULT SYSUTCDATETIME(),
+    CONSTRAINT FK_Order_Renter
+        FOREIGN KEY (renter_id)  REFERENCES dbo.Renter(renter_id),
+    CONSTRAINT FK_Order_Vehicle
+        FOREIGN KEY (vehicle_id) REFERENCES dbo.Vehicle(vehicle_id),
+    CONSTRAINT FK_Order_PickupStation
+        FOREIGN KEY (pickup_station_id) REFERENCES dbo.Station(station_id),
+    CONSTRAINT FK_Order_ReturnStation
+        FOREIGN KEY (return_station_id) REFERENCES dbo.Station(station_id)
 );
 GO
 
--- 10. ExtraFee
-CREATE TABLE ExtraFee (
-    fee_id INT IDENTITY(1,1) PRIMARY KEY,
-    order_id INT NOT NULL,
-    fee_type NVARCHAR(100),
-    amount DECIMAL(12,2) DEFAULT 0,
-    description NVARCHAR(MAX),
-    created_at DATETIME2 DEFAULT SYSUTCDATETIME(),
-    FOREIGN KEY (order_id) REFERENCES RentalOrder(order_id)
+/* ===================== 8. Contract ===================== */
+CREATE TABLE dbo.Contract (
+    contract_id     INT IDENTITY(1,1) PRIMARY KEY,
+    staff_id        INT NOT NULL,
+    order_id        INT NOT NULL UNIQUE, -- 1-1 with order
+    signed_date     DATETIME2(3) NOT NULL DEFAULT SYSUTCDATETIME(),
+    contract_pdf_url NVARCHAR(255) NULL,
+    CONSTRAINT FK_Contract_Order
+        FOREIGN KEY (order_id) REFERENCES dbo.RentalOrder(order_id)
+        ON DELETE CASCADE,
+    CONSTRAINT FK_Contract_Staff
+        FOREIGN KEY (staff_id) REFERENCES dbo.Staff(staff_id)
 );
 GO
 
--- 11. Handover
-CREATE TABLE Handover (
-    handover_id INT IDENTITY(1,1) PRIMARY KEY,
-    order_id INT NOT NULL,
-    staff_id INT,
-    handover_type NVARCHAR(10) NOT NULL CHECK (handover_type IN ('PICKUP','RETURN')),
-    condition_notes NVARCHAR(MAX),
-    photo_url NVARCHAR(255),
-    handover_timestamp DATETIME2 DEFAULT SYSUTCDATETIME(),
-    FOREIGN KEY (order_id) REFERENCES RentalOrder(order_id),
-    FOREIGN KEY (staff_id) REFERENCES Staff(staff_id)
+/* ===================== 9. Payment ===================== */
+CREATE TABLE dbo.Payment (
+    payment_id     INT IDENTITY(1,1) PRIMARY KEY,
+    order_id       INT NOT NULL,
+    amount         DECIMAL(12,2) NOT NULL CHECK (amount >= 0),
+    payment_method NVARCHAR(50)  NOT NULL CHECK (payment_method IN (N'Cash', N'Card', N'E-Wallet')),
+    payment_date   DATETIME2(3) NOT NULL DEFAULT SYSUTCDATETIME(),
+    external_ref   NVARCHAR(255) NULL,
+    CONSTRAINT FK_Payment_Order
+        FOREIGN KEY (order_id) REFERENCES dbo.RentalOrder(order_id)
+        ON DELETE CASCADE
 );
 GO
 
--- 12. Complaint
-CREATE TABLE Complaint (
-    complaint_id INT IDENTITY(1,1) PRIMARY KEY,
-    renter_id INT NOT NULL,
-    order_id INT,
-    description NVARCHAR(MAX),
-    created_date DATETIME2 DEFAULT SYSUTCDATETIME(),
-    resolve_date DATETIME2,
-    resolve_by_staff_id INT,
-    status NVARCHAR(50) DEFAULT 'PENDING',
-    FOREIGN KEY (renter_id) REFERENCES Renter(renter_id),
-    FOREIGN KEY (order_id) REFERENCES RentalOrder(order_id),
-    FOREIGN KEY (resolve_by_staff_id) REFERENCES Staff(staff_id)
+/* ===================== 10. FeeType & ExtraFee ===================== */
+CREATE TABLE dbo.FeeType (
+    FeeType_id INT IDENTITY(1,1) PRIMARY KEY,
+    FeeType    NVARCHAR(100) NOT NULL UNIQUE,
+    amount      DECIMAL(12,2) NOT NULL DEFAULT 0 CHECK (amount >= 0)
 );
 GO
 
--- 13. Log_History
-CREATE TABLE Log_History (
-    log_id INT IDENTITY(1,1) PRIMARY KEY,
-    user_id INT,
-    log_type NVARCHAR(50),
-    action NVARCHAR(MAX),
-    log_date DATETIME2 DEFAULT SYSUTCDATETIME(),
-    FOREIGN KEY (user_id) REFERENCES Users(user_id)
+CREATE TABLE dbo.ExtraFee (
+    fee_id       INT IDENTITY(1,1) PRIMARY KEY,
+    order_id     INT NOT NULL,
+    FeeType_id  INT NOT NULL,
+    [description] NVARCHAR(MAX) NULL,
+    created_at   DATETIME2(3) NOT NULL DEFAULT SYSUTCDATETIME(),
+    CONSTRAINT FK_ExtraFee_Order
+        FOREIGN KEY (order_id) REFERENCES dbo.RentalOrder(order_id)
+        ON DELETE CASCADE,
+    CONSTRAINT FK_ExtraFee_FeeType
+        FOREIGN KEY (FeeType_id) REFERENCES dbo.FeeType(FeeType_id)
 );
 GO
 
--- 14. Notification
-CREATE TABLE Notification (
+/* ===================== 12. Complaint ===================== */
+CREATE TABLE dbo.Complaint (
+    complaint_id   INT IDENTITY(1,1) PRIMARY KEY,
+    renter_id      INT NOT NULL,
+    order_id       INT NULL,
+    [description]  NVARCHAR(MAX) NULL,
+    created_date   DATETIME2(3) NOT NULL DEFAULT SYSUTCDATETIME(),
+    resolve_date   DATETIME2(3) NULL,
+    [status]       NVARCHAR(50) NOT NULL DEFAULT N'PROCESSING'
+                   CHECK ([status] IN (N'PROCESSING', N'RESOLVED')),
+    CONSTRAINT FK_Complaint_Renter
+        FOREIGN KEY (renter_id) REFERENCES dbo.Renter(renter_id)
+        ON DELETE CASCADE,
+    CONSTRAINT FK_Complaint_Order
+        FOREIGN KEY (order_id)  REFERENCES dbo.RentalOrder(order_id)
+);
+GO
+
+/* ===================== 13. Log_History ===================== */
+CREATE TABLE dbo.Log_History (
+    log_id    INT IDENTITY(1,1) PRIMARY KEY,
+    user_id   INT NULL,
+    log_type  NVARCHAR(50) NULL,
+    action    NVARCHAR(MAX) NULL,
+    log_date  DATETIME2(3) NOT NULL DEFAULT SYSUTCDATETIME(),
+    CONSTRAINT FK_LogHistory_User
+        FOREIGN KEY (user_id) REFERENCES dbo.Users(user_id)
+        ON DELETE SET NULL
+);
+GO
+
+/* ===================== 14. Notification ===================== */
+CREATE TABLE dbo.Notification (
     notification_id INT IDENTITY(1,1) PRIMARY KEY,
-    user_id INT NOT NULL,
-    message NVARCHAR(MAX),
-    is_read BIT DEFAULT 0,
-    created_at DATETIME2 DEFAULT SYSUTCDATETIME(),
-    FOREIGN KEY (user_id) REFERENCES Users(user_id)
+    user_id         INT NOT NULL,
+    [message]       NVARCHAR(MAX) NOT NULL,
+    is_read         BIT NOT NULL DEFAULT 0,
+    created_at      DATETIME2(3) NOT NULL DEFAULT SYSUTCDATETIME(),
+    CONSTRAINT FK_Notification_User
+        FOREIGN KEY (user_id) REFERENCES dbo.Users(user_id)
+        ON DELETE CASCADE
 );
-GO
-
--- 15. Image (optional)
-CREATE TABLE Image (
-    image_id INT IDENTITY(1,1) PRIMARY KEY,
-    related_type NVARCHAR(50) NOT NULL, -- Vehicle, Renter, Handover, Contract
-    related_id INT NOT NULL,
-    url NVARCHAR(255) NOT NULL,
-    uploaded_at DATETIME2 DEFAULT SYSUTCDATETIME()
-);
-GO
-
--- Indexes
-CREATE INDEX IDX_Vehicle_Station ON Vehicle(station_id);
-CREATE INDEX IDX_RentalOrder_Renter ON RentalOrder(renter_id);
-CREATE INDEX IDX_Renter_User ON Renter(user_id);
 GO
