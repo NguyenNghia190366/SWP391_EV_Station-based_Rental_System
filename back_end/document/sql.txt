@@ -1,4 +1,3 @@
-
 /* ===================== 1. Station ===================== */
 CREATE TABLE dbo.Station (
     station_id   INT IDENTITY(1,1) PRIMARY KEY,
@@ -235,4 +234,39 @@ CREATE TABLE dbo.Notification (
         FOREIGN KEY (user_id) REFERENCES dbo.Users(user_id)
         ON DELETE CASCADE
 );
+GO
+
+INSERT INTO Station (station_name, address, latitude, longitude, status, capacity)
+VALUES
+(N'Trạm EV Quận 1', N'12 Nguyễn Huệ, Quận 1, TP.HCM', 10.7758, 106.7009, N'ACTIVE', 10),
+(N'Trạm EV Thủ Đức', N'25 Võ Văn Ngân, Thủ Đức, TP.HCM', 10.8500, 106.7700, N'ACTIVE', 8);
+
+INSERT INTO Vehicle_Model (brand_name, vehicle_color, number_of_seats, mileage)
+VALUES
+(N'VinFast VF5', N'Xanh', 4, 10000),
+(N'Tesla Model 3', N'Đen', 4, 15000);
+
+INSERT INTO Users (full_name, email, phone_number, role, [status], password_hash, date_of_birth)
+VALUES
+(N'Nguyễn Trung Nghĩa', N'nghiant@example.com', N'0901234567', N'RENTER', N'Active', N'$2a$10$abc123hash', '1999-05-12'),
+(N'Dương Trung Kiên', N'kienduong@example.com', N'0912345678', N'ADMIN', N'Active', N'$2a$10$def456hash', '1998-10-22'),
+(N'Ông Gia Huy', N'huyong@example.com', N'0939876543', N'STAFF', N'Active', N'$2a$10$ghi789hash', '2002-07-15');
+
+INSERT INTO Staff (user_id, station_id) -- gắn user Ông Gia Huy với trạm Quận 1
+VALUES (3, 1);
+
+INSERT INTO Renter (user_id, current_address, is_verified) -- gắn user Nguyễn Trung Nghĩa
+VALUES (1, N'45 Lý Thường Kiệt, Quận 10, TP.HCM', 1);
+
+
+/* ===================== Helpful Indexes ===================== */
+CREATE INDEX IX_Vehicle_station_id            ON dbo.Vehicle(station_id);
+CREATE INDEX IX_RentalOrder_renter_id         ON dbo.RentalOrder(renter_id);
+CREATE INDEX IX_RentalOrder_vehicle_id        ON dbo.RentalOrder(vehicle_id);
+CREATE INDEX IX_RentalOrder_pickup_station_id ON dbo.RentalOrder(pickup_station_id);
+CREATE INDEX IX_RentalOrder_return_station_id ON dbo.RentalOrder(return_station_id);
+CREATE INDEX IX_ExtraFee_order_id             ON dbo.ExtraFee(order_id);
+CREATE INDEX IX_ExtraFee_FeeType_id          ON dbo.ExtraFee(FeeType_id);
+CREATE INDEX IX_Payment_order_id              ON dbo.Payment(order_id);
+CREATE INDEX IX_Complaint_order_id            ON dbo.Complaint(order_id);
 GO
