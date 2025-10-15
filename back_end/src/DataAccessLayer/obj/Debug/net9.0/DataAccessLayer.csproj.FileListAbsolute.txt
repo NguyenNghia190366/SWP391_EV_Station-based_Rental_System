@@ -10,3 +10,6 @@ D:\Linh tinh\studying\Semester_5\swP391\main\back_end\src\DataAccessLayer\obj\De
 D:\Linh tinh\studying\Semester_5\swP391\main\back_end\src\DataAccessLayer\obj\Debug\net9.0\refint\DataAccessLayer.dll
 D:\Linh tinh\studying\Semester_5\swP391\main\back_end\src\DataAccessLayer\obj\Debug\net9.0\DataAccessLayer.pdb
 D:\Linh tinh\studying\Semester_5\swP391\main\back_end\src\DataAccessLayer\obj\Debug\net9.0\ref\DataAccessLayer.dll
+D:\Linh tinh\studying\Semester_5\swP391\main\back_end\src\DataAccessLayer\bin\Debug\net9.0\DataAccessLayer.runtimeconfig.json
+D:\Linh tinh\studying\Semester_5\swP391\main\back_end\src\DataAccessLayer\obj\Debug\net9.0\DataAccessLayer.csproj.AssemblyReference.cache
+D:\Linh tinh\studying\Semester_5\swP391\main\back_end\src\DataAccessLayer\obj\Debug\net9.0\DataAccessLayer.genruntimeconfig.cache
