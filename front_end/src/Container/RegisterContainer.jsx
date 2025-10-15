@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import api from "../utils/axios";
+import api from "../utils/api";
 import RegisterForm from "../Components/Form/RegisterForm";
 
 const RegisterContainer = () => {

@@ -29,10 +29,13 @@ const SDZHomepage = () => {
       <header className="header">
         <nav className="nav">
           <div className="nav-left">
-            <h1 className="logo">
-              <span>SDZ</span>
-            </h1>
+            <a href="/home" className="logo-link">
+              <h1 className="logo">
+                <span>SDZ</span>
+              </h1>
+            </a>
             <div className="nav-links">
+              <a href="/home" className="home-btn">Trang Chủ</a>
               <a href="#">Đi xe</a>
               <a href="#">Lái xe</a>
               <a href="#">Doanh nghiệp</a>

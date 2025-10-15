@@ -1,6 +1,5 @@
-// const MOCKAPI_BASE = 'https://68e62cc921dd31f22cc4769d.mockapi.io/api/ev/users';
-const MOCKAPI_BASE =
-  "https://alani-uncorroboratory-sympetaly.ngrok-free.dev/Users";
+const MOCKAPI_BASE = 'https://68e62cc921dd31f22cc4769d.mockapi.io/api/ev/users';
+// const MOCKAPI_BASE = "https://alani-uncorroboratory-sympetaly.ngrok-free.dev/Users";
 
 export const userAPI = {
   // Lấy tất cả user
@@ -54,3 +53,5 @@ export const userAPI = {
     });
   },
 };
+
+export default userAPI;
