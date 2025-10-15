@@ -1,0 +1,16 @@
+D:\Linh tinh\studying\Semester_5\swP391\main\back_end\src\BusinessLogicLayer\bin\Debug\net9.0\BusinessLogicLayer.deps.json
+D:\Linh tinh\studying\Semester_5\swP391\main\back_end\src\BusinessLogicLayer\bin\Debug\net9.0\BusinessLogicLayer.dll
+D:\Linh tinh\studying\Semester_5\swP391\main\back_end\src\BusinessLogicLayer\bin\Debug\net9.0\BusinessLogicLayer.pdb
+D:\Linh tinh\studying\Semester_5\swP391\main\back_end\src\BusinessLogicLayer\bin\Debug\net9.0\DataAccessLayer.dll
+D:\Linh tinh\studying\Semester_5\swP391\main\back_end\src\BusinessLogicLayer\bin\Debug\net9.0\DataAccessLayer.pdb
+D:\Linh tinh\studying\Semester_5\swP391\main\back_end\src\BusinessLogicLayer\obj\Debug\net9.0\BusinessLogicLayer.csproj.AssemblyReference.cache
+D:\Linh tinh\studying\Semester_5\swP391\main\back_end\src\BusinessLogicLayer\obj\Debug\net9.0\BusinessLogicLayer.GeneratedMSBuildEditorConfig.editorconfig
+D:\Linh tinh\studying\Semester_5\swP391\main\back_end\src\BusinessLogicLayer\obj\Debug\net9.0\BusinessLogicLayer.AssemblyInfoInputs.cache
+D:\Linh tinh\studying\Semester_5\swP391\main\back_end\src\BusinessLogicLayer\obj\Debug\net9.0\BusinessLogicLayer.AssemblyInfo.cs
+D:\Linh tinh\studying\Semester_5\swP391\main\back_end\src\BusinessLogicLayer\obj\Debug\net9.0\BusinessLogicLayer.csproj.CoreCompileInputs.cache
+D:\Linh tinh\studying\Semester_5\swP391\main\back_end\src\BusinessLogicLayer\obj\Debug\net9.0\BusinessLogicLayer.sourcelink.json
+D:\Linh tinh\studying\Semester_5\swP391\main\back_end\src\BusinessLogicLayer\obj\Debug\net9.0\Business.450209FB.Up2Date
+D:\Linh tinh\studying\Semester_5\swP391\main\back_end\src\BusinessLogicLayer\obj\Debug\net9.0\BusinessLogicLayer.dll
+D:\Linh tinh\studying\Semester_5\swP391\main\back_end\src\BusinessLogicLayer\obj\Debug\net9.0\refint\BusinessLogicLayer.dll
+D:\Linh tinh\studying\Semester_5\swP391\main\back_end\src\BusinessLogicLayer\obj\Debug\net9.0\BusinessLogicLayer.pdb
+D:\Linh tinh\studying\Semester_5\swP391\main\back_end\src\BusinessLogicLayer\obj\Debug\net9.0\ref\BusinessLogicLayer.dll
