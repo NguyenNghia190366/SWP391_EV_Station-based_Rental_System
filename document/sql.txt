@@ -1,0 +1,272 @@
+/* ===================== 1. Station ===================== */
+CREATE TABLE dbo.Station (
+    station_id   INT IDENTITY(1,1) PRIMARY KEY,
+    station_name NVARCHAR(255) NOT NULL,
+    address      NVARCHAR(500) NOT NULL,
+    latitude     DECIMAL(10,8) NULL,
+    longitude    DECIMAL(11,8) NULL,
+    status       NVARCHAR(10)  NOT NULL
+                 CHECK (status IN (N'ACTIVE', N'INACTIVE')),
+    capacity     INT NOT NULL DEFAULT 0,
+    created_at   DATETIME2(3) NOT NULL DEFAULT SYSUTCDATETIME()
+);
+GO
+
+/* ===================== 2. Vehicle_Model ===================== */
+CREATE TABLE dbo.Vehicle_Model (
+    vehicle_model_id INT IDENTITY(1,1) PRIMARY KEY,
+    brand_name       NVARCHAR(100) NOT NULL,
+    vehicle_color    NVARCHAR(50)  NULL,
+    number_of_seats  INT NOT NULL DEFAULT 1
+                     CHECK (number_of_seats > 0),
+    mileage          INT NULL
+);
+GO
+
+/* ===================== 3. Vehicle ===================== */
+CREATE TABLE dbo.Vehicle (
+    vehicle_id       INT IDENTITY(1,1) PRIMARY KEY,
+    license_plate    NVARCHAR(50)  NOT NULL UNIQUE,
+    vehicle_model_id INT NOT NULL,
+    model            NVARCHAR(100) NOT NULL,
+    release_year     INT NULL CHECK (release_year IS NULL OR release_year BETWEEN 1970 AND YEAR(SYSUTCDATETIME())+1),
+    battery_capacity INT NULL,
+    current_mileage  INT NOT NULL DEFAULT 0 CHECK (current_mileage >= 0),
+    img_car_url      NVARCHAR(255) NULL,
+    [condition]      NVARCHAR(20)  NOT NULL DEFAULT N'GOOD'
+                     CHECK ([condition] IN (N'GOOD', N'IN_REPAIR', N'DAMAGED')),
+    is_available     BIT NOT NULL DEFAULT 1,
+    station_id       INT NULL,
+    created_at       DATETIME2(3) NOT NULL DEFAULT SYSUTCDATETIME(),
+    CONSTRAINT FK_Vehicle_Station
+        FOREIGN KEY (station_id) REFERENCES dbo.Station(station_id)
+        ON DELETE SET NULL,
+    CONSTRAINT FK_Vehicle_VehicleModel
+        FOREIGN KEY (vehicle_model_id) REFERENCES dbo.Vehicle_Model(vehicle_model_id)
+);
+GO
+
+/* ===================== 4. Users ===================== */
+CREATE TABLE dbo.Users (
+    user_id       INT IDENTITY(1,1) PRIMARY KEY,
+    full_name     NVARCHAR(255) NOT NULL,
+    email         NVARCHAR(255) NOT NULL UNIQUE,
+    phone_number  NVARCHAR(20)  NULL,
+    role          NVARCHAR(10)  NOT NULL DEFAULT N'RENTER'
+                  CHECK (role IN (N'RENTER', N'STAFF', N'ADMIN')),
+    [status]      NVARCHAR(10)  NOT NULL DEFAULT N'Active'
+                  CHECK ([status] IN (N'Active', N'Inactive', N'Blocked')),
+    password_hash NVARCHAR(255) NOT NULL,
+    date_of_birth DATE NOT NULL,
+    last_login    DATETIME2(3) NULL,
+    created_at    DATETIME2(3) NOT NULL DEFAULT SYSUTCDATETIME()
+);
+GO
+
+/* ===================== 5. Staff ===================== */
+CREATE TABLE dbo.Staff (
+    staff_id   INT IDENTITY(1,1) PRIMARY KEY,
+    user_id    INT NOT NULL UNIQUE,
+    station_id INT NULL,
+    CONSTRAINT FK_Staff_User
+        FOREIGN KEY (user_id) REFERENCES dbo.Users(user_id)
+        ON DELETE CASCADE,
+    CONSTRAINT FK_Staff_Station
+        FOREIGN KEY (station_id) REFERENCES dbo.Station(station_id)
+        ON DELETE SET NULL
+);
+GO
+
+/* ===================== 6. Renter ===================== */
+CREATE TABLE dbo.Renter (
+    renter_id          INT IDENTITY(1,1) PRIMARY KEY,
+    user_id            INT NOT NULL UNIQUE,
+    current_address    NVARCHAR(255) NULL,
+    registration_date  DATETIME2(3) NOT NULL DEFAULT SYSUTCDATETIME(),
+    is_verified        BIT NOT NULL DEFAULT 0,
+    CONSTRAINT FK_Renter_User
+        FOREIGN KEY (user_id) REFERENCES dbo.Users(user_id)
+        ON DELETE CASCADE
+);
+GO
+
+/* ---- 6.1 CCCD (ID card) ---- */
+CREATE TABLE dbo.CCCD (
+    renter_id       INT PRIMARY KEY,
+    url_cccd_cmnd   NVARCHAR(255) NULL,
+    id_card_number  NVARCHAR(50)  NOT NULL UNIQUE,
+    CONSTRAINT FK_CCCD_Renter
+        FOREIGN KEY (renter_id) REFERENCES dbo.Renter(renter_id)
+        ON DELETE CASCADE
+);
+GO
+
+/* ---- 6.2 Driver License ---- */
+CREATE TABLE dbo.Driver_License (
+    renter_id               INT PRIMARY KEY,
+    url_driver_license      NVARCHAR(255) NULL,
+    driver_license_number   NVARCHAR(50)  NOT NULL UNIQUE,
+    CONSTRAINT FK_DriverLicense_Renter
+        FOREIGN KEY (renter_id) REFERENCES dbo.Renter(renter_id)
+        ON DELETE CASCADE
+);
+GO
+
+/* ===================== 7. RentalOrder ===================== */
+CREATE TABLE dbo.RentalOrder (
+    order_id            INT IDENTITY(1,1) PRIMARY KEY,
+    renter_id           INT NOT NULL,
+    vehicle_id          INT NOT NULL,
+    pickup_station_id   INT NULL,
+    return_station_id   INT NULL,
+    start_time          DATETIME2(3) NOT NULL,
+    end_time            DATETIME2(3) NULL,
+    total_amount        DECIMAL(12,2) NOT NULL DEFAULT 0,
+    deposit_amount      DECIMAL(12,2) NOT NULL DEFAULT 0,
+    payment_status      NVARCHAR(20)  NOT NULL DEFAULT N'UNPAID'
+                        CHECK (payment_status IN (N'PAID', N'UNPAID', N'REFUNDED')),
+    [status]            NVARCHAR(50)  NOT NULL DEFAULT N'BOOKED'
+                        CHECK ([status] IN (N'BOOKED', N'IN_USE', N'COMPLETED', N'CANCELED')),
+    img_vehicle_before_URL NVARCHAR(255) NULL,
+    img_vehicle_after_URL  NVARCHAR(255) NULL,
+    created_at          DATETIME2(3) NOT NULL DEFAULT SYSUTCDATETIME(),
+    CONSTRAINT FK_Order_Renter
+        FOREIGN KEY (renter_id)  REFERENCES dbo.Renter(renter_id),
+    CONSTRAINT FK_Order_Vehicle
+        FOREIGN KEY (vehicle_id) REFERENCES dbo.Vehicle(vehicle_id),
+    CONSTRAINT FK_Order_PickupStation
+        FOREIGN KEY (pickup_station_id) REFERENCES dbo.Station(station_id),
+    CONSTRAINT FK_Order_ReturnStation
+        FOREIGN KEY (return_station_id) REFERENCES dbo.Station(station_id)
+);
+GO
+
+/* ===================== 8. Contract ===================== */
+CREATE TABLE dbo.Contract (
+    contract_id     INT IDENTITY(1,1) PRIMARY KEY,
+    staff_id        INT NOT NULL,
+    order_id        INT NOT NULL UNIQUE, -- 1-1 with order
+    signed_date     DATETIME2(3) NOT NULL DEFAULT SYSUTCDATETIME(),
+    contract_pdf_url NVARCHAR(255) NULL,
+    CONSTRAINT FK_Contract_Order
+        FOREIGN KEY (order_id) REFERENCES dbo.RentalOrder(order_id)
+        ON DELETE CASCADE,
+    CONSTRAINT FK_Contract_Staff
+        FOREIGN KEY (staff_id) REFERENCES dbo.Staff(staff_id)
+);
+GO
+
+/* ===================== 9. Payment ===================== */
+CREATE TABLE dbo.Payment (
+    payment_id     INT IDENTITY(1,1) PRIMARY KEY,
+    order_id       INT NOT NULL,
+    amount         DECIMAL(12,2) NOT NULL CHECK (amount >= 0),
+    payment_method NVARCHAR(50)  NOT NULL CHECK (payment_method IN (N'Cash', N'Card', N'E-Wallet')),
+    payment_date   DATETIME2(3) NOT NULL DEFAULT SYSUTCDATETIME(),
+    external_ref   NVARCHAR(255) NULL,
+    CONSTRAINT FK_Payment_Order
+        FOREIGN KEY (order_id) REFERENCES dbo.RentalOrder(order_id)
+        ON DELETE CASCADE
+);
+GO
+
+/* ===================== 10. FeeType & ExtraFee ===================== */
+CREATE TABLE dbo.FeeType (
+    FeeType_id INT IDENTITY(1,1) PRIMARY KEY,
+    FeeType    NVARCHAR(100) NOT NULL UNIQUE,
+    amount      DECIMAL(12,2) NOT NULL DEFAULT 0 CHECK (amount >= 0)
+);
+GO
+
+CREATE TABLE dbo.ExtraFee (
+    fee_id       INT IDENTITY(1,1) PRIMARY KEY,
+    order_id     INT NOT NULL,
+    FeeType_id  INT NOT NULL,
+    [description] NVARCHAR(MAX) NULL,
+    created_at   DATETIME2(3) NOT NULL DEFAULT SYSUTCDATETIME(),
+    CONSTRAINT FK_ExtraFee_Order
+        FOREIGN KEY (order_id) REFERENCES dbo.RentalOrder(order_id)
+        ON DELETE CASCADE,
+    CONSTRAINT FK_ExtraFee_FeeType
+        FOREIGN KEY (FeeType_id) REFERENCES dbo.FeeType(FeeType_id)
+);
+GO
+
+/* ===================== 12. Complaint ===================== */
+CREATE TABLE dbo.Complaint (
+    complaint_id   INT IDENTITY(1,1) PRIMARY KEY,
+    renter_id      INT NOT NULL,
+    order_id       INT NULL,
+    [description]  NVARCHAR(MAX) NULL,
+    created_date   DATETIME2(3) NOT NULL DEFAULT SYSUTCDATETIME(),
+    resolve_date   DATETIME2(3) NULL,
+    [status]       NVARCHAR(50) NOT NULL DEFAULT N'PROCESSING'
+                   CHECK ([status] IN (N'PROCESSING', N'RESOLVED')),
+    CONSTRAINT FK_Complaint_Renter
+        FOREIGN KEY (renter_id) REFERENCES dbo.Renter(renter_id)
+        ON DELETE CASCADE,
+    CONSTRAINT FK_Complaint_Order
+        FOREIGN KEY (order_id)  REFERENCES dbo.RentalOrder(order_id)
+);
+GO
+
+/* ===================== 13. Log_History ===================== */
+CREATE TABLE dbo.Log_History (
+    log_id    INT IDENTITY(1,1) PRIMARY KEY,
+    user_id   INT NULL,
+    log_type  NVARCHAR(50) NULL,
+    action    NVARCHAR(MAX) NULL,
+    log_date  DATETIME2(3) NOT NULL DEFAULT SYSUTCDATETIME(),
+    CONSTRAINT FK_LogHistory_User
+        FOREIGN KEY (user_id) REFERENCES dbo.Users(user_id)
+        ON DELETE SET NULL
+);
+GO
+
+/* ===================== 14. Notification ===================== */
+CREATE TABLE dbo.Notification (
+    notification_id INT IDENTITY(1,1) PRIMARY KEY,
+    user_id         INT NOT NULL,
+    [message]       NVARCHAR(MAX) NOT NULL,
+    is_read         BIT NOT NULL DEFAULT 0,
+    created_at      DATETIME2(3) NOT NULL DEFAULT SYSUTCDATETIME(),
+    CONSTRAINT FK_Notification_User
+        FOREIGN KEY (user_id) REFERENCES dbo.Users(user_id)
+        ON DELETE CASCADE
+);
+GO
+
+INSERT INTO Station (station_name, address, latitude, longitude, status, capacity)
+VALUES
+(N'Trạm EV Quận 1', N'12 Nguyễn Huệ, Quận 1, TP.HCM', 10.7758, 106.7009, N'ACTIVE', 10),
+(N'Trạm EV Thủ Đức', N'25 Võ Văn Ngân, Thủ Đức, TP.HCM', 10.8500, 106.7700, N'ACTIVE', 8);
+
+INSERT INTO Vehicle_Model (brand_name, vehicle_color, number_of_seats, mileage)
+VALUES
+(N'VinFast VF5', N'Xanh', 4, 10000),
+(N'Tesla Model 3', N'Đen', 4, 15000);
+
+INSERT INTO Users (full_name, email, phone_number, role, [status], password_hash, date_of_birth)
+VALUES
+(N'Nguyễn Trung Nghĩa', N'nghiant@example.com', N'0901234567', N'RENTER', N'Active', N'$2a$10$abc123hash', '1999-05-12'),
+(N'Dương Trung Kiên', N'kienduong@example.com', N'0912345678', N'ADMIN', N'Active', N'$2a$10$def456hash', '1998-10-22'),
+(N'Ông Gia Huy', N'huyong@example.com', N'0939876543', N'STAFF', N'Active', N'$2a$10$ghi789hash', '2002-07-15');
+
+INSERT INTO Staff (user_id, station_id) -- gắn user Ông Gia Huy với trạm Quận 1
+VALUES (3, 1);
+
+INSERT INTO Renter (user_id, current_address, is_verified) -- gắn user Nguyễn Trung Nghĩa
+VALUES (1, N'45 Lý Thường Kiệt, Quận 10, TP.HCM', 1);
+
+
+/* ===================== Helpful Indexes ===================== */
+CREATE INDEX IX_Vehicle_station_id            ON dbo.Vehicle(station_id);
+CREATE INDEX IX_RentalOrder_renter_id         ON dbo.RentalOrder(renter_id);
+CREATE INDEX IX_RentalOrder_vehicle_id        ON dbo.RentalOrder(vehicle_id);
+CREATE INDEX IX_RentalOrder_pickup_station_id ON dbo.RentalOrder(pickup_station_id);
+CREATE INDEX IX_RentalOrder_return_station_id ON dbo.RentalOrder(return_station_id);
+CREATE INDEX IX_ExtraFee_order_id             ON dbo.ExtraFee(order_id);
+CREATE INDEX IX_ExtraFee_FeeType_id          ON dbo.ExtraFee(FeeType_id);
+CREATE INDEX IX_Payment_order_id              ON dbo.Payment(order_id);
+CREATE INDEX IX_Complaint_order_id            ON dbo.Complaint(order_id);
+GO
