@@ -1,4 +1,22 @@
 /* Reset CSS */
+
+html, body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  background: linear-gradient(135deg, #0f172a, #1e293b, #4338ca, #6366f1);
+  background-size: 400% 400%;
+  animation: gradientMove 15s ease infinite;
+  font-family: "Inter", sans-serif;
+  overflow-x: hidden;
+}
+
+@keyframes gradientMove {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
 * {
   margin: 0;
   padding: 0;

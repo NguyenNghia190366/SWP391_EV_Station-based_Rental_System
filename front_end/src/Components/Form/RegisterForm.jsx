@@ -1,114 +1,120 @@
 import React from "react";
-import { Form, Button, Card, Alert, Spinner } from "react-bootstrap";
+import { Form, Input, Button, Card, Typography, Spin } from "antd";
+import { LockOutlined, MailOutlined, UserOutlined } from "@ant-design/icons";
 import { Link } from "react-router-dom";
-import './RegisterForm.css';
 
-const RegisterForm = ({
-  email,
-  setEmail,
-  password,
-  setPassword,
-  confirmPassword,
-  setConfirmPassword,
-  error,
-  loading,
-  onSubmit,
-}) => {
+const { Title, Text } = Typography;
+
+const RegisterForm = ({ onSubmit, loading }) => {
+  const [form] = Form.useForm();
+
   return (
-    <div className="flex justify-center items-center min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
-      <Card className="shadow-lg border border-gray-200 w-[400px]">
-        <Card.Body className="p-6">
-          <h2 className="text-2xl font-semibold text-center text-indigo-700 mb-4">
-            Register
-          </h2>
+    <div className="flex items-center justify-center h-screen bg-gradient-to-br from-sdzDark via-indigo-900 to-sdzBlue">
+      <Card className="w-[400px] bg-white/95 backdrop-blur-sm shadow-2xl rounded-2xl p-6">
+        <Title level={2} className="text-center text-indigo-600 mb-2">
+          Đăng ký tài khoản
+        </Title>
+        <Text type="secondary" className="block text-center mb-6">
+          Tham gia cộng đồng SDZ để trải nghiệm thuê xe điện
+        </Text>
 
-          <Form onSubmit={onSubmit}>
-            <Form.Group className="mb-3">
-              <Form.Label className="text-sm font-medium text-gray-700">
-                Email
-              </Form.Label>
-              <Form.Control
-                type="email"
-                placeholder="Enter your email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-                className="focus:ring-2 focus:ring-indigo-300"
-                disabled={loading}
-              />
-            </Form.Group>
+        <Form
+          form={form}
+          layout="vertical"
+          onFinish={onSubmit}
+          requiredMark={false}
+        >
+          <Form.Item
+        
+            name="name"
+            label="Họ và tên"
+            rules={[{ required: true, message: "Vui lòng nhập họ tên!" }]}
+          >
+            <Input
+              prefix={<UserOutlined />}
+              placeholder="Nhập họ tên"
+              size="large"
+              disabled={loading}
+            />
+          </Form.Item>
 
-            <Form.Group className="mb-3">
-              <Form.Label className="text-sm font-medium text-gray-700">
-                Password
-              </Form.Label>
-              <Form.Control
-                type="password"
-                placeholder="Enter your password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-                className="focus:ring-2 focus:ring-indigo-300"
-                disabled={loading}
-              />
-            </Form.Group>
+          <Form.Item
+            name="email"
+            label="Email"
+            rules={[
+              { required: true, message: "Vui lòng nhập email!" },
+              { type: "email", message: "Email không hợp lệ!" },
+            ]}
+          >
+            <Input
+              prefix={<MailOutlined />}
+              placeholder="Nhập email"
+              size="large"
+              disabled={loading}
+            />
+          </Form.Item>
 
-            <Form.Group className="mb-3">
-              <Form.Label className="text-sm font-medium text-gray-700">
-                Confirm Password
-              </Form.Label>
-              <Form.Control
-                type="password"
-                placeholder="Confirm your password"
-                value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
-                required
-                className="focus:ring-2 focus:ring-indigo-300"
-                disabled={loading}
-              />
-            </Form.Group>
+          <Form.Item
+            name="password"
+            label="Mật khẩu"
+            rules={[
+              { required: true, message: "Vui lòng nhập mật khẩu!" },
+              { min: 6, message: "Mật khẩu tối thiểu 6 ký tự!" },
+            ]}
+          >
+            <Input.Password
+              prefix={<LockOutlined />}
+              placeholder="Nhập mật khẩu"
+              size="large"
+              disabled={loading}
+            />
+          </Form.Item>
 
-            {error && (
-              <Alert variant="danger" className="text-center py-2 text-sm">
-                {error}
-              </Alert>
-            )}
+          <Form.Item
+            name="confirm"
+            label="Xác nhận mật khẩu"
+            dependencies={["password"]}
+            rules={[
+              { required: true, message: "Vui lòng nhập lại mật khẩu!" },
+              ({ getFieldValue }) => ({
+                validator(_, value) {
+                  if (!value || getFieldValue("password") === value) {
+                    return Promise.resolve();
+                  }
+                  return Promise.reject(
+                    new Error("Mật khẩu không trùng khớp!")
+                  );
+                },
+              }),
+            ]}
+          >
+            <Input.Password
+              prefix={<LockOutlined />}
+              placeholder="Nhập lại mật khẩu"
+              size="large"
+              disabled={loading}
+            />
+          </Form.Item>
 
-            <div className="d-grid mt-3">
-              <Button
-                type="submit"
-                variant="primary"
-                className="bg-indigo-600 border-0 hover:bg-indigo-700"
-                disabled={loading}
-              >
-                {loading ? (
-                  <div className="d-flex align-items-center justify-content-center gap-2">
-                    <Spinner
-                      as="span"
-                      animation="border"
-                      size="sm"
-                      role="status"
-                      aria-hidden="true"
-                    />
-                    <span>Registering...</span>
-                  </div>
-                ) : (
-                  "Register"
-                )}
-              </Button>
-            </div>
-          </Form>
-
-          <p className="text-center text-sm text-gray-600 mt-3">
-            Already have an account?{" "}
-            <Link 
-              to="/login" 
-              className="text-indigo-600 hover:underline"
+          <Form.Item>
+            <Button
+              type="primary"
+              htmlType="submit"
+              size="large"
+              className="w-full bg-gradient-to-r from-indigo-500 to-indigo-700 border-none rounded-lg font-semibold shadow-md hover:opacity-90"
+              disabled={loading}
             >
-              Login
+              {loading ? <Spin size="small" /> : "Đăng ký"}
+            </Button>
+          </Form.Item>
+
+          <p className="text-center text-sm text-gray-600 mt-4 mb-0">
+            Đã có tài khoản?{" "}
+            <Link to="/login" className="text-indigo-600 hover:underline">
+              Đăng nhập
             </Link>
           </p>
-        </Card.Body>
+        </Form>
       </Card>
     </div>
   );

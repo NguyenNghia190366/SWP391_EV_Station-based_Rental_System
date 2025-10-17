@@ -12,7 +12,7 @@ const LoginForm = ({
 }) => {
   return (
     <div className="login-container">
-      <div className="login-form">
+      <div className="login-form text-slate-900">
         <h2 className="login-title">Login</h2>
 
         <form onSubmit={onSubmit}>
@@ -54,7 +54,7 @@ const LoginForm = ({
         </form>
 
         <div className="register-link">
-          <a href="/register">Don't have account? Create here!</a>
+          <a href="/register">Chưa có tài khoản? Đăng ký tại đây!</a>
         </div>
       </div>
     </div>

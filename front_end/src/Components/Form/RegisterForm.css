@@ -1,62 +1,77 @@
-.register-container {
-  display: flex;
-  justify-content: center;
-  align-items: center;
+/* ===== NỀN CHUNG ===== */
+body, .register-page {
   min-height: 100vh;
-  background-color: #f0f2f5;
-  padding: 2rem;
+  background: linear-gradient(135deg, #0f172a, #1e293b, #4338ca, #6366f1);
+  background-size: 400% 400%;
+  animation: gradientMove 15s ease infinite;
+  font-family: "Inter", sans-serif;
+  color: #1e293b;
 }
 
-.register-form {
-  padding: 2rem;
-  background: white;
-  border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  width: 100%;
-  max-width: 500px;
+/* Gradient chuyển động */
+@keyframes gradientMove {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
 }
 
-.register-title {
-  text-align: center;
-  color: #1890ff;
-  margin-bottom: 2rem;
-  font-size: 24px;
+/* ===== Card ===== */
+.card {
+  border-radius: 18px !important;
+  background: rgba(255, 255, 255, 0.96) !important;
+  box-shadow: 0 0 25px rgba(99, 102, 241, 0.25) !important;
+  transition: all 0.3s ease;
 }
 
-.form-row {
-  display: flex;
-  gap: 1rem;
-  margin-bottom: 1rem;
+.card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 0 40px rgba(99, 102, 241, 0.35);
 }
 
-.form-item {
-  flex: 1;
-  margin-bottom: 1rem;
+/* ===== Tiêu đề ===== */
+.card h2 {
+  color: #4f46e5;
+  font-weight: 700;
 }
 
-.error-message {
-  color: #ff4d4f;
-  margin-bottom: 1rem;
-  text-align: center;
+/* ===== Form control ===== */
+.form-control {
+  border-radius: 8px !important;
+  border: 1px solid #cbd5e1 !important;
+  padding: 10px !important;
+  transition: all 0.2s ease !important;
+  font-size: 0.95rem;
 }
 
-.submit-button {
-  width: 100%;
-  height: 40px;
-  font-size: 16px;
-  margin-top: 1rem;
+.form-control:focus {
+  border-color: #6366f1 !important;
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.25) !important;
 }
 
-.login-link {
-  text-align: center;
-  margin-top: 1rem;
+/* ===== Nút đăng ký ===== */
+button.btn-primary,
+button.bg-indigo-600 {
+  background: linear-gradient(90deg, #6366f1, #4f46e5) !important;
+  border: none !important;
+  color: white !important;
+  font-weight: 600 !important;
+  padding: 10px !important;
+  border-radius: 10px !important;
+  transition: all 0.3s ease !important;
+  box-shadow: 0 0 15px rgba(99, 102, 241, 0.25);
 }
 
-.login-link a {
-  color: #1890ff;
-  text-decoration: none;
+button.btn-primary:hover,
+button.bg-indigo-600:hover {
+  background: linear-gradient(90deg, #4f46e5, #4338ca) !important;
+  box-shadow: 0 0 25px rgba(99, 102, 241, 0.4);
 }
 
-.login-link a:hover {
-  text-decoration: underline;
+/* ===== Liên kết Login ===== */
+.text-indigo-600 {
+  color: #4f46e5 !important;
+}
+
+.text-indigo-600:hover {
+  text-decoration: underline !important;
 }

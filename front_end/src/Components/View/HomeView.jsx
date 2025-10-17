@@ -43,10 +43,6 @@ const SDZHomepage = () => {
           </div>
 
           <div className="nav-buttons">
-            <a href="/help" className="btn btn-outline">
-              Trợ giúp
-            </a>
-
             {user ? (
               <div className="profile-wrapper">
                 <img

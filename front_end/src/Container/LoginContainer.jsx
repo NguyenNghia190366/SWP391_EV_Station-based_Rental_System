@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 // import api from "../utils/axios";
-import { userAPI } from "../utils/api";
+import { userAPI } from "../api/api";
 import LoginForm from "../Components/Form/LoginForm";
 
 const LoginContainer = () => {
@@ -83,12 +83,12 @@ const LoginContainer = () => {
 
       if (matchedUser) {
         // ===== CHECK VERIFICATION (nếu là renter) =====
-        if (matchedUser.role === "renter" && !matchedUser.isVerified) {
+        if (matchedUser.role === "Renter" && !matchedUser.isVerified) {
+          
           setError(
             "⚠️ Tài khoản chưa được xác thực. Vui lòng đến điểm thuê để nhân viên xác thực!"
           );
           console.log("❌ Login blocked - renter chưa xác thực");
-          return;
         }
 
         console.log("✅ Đăng nhập thành công!");

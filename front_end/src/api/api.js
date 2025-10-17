@@ -1,4 +1,4 @@
-const MOCKAPI_BASE = 'https://68e62cc921dd31f22cc4769d.mockapi.io/api/ev/users';
+const MOCKAPI_BASE = "https://68e62cc921dd31f22cc4769d.mockapi.io/api/ev/users";
 // const MOCKAPI_BASE = "https://alani-uncorroboratory-sympetaly.ngrok-free.dev/Users";
 
 export const userAPI = {
@@ -51,6 +51,27 @@ export const userAPI = {
         rejectedReason: reason,
       }),
     });
+  },
+
+  //Register
+  registerUser: async (newUser) => {
+    try {
+      const response = await fetch(`${MOCKAPI_BASE}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(newUser),
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const data = await response.json();
+      return data;
+    } catch (error) {
+      console.error("Error registering user:", error);
+      throw error;
+    }
   },
 };
 
