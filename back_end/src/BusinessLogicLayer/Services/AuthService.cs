@@ -5,7 +5,6 @@ using System.Text;
 using BusinessLogicLayer.Interfaces;
 using BusinessLogicLayer.DTOs.Auth;
 using DataAccessLayer;
-using DataAccessLayer.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
@@ -17,70 +16,84 @@ namespace BusinessLogicLayer.Services
         private readonly ApplicationDbContext _db;
         private readonly IConfiguration _cfg;
 
-        // Constructor để inject DbContext và Configuration
         public AuthService(ApplicationDbContext db, IConfiguration cfg)
         {
             _db = db;
-            _cfg = cfg; // IConfiguration dùng để đọc các setting từ file appsettings.json
+            _cfg = cfg;
         }
 
-        // Logic xử lý đăng nhập cho người dùng
-        // Trả về một LoginResponse chứa JWT token, Role và UserId nếu thành công, ngược lại trả về null.
         public async Task<LoginResponse?> LoginAsync(LoginRequest request)
         {
-            // 🔎 Tìm user theo Email và Password (plain text tạm thời)
-            var user = await _db.Users
-                .FirstOrDefaultAsync(u =>
-                    u.email == request.Email &&
-                    u.password_hash == request.Password);
+            // --- BƯỚC 1: Tìm người dùng một cách an toàn ---
 
-            // ❌ Nếu không tìm thấy user → trả null cho controller xử lý
+            // Chuẩn hóa email đầu vào: loại bỏ khoảng trắng thừa và chuyển sang chữ thường.
+            // Sử dụng `?? string.Empty` để phòng trường hợp request.Email bị null.
+            var cleanEmail = (request.Email ?? string.Empty).Trim().ToLower();
+
+            // Tìm user trong DB.
+            // - AsNoTracking(): Tối ưu hiệu suất cho các truy vấn chỉ đọc, không cần theo dõi thay đổi.
+            // - ToLower(): Đảm bảo so sánh email không phân biệt chữ hoa/thường.
+            var user = await _db.Users.AsNoTracking()
+                .FirstOrDefaultAsync(u => u.email.ToLower() == cleanEmail);
+
+            // ❌ Nếu không tìm thấy user với email này -> trả về null.
             if (user is null)
             {
                 return null;
             }
 
-            // 🚫 Kiểm tra trạng thái tài khoản
-            if (user.status != "ACTIVE")
+            // --- BƯỚC 2: Xác thực thông tin ---
+
+            // So sánh mật khẩu (hiện tại là plain text).
+            // Dùng string.Equals cho an toàn và rõ ràng, Trim() để xử lý khoảng trắng thừa.
+            if (!string.Equals(user.password_hash?.Trim(), request.Password?.Trim()))
             {
-                // Không cho đăng nhập nếu bị khóa hoặc chưa kích hoạt
-                return null;
+                return null; // Mật khẩu không khớp
             }
 
-            // ✅ Nếu hợp lệ → tạo JWT token
+            // Kiểm tra trạng thái tài khoản.
+            // Dùng StringComparison.OrdinalIgnoreCase để so sánh không phân biệt chữ hoa/thường.
+            // DB của cậu có giá trị là 'Active'[cite: 8], nên chỉ cần kiểm tra với chuỗi này là đủ.
+            if (!"Active".Equals(user.status, StringComparison.OrdinalIgnoreCase))
+            {
+                return null; // Tài khoản không hoạt động
+            }
+
+            // --- BƯỚC 3: Tạo Token và trả về kết quả ---
+
+            // ✅ Nếu mọi thứ đều hợp lệ -> tạo JWT token
             var token = GenerateJwt(user.user_id, user.role);
 
-            // 🎯 Trả về kết quả cho client
             return new LoginResponse
             {
-                Token = token,
-                Role = user.role,   // Giữ nguyên role in uppercase (RENTER, STAFF, ADMIN)
+                Token  = token,
+                Role   = user.role,
                 UserId = user.user_id
             };
         }
-        
-        //Tạo chuỗi JSON Web Token (JWT) cho người dùng đã được xác thực.
-        private string GenerateJwt(int userId, string role) // userId và role sẽ được nhúng trong token
+
+        // Hàm tạo JWT, giữ nguyên logic chuẩn của cậu
+        private string GenerateJwt(int userId, string role)
         {
-            // Lấy các thông tin cấu hình JWT từ appsettings.json
-            var jwt = _cfg.GetSection("Jwt"); 
-            var key   = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwt["Key"]!));  
+            var jwt  = _cfg.GetSection("Jwt");
+            var key  = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwt["Key"]!));
             var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
-            // Định nghĩa các "claims" - thông tin sẽ được mã hóa vào trong token
+
             var claims = new[]
             {
-                new Claim(JwtRegisteredClaimNames.Sub, userId.ToString()), // Subject: thường là ID của user
-                new Claim(ClaimTypes.Role, role) // Claim chứa vai trò của user
+                new Claim(JwtRegisteredClaimNames.Sub, userId.ToString()),
+                // Thêm default role "RENTER" phòng trường hợp dữ liệu trong DB bị null
+                new Claim(ClaimTypes.Role, role ?? "RENTER")
             };
-            // Tạo đối tượng token JWT
+
             var token = new JwtSecurityToken(
                 issuer: jwt["Issuer"],
                 audience: jwt["Audience"],
                 claims: claims,
-                expires: DateTime.UtcNow.AddMinutes(double.Parse(jwt["ExpiresMinutes"]!)), // Thời gian hết hạn token
+                expires: DateTime.UtcNow.AddMinutes(double.Parse(jwt["ExpiresMinutes"]!)),
                 signingCredentials: creds
             );
-            // Chuyển đối tượng token thành dạng chuỗi và trả về
+
             return new JwtSecurityTokenHandler().WriteToken(token);
         }
     }
