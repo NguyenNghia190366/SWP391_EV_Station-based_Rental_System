@@ -17,7 +17,7 @@ const RegisterContainer = () => {
         name: values.name,
         email: values.email,
         password: values.password,
-        role: "Renter", // dùng lowercase để khớp logic login
+        role: "renter", // dùng lowercase để khớp logic login
         isVerified: false, // chỉ cho license verification, không ảnh hưởng login
         createdAt: new Date().toISOString(),
       };

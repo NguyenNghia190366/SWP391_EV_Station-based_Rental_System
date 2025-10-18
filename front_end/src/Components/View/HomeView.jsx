@@ -50,7 +50,7 @@ const SDZHomepage = () => {
                     user.avatar ||
                     "https://cdn-icons-png.flaticon.com/512/149/149071.png"
                   }
-                  alt={user.name}
+                  alt={user.fullName}
                   className="profile-avatar"
                   onClick={() => setMenuOpen(!menuOpen)}
                 />
@@ -63,11 +63,11 @@ const SDZHomepage = () => {
                         user.avatarUrl ||
                         "https://cdn-icons-png.flaticon.com/512/149/149071.png"
                       }
-                      alt={user.name || "user avatar"}
+                      alt={user.fullName || "user avatar"}
                       className="profile-avatar-lg"
                     />
                     <div className="profile-text">
-                      <p className="profile-name">{user.name}</p>
+                      <p className="profile-name">{user.fullName}</p>
                       {user.email && (
                         <p className="profile-email">{user.email}</p>
                       )}

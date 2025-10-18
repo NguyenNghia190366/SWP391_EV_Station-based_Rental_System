@@ -53,18 +53,19 @@ const LoginContainer = () => {
       // const users = response.data;
       const users = await userAPI.getAllUsers();
 
-
       // ✅ Match email & password
       const matchedUser = users.find(
         (u) =>
           u.email.toLowerCase() === userEmail.toLowerCase() &&
-          u.password === userPassword
+          (u.password === userPassword || u.passwordHash === userPassword || u.password_Hash === userPassword)
       );
 
       return matchedUser;
     } catch (error) {
       console.error("❌ Error fetching users:", error);
-      throw new Error("Không thể kết nối tới máy chủ. Vui lòng thử lại.");
+      throw new Error(
+        error.message || "Không thể kết nối tới máy chủ. Vui lòng thử lại."
+      );
     }
   };
 
@@ -79,12 +80,17 @@ const LoginContainer = () => {
 
     try {
       const matchedUser = await fetchAndAuthenticateUser(email, password);
-      console.log("🔍 Kết quả xác thực:", matchedUser ? "Tìm thấy" : "Không tìm thấy");
+      console.log(
+        "🔍 Kết quả xác thực:",
+        matchedUser ? "Tìm thấy" : "Không tìm thấy"
+      );
 
       if (matchedUser) {
         // ===== CHECK VERIFICATION (nếu là renter) =====
-        if (matchedUser.role === "Renter" && !matchedUser.isVerified) {
-          
+        if (
+          matchedUser.role.toLowerCase() === "renter" &&
+          !matchedUser.isVerified
+        ) {
           setError(
             "⚠️ Tài khoản chưa được xác thực. Vui lòng đến điểm thuê để nhân viên xác thực!"
           );
@@ -100,11 +106,10 @@ const LoginContainer = () => {
         localStorage.setItem("token", `token_${matchedUser.id}_${Date.now()}`);
 
         // ===== THÔNG BÁO + CHUYỂN HƯỚNG =====
-        alert(`Xin chào ${matchedUser.name || matchedUser.email}!`);
+        alert(`Xin chào ${matchedUser.fullName || matchedUser.email}!`);
 
         if (
-          matchedUser.role === "station_staff" ||
-          matchedUser.role === "admin"
+          ["station_staff", "admin"].includes(matchedUser.role.toLowerCase())
         ) {
           navigate("/staff/verification");
         } else {
