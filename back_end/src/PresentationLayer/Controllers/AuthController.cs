@@ -55,5 +55,34 @@ namespace PresentationLayer.Controllers
             // Nếu đăng nhập thành công, trả về HTTP status code 200 OK cùng với dữ liệu (token, user info).
             return Ok(result);
         }
+        // --- HÀM REGISTER (MỚI) ---
+        /// <summary>
+        /// Xử lý đăng ký tài khoản mới cho người thuê xe.
+        /// </summary>
+        /// <param name="request">Thông tin chi tiết để đăng ký tài khoản.</param>
+        /// <returns>Đối tượng LoginResponse chứa JWT và thông tin người dùng nếu thành công.</returns>
+        [HttpPost("register")]
+        // Khi đăng ký thành công, trả về 200 OK cùng với token.
+        [ProducesResponseType(typeof(LoginResponse), StatusCodes.Status200OK)]
+        // Khi có lỗi nghiệp vụ (email đã tồn tại), trả về 400 Bad Request.
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        public async Task<ActionResult<LoginResponse>> Register([FromBody] RegisterRequestDto request)
+        {
+            try
+            {
+                // Gọi đến service layer để thực hiện logic đăng ký.
+                var result = await _authSvc.RegisterAsync(request);
+                
+                // Nếu không có lỗi, trả về 200 OK cùng với kết quả (token, user info).
+                return Ok(result);
+            }
+            // Bắt lỗi cụ thể 'ArgumentException' được ném từ service khi email đã tồn tại.
+            catch (ArgumentException ex)
+            {
+                // Trả về HTTP status 400 Bad Request cùng với thông báo lỗi từ service.
+                // Điều này giúp client biết chính xác lý do đăng ký thất bại.
+                return BadRequest(new { message = ex.Message });
+            }
+        }
     }
 }
