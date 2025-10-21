@@ -244,7 +244,14 @@ VALUES
 INSERT INTO Vehicle_Model (brand_name, vehicle_color, number_of_seats, mileage)
 VALUES
 (N'VinFast VF5', N'Xanh', 4, 10000),
-(N'Tesla Model 3', N'Đen', 4, 15000);
+(N'Tesla Model 3', N'Đen', 4, 15000),
+('VinFast VF e34', N'Trắng', 5, 318),
+('BYD Dolphin', N'Hồng', 5, 405),
+('MG4 EV', N'Cam', 5, 350),
+('Hyundai Kona Electric', N'Xanh dương', 5, 305),
+('Kia Niro EV', N'Xám', 5, 460),
+('Nissan Leaf', N'Bạc', 5, 241),
+('Chevrolet Bolt EV', N'Đỏ', 5, 417);
 
 INSERT INTO Users (full_name, email, phone_number, role, [status], password_hash, date_of_birth)
 VALUES
