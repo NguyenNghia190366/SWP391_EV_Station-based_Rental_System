@@ -36,5 +36,7 @@ namespace BusinessLogicLayer.Interfaces
 
         // Lấy thông tin profile của một người dùng
         Task<UserProfileDto?> GetProfileAsync(int userId);
+        // Cập nhật thông tin profile của một người dùng
+        Task<UserProfileDto?> UpdateProfileAsync(int userId, UserProfileUpdateDto dto);
     }
 }
