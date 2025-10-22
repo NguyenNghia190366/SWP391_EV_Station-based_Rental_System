@@ -109,5 +109,43 @@ namespace PresentationLayer.Controllers
             var succeeded = await _svc.SetStatusAsync(id, status);
             return succeeded ? NoContent() : NotFound();
         }
+
+        /// <summary>
+        /// Lấy thông tin profile của người dùng đang đăng nhập.
+        /// </summary>
+        /// <returns>Thông tin chi tiết profile</returns>
+        [HttpGet("profile")] // Tạo endpoint -> GET /api/users/me
+        [ProducesResponseType(typeof(UserProfileDto), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)] // Do [Authorize]
+        public async Task<ActionResult<UserProfileDto>> GetMyProfile()
+        {
+            // Lấy ID của người dùng từ token.
+            // Khi đăng nhập, chúng ta đã lưu ID vào claim "sub" (Subject).
+            // ASP.NET Core tự động map "sub" vào ClaimTypes.NameIdentifier.
+            var userIdString = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+            if (string.IsNullOrEmpty(userIdString))
+            {
+                // Điều này hiếm khi xảy ra nếu [Authorize] hoạt động đúng,
+                // nhưng vẫn nên kiểm tra.
+                return Unauthorized(); 
+            }
+
+            if (!int.TryParse(userIdString, out var userId))
+            {
+                return Unauthorized("User ID trong token không hợp lệ.");
+            }
+
+            // Gọi service với ID đã được xác thực
+            var profile = await _svc.GetProfileAsync(userId);
+
+            if (profile == null)
+            {
+                return NotFound(new { message = "Không tìm thấy thông tin người dùng." });
+            }
+
+            return Ok(profile);
+        }
     }
 }
