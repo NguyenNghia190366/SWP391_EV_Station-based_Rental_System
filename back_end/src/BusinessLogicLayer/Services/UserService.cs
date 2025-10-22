@@ -171,7 +171,7 @@ namespace BusinessLogicLayer.Services
                     DateOfBirth = u.date_of_birth,
                     // Giả định rằng mối quan hệ 1-1 giữa User và Renter luôn tồn tại
                     // cho một RENTER. Dùng '?' (null-conditional) để an toàn.
-                    CurrentAddress = (u.Renter == null) ? null : u.Renter.current_address, 
+                    CurrentAddress = (u.Renter == null) ? null : u.Renter.current_address,
                     IsVerified = (u.Renter == null) ? false : u.Renter.is_verified,
                     RegistrationDate = (u.Renter == null) ? default : u.Renter.registration_date
                 })
@@ -179,5 +179,50 @@ namespace BusinessLogicLayer.Services
 
             return userProfile;
         }
+        
+        public async Task<UserProfileDto?> UpdateProfileAsync(int userId, UserProfileUpdateDto dto)
+        {
+            var user = await _db.Users
+                .Include(u => u.Renter) 
+                .FirstOrDefaultAsync(u => u.user_id == userId);
+
+            if (user == null)
+            {
+                return null; // Không tìm thấy user
+            }
+
+            // ✅ LOGIC MỚI: Chỉ cập nhật nếu giá trị DTO không null
+            // Điều này áp dụng cho tất cả các trường.
+
+            if (dto.FullName != null)
+            {
+                user.full_name = dto.FullName;
+            }
+            
+            // .HasValue là cách kiểm tra an toàn cho kiểu nullable DateTime?
+            if (dto.DateOfBirth.HasValue) 
+            {
+                user.date_of_birth = DateOnly.FromDateTime(dto.DateOfBirth.Value);
+            }
+            
+            // Đối với các trường vốn đã nullable (PhoneNumber, CurrentAddress),
+            // chúng ta cũng áp dụng logic tương tự.
+            if (dto.PhoneNumber != null)
+            {
+                user.phone_number = dto.PhoneNumber;
+            }
+
+            if (user.Renter != null && dto.CurrentAddress != null)
+            {
+                user.Renter.current_address = dto.CurrentAddress;
+            }
+            
+            // Lưu bất kỳ thay đổi nào đã được thực hiện
+            await _db.SaveChangesAsync();
+
+            // Trả về profile mới nhất
+            return await GetProfileAsync(userId);
+        }
+
     }
 }

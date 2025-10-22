@@ -129,7 +129,7 @@ namespace PresentationLayer.Controllers
             {
                 // Điều này hiếm khi xảy ra nếu [Authorize] hoạt động đúng,
                 // nhưng vẫn nên kiểm tra.
-                return Unauthorized(); 
+                return Unauthorized();
             }
 
             if (!int.TryParse(userIdString, out var userId))
@@ -146,6 +146,39 @@ namespace PresentationLayer.Controllers
             }
 
             return Ok(profile);
+        }
+        
+        /// <summary>
+        /// Cập nhật thông tin profile của người dùng đang đăng nhập.
+        /// </summary>
+        /// <param name="dto">Dữ liệu profile mới.</param>
+        /// <returns>Thông tin profile đã được cập nhật.</returns>
+        [HttpPut("profile")] // Endpoint: PUT /api/users/profile
+        [ProducesResponseType(typeof(UserProfileDto), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest)]
+        public async Task<ActionResult<UserProfileDto>> UpdateMyProfile([FromBody] UserProfileUpdateDto dto)
+        {
+            // Lấy userId từ token (giống hệt hàm GET)
+            var userIdString = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (string.IsNullOrEmpty(userIdString) || !int.TryParse(userIdString, out var userId))
+            {
+                return Unauthorized("User ID trong token không hợp lệ.");
+            }
+
+            // Gọi service để cập nhật
+            // DTO sẽ được tự động validate bởi [ApiController]
+            var updatedProfile = await _svc.UpdateProfileAsync(userId, dto);
+
+            if (updatedProfile == null)
+            {
+                // Lỗi này có nghĩa là user_id trong token không tìm thấy trong DB
+                return NotFound(new { message = "Không tìm thấy người dùng để cập nhật." });
+            }
+
+            // Trả về 200 OK cùng profile mới
+            return Ok(updatedProfile);
         }
     }
 }
