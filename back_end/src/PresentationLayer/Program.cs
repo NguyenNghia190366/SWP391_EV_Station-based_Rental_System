@@ -155,14 +155,5 @@ app.MapControllers();
 // Chuyển hướng trang gốc đến Swagger cho tiện lợi
 app.MapGet("/", () => Results.Redirect("/swagger"));
 
-// Lấy port động từ biến môi trường của Render
-var port = Environment.GetEnvironmentVariable("PORT");
-if (!string.IsNullOrEmpty(port))
-{
-    // Báo cho Kestrel (web server của .NET) chạy trên port này
-    // và chấp nhận kết nối từ mọi IP (0.0.0.0)
-    app.Urls.Add($"http://0.0.0.0:{port}");
-}
-
 // Khởi chạy ứng dụng.
 app.Run();
