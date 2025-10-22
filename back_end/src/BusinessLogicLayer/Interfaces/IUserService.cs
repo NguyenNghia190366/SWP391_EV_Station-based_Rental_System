@@ -33,5 +33,8 @@ namespace BusinessLogicLayer.Interfaces
         /// Khoá/Mở khoá nhanh theo Status (ACTIVE/INACTIVE).
         /// </summary>
         Task<bool> SetStatusAsync(int id, string status);
+
+        // Lấy thông tin profile của một người dùng
+        Task<UserProfileDto?> GetProfileAsync(int userId);
     }
 }

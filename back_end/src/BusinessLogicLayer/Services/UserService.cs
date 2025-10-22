@@ -152,5 +152,32 @@ namespace BusinessLogicLayer.Services
             await _db.SaveChangesAsync();
             return true;
         }
+
+        public async Task<UserProfileDto?> GetProfileAsync(int userId)
+        {
+            // Tối ưu truy vấn bằng cách sử dụng:
+            // 1. AsNoTracking(): Vì đây là thao tác chỉ đọc.
+            // 2. Select(): Chỉ chọn các cột cần thiết (Projection) thay vì kéo
+            //    toàn bộ entity User và Renter. Đây là cách làm hiệu quả nhất.
+            var userProfile = await _db.Users
+                .AsNoTracking()
+                .Where(u => u.user_id == userId)
+                .Select(u => new UserProfileDto
+                {
+                    UserId = u.user_id,
+                    FullName = u.full_name,
+                    Email = u.email,
+                    PhoneNumber = u.phone_number,
+                    DateOfBirth = u.date_of_birth,
+                    // Giả định rằng mối quan hệ 1-1 giữa User và Renter luôn tồn tại
+                    // cho một RENTER. Dùng '?' (null-conditional) để an toàn.
+                    CurrentAddress = u.Renter.current_address, 
+                    IsVerified = u.Renter.is_verified,
+                    RegistrationDate = u.Renter.registration_date
+                })
+                .FirstOrDefaultAsync();
+
+            return userProfile;
+        }
     }
 }
