@@ -1,13 +1,17 @@
-using System.IdentityModel.Tokens.Jwt;
-using System.Security.Claims;
-using System.Text;
-using BusinessLogicLayer.Interfaces;
-using BusinessLogicLayer.DTOs.Auth;
-using DataAccessLayer;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
-using Microsoft.IdentityModel.Tokens;
-using DataAccessLayer.Models;
+using System.IdentityModel.Tokens.Jwt;      // Types để tạo, quản lý và serialize/deserialize JWT (JwtSecurityToken, JwtSecurityTokenHandler)
+using System.Security.Claims;               // Claim, ClaimTypes: dùng để gắn thông tin (sub, role, jti ...) vào JWT
+using System.Text;                          // Encoding.UTF8: chuyển chuỗi secret sang byte[] khi tạo SymmetricSecurityKey
+
+using BusinessLogicLayer.Interfaces;        // IAuthService interface: để implement service contract
+using BusinessLogicLayer.DTOs.Auth;         // DTOs (RegisterRequestDto, LoginRequest, LoginResponse) dùng làm input/output cho service
+
+using DataAccessLayer;                      // ApplicationDbContext để truy cập database
+using DataAccessLayer.Models;               // Entity models (User, Renter, ...) mapping tới database tables
+using Microsoft.EntityFrameworkCore;        // EF Core package
+using Microsoft.Extensions.Configuration;   // IConfiguration: đọc cấu hình (appsettings.json / env vars) như Jwt:Key, Issuer...
+
+using Microsoft.IdentityModel.Tokens;       // SymmetricSecurityKey, SigningCredentials, SecurityAlgorithms: hỗ trợ tạo chữ ký cho JWT
+using BCrypt.Net;                           // BCrypt: thư viện hash mật khẩu an toàn
 
 namespace BusinessLogicLayer.Services
 {
@@ -36,13 +40,15 @@ namespace BusinessLogicLayer.Services
                 throw new ArgumentException("Email đã được sử dụng.");
             }
 
+            // + hash mật khẩu (sử dụng BCrypt)
+            var hashedPassword = BCrypt.Net.BCrypt.HashPassword(request.Password);
+            
             // --- BƯỚC 2: TẠO ENTITY MỚI ---
             var newUser = new User
             {
                 full_name = request.FullName,
                 email = cleanEmail,
-                // ⚠️ CẢNH BÁO BẢO MẬT: Luôn hash mật khẩu trong dự án thực tế.
-                password_hash = request.Password,
+                password_hash = hashedPassword, // Lưu hash mật khẩu
                 date_of_birth = DateOnly.FromDateTime(request.DateOfBirth),
                 phone_number = request.PhoneNumber,
                 // Gán vai trò mặc định một cách tường minh.
@@ -52,7 +58,7 @@ namespace BusinessLogicLayer.Services
             };
 
             var newRenter = new Renter { user = newUser };
-            
+
             // --- BƯỚC 3: LƯU VÀO DATABASE ---
             await using var transaction = await _db.Database.BeginTransactionAsync();
             try
@@ -64,7 +70,7 @@ namespace BusinessLogicLayer.Services
             catch (Exception)
             {
                 await transaction.RollbackAsync();
-                throw; 
+                throw;
             }
 
             // --- BƯỚC 4: TẠO TOKEN VÀ TRẢ VỀ ---
@@ -89,8 +95,8 @@ namespace BusinessLogicLayer.Services
             }
 
             // --- BƯỚC 2: XÁC THỰC ---
-            // So sánh mật khẩu (plain text)
-            if (!string.Equals(user.password_hash, request.Password))
+            // So sánh mật khẩu (sử dụng BCrypt)
+            if (!BCrypt.Net.BCrypt.Verify(request.Password, user.password_hash))
             {
                 return null; // Sai mật khẩu
             }
@@ -122,7 +128,7 @@ namespace BusinessLogicLayer.Services
                 UserId = user.user_id
             };
         }
-        
+
         /// <summary>
         /// Tạo chuỗi JWT token.
         /// </summary>
@@ -135,7 +141,7 @@ namespace BusinessLogicLayer.Services
             {
                 throw new InvalidOperationException("JWT Key không được cấu hình trong appsettings.");
             }
-            
+
             var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(keyString));
             var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
 
