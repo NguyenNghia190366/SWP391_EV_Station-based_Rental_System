@@ -6,7 +6,7 @@ namespace BusinessLogicLayer.DTOs.User
     {
             // --- Thông tin từ bảng Users ---
             
-            public int UserId { get; set; } 
+    //         public int UserId { get; set; } 
 
             // NOT NULL trong DB, nên ta khởi tạo giá trị mặc định
             public string FullName { get; set; } = string.Empty; 

@@ -164,7 +164,7 @@ namespace BusinessLogicLayer.Services
                 .Where(u => u.user_id == userId)
                 .Select(u => new UserProfileDto
                 {
-                    UserId = u.user_id,
+                    // UserId = u.user_id,
                     FullName = u.full_name,
                     Email = u.email,
                     PhoneNumber = u.phone_number,
