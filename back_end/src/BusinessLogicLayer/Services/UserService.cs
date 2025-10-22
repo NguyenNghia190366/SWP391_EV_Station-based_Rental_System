@@ -171,9 +171,9 @@ namespace BusinessLogicLayer.Services
                     DateOfBirth = u.date_of_birth,
                     // Giả định rằng mối quan hệ 1-1 giữa User và Renter luôn tồn tại
                     // cho một RENTER. Dùng '?' (null-conditional) để an toàn.
-                    CurrentAddress = u.Renter.current_address, 
-                    IsVerified = u.Renter.is_verified,
-                    RegistrationDate = u.Renter.registration_date
+                    CurrentAddress = (u.Renter == null) ? null : u.Renter.current_address, 
+                    IsVerified = (u.Renter == null) ? false : u.Renter.is_verified,
+                    RegistrationDate = (u.Renter == null) ? default : u.Renter.registration_date
                 })
                 .FirstOrDefaultAsync();
 
