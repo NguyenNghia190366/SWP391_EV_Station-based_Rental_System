@@ -147,7 +147,7 @@ namespace PresentationLayer.Controllers
 
             return Ok(profile);
         }
-        
+
         /// <summary>
         /// Cập nhật thông tin profile của người dùng đang đăng nhập.
         /// </summary>
@@ -179,6 +179,39 @@ namespace PresentationLayer.Controllers
 
             // Trả về 200 OK cùng profile mới
             return Ok(updatedProfile);
+        }
+        
+        // --- HÀM MỚI ---
+        /// <summary>
+        /// Thay đổi mật khẩu của người dùng đang đăng nhập.
+        /// </summary>
+        /// <param name="dto">Thông tin mật khẩu cũ và mới.</param>
+        [HttpPost("change-password")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        public async Task<IActionResult> ChangePassword([FromBody] ChangePasswordRequestDto dto)
+        {
+            // 1. Lấy userId từ token
+            var userIdString = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (string.IsNullOrEmpty(userIdString) || !int.TryParse(userIdString, out var userId))
+            {
+                return Unauthorized("User ID trong token không hợp lệ.");
+            }
+
+            // 2. Gọi service
+            var (isSuccess, errorMessage) = await _svc.ChangePasswordAsync(userId, dto);
+
+            // 3. Xử lý kết quả
+            if (!isSuccess)
+            {
+                // Trả về 400 Bad Request với thông báo lỗi cụ thể từ service
+                // (ví dụ: "Mật khẩu hiện tại không chính xác.")
+                return BadRequest(new { message = errorMessage });
+            }
+
+            // Trả về 200 OK
+            return Ok(new { message = "Đổi mật khẩu thành công." });
         }
     }
 }

@@ -179,11 +179,11 @@ namespace BusinessLogicLayer.Services
 
             return userProfile;
         }
-        
+
         public async Task<UserProfileDto?> UpdateProfileAsync(int userId, UserProfileUpdateDto dto)
         {
             var user = await _db.Users
-                .Include(u => u.Renter) 
+                .Include(u => u.Renter)
                 .FirstOrDefaultAsync(u => u.user_id == userId);
 
             if (user == null)
@@ -198,13 +198,13 @@ namespace BusinessLogicLayer.Services
             {
                 user.full_name = dto.FullName;
             }
-            
+
             // .HasValue là cách kiểm tra an toàn cho kiểu nullable DateTime?
-            if (dto.DateOfBirth.HasValue) 
+            if (dto.DateOfBirth.HasValue)
             {
                 user.date_of_birth = DateOnly.FromDateTime(dto.DateOfBirth.Value);
             }
-            
+
             // Đối với các trường vốn đã nullable (PhoneNumber, CurrentAddress),
             // chúng ta cũng áp dụng logic tương tự.
             if (dto.PhoneNumber != null)
@@ -216,12 +216,33 @@ namespace BusinessLogicLayer.Services
             {
                 user.Renter.current_address = dto.CurrentAddress;
             }
-            
+
             // Lưu bất kỳ thay đổi nào đã được thực hiện
             await _db.SaveChangesAsync();
 
             // Trả về profile mới nhất
             return await GetProfileAsync(userId);
+        }
+
+        public async Task<(bool Success, string ErrorMessage)> ChangePasswordAsync(int userId, ChangePasswordRequestDto dto)
+        {
+            var user = await _db.Users.FindAsync(userId);
+            if (user == null)
+            {
+                return (false, "Người dùng không tồn tại.");
+            }
+
+            // Kiểm tra mật khẩu hiện tại
+            if (!BCrypt.Net.BCrypt.Verify(dto.CurrentPassword, user.password_hash))
+            {
+                return (false, "Mật khẩu hiện tại không đúng.");
+            }
+                    
+            // Hash mật khẩu mới và cập nhật
+            user.password_hash = BCrypt.Net.BCrypt.HashPassword(dto.NewPassword);
+            await _db.SaveChangesAsync();
+
+            return (true, string.Empty);
         }
 
     }

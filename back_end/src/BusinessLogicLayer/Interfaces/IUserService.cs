@@ -38,5 +38,7 @@ namespace BusinessLogicLayer.Interfaces
         Task<UserProfileDto?> GetProfileAsync(int userId);
         // Cập nhật thông tin profile của một người dùng
         Task<UserProfileDto?> UpdateProfileAsync(int userId, UserProfileUpdateDto dto);
+        // Thay đổi mật khẩu cho người Dùng
+        Task<(bool Success, string ErrorMessage)> ChangePasswordAsync(int userId, ChangePasswordRequestDto dto);
     }
 }
