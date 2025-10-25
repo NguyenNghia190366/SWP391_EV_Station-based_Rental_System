@@ -14,6 +14,11 @@ public partial class Vehicle_Model
 
     [StringLength(100)]
     public string brand_name { get; set; } = null!;
+    
+    [Required] // Vì ta set là NOT NULL
+    [StringLength(100)]
+    [Column("model_name")]
+    public string model_name { get; set; } = null!;
 
     [StringLength(50)]
     public string? vehicle_color { get; set; }
