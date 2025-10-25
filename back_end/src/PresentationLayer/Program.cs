@@ -28,6 +28,9 @@ builder.Services.AddControllers();
 builder.Services.AddScoped<IStationService, StationService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IUserService, UserService>();
+builder.Services.AddScoped<IVehicleModelsService, VehicleModelsService>();
+
+builder.Services.AddAutoMapper(typeof(BusinessLogicLayer.Helpers.AutoMapperProfile)); // Đăng ký AutoMapper
 
 // -----------------------------
 // Authentication + Authorization (JWT)
