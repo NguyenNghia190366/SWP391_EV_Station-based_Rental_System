@@ -1,9 +1,10 @@
-/* Reset/typography/base styles */
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 /* Global SDZ style */
-body {
-  @apply bg-gradient-to-br from-sdzDark via-indigo-900 to-sdzBlue text-slate-100 min-h-screen font-inter;
+@layer base {
+  body {
+    @apply bg-gradient-to-br from-sdz-700 via-indigo-900 to-sdz-500 text-slate-100 min-h-screen font-inter;
+  }
 }

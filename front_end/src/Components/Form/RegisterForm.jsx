@@ -1,6 +1,13 @@
 import React from "react";
-import { Form, Input, Button, Card, Typography, Spin } from "antd";
-import { LockOutlined, MailOutlined, UserOutlined } from "@ant-design/icons";
+import { Form, Input, Button, Card, Typography, Spin, DatePicker } from "antd";
+import {
+  HomeOutlined,
+  LockOutlined,
+  MailOutlined,
+  PhoneOutlined,
+  UserOutlined,
+  ScheduleOutlined,
+} from "@ant-design/icons";
 import { Link } from "react-router-dom";
 
 const { Title, Text } = Typography;
@@ -9,7 +16,7 @@ const RegisterForm = ({ onSubmit, loading }) => {
   const [form] = Form.useForm();
 
   return (
-    <div className="flex items-center justify-center h-screen bg-gradient-to-br from-sdzDark via-indigo-900 to-sdzBlue">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-sdzDark via-indigo-900 to-sdzBlue py-10">
       <Card className="w-[400px] bg-white/95 backdrop-blur-sm shadow-2xl rounded-2xl p-6">
         <Title level={2} className="text-center text-indigo-600 mb-2">
           Đăng ký tài khoản
@@ -25,7 +32,6 @@ const RegisterForm = ({ onSubmit, loading }) => {
           requiredMark={false}
         >
           <Form.Item
-        
             name="name"
             label="Họ và tên"
             rules={[{ required: true, message: "Vui lòng nhập họ tên!" }]}
@@ -33,6 +39,44 @@ const RegisterForm = ({ onSubmit, loading }) => {
             <Input
               prefix={<UserOutlined />}
               placeholder="Nhập họ tên"
+              size="large"
+              disabled={loading}
+            />
+          </Form.Item>
+
+          <Form.Item
+            name="phone"
+            label="Số điện thoại"
+            rules={[
+              {
+                required: true,
+                message: "Vui lòng nhập số điện thoại của bạn!!",
+              },
+              { type: "phone", message: "số điện thoại không hợp lệ!" },
+            ]}
+          >
+            <Input
+              prefix={<PhoneOutlined />}
+              placeholder="Nhập số điện thoại"
+              size="large"
+              disabled={loading}
+            />
+          </Form.Item>
+
+          <Form.Item
+            name="address"
+            label="Địa chỉ"
+            rules={[
+              { required: true, message: "Vui lòng nhập địa chỉ của bạn!" },
+              {
+                type: "address",
+                message: "Địa chỉ nhà không được chứa kí tự đặc biệt",
+              },
+            ]}
+          >
+            <Input
+              prefix={<HomeOutlined />}
+              placeholder="Nhập địa chỉ của bạn"
               size="large"
               disabled={loading}
             />
@@ -49,6 +93,25 @@ const RegisterForm = ({ onSubmit, loading }) => {
             <Input
               prefix={<MailOutlined />}
               placeholder="Nhập email"
+              size="large"
+              disabled={loading}
+            />
+          </Form.Item>
+
+          <Form.Item
+            name="dateOfBirth"
+            label="Ngày sinh"
+            rules={[
+              { required: true, message: "Vui lòng điền ngày sinh của bạn!" },
+              {
+                type: "dateOfBirth",
+                message: "Bạn chưa đủ 18 tuổi! Hãy thoát trang web này :3",
+              },
+            ]}
+          >
+            <DatePicker
+              prefix={<ScheduleOutlined />}
+              placeholder="Nhập ngày sinh"
               size="large"
               disabled={loading}
             />

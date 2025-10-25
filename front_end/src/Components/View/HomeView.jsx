@@ -1,308 +1,259 @@
 import React, { useEffect, useState } from "react";
-import "./HomeView.css";
+import { useNavigate } from "react-router-dom";
 
-const SDZHomepage = () => {
-  const [menuOpen, setMenuOpen] = useState(false);
+const HomeContainer = () => {
+  const navigate = useNavigate();
+  
+  // ===== STATE MANAGEMENT =====
   const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [vehicles, setVehicles] = useState([]);
+  const [featuredVehicles, setFeaturedVehicles] = useState([]);
+  const [statistics, setStatistics] = useState({
+    totalVehicles: 0,
+    totalBookings: 0,
+    happyCustomers: 0,
+  });
+  const [testimonials, setTestimonials] = useState([]);
 
+  // ===== LOGIC: Lấy user từ localStorage =====
   useEffect(() => {
-    const storedUser = localStorage.getItem("currentUser");
-    if (storedUser) {
-      setUser(JSON.parse(storedUser));
-    }
+    const fetchUserData = () => {
+      try {
+        const storedUser = localStorage.getItem("currentUser");
+        const isLoggedIn = localStorage.getItem("isLoggedIn");
+        
+        console.log("🔍 HomeContainer - Checking localStorage:", { 
+          storedUser: storedUser ? "exists" : "null", 
+          isLoggedIn 
+        });
+        
+        if (storedUser && isLoggedIn === "true") {
+          const userData = JSON.parse(storedUser);
+          
+          // 🔥 DEBUG: Log đầy đủ thông tin user
+          console.log("✅ HomeContainer - Full user object:", userData);
+          console.log("📝 HomeContainer - Available fields:", Object.keys(userData));
+          console.log("👤 HomeContainer - User name:", userData.fullName || userData.name || userData.username);
+          
+          setUser(userData);
+        } else {
+          console.warn("⚠️ HomeContainer - No valid user found in localStorage");
+          setUser(null);
+        }
+      } catch (error) {
+        console.error("❌ HomeContainer - Error loading user data:", error);
+        setUser(null);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchUserData();
   }, []);
 
-  const handleLogout = () => {
-    localStorage.removeItem("currentUser");
-    localStorage.removeItem("isLoggedIn");
-    localStorage.removeItem("token");
-    localStorage.removeItem("userId");
+  // ===== LOGIC: Fetch vehicles (sẽ dùng API sau) =====
+  useEffect(() => {
+    const fetchVehicles = async () => {
+      try {
+        // TODO: Thay bằng API call thực
+        // const response = await fetch('YOUR_API/vehicles');
+        // const data = await response.json();
+        
+        // Dummy data tạm thời
+        const dummyVehicles = [
+          {
+            id: "1",
+            name: "Tesla Model 3",
+            type: "Sedan",
+            price: 45,
+            range: 358,
+            image: "https://images.unsplash.com/photo-1560958089-b8a1929cea89?w=400",
+            available: true,
+            rating: 4.8,
+          },
+          {
+            id: "2",
+            name: "Nissan Leaf",
+            type: "Hatchback",
+            price: 35,
+            range: 226,
+            image: "https://images.unsplash.com/photo-1593941707882-a5bba14938c7?w=400",
+            available: true,
+            rating: 4.5,
+          },
+          {
+            id: "3",
+            name: "Chevrolet Bolt",
+            type: "Hatchback",
+            price: 38,
+            range: 259,
+            image: "https://images.unsplash.com/photo-1552519507-da3b142c6e3d?w=400",
+            available: false,
+            rating: 4.6,
+          },
+        ];
 
-    setUser(null);
-    alert("You have been logged out.");
-    window.location.href = "/home";
+        setVehicles(dummyVehicles);
+        setFeaturedVehicles(dummyVehicles.slice(0, 3));
+      } catch (error) {
+        console.error("❌ Error fetching vehicles:", error);
+      }
+    };
+
+    fetchVehicles();
+  }, []);
+
+  // ===== LOGIC: Fetch statistics =====
+  useEffect(() => {
+    const fetchStatistics = async () => {
+      try {
+        // TODO: Thay bằng API call thực
+        setStatistics({
+          totalVehicles: 500,
+          totalBookings: 15000,
+          happyCustomers: 10000,
+        });
+      } catch (error) {
+        console.error("❌ Error fetching statistics:", error);
+      }
+    };
+
+    fetchStatistics();
+  }, []);
+
+  // ===== LOGIC: Fetch testimonials =====
+  useEffect(() => {
+    const fetchTestimonials = async () => {
+      try {
+        const dummyTestimonials = [
+          {
+            id: "1",
+            name: "John Doe",
+            avatar: "https://ui-avatars.com/api/?name=John+Doe",
+            rating: 5,
+            comment: "Excellent service! The Tesla Model 3 was in perfect condition.",
+            date: "2025-09-15",
+          },
+          {
+            id: "2",
+            name: "Jane Smith",
+            avatar: "https://ui-avatars.com/api/?name=Jane+Smith",
+            rating: 5,
+            comment: "Very easy booking process. Highly recommend!",
+            date: "2025-09-20",
+          },
+        ];
+
+        setTestimonials(dummyTestimonials);
+      } catch (error) {
+        console.error("❌ Error fetching testimonials:", error);
+      }
+    };
+
+    fetchTestimonials();
+  }, []);
+
+  // ===== HANDLER: Logout =====
+  const handleLogout = () => {
+    if (window.confirm("Bạn có chắc chắn muốn đăng xuất?")) {
+      localStorage.removeItem("currentUser");
+      localStorage.removeItem("isLoggedIn");
+      localStorage.removeItem("userId");
+      localStorage.removeItem("token");
+      
+      setUser(null);
+      navigate("/login");
+      console.log("✅ User logged out");
+    }
   };
 
+  // ===== HANDLER: Navigation =====
+  const handleNavigation = (path) => {
+    console.log(`🧭 Navigating to: ${path}`);
+    
+    // Đảm bảo user data được lưu trước khi navigate
+    if (user && path === "/profile") {
+      localStorage.setItem("currentUser", JSON.stringify(user));
+      localStorage.setItem("isLoggedIn", "true");
+      console.log("💾 User data saved before navigation to profile");
+    }
+    
+    navigate(path);
+  };
+
+  // ===== HANDLER: Book vehicle =====
+  const handleBookVehicle = (vehicleId) => {
+    if (!user) {
+      // Redirect to login if not authenticated
+      alert("Vui lòng đăng nhập để đặt xe");
+      navigate("/login");
+      return;
+    }
+
+    // Navigate to booking page with vehicle ID
+    navigate(`/booking/${vehicleId}`);
+    console.log(`📋 Booking vehicle ID: ${vehicleId}`);
+  };
+
+  // ===== HANDLER: View vehicle details =====
+  const handleViewVehicle = (vehicleId) => {
+    navigate(`/vehicle/${vehicleId}`);
+    console.log(`👁️ Viewing vehicle ID: ${vehicleId}`);
+  };
+
+  // ===== HANDLER: Search vehicles =====
+  const handleSearch = (searchQuery) => {
+    console.log(`🔍 Searching for: ${searchQuery}`);
+    navigate(`/vehicles?search=${searchQuery}`);
+  };
+
+  // ===== HANDLER: Filter by type =====
+  const handleFilterByType = (type) => {
+    console.log(`🔧 Filtering by type: ${type}`);
+    navigate(`/vehicles?type=${type}`);
+  };
+
+  // ===== Helper: Get display name =====
+  const getDisplayName = () => {
+    if (!user) return "Khách";
+    return user.fullName || user.name || user.username || user.email?.split('@')[0] || "Người dùng";
+  };
+
+  // Log user info whenever it changes
+  useEffect(() => {
+    if (user) {
+      console.log("👤 Current user display name:", getDisplayName());
+    }
+  }, [user]);
+
+  // ===== Truyền tất cả data và handlers xuống View =====
   return (
-    <div className="sdz-container">
-      {/* Header */}
-      <header className="header">
-        <nav className="nav">
-          <div className="nav-left">
-            <a href="/home" className="logo-link">
-              <h1 className="logo">
-                <span>SDZ</span>
-              </h1>
-            </a>
-            <div className="nav-links">
-              <a href="/home" className="home-btn">Trang Chủ</a>
-              <a href="#">Đi xe</a>
-              <a href="#">Lái xe</a>
-              <a href="#">Doanh nghiệp</a>
-            </div>
-          </div>
-
-          <div className="nav-buttons">
-            {user ? (
-              <div className="profile-wrapper">
-                <img
-                  src={
-                    user.avatar ||
-                    "https://cdn-icons-png.flaticon.com/512/149/149071.png"
-                  }
-                  alt={user.fullName}
-                  className="profile-avatar"
-                  onClick={() => setMenuOpen(!menuOpen)}
-                />
-
-                <div className={`profile-menu ${menuOpen ? "active" : ""}`}>
-                  <div className="profile-info">
-                    <img
-                      src={
-                        user.avatar ||
-                        user.avatarUrl ||
-                        "https://cdn-icons-png.flaticon.com/512/149/149071.png"
-                      }
-                      alt={user.fullName || "user avatar"}
-                      className="profile-avatar-lg"
-                    />
-                    <div className="profile-text">
-                      <p className="profile-name">{user.fullName}</p>
-                      {user.email && (
-                        <p className="profile-email">{user.email}</p>
-                      )}
-                    </div>
-                  </div>
-
-                  <hr className="profile-divider" />
-
-                  <a href="/profile" className="menu-link">
-                    Hồ sơ cá nhân
-                  </a>
-                  <a href="/settings" className="menu-link">
-                    Cài đặt
-                  </a>
-
-                  <button onClick={handleLogout} className="menu-logout">
-                    Đăng xuất
-                  </button>
-                </div>
-              </div>
-            ) : (
-              <>
-                <a href="/login" className="btn btn-outline-primary">
-                  Đăng nhập
-                </a>
-                <a href="/register" className="btn btn-primary">
-                  Đăng ký
-                </a>
-              </>
-            )}
-          </div>
-
-          <button
-            className="menu-toggle"
-            onClick={() => setMenuOpen(!menuOpen)}
-          >
-            <svg
-              width="24"
-              height="24"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M4 6h16M4 12h16M4 18h16"
-              />
-            </svg>
-          </button>
-        </nav>
-      </header>
-
-      {/* Hero Section */}
-      <section className="hero">
-        <div className="container">
-          <div className="hero-grid">
-            <div className="hero-content">
-              <h2 className="hero-title">Đi đến bất cứ đâu với SDZ</h2>
-              <p className="hero-subtitle">
-                Đặt chuyến đi, di chuyển nhanh chóng và an toàn với SDZ
-              </p>
-
-              <div className="booking-form">
-                <div className="booking-tabs">
-                  <button className="tab-btn active">Đi xe</button>
-                </div>
-
-                <div className="input-group">
-                  <div className="input-wrapper">
-                    <div className="location-dot"></div>
-                    <input type="text" placeholder="Nhập địa điểm đón" />
-                  </div>
-
-                  <div className="input-wrapper">
-                    <div className="location-dot outline"></div>
-                    <input type="text" placeholder="Nhập địa điểm đến" />
-                  </div>
-                </div>
-
-                <button className="btn btn-submit">Xem giá cước</button>
-              </div>
-            </div>
-
-            <div>
-              <img
-                src="https://images.unsplash.com/photo-1449965408869-eaa3f722e40d?w=800&q=80"
-                alt="SDZ car"
-                className="hero-image"
-              />
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Services Section */}
-      <section className="services">
-        <div className="container">
-          <h3 className="section-title">Dịch vụ của chúng tôi</h3>
-
-          <div className="services-grid">
-            <div className="service-card">
-              <div className="service-icon">
-                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"
-                  />
-                </svg>
-              </div>
-              <h4 className="service-title">Đi xe</h4>
-              <p className="service-description">
-                Đặt chuyến đi trong vài giây với ứng dụng dễ sử dụng
-              </p>
-            </div>
-
-            <div className="service-card">
-              <div className="service-icon">
-                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1"
-                  />
-                </svg>
-              </div>
-              <h4 className="service-title">Lái xe kiếm tiền</h4>
-              <p className="service-description">
-                Trở thành đối tác tài xế và kiếm tiền theo lịch trình linh hoạt
-              </p>
-            </div>
-
-            <div className="service-card">
-              <div className="service-icon">
-                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"
-                  />
-                </svg>
-              </div>
-              <h4 className="service-title">SDZ Eats</h4>
-              <p className="service-description">
-                Đặt món ăn yêu thích và giao tận nơi nhanh chóng
-              </p>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* CTA Section */}
-      <section className="cta">
-        <div className="container">
-          <h3 className="cta-title">Sẵn sàng bắt đầu?</h3>
-          <p className="cta-subtitle">
-            Tải ứng dụng SDZ ngay hôm nay và trải nghiệm dịch vụ tốt nhất
-          </p>
-          <div className="cta-buttons">
-            <button className="btn btn-primary btn-large">Đăng ký ngay</button>
-            <button className="btn btn-outline btn-large">Tìm hiểu thêm</button>
-          </div>
-        </div>
-      </section>
-
-      {/* Footer */}
-      <footer className="footer">
-        <div className="container">
-          <div className="footer-grid">
-            <div className="footer-column">
-              <h5>Công ty</h5>
-              <ul>
-                <li>
-                  <a href="#">Giới thiệu</a>
-                </li>
-                <li>
-                  <a href="#">Tin tức</a>
-                </li>
-                <li>
-                  <a href="#">Tuyển dụng</a>
-                </li>
-              </ul>
-            </div>
-            <div className="footer-column">
-              <h5>Sản phẩm</h5>
-              <ul>
-                <li>
-                  <a href="#">Đi xe</a>
-                </li>
-                <li>
-                  <a href="#">Lái xe</a>
-                </li>
-              </ul>
-            </div>
-            <div className="footer-column">
-              <h5>Hỗ trợ</h5>
-              <ul>
-                <li>
-                  <a href="#">Trợ giúp</a>
-                </li>
-                <li>
-                  <a href="#">Liên hệ</a>
-                </li>
-                <li>
-                  <a href="#">An toàn</a>
-                </li>
-              </ul>
-            </div>
-            <div className="footer-column">
-              <h5>Kết nối</h5>
-              <div className="social-links">
-                <a href="#" className="social-link">
-                  f
-                </a>
-                <a href="#" className="social-link">
-                  t
-                </a>
-                <a href="#" className="social-link">
-                  in
-                </a>
-              </div>
-            </div>
-          </div>
-          <div className="footer-bottom">
-            <p>&copy; 2024 SDZ Technologies Inc. All rights reserved.</p>
-          </div>
-        </div>
-      </footer>
-    </div>
+    <HomeView
+      // User data
+      user={user}
+      loading={loading}
+      displayName={getDisplayName()} // 🔥 THÊM displayName để View dùng
+      
+      // Vehicle data
+      vehicles={vehicles}
+      featuredVehicles={featuredVehicles}
+      
+      // Statistics
+      statistics={statistics}
+      
+      // Testimonials
+      testimonials={testimonials}
+      
+      // Handlers
+      onLogout={handleLogout}
+      onNavigate={handleNavigation}
+      onBookVehicle={handleBookVehicle}
+      onViewVehicle={handleViewVehicle}
+      onSearch={handleSearch}
+      onFilterByType={handleFilterByType}
+    />
   );
 };
 
-export default SDZHomepage;
+export default HomeContainer;

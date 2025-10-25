@@ -12,21 +12,25 @@ const RegisterContainer = () => {
     setLoading(true);
 
     try {
-      // 🧱 Chuẩn bị dữ liệu user
+      // Chuẩn bị dữ liệu user
       const newUser = {
-        name: values.name,
+        fullName: values.name,
         email: values.email,
+        phoneNumber: values.phone,
+        address: values.address || "chưa cập nhật",
         password: values.password,
-        role: "renter", // dùng lowercase để khớp logic login
-        isVerified: false, // chỉ cho license verification, không ảnh hưởng login
+        role: "renter",
+        isVerified: false,
         createdAt: new Date().toISOString(),
       };
 
-      console.log("📦 Sending user to MockAPI:", newUser);
-      const result = await userAPI.registerUser(newUser);
+      console.log("🟢 Sending new user:", newUser);
 
+      const result = await userAPI.registerUser(newUser);
+      
       if (result) {
         message.success("🎉 Đăng ký thành công!");
+        alert("Welcome! " + result.fullName);
         navigate("/login");
       } else {
         message.error("Không thể tạo tài khoản, vui lòng thử lại!");

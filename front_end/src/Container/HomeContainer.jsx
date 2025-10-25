@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import HomeView from "@/Components/View/HomeView";
+import HomeView from "../Components/View/HomeView";
 
 const HomeContainer = () => {
   const navigate = useNavigate();

@@ -1,5 +1,5 @@
 /** @type {import('tailwindcss').Config} */
-export default {
+module.exports = {
   content: [
     "./index.html",
     "./src/**/*.{js,ts,jsx,tsx}",
@@ -7,11 +7,14 @@ export default {
   theme: {
     extend: {
       colors: {
-        sdzBlue: "#6366f1",
-        sdzDark: "#0f172a",
+        sdz: {
+          500: "#6366f1",
+          600: "#4f46e5",
+          700: "#4338ca",
+        },
       },
       fontFamily: {
-        inter: ["Inter", "sans-serif"],
+        inter: ['Inter', 'sans-serif'],
       },
     },
   },
