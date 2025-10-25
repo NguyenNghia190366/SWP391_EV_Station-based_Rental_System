@@ -88,3 +88,4 @@ D:\Linh tinh\studying\Semester_5\swP391\main\back_end\src\PresentationLayer\bin\
 D:\Linh tinh\studying\Semester_5\swP391\main\back_end\src\PresentationLayer\bin\Debug\net9.0\runtimes\win\lib\net6.0\System.Security.Cryptography.ProtectedData.dll
 D:\Linh tinh\studying\Semester_5\swP391\main\back_end\src\PresentationLayer\bin\Debug\net9.0\runtimes\win\lib\net6.0\System.Windows.Extensions.dll
 D:\Linh tinh\studying\Semester_5\swP391\main\back_end\src\PresentationLayer\bin\Debug\net9.0\BCrypt.Net-Next.dll
+D:\Linh tinh\studying\Semester_5\swP391\main\back_end\src\PresentationLayer\bin\Debug\net9.0\AutoMapper.dll
