@@ -1,0 +1,78 @@
+/* ===== NỀN CHUNG ===== */
+body, .register-page {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #0f172a, #1e293b, #4338ca, #6366f1);
+  background-size: 400% 400%;
+  animation: gradientMove 15s ease infinite;
+  font-family: "Inter", sans-serif;
+  color: #1e293b;
+}
+
+/* Gradient chuyển động */
+@keyframes gradientMove {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+/* ===== Card ===== */
+.card {
+  border-radius: 18px !important;
+  background: rgba(255, 255, 255, 0.96) !important;
+  box-shadow: 0 0 25px rgba(99, 102, 241, 0.25) !important;
+  transition: all 0.3s ease;
+}
+
+.card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 0 40px rgba(99, 102, 241, 0.35);
+}
+
+/* ===== Tiêu đề ===== */
+.card h2 {
+  color: #4f46e5;
+  font-weight: 700;
+}
+
+/* ===== Form control ===== */
+.form-control {
+  border-radius: 8px !important;
+  border: 1px solid #cbd5e1 !important;
+  padding: 10px !important;
+  transition: all 0.2s ease !important;
+  font-size: 0.95rem;
+}
+
+.form-control:focus {
+  border-color: #6366f1 !important;
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.25) !important;
+}
+
+/* ===== Nút đăng ký ===== */
+button.btn-primary,
+button.bg-indigo-600 {
+  background: linear-gradient(90deg, #6366f1, #4f46e5) !important;
+  border: none !important;
+  color: white !important;
+  font-weight: 600 !important;
+  padding: 10px !important;
+  border-radius: 10px !important;
+  transition: all 0.3s ease !important;
+  box-shadow: 0 0 15px rgba(99, 102, 241, 0.25);
+}
+
+button.btn-primary:hover,
+button.bg-indigo-600:hover {
+  background: linear-gradient(90deg, #4f46e5, #4338ca) !important;
+  box-shadow: 0 0 25px rgba(99, 102, 241, 0.4);
+}
+
+/* ===== Liên kết Login ===== */
+.text-indigo-600 {
+  color: #4f46e5 !important;
+}
+
+.text-indigo-600:hover {
+  text-decoration: underline !important;
+}
+

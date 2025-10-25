@@ -1,0 +1,117 @@
+/* ===== NỀN CHUNG ===== */
+.login-container {
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: linear-gradient(135deg, #0f172a, #1e293b, #4338ca, #6366f1);
+  background-size: 400% 400%;
+  animation: gradientMove 15s ease infinite;
+  font-family: "Inter", sans-serif;
+  color: #f1f5f9;
+}
+
+/* Gradient animation */
+@keyframes gradientMove {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+/* ===== CARD LOGIN ===== */
+.login-form {
+  background: rgba(255, 255, 255, 0.96);
+  padding: 2.5rem;
+  border-radius: 18px;
+  box-shadow: 0 0 25px rgba(99, 102, 241, 0.25);
+  width: 380px;
+  text-align: center;
+  transition: all 0.3s ease;
+}
+
+.login-form:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 0 40px rgba(99, 102, 241, 0.35);
+}
+
+/* ===== Title ===== */
+.login-title {
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: #4f46e5;
+  margin-bottom: 1.5rem;
+}
+
+/* ===== Form fields ===== */
+.form-item {
+  margin-bottom: 1.2rem;
+  text-align: left;
+}
+
+.form-item label {
+  display: block;
+  font-size: 0.9rem;
+  color: #374151;
+  margin-bottom: 6px;
+  font-weight: 500;
+}
+
+.form-item input {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid black;
+  border-radius: 8px;
+  outline: none;
+  font-size: 0.95rem;
+  transition: 0.2s;
+}
+
+.form-item input:focus {
+  border-color: #6366f1;
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
+}
+
+/* ===== Nút Login ===== */
+.submit-button {
+  width: 100%;
+  background: linear-gradient(90deg, #6366f1, #4f46e5);
+  border: none;
+  color: white;
+  padding: 10px;
+  border-radius: 10px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 0 15px rgba(99, 102, 241, 0.25);
+}
+
+.submit-button:hover {
+  background: linear-gradient(90deg, #4f46e5, #4338ca);
+  box-shadow: 0 0 25px rgba(99, 102, 241, 0.4);
+}
+
+/* ===== Error message ===== */
+.error-message {
+  background-color: #fee2e2;
+  color: #b91c1c;
+  border-radius: 8px;
+  padding: 0.6rem;
+  margin-bottom: 1rem;
+  font-size: 0.9rem;
+}
+
+/* ===== Link to register ===== */
+.register-link {
+  margin-top: 1rem;
+}
+
+.register-link a {
+  color: #4f46e5;
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.register-link a:hover {
+  text-decoration: underline;
+}
