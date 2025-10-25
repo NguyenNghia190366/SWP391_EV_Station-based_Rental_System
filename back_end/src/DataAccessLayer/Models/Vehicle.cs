@@ -19,9 +19,6 @@ public partial class Vehicle
 
     public int vehicle_model_id { get; set; }
 
-    [StringLength(100)]
-    public string model { get; set; } = null!;
-
     public int? release_year { get; set; }
 
     public int? battery_capacity { get; set; }
