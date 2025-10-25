@@ -8,7 +8,7 @@ function App() {
   return (
       <Routes>
         {/* Nếu chỉ vào http://localhost:5173 hoặc http://localhost:5173/ → tự chuyển sang /home */}
-        <Route path="/" element={<Navigate to="/login" replace />} />
+        <Route path="/" element={<Navigate to="/home" replace />} />
         <Route path="/home" element={<HomePage />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<RegisterPage />} />

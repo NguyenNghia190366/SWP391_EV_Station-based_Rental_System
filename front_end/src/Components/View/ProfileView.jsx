@@ -1,239 +1,320 @@
-.profile-page {
-  min-height: 100vh;
-  font-family: "Inter", sans-serif;
-  color: #f1f5f9;
-  background: linear-gradient(135deg, #0f172a, #1e293b, #4338ca, #6366f1);
-  background-size: 400% 400%;
-  animation: gradientMove 15s ease infinite;
-}
+import React, { useState } from "react";
+import "./ProfileView.css";
 
-/* 🔮 Hiệu ứng gradient di chuyển nhẹ */
-@keyframes gradientMove {
-  0% {
-    background-position: 0% 50%;
-  }
-  50% {
-    background-position: 100% 50%;
-  }
-  100% {
-    background-position: 0% 50%;
-  }
-}
+const ProfileView = ({ user, loading, onUpdateUser }) => {
+  const [activeTab, setActiveTab] = useState("overview");
+  const [isEditing, setIsEditing] = useState(false);
+  const [form, setForm] = useState(user || {});
+  const [images, setImages] = useState([]);
 
-.profile-page {
-  min-height: 100vh;
-  font-family: "Inter", sans-serif;
-  background: #f8fafc;
-}
+  const handleMultiFileUpload = (e) => {
+    const files = Array.from(e.target.files);
+    if (files.length === 0) return;
 
-/* ===== Navbar ===== */
-.profile-navbar {
-  position: fixed;
-  top: 0;
-  width: 100%;
-  background: rgba(15, 23, 42, 0.95);
-  backdrop-filter: blur(10px);
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 1rem 3rem;
-  z-index: 50;
-}
+    const previews = files.map((file) => ({
+      file,
+      previewUrl: URL.createObjectURL(file),
+    }));
 
-.nav-logo {
-  font-weight: 800;
-  font-size: 1.6rem;
-  color: #6366f1;
-}
+    setImages((prev) => [...prev, ...previews]);
+  };
 
-.nav-links {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-}
-
-.nav-links a {
-  text-decoration: none;
-  color: #e2e8f0;
-  font-weight: 500;
-  transition: 0.3s;
-}
-
-.nav-links a:hover {
-  color: #6366f1;
-}
-
-.logout-btn {
-  background: linear-gradient(90deg, #6366f1, #4f46e5);
-  border: none;
-  color: #fff;
-  padding: 8px 16px;
-  border-radius: 8px;
-  cursor: pointer;
-  transition: 0.3s;
-}
-
-.logout-btn:hover {
-  transform: translateY(-1px);
-  background: linear-gradient(90deg, #4f46e5, #4338ca);
-}
-
-/* ===== Layout ===== */
-.profile-container.two-column {
-  display: flex;
-  justify-content: center;
-  align-items: flex-start;
-  gap: 2.5rem;
-  flex-wrap: wrap;
-  padding: 140px 3rem 4rem;
-}
-
-/* ===== Cột trái ===== */
-.profile-left {
-  background: #fff;
-  border-radius: 16px;
-  width: 280px;
-  padding: 2rem 1.5rem;
-  text-align: center;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
-}
-
-.profile-avatar-large {
-  width: 120px;
-  height: 120px;
-  margin-left: 55px;
-  border-radius: 50%;
-  border: 3px solid #6366f1;
-  margin-bottom: 1rem;
-}
-
-.profile-name {
-  font-size: 1.3rem;
-  font-weight: 600;
-  color: #1e293b;
-}
-
-.profile-role {
-  font-size: 0.95rem;
-  color: #64748b;
-}
-
-/* ===== Tabs ===== */
-.tabs {
-  display: flex;
-  border-bottom: 1px solid #e2e8f0;
-  margin-bottom: 1.5rem;
-}
-
-.tabs button {
-  background: none;
-  border: none;
-  padding: 0.8rem 1.2rem;
-  font-weight: 500;
-  color: #64748b;
-  cursor: pointer;
-  transition: 0.2s;
-}
-
-.tabs button.active {
-  color: #4f46e5;
-  border-bottom: 3px solid #6366f1;
-}
-
-.tabs button:hover {
-  color: #6366f1;
-}
-
-/* ===== Nội dung tab ===== */
-.tab-content {
-  padding-top: 1rem;
-}
-
-.tab-content h2,
-.tab-content h3 {
-  color: #1e293b;
-  margin-bottom: 0.8rem;
-}
-
-.tab-content p {
-  color: #475569;
-  font-size: 0.95rem;
-  line-height: 1.6;
-}
-
-/* ===== Form và grid ===== */
-.profile-info-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 1rem 2rem;
-  margin-bottom: 1rem;
-}
-
-.profile-form input {
-  width: 100%;
-  margin: 8px 0;
-  padding: 8px 12px;
-  border-radius: 8px;
-  border: 1px solid #cbd5e1;
-  font-size: 0.95rem;
-}
-
-.profile-form input:focus {
-  border-color: #6366f1;
-  box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.2);
-}
-
-/* ===== Upload xác thực ===== */
-.upload-input {
-  display: block;
-  margin: 1rem 0;
-}
-
-.verified {
-  color: #16a34a;
-  font-weight: 600;
-}
-
-.unverified {
-  color: #dc2626;
-  font-weight: 600;
-}
-
-/* ===== Buttons ===== */
-.btn-edit,
-.btn-save {
-  background: linear-gradient(90deg, #6366f1, #4f46e5);
-  border: none;
-  padding: 10px;
-  width: 36%;
-  border-radius: 10px;
-  color: #fff;
-  font-weight: 500;
-  cursor: pointer;
-  transition: 0.3s;
-  margin-top: 2.2rem;
-}
-
-.btn-edit:hover,
-.btn-save:hover {
-  background: linear-gradient(90deg, #4f46e5, #4338ca);
-  transform: translateY(-1px);
-}
-
-/* ===== Responsive ===== */
-@media (max-width: 900px) {
-  .profile-container.two-column {
-    flex-direction: column;
-    align-items: center;
-    padding: 120px 1rem;
+  if (loading) return <p className="profile-loading">Đang tải...</p>;
+  if (!user) {
+    return (
+      <div className="profile-container">
+        <div className="profile-card">
+          <h2>Bạn chưa đăng nhập</h2>
+          <p>Hãy đăng nhập để xem thông tin cá nhân.</p>
+          <button
+            className="btn-login"
+            onClick={() => (window.location.href = "/login")}
+          >
+            Đăng nhập ngay
+          </button>
+        </div>
+      </div>
+    );
   }
 
-  .profile-left,
-  .profile-right {
-    width: 95%;
-  }
+  const handleChange = (e) => {
+    setForm({ ...form, [e.target.name]: e.target.value });
+  };
 
-  .profile-info-grid {
-    grid-template-columns: 1fr;
-  }
-}
+  const handleSave = () => {
+    onUpdateUser(form);
+    setIsEditing(false);
+  };
+
+  return (
+    <div className="profile-page">
+      {/* ===== NAVBAR ===== */}
+      <nav className="fixed top-0 w-full bg-gray-900 text-gray-200 px-8 py-4 flex justify-between items-center shadow-md">
+        <a href="/home" className="nav-logo-link">
+          <div className="text-indigo-400 font-bold text-2xl">SDZ</div>
+        </a>
+        <div className="nav-links">
+          <a href="/home" className="hover:text-indigo-400 transition">
+            Trang chủ
+          </a>
+          <a href="/home">Đi xe</a>
+          <a href="/drive">Lái xe</a>
+          <a href="/business">Doanh nghiệp</a>
+          <button
+            className="logout-btn"
+            onClick={() => {
+              localStorage.clear();
+              window.location.href = "/login";
+            }}
+          >
+            Đăng xuất
+          </button>
+        </div>
+      </nav>
+
+      {/* ===== PROFILE CONTENT ===== */}
+      <div className="profile-container two-column">
+        {/* CỘT TRÁI */}
+        <div className="bg-white rounded-xl shadow-lg w-72 p-6 text-center">
+          <img
+            src={
+              user.avatar ||
+              "https://cdn-icons-png.flaticon.com/512/149/149071.png"
+            }
+            className="w-32 h-32 rounded-full border-4 border-indigo-500 mx-auto mb-4"
+          />
+          <h2 className="text-lg font-semibold text-gray-800">
+            {user.fullName}
+          </h2>
+          <h2 className="text-lg font-semibold text-gray-800">{user.role}</h2>
+        </div>
+        <div className="profile-right">
+          <div className="tabs">
+            <button
+              className={activeTab === "overview" ? "active" : ""}
+              onClick={() => setActiveTab("overview")}
+            >
+              Tổng quan
+            </button>
+            <button
+              className={activeTab === "info" ? "active" : ""}
+              onClick={() => setActiveTab("info")}
+            >
+              Thông tin
+            </button>
+            <button
+              className={activeTab === "verify" ? "active" : ""}
+              onClick={() => setActiveTab("verify")}
+            >
+              Xác thực
+            </button>
+            <button
+              className={activeTab === "history" ? "active" : ""}
+              onClick={() => setActiveTab("history")}
+            >
+              Lịch sử thuê xe
+            </button>
+          </div>
+
+          {/* TAB: TỔNG QUAN */}
+          {activeTab === "overview" && (
+            <div className="tab-content">
+              <h2>Xin chào, {user.fullName} 👋</h2>
+              <h2 className="text-xl font-semibold text-gray-800 mb-2">
+                Hồ sơ người dùng
+              </h2>
+              <p className="text-gray-600">
+                Đây là trang thông tin cá nhân của bạn
+              </p>
+            </div>
+          )}
+
+          {/* TAB: THÔNG TIN */}
+          {activeTab === "info" && (
+            <div className="tab-content mt-6">
+              {isEditing ? (
+                <div className="bg-white p-6 rounded-2xl shadow-md space-y-4 max-w-md mx-auto">
+                  <h3 className="text-lg font-semibold text-gray-700 mb-4 border-b pb-2">
+                    Cập nhật thông tin cá nhân
+                  </h3>
+
+                  <div className="flex flex-col space-y-3">
+                    <label className="text-sm font-medium text-gray-600">
+                      Tên:
+                    </label>
+                    <input
+                      name="name"
+                      value={form.name || ""}
+                      onChange={handleChange}
+                      className="border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-400 focus:outline-none text-gray-600"
+                    />
+
+                    <label className="text-sm font-medium text-gray-600">
+                      Email:
+                    </label>
+                    <input
+                      name="email"
+                      value={form.email || ""}
+                      onChange={handleChange}
+                      className="border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-400 focus:outline-none text-gray-600"
+                    />
+
+                    <label className="text-sm font-medium text-gray-600">
+                      Số điện thoại:
+                    </label>
+                    <input
+                      name="phone"
+                      value={form.phone || ""}
+                      onChange={handleChange}
+                      className="border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-400 focus:outline-none text-gray-600"
+                    />
+                  </div>
+
+                  <button
+                    className="w-full bg-indigo-500 hover:bg-indigo-600 text-white font-medium py-2 px-4 rounded-lg transition duration-200"
+                    onClick={handleSave}
+                  >
+                    💾 Lưu thay đổi
+                  </button>
+                </div>
+              ) : (
+                <>
+                  <div className="bg-white p-6 rounded-2xl shadow-md grid grid-cols-1 sm:grid-cols-2 gap-4 max-w-2xl mx-auto">
+                    <p className="text-gray-700">
+                      <strong className="font-medium text-gray-800">
+                        Email:
+                      </strong>{" "}
+                      {user.email}
+                    </p>
+                    <p className="text-gray-700">
+                      <strong className="font-medium text-gray-800">
+                        Số điện thoại:
+                      </strong>{" "}
+                      {user.phoneNumber || "Chưa có"}
+                    </p>
+                    <p className="text-gray-700">
+                      <strong className="font-medium text-gray-800">
+                        Ngày tạo:
+                      </strong>{" "}
+                      {user.createdAt
+                        ? new Date(user.createdAt).toLocaleDateString()
+                        : "N/A"}
+                    </p>
+                    <p className="text-gray-700">
+                      <strong className="font-medium text-gray-800">
+                        Trạng thái:
+                      </strong>{" "}
+                      {user.isVerified ? (
+                        <span className="text-green-600 font-semibold">
+                          Đã xác thực ✅
+                        </span>
+                      ) : (
+                        <span className="text-red-500 font-semibold">
+                          Chưa xác thực ❌
+                        </span>
+                      )}
+                    </p>
+                  </div>
+
+                  <div className="text-center mt-6">
+                    <button
+                      className="bg-indigo-500 hover:bg-indigo-600 text-white font-medium px-5 py-2 rounded-lg shadow transition duration-200"
+                      onClick={() => setIsEditing(true)}
+                    >
+                      ✏️ Chỉnh sửa thông tin
+                    </button>
+                  </div>
+                </>
+              )}
+            </div>
+          )}
+
+          {/* TAB: XÁC THỰC */}
+          {activeTab === "verify" && (
+            <div className="tab-content text-gray-800">
+              <h3 className="font-semibold text-lg mb-3">
+                Trạng thái xác thực:
+              </h3>
+
+              {user.isVerified ? (
+                <p className="text-green-600 font-medium">
+                  Tài khoản đã được xác thực ✅
+                </p>
+              ) : (
+                <div className="bg-white rounded-xl shadow-md p-6">
+                  <p className="text-red-500 mb-4">
+                    Bạn chưa xác thực. Vui lòng tải lên{" "}
+                    <strong>nhiều ảnh</strong> giấy phép/CCCD để được duyệt.
+                  </p>
+
+                  {/* Chọn nhiều ảnh */}
+                  <input
+                    type="file"
+                    multiple
+                    accept="image/*"
+                    onChange={handleMultiFileUpload}
+                    className="block w-full max-w-sm border border-gray-300 rounded-md p-2 text-gray-700 cursor-pointer"
+                  />
+
+                  {/* Hiển thị grid ảnh đã chọn */}
+                  {images.length > 0 ? (
+                    <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mt-4">
+                      {images.map((img, index) => (
+                        <div key={index} className="relative group">
+                          <img
+                            src={img.previewUrl}
+                            alt={`preview-${index}`}
+                            className="w-40 h-40 object-cover rounded-lg border-2 border-indigo-500 shadow transition"
+                          />
+                          <button
+                            onClick={() =>
+                              setImages(images.filter((_, i) => i !== index))
+                            }
+                            className="absolute top-1 right-1 bg-red-500 text-white text-xs px-2 py-1 rounded-md opacity-0 group-hover:opacity-100 transition"
+                            aria-label="Xóa ảnh này"
+                          >
+                            ✕
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="text-gray-500 italic mt-3">
+                      Chưa chọn ảnh nào
+                    </p>
+                  )}
+
+                  {/* Nút gửi ảnh (sau này nối API thật) */}
+                  {images.length > 0 && (
+                    <button
+                      className="bg-indigo-500 hover:bg-indigo-600 text-white px-6 py-2 rounded-lg mt-5 transition"
+                      onClick={() => {
+                        console.log(
+                          "Uploading files:",
+                          images.map((x) => x.file)
+                        );
+                        alert("Ảnh đã được gửi để xác thực! (demo)");
+                      }}
+                    >
+                      Gửi ảnh xác thực
+                    </button>
+                  )}
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* TAB: LỊCH SỬ THUÊ XE */}
+          {activeTab === "history" && (
+            <div className="tab-content">
+              <h3>Lịch sử thuê xe của bạn</h3>
+              <p>Chưa có dữ liệu thuê xe nào được ghi nhận.</p>
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default ProfileView;
