@@ -16,14 +16,19 @@ export default defineConfig({
   server: {
     host: "0.0.0.0",
     port: 5173,
-    proxy: {
-      '/api': {
-        target: 'https://68e62cc921dd31f22cc4769d.mockapi.io/api/ev/users',
-        changeOrigin: true,
-        secure: false,
-      },
-    },
+    // ⚠️ DISABLE proxy when using ngrok URL
+    // Uncomment proxy below ONLY when using LOCAL BE (localhost:5189)
+    
+    // proxy: {
+    //   '/api': {
+    //     target: 'http://localhost:5189',  // Local backend
+    //     changeOrigin: true,
+    //     secure: false,
+    //     rewrite: (path) => path,
+    //   },
+    // },
   },
 })
+
 
 

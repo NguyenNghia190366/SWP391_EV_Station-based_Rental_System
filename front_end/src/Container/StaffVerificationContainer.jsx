@@ -26,7 +26,7 @@ export default function StaffVerificationContainer() {
 
   return (
     <div>
-      <h2>📋 Danh sách giấy phép chờ duyệt</h2>
+      <h2> Danh sách giấy phép chờ duyệt</h2>
       {licenses.length === 0 && <p>Không có giấy phép nào chờ duyệt.</p>}
       {licenses.map((l) => (
         <div key={l.id} className="border p-4 mb-2">
@@ -37,10 +37,10 @@ export default function StaffVerificationContainer() {
             onClick={() => handleApprove(l.id)}
             className="btn btn-success"
           >
-            ✅ Duyệt
+             Duyệt
           </button>
           <button onClick={() => handleReject(l.id)} className="btn btn-danger">
-            ❌ Từ chối
+             Từ chối
           </button>
         </div>
       ))}

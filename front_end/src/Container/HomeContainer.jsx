@@ -1,223 +1,322 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import HomeView from "../Components/View/HomeView";
+import HomeView from "../Components/Common/View/HomeView";
+import { stationAPI, driverLicenseAPI, cccdVerificationAPI } from "../api/api";
+import { findNearestStation } from "../utils/geo";
+import BookingVerificationModal from "../Components/Common/Modal/BookingVerificationModal";
 
 const HomeContainer = () => {
   const navigate = useNavigate();
-  
-  // ===== STATE MANAGEMENT =====
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [vehicles, setVehicles] = useState([]);
   const [featuredVehicles, setFeaturedVehicles] = useState([]);
-  const [statistics, setStatistics] = useState({
-    totalVehicles: 0,
-    totalBookings: 0,
-    happyCustomers: 0,
-  });
+  const [statistics, setStatistics] = useState({ totalVehicles: 0, totalBookings: 0, happyCustomers: 0 });
   const [testimonials, setTestimonials] = useState([]);
+  const [stations, setStations] = useState([]);
+  const [nearestStation, setNearestStation] = useState(null);
+  const [nearestSearching, setNearestSearching] = useState(false);
+  const [showVerificationModal, setShowVerificationModal] = useState(false);
+  const [verificationType, setVerificationType] = useState('license');
 
-  // ===== LOGIC: Lấy user từ localStorage =====
   useEffect(() => {
-    const fetchUserData = () => {
+    try {
+      const storedUser = localStorage.getItem("currentUser");
+      const isLoggedIn = localStorage.getItem("isLoggedIn");
+      if (storedUser && isLoggedIn === "true") setUser(JSON.parse(storedUser));
+    } catch (e) {
+      console.error("Error reading user from localStorage", e);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    const dummy = [
+      { id: "1", name: "Tesla Model 3" },
+      { id: "2", name: "Nissan Leaf" },
+      { id: "3", name: "Chevrolet Bolt" },
+    ];
+    setVehicles(dummy);
+    setFeaturedVehicles(dummy.slice(0, 3));
+  }, []);
+
+  useEffect(() => setStatistics({ totalVehicles: 500, totalBookings: 15000, happyCustomers: 10000 }), []);
+
+  useEffect(() => {
+    setTestimonials([
+      { id: "1", name: "John Doe", rating: 5, comment: "Excellent service!" },
+      { id: "2", name: "Jane Smith", rating: 5, comment: "Very easy booking process." },
+    ]);
+  }, []);
+
+  useEffect(() => {
+    let mounted = true;
+    const fetchStations = async () => {
       try {
-        const storedUser = localStorage.getItem("currentUser");
-        const isLoggedIn = localStorage.getItem("isLoggedIn");
+        const data = await stationAPI.getAll();
+        const list = Array.isArray(data) ? data : data?.data || [];
         
-        if (storedUser && isLoggedIn === "true") {
-          const userData = JSON.parse(storedUser);
-          setUser(userData);
-          console.log("✅ User loaded:", userData);
+        if (mounted) {
+          if (list.length > 0) {
+            console.log(' Loaded stations from API:', list.length);
+            setStations(list);
+          } else {
+            // Fallback to dummy data if API returns empty
+            console.warn(' API returned no stations, using dummy data');
+            const dummyStations = [
+              {
+                id: 1,
+                station_id: 1,
+                station_name: "Trạm Quận 1",
+                name: "Trạm Quận 1",
+                address: "123 Nguyễn Huệ, Quận 1, TP.HCM",
+                latitude: 10.7769,
+                longitude: 106.7009,
+                lat: 10.7769,
+                lng: 106.7009,
+              },
+              {
+                id: 2,
+                station_id: 2,
+                station_name: "Trạm Quận 3",
+                name: "Trạm Quận 3",
+                address: "45 Võ Văn Tần, Quận 3, TP.HCM",
+                latitude: 10.7826,
+                longitude: 106.6920,
+                lat: 10.7826,
+                lng: 106.6920,
+              },
+              {
+                id: 3,
+                station_id: 3,
+                station_name: "Trạm Bình Thạnh",
+                name: "Trạm Bình Thạnh",
+                address: "789 Điện Biên Phủ, Bình Thạnh, TP.HCM",
+                latitude: 10.8054,
+                longitude: 106.7141,
+                lat: 10.8054,
+                lng: 106.7141,
+              },
+              {
+                id: 4,
+                station_id: 4,
+                station_name: "Trạm Quận 7",
+                name: "Trạm Quận 7",
+                address: "100 Nguyễn Văn Linh, Quận 7, TP.HCM",
+                latitude: 10.7336,
+                longitude: 106.7219,
+                lat: 10.7336,
+                lng: 106.7219,
+              },
+              {
+                id: 5,
+                station_id: 5,
+                station_name: "Trạm Phú Nhuận",
+                name: "Trạm Phú Nhuận",
+                address: "56 Phan Đăng Lưu, Phú Nhuận, TP.HCM",
+                latitude: 10.7971,
+                longitude: 106.6822,
+                lat: 10.7971,
+                lng: 106.6822,
+              },
+            ];
+            setStations(dummyStations);
+          }
         }
-      } catch (error) {
-        console.error("❌ Error loading user data:", error);
-      } finally {
-        setLoading(false);
+      } catch (err) {
+        console.error(' Error loading stations:', err);
+        if (mounted) {
+          // Fallback to dummy data on error
+          const dummyStations = [
+            {
+              id: 1,
+              station_id: 1,
+              station_name: "Trạm Quận 1",
+              name: "Trạm Quận 1",
+              address: "123 Nguyễn Huệ, Quận 1, TP.HCM",
+              latitude: 10.7769,
+              longitude: 106.7009,
+              lat: 10.7769,
+              lng: 106.7009,
+            },
+            {
+              id: 2,
+              station_id: 2,
+              station_name: "Trạm Quận 3",
+              name: "Trạm Quận 3",
+              address: "45 Võ Văn Tần, Quận 3, TP.HCM",
+              latitude: 10.7826,
+              longitude: 106.6920,
+              lat: 10.7826,
+              lng: 106.6920,
+            },
+            {
+              id: 3,
+              station_id: 3,
+              station_name: "Trạm Bình Thạnh",
+              name: "Trạm Bình Thạnh",
+              address: "789 Điện Biên Phủ, Bình Thạnh, TP.HCM",
+              latitude: 10.8054,
+              longitude: 106.7141,
+              lat: 10.8054,
+              lng: 106.7141,
+            },
+            {
+              id: 4,
+              station_id: 4,
+              station_name: "Trạm Quận 7",
+              name: "Trạm Quận 7",
+              address: "100 Nguyễn Văn Linh, Quận 7, TP.HCM",
+              latitude: 10.7336,
+              longitude: 106.7219,
+              lat: 10.7336,
+              lng: 106.7219,
+            },
+            {
+              id: 5,
+              station_id: 5,
+              station_name: "Trạm Phú Nhuận",
+              name: "Trạm Phú Nhuận",
+              address: "56 Phan Đăng Lưu, Phú Nhuận, TP.HCM",
+              latitude: 10.7971,
+              longitude: 106.6822,
+              lat: 10.7971,
+              lng: 106.6822,
+            },
+          ];
+          setStations(dummyStations);
+        }
       }
     };
-
-    fetchUserData();
+    fetchStations();
+    return () => { mounted = false };
   }, []);
 
-  // ===== LOGIC: Fetch vehicles (sẽ dùng API sau) =====
-  useEffect(() => {
-    const fetchVehicles = async () => {
-      try {
-        // TODO: Thay bằng API call thực
-        // const response = await fetch('YOUR_API/vehicles');
-        // const data = await response.json();
-        
-        // Dummy data tạm thời
-        const dummyVehicles = [
-          {
-            id: "1",
-            name: "Tesla Model 3",
-            type: "Sedan",
-            price: 45,
-            range: 358,
-            image: "https://images.unsplash.com/photo-1560958089-b8a1929cea89?w=400",
-            available: true,
-            rating: 4.8,
-          },
-          {
-            id: "2",
-            name: "Nissan Leaf",
-            type: "Hatchback",
-            price: 35,
-            range: 226,
-            image: "https://images.unsplash.com/photo-1593941707882-a5bba14938c7?w=400",
-            available: true,
-            rating: 4.5,
-          },
-          {
-            id: "3",
-         
-            name: "Chevrolet Bolt",
-            type: "Hatchback",
-            price: 38,
-            range: 259,
-            image: "https://images.unsplash.com/photo-1552519507-da3b142c6e3d?w=400",
-            available: false,
-            rating: 4.6,
-          },
-        ];
-
-        setVehicles(dummyVehicles);
-        setFeaturedVehicles(dummyVehicles.slice(0, 3));
-      } catch (error) {
-        console.error("❌ Error fetching vehicles:", error);
-      }
-    };
-
-    fetchVehicles();
-  }, []);
-
-  // ===== LOGIC: Fetch statistics =====
-  useEffect(() => {
-    const fetchStatistics = async () => {
-      try {
-        // TODO: Thay bằng API call thực
-        setStatistics({
-          totalVehicles: 500,
-          totalBookings: 15000,
-          happyCustomers: 10000,
-        });
-      } catch (error) {
-        console.error("❌ Error fetching statistics:", error);
-      }
-    };
-
-    fetchStatistics();
-  }, []);
-
-  // ===== LOGIC: Fetch testimonials =====
-  useEffect(() => {
-    const fetchTestimonials = async () => {
-      try {
-        const dummyTestimonials = [
-          {
-            id: "1",
-            name: "John Doe",
-            avatar: "https://ui-avatars.com/api/?name=John+Doe",
-            rating: 5,
-            comment: "Excellent service! The Tesla Model 3 was in perfect condition.",
-            date: "2025-09-15",
-          },
-          {
-            id: "2",
-            name: "Jane Smith",
-            avatar: "https://ui-avatars.com/api/?name=Jane+Smith",
-            rating: 5,
-            comment: "Very easy booking process. Highly recommend!",
-            date: "2025-09-20",
-          },
-        ];
-
-        setTestimonials(dummyTestimonials);
-      } catch (error) {
-        console.error("❌ Error fetching testimonials:", error);
-      }
-    };
-
-    fetchTestimonials();
-  }, []);
-
-  // ===== HANDLER: Logout =====
   const handleLogout = () => {
-    if (window.confirm("Are you sure you want to logout?")) {
-      localStorage.removeItem("currentUser");
-      localStorage.removeItem("isLoggedIn");
-      localStorage.removeItem("userId");
-      localStorage.removeItem("token");
-      
-      setUser(null);
-      navigate("/login");
-      console.log("✅ User logged out");
+    localStorage.removeItem('currentUser');
+    localStorage.removeItem('isLoggedIn');
+    setUser(null);
+    navigate('/login');
+  };
+
+  const findNearestStationForUser = async (opts = {}) => {
+    setNearestSearching(true);
+    try {
+      let lat = opts.lat; let lng = opts.lng;
+      if (lat == null || lng == null) {
+        if (!navigator.geolocation) throw new Error('Geolocation not available');
+        const pos = await new Promise((res, rej) => navigator.geolocation.getCurrentPosition(res, rej, { enableHighAccuracy: true, timeout: 10000 }));
+        lat = pos.coords.latitude; lng = pos.coords.longitude;
+      }
+      try {
+        const apiResult = await stationAPI.getNearest(lat, lng);
+        const station = apiResult?.station || apiResult;
+        const distanceKm = apiResult?.distanceKm ?? apiResult?.distance ?? null;
+        const payload = { station, distanceKm };
+        setNearestStation(payload);
+        return payload;
+      } catch (apiErr) {
+        const best = findNearestStation(stations, lat, lng);
+        if (best) { setNearestStation(best); return best }
+        throw apiErr;
+      }
+    } catch (err) {
+      console.error('Nearest station lookup failed', err);
+      setNearestStation(null);
+      return null;
+    } finally {
+      setNearestSearching(false);
     }
   };
 
-  // ===== HANDLER: Navigation =====
-  const handleNavigation = (path) => {
-    navigate(path);
-  };
-
-  // ===== HANDLER: Book vehicle =====
-  const handleBookVehicle = (vehicleId) => {
+  const handleBookVehicle = async (vehicleId) => {
+    // Check if user is logged in
     if (!user) {
-      // Redirect to login if not authenticated
-      alert("Please login to book a vehicle");
       navigate("/login");
       return;
     }
 
-    // Navigate to booking page with vehicle ID
-    navigate(`/booking/${vehicleId}`);
-    console.log(`📋 Booking vehicle ID: ${vehicleId}`);
+    // Check if user is renter (case-insensitive)
+    const userRole = (user.role || '').toLowerCase();
+    if (userRole !== 'renter') {
+      alert('Chỉ khách hàng mới có thể đặt xe!');
+      return;
+    }
+
+    // Check verification status
+    try {
+      let licenseVerified = false;
+      let cccdVerified = false;
+
+      try {
+        const licenseData = await driverLicenseAPI.getByRenter(user.userId || user.user_id);
+        licenseVerified = licenseData?.is_verified === true;
+      } catch (err) {
+        console.warn('Could not check license verification:', err);
+      }
+
+      try {
+        const cccdData = await cccdVerificationAPI.getByRenter(user.userId || user.user_id);
+        cccdVerified = cccdData?.is_verified === true;
+      } catch (err) {
+        console.warn('Could not check CCCD verification:', err);
+      }
+
+      // Determine what needs verification
+      if (!licenseVerified && !cccdVerified) {
+        setVerificationType('both');
+        setShowVerificationModal(true);
+        return;
+      } else if (!licenseVerified) {
+        setVerificationType('license');
+        setShowVerificationModal(true);
+        return;
+      } else if (!cccdVerified) {
+        setVerificationType('cccd');
+        setShowVerificationModal(true);
+        return;
+      }
+
+      // All verified, proceed to booking
+      navigate(`/booking/${vehicleId}`);
+    } catch (error) {
+      console.error('Error checking verification:', error);
+      alert('Có lỗi khi kiểm tra xác thực. Vui lòng thử lại.');
+    }
   };
 
-  // ===== HANDLER: View vehicle details =====
-  const handleViewVehicle = (vehicleId) => {
-    navigate(`/vehicle/${vehicleId}`);
-    console.log(`👁️ Viewing vehicle ID: ${vehicleId}`);
+  const handleNavigateToVerification = () => {
+    setShowVerificationModal(false);
+    navigate('/profile');
   };
 
-  // ===== HANDLER: Search vehicles =====
-  const handleSearch = (searchQuery) => {
-    console.log(`🔍 Searching for: ${searchQuery}`);
-    navigate(`/vehicles?search=${searchQuery}`);
-  };
-
-  // ===== HANDLER: Filter by type =====
-  const handleFilterByType = (type) => {
-    console.log(`🔧 Filtering by type: ${type}`);
-    navigate(`/vehicles?type=${type}`);
-  };
-
-  // ===== Truyền tất cả data và handlers xuống View =====
   return (
-    <HomeView
-      // User data
-      user={user}
-      loading={loading}
+    <>
+      <HomeView
+        user={user}
+        loading={loading}
+        vehicles={vehicles}
+        featuredVehicles={featuredVehicles}
+        statistics={statistics}
+        testimonials={testimonials}
+        stations={stations}
+        onFindNearest={findNearestStationForUser}
+        nearestStation={nearestStation}
+        nearestSearching={nearestSearching}
+        onLogout={handleLogout}
+        onNavigate={(p) => navigate(p)}
+        onBookVehicle={handleBookVehicle}
+        onViewVehicle={(id) => navigate(`/vehicle/${id}`)}
+      />
       
-      // Vehicle data
-      vehicles={vehicles}
-      featuredVehicles={featuredVehicles}
-      
-      // Statistics
-      statistics={statistics}
-      
-      // Testimonials
-      testimonials={testimonials}
-      
-      // Handlers
-      onLogout={handleLogout}
-      onNavigate={handleNavigation}
-      onBookVehicle={handleBookVehicle}
-      onViewVehicle={handleViewVehicle}
-      onSearch={handleSearch}
-      onFilterByType={handleFilterByType}
-    />
+      <BookingVerificationModal
+        visible={showVerificationModal}
+        onClose={() => setShowVerificationModal(false)}
+        onNavigateToVerification={handleNavigateToVerification}
+        verificationType={verificationType}
+      />
+    </>
   );
 };
 

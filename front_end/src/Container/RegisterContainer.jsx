@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { message } from "antd";
 import { useNavigate } from "react-router-dom";
-import RegisterForm from "../Components/Form/RegisterForm";
+import RegisterForm from "../Components/Common/Form/RegisterForm";
 import { userAPI } from "../api/api";
 
 const RegisterContainer = () => {
@@ -24,19 +24,19 @@ const RegisterContainer = () => {
         createdAt: new Date().toISOString(),
       };
 
-      console.log("🟢 Sending new user:", newUser);
+      console.log(" Sending new user:", newUser);
 
       const result = await userAPI.registerUser(newUser);
       
       if (result) {
-        message.success("🎉 Đăng ký thành công!");
+        message.success(" Đăng ký thành công!");
         alert("Welcome! " + result.fullName);
         navigate("/login");
       } else {
         message.error("Không thể tạo tài khoản, vui lòng thử lại!");
       }
     } catch (error) {
-      console.error("❌ Register error:", error);
+      console.error(" Register error:", error);
       message.error("Lỗi khi đăng ký. Kiểm tra console để xem chi tiết.");
     } finally {
       setLoading(false);
