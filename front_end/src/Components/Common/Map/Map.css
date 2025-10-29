@@ -1,0 +1,39 @@
+.map-wrapper {
+  width: 100%;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+}
+
+/* Ensure map container fills the wrapper (MapLibre / TrackAsia) */
+.trackasia-map-container,
+.maplibre-container {
+  width: 100% !important;
+  height: 100% !important;
+}
+
+.map-marker {
+  display: block;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: #007bff;
+  box-shadow: 0 0 6px rgba(0,0,0,0.25);
+  border: 2px solid #fff;
+}
+
+.map-marker-highlight {
+  display: block;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: #ff5a5f;
+  box-shadow: 0 0 10px rgba(255,90,95,0.4);
+  border: 3px solid #fff;
+}
+
+@media (max-width: 768px) {
+  .map-wrapper {
+    border-radius: 6px;
+  }
+}
