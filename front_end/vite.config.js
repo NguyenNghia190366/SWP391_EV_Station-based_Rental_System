@@ -18,15 +18,16 @@ export default defineConfig({
     port: 5173,
     // ⚠️ DISABLE proxy when using ngrok URL
     // Uncomment proxy below ONLY when using LOCAL BE (localhost:5189)
-    
-    // proxy: {
-    //   '/api': {
-    //     target: 'http://localhost:5189',  // Local backend
-    //     changeOrigin: true,
-    //     secure: false,
-    //     rewrite: (path) => path,
-    //   },
-    // },
+    // Enable proxy when developing locally so requests to /api are forwarded to the .NET backend
+    // ⚠️ If you use ngrok or a remote backend, disable this block and set the BASE_URL in src/api/api.js accordingly
+    proxy: {
+      '/api': {
+        target: 'http://localhost:5189', // Local backend (see EVRental_BE/Properties/launchSettings.json)
+        changeOrigin: true,
+        secure: false,
+        rewrite: (path) => path,
+      },
+    },
   },
 })
 

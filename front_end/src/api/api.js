@@ -1,9 +1,9 @@
 //  Configuration
 // 🌐 BE của team (đang dùng)
-const BASE_URL = "https://alani-uncorroboratory-sympetaly.ngrok-free.dev/api";
+// const BASE_URL = "https://alani-uncorroboratory-sympetaly.ngrok-free.dev/api";
 
 // 🏠 Local BE với Vite proxy (comment lại khi dùng ngrok)
-// const BASE_URL = "/api"; // Use relative URL to work with Vite proxy
+const BASE_URL = "/api"; // Use relative URL to work with Vite proxy
 
 //  Headers
 const HEADERS = {
