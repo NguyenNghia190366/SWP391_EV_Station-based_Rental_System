@@ -1,45 +1,153 @@
-// Geospatial utilities: Haversine distance and nearest-station helper
-// Returns distances in kilometers
+/**
+ * Geolocation utility functions
+ */
 
 /**
- * Haversine distance between two points (lat/lng in degrees)
- * @returns distance in kilometers
+ * Calculate distance between two coordinates using Haversine formula
+ * @param {number} lat1 - Latitude of first point
+ * @param {number} lon1 - Longitude of first point
+ * @param {number} lat2 - Latitude of second point
+ * @param {number} lon2 - Longitude of second point
+ * @returns {number} Distance in kilometers
  */
-export function haversineDistanceKm(lat1, lon1, lat2, lon2) {
-  const toRad = (deg) => (deg * Math.PI) / 180;
-  const R = 6371; // Earth radius in km
-  const dLat = toRad(lat2 - lat1);
-  const dLon = toRad(lon2 - lon1);
+export const calculateDistance = (lat1, lon1, lat2, lon2) => {
+  const R = 6371; // Radius of the Earth in kilometers
+  const dLat = toRadians(lat2 - lat1);
+  const dLon = toRadians(lon2 - lon1);
+  
   const a =
     Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-    Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) *
-    Math.sin(dLon / 2) * Math.sin(dLon / 2);
+    Math.cos(toRadians(lat1)) *
+      Math.cos(toRadians(lat2)) *
+      Math.sin(dLon / 2) *
+      Math.sin(dLon / 2);
+  
   const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-  return R * c;
-}
+  const distance = R * c;
+  
+  return distance;
+};
 
 /**
- * Find nearest station from an array of stations.
- * Stations may have latitude/longitude, lat/lng, or location.{lat,lng}.
- * Returns { station, distanceKm } or null if no valid coordinates.
+ * Convert degrees to radians
+ * @param {number} degrees
+ * @returns {number} Radians
  */
-export function findNearestStation(stations = [], userLat, userLng) {
-  if (!Array.isArray(stations) || stations.length === 0) return null;
+const toRadians = (degrees) => {
+  return degrees * (Math.PI / 180);
+};
 
-  let best = null;
+/**
+ * Find the nearest station from a list based on user's coordinates
+ * @param {Array} stations - Array of station objects
+ * @param {number} userLat - User's latitude
+ * @param {number} userLng - User's longitude
+ * @returns {Object|null} Object with station and distance, or null if no stations
+ */
+export const findNearestStation = (stations, userLat, userLng) => {
+  if (!stations || stations.length === 0) {
+    return null;
+  }
 
-  stations.forEach((st) => {
-    const lat = parseFloat(st.latitude ?? st.lat ?? (st.location && st.location.lat));
-    const lng = parseFloat(st.longitude ?? st.lng ?? (st.location && st.location.lng));
-    if (Number.isFinite(lat) && Number.isFinite(lng)) {
-      const dist = haversineDistanceKm(userLat, userLng, lat, lng);
-      if (!best || dist < best.distanceKm) {
-        best = { station: st, distanceKm: dist };
+  let nearestStation = null;
+  let minDistance = Infinity;
+
+  stations.forEach((station) => {
+    // Handle different property names (latitude/lat, longitude/lng)
+    const stationLat = station.latitude || station.lat;
+    const stationLng = station.longitude || station.lng;
+
+    if (stationLat && stationLng) {
+      const distance = calculateDistance(
+        userLat,
+        userLng,
+        stationLat,
+        stationLng
+      );
+
+      if (distance < minDistance) {
+        minDistance = distance;
+        nearestStation = station;
       }
     }
   });
 
-  return best;
-}
+  if (nearestStation) {
+    return {
+      station: nearestStation,
+      distanceKm: Math.round(minDistance * 100) / 100, // Round to 2 decimal places
+    };
+  }
 
-export default { haversineDistanceKm, findNearestStation };
+  return null;
+};
+
+/**
+ * Get user's current position using browser geolocation API
+ * @param {Object} options - Geolocation options
+ * @returns {Promise<{latitude: number, longitude: number}>}
+ */
+export const getCurrentPosition = (options = {}) => {
+  return new Promise((resolve, reject) => {
+    if (!navigator.geolocation) {
+      reject(new Error('Geolocation is not supported by this browser'));
+      return;
+    }
+
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        resolve({
+          latitude: position.coords.latitude,
+          longitude: position.coords.longitude,
+          accuracy: position.coords.accuracy,
+        });
+      },
+      (error) => {
+        reject(error);
+      },
+      {
+        enableHighAccuracy: true,
+        timeout: 10000,
+        maximumAge: 0,
+        ...options,
+      }
+    );
+  });
+};
+
+/**
+ * Format distance for display
+ * @param {number} distanceKm - Distance in kilometers
+ * @returns {string} Formatted distance string
+ */
+export const formatDistance = (distanceKm) => {
+  if (distanceKm < 1) {
+    return `${Math.round(distanceKm * 1000)} m`;
+  }
+  return `${distanceKm.toFixed(1)} km`;
+};
+
+/**
+ * Check if coordinates are valid
+ * @param {number} lat - Latitude
+ * @param {number} lng - Longitude
+ * @returns {boolean}
+ */
+export const isValidCoordinates = (lat, lng) => {
+  return (
+    typeof lat === 'number' &&
+    typeof lng === 'number' &&
+    lat >= -90 &&
+    lat <= 90 &&
+    lng >= -180 &&
+    lng <= 180
+  );
+};
+
+export default {
+  calculateDistance,
+  findNearestStation,
+  getCurrentPosition,
+  formatDistance,
+  isValidCoordinates,
+};

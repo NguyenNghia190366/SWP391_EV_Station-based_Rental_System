@@ -1,221 +1,378 @@
-// 🔹 Base URLs
+//  Configuration
+// 🌐 BE của team (đang dùng)
 const BASE_URL = "https://alani-uncorroboratory-sympetaly.ngrok-free.dev/api";
 
-// const BASE_URL = "https://68e62cc921dd31f22cc4769d.mockapi.io/api/ev";
+// 🏠 Local BE với Vite proxy (comment lại khi dùng ngrok)
+// const BASE_URL = "/api"; // Use relative URL to work with Vite proxy
 
-// 🔹 Common headers
-const JSON_HEADERS = {
-  "Content-Type": "application/json",
-  "ngrok-skip-browser-warning": "true",
+//  Headers
+const HEADERS = {
+  JSON: {
+    "Content-Type": "application/json",
+    "ngrok-skip-browser-warning": "true",
+  },
+  NGROK: {
+    "ngrok-skip-browser-warning": "true",
+  },
 };
 
-const NGROK_HEADER = { "ngrok-skip-browser-warning": "true" };
+//  Helper function for fetch requests
+// Handles JSON and empty/no-content responses safely.
+const apiRequest = async (url, options = {}) => {
+  const response = await fetch(url, {
+    headers: HEADERS.JSON,
+    ...options,
+  });
 
-//
+  // If not OK, try to parse JSON error body but fall back to status text
+  if (!response.ok) {
+    let errorBody = null;
+    try {
+      // Attempt to parse JSON error body if present
+      const text = await response.text();
+      errorBody = text ? JSON.parse(text) : null;
+    } catch {
+      // ignore parse errors
+      errorBody = null;
+    }
+    throw new Error(errorBody?.message || errorBody || `HTTP ${response.status}`);
+  }
+
+  // Handle 204 No Content or empty bodies
+  if (response.status === 204) return null;
+
+  // Check content-type header to decide how to parse
+  const contentType = response.headers.get("content-type") || "";
+  if (contentType.includes("application/json")) {
+    return response.json();
+  }
+
+  // If not JSON, return raw text
+  return response.text();
+};
+
 // ==================== USER API ====================
-//
 export const userAPI = {
-  // 🔹 Lấy tất cả người dùng
   getAllUsers: async () => {
-    const res = await fetch(`${BASE_URL}/Users`, { headers: NGROK_HEADER });
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
-    return res.json();
+    return apiRequest(`${BASE_URL}/Users`);
   },
 
-  // 🔹 Lấy danh sách người dùng chưa xác minh
   getUnverifiedUsers: async () => {
-    const res = await fetch(`${BASE_URL}/Users`);
-    const data = await res.json();
-    return data.filter((u) => u.role === "renter" && !u.isVerified);
+    const users = await apiRequest(`${BASE_URL}/Users`);
+    return users.filter((user) => user.role === "renter" && !user.isVerified);
   },
 
-  // 🔹 Duyệt người dùng
   verifyUser: async (userId, staffId) => {
-    const res = await fetch(`${BASE_URL}/Users/${userId}`, {
+    return apiRequest(`${BASE_URL}/Users/${userId}`, {
       method: "PUT",
-      headers: JSON_HEADERS,
       body: JSON.stringify({
         isVerified: true,
         verifiedBy: staffId,
         verifiedAt: new Date().toISOString(),
       }),
     });
-    if (!res.ok) throw new Error("Xác minh người dùng thất bại!");
-    return res.json();
   },
 
-  // 🔹 Từ chối người dùng
   rejectUser: async (userId, reason) => {
-    const res = await fetch(`${BASE_URL}/Users/${userId}`, {
+    return apiRequest(`${BASE_URL}/Users/${userId}`, {
       method: "PUT",
-      headers: JSON_HEADERS,
       body: JSON.stringify({
         isVerified: false,
         rejectedAt: new Date().toISOString(),
         rejectedReason: reason,
       }),
     });
-    if (!res.ok) throw new Error("Từ chối người dùng thất bại!");
-    return res.json();
   },
 
-  // 🔹 Đăng ký người dùng
   registerUser: async (newUser) => {
-    const res = await fetch(`${BASE_URL}/Users/Register`, {
+    return apiRequest(`${BASE_URL}/Users/Register`, {
       method: "POST",
-      headers: JSON_HEADERS,
       body: JSON.stringify(newUser),
     });
-
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
-    return res.json();
   },
 
-  // Đăng nhập
   loginUser: async (credentials) => {
-    const res = await fetch(`${BASE_URL}/UserAccount/login`, {
+    const data = await apiRequest(`${BASE_URL}/UserAccount/login`, {
       method: "POST",
-      headers: JSON_HEADERS,
       body: JSON.stringify(credentials),
     });
 
-    // Kiểm tra response status
-    if (!res.ok) {
-      try {
-        const errorData = await res.json();
-        throw new Error(errorData.message || "Đăng nhập thất bại");
-      } catch {
-        throw new Error(`Đăng nhập thất bại: ${res.status}`);
-      }
+    if (!data) {
+      throw new Error("Không nhận được dữ liệu từ server");
     }
 
-    try {
-      const data = await res.json();
-      console.log(data);
-      if (!data) throw new Error("Không nhận được dữ liệu từ server");
-      return data; // Trả về { token, user } từ API
-    } catch {
-      throw new Error("Lỗi xử lý dữ liệu đăng nhập");
-    }
-
+    console.log(data);
+    return data;
   },
 
-  // 🔹 Cập nhật người dùng
   updateUser: async (user) => {
-    const res = await fetch(`${BASE_URL}/Users/${user.userId}`, {
+    return apiRequest(`${BASE_URL}/Users/${user.userId}`, {
       method: "PUT",
-      headers: JSON_HEADERS,
       body: JSON.stringify(user),
     });
-    if (!res.ok) throw new Error("Cập nhật người dùng thất bại!");
-    return res.json();
+  },
+
+  uploadAvatar: async (formData) => {
+    const response = await fetch(`${BASE_URL}/Users/upload-avatar`, {
+      method: "POST",
+      headers: HEADERS.NGROK,
+      body: formData,
+    });
+
+    if (!response.ok) {
+      const errorMessage = await response.json().catch(() => null);
+      throw new Error(errorMessage?.message || "Upload avatar failed");
+    }
+
+    return response.json();
+  },
+
+  uploadLicense: async (formData) => {
+    const response = await fetch(`${BASE_URL}/Users/upload-license`, {
+      method: "POST",
+      headers: HEADERS.NGROK,
+      body: formData,
+    });
+
+    if (!response.ok) {
+      const errorMessage = await response.json().catch(() => null);
+      throw new Error(errorMessage?.message || "Upload license failed");
+    }
+
+    return response.json();
+  },
+
+  uploadIdCard: async (formData) => {
+    const response = await fetch(`${BASE_URL}/Users/upload-idcard`, {
+      method: "POST",
+      headers: HEADERS.NGROK,
+      body: formData,
+    });
+
+    if (!response.ok) {
+      const errorMessage = await response.json().catch(() => null);
+      throw new Error(errorMessage?.message || "Upload ID card failed");
+    }
+
+    return response.json();
   },
 };
 
-//
 // ==================== LICENSE API ====================
-//
 export const licenseAPI = {
-  base: `${BASE_URL}/licenses`,
-
-  // 🔹 Lấy tất cả license (Staff/Admin)
   getAll: async () => {
-    const res = await fetch(`${BASE_URL}/licenses`, { headers: JSON_HEADERS });
-    if (!res.ok) throw new Error("Không thể tải danh sách license");
-    return res.json();
+    return apiRequest(`${BASE_URL}/licenses`);
   },
 
-  // 🔹 Lấy license theo renter_id (User)
   getByRenter: async (renterId) => {
-    const res = await fetch(`${BASE_URL}/licenses?renter_id=${renterId}`, {
-      headers: JSON_HEADERS,
-    });
-    if (!res.ok) throw new Error("Không thể tải giấy phép người dùng");
-    const data = await res.json();
+    const data = await apiRequest(`${BASE_URL}/licenses?renter_id=${renterId}`);
     return data[0];
   },
 
-  // 🔹 Upload ảnh giấy phép thật (FormData)
   uploadImage: async (file) => {
     const formData = new FormData();
     formData.append("file", file);
 
-    const res = await fetch(`${BASE_URL}/licenses/upload`, {
+    console.log(" Uploading to:", `${BASE_URL}/licenses/upload`);
+    console.log(" File:", file.name, file.type, file.size);
+
+    const response = await fetch(`${BASE_URL}/licenses/upload`, {
       method: "POST",
+      headers: HEADERS.NGROK,
       body: formData,
     });
 
-    if (!res.ok) throw new Error("Upload ảnh thất bại");
-    const data = await res.json();
-    return data.filePath; // giả định server trả về { filePath: "https://..." }
+    console.log(" Upload response status:", response.status);
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error(" Upload failed:", errorText);
+      throw new Error(`Upload ảnh thất bại: ${response.status} - ${errorText}`);
+    }
+
+    const data = await response.json();
+    console.log(" Upload response:", data);
+    return data.filePath || data.url || data;
   },
 
-  // 🔹 Gửi license (User nộp)
   create: async (payload) => {
-    const res = await fetch(`${BASE_URL}/licenses`, {
+    return apiRequest(`${BASE_URL}/licenses`, {
       method: "POST",
-      headers: JSON_HEADERS,
       body: JSON.stringify(payload),
     });
-    if (!res.ok) throw new Error("Gửi xác minh thất bại!");
-    return res.json();
   },
 
-  // 🔹 Cập nhật trạng thái (Staff duyệt)
   updateStatus: async (id, status, reason = "") => {
-    const res = await fetch(`${BASE_URL}/licenses/${id}`, {
+    return apiRequest(`${BASE_URL}/licenses/${id}`, {
       method: "PUT",
-      headers: JSON_HEADERS,
       body: JSON.stringify({
         status,
         verified_date: new Date().toISOString(),
         rejected_reason: reason,
       }),
     });
-    if (!res.ok) throw new Error("Cập nhật trạng thái thất bại!");
-    return res.json();
   },
 };
 
-//
 // ==================== CCCD API ====================
-//
 export const cccdAPI = {
-  base: `${BASE_URL}/Cccd_Cmnd`,
-
-  // 🔹 Lấy tất cả CCCD
   getAll: async () => {
-    const res = await fetch(`${BASE_URL}/Cccd_Cmnd`, { headers: JSON_HEADERS });
-    if (!res.ok) throw new Error("Không thể tải danh sách CCCD");
-    return res.json();
+    return apiRequest(`${BASE_URL}/Cccd_Cmnd`);
   },
 
-  // 🔹 Tạo CCCD mới
   create: async (payload) => {
-    const res = await fetch(`${BASE_URL}/Cccd_Cmnd`, {
+    return apiRequest(`${BASE_URL}/Cccd_Cmnd`, {
       method: "POST",
-      headers: JSON_HEADERS,
       body: JSON.stringify(payload),
     });
-    if (!res.ok) throw new Error("Gửi CCCD thất bại!");
-    return res.json();
   },
 
-  // 🔹 Cập nhật trạng thái CCCD
   updateStatus: async (id, status, reason = "") => {
-    const res = await fetch(`${BASE_URL}/Cccd_Cmnd/${id}`, {
+    return apiRequest(`${BASE_URL}/Cccd_Cmnd/${id}`, {
       method: "PUT",
-      headers: JSON_HEADERS,
       body: JSON.stringify({
         status,
         verified_date: new Date().toISOString(),
         rejected_reason: reason,
       }),
     });
-    if (!res.ok) throw new Error("Cập nhật trạng thái CCCD thất bại!");
-    return res.json();
   },
 };
 
-// ✅ Xuất mặc định để có thể import userAPI nhanh
+// ==================== DRIVER LICENSE API (for real database) ====================
+export const driverLicenseAPI = {
+  // Get all pending driver licenses
+  getPending: async () => {
+    return apiRequest(`${BASE_URL}/Driver_License/pending`);
+  },
+
+  // Get all driver licenses
+  getAll: async () => {
+    return apiRequest(`${BASE_URL}/Driver_License`);
+  },
+
+  // Get license by renter ID
+  getByRenter: async (renterId) => {
+    return apiRequest(`${BASE_URL}/Driver_License?renter_id=${renterId}`);
+  },
+
+  // Upload driver license image
+  uploadLicense: async (formData) => {
+    const response = await fetch(`${BASE_URL}/Driver_License/upload`, {
+      method: "POST",
+      headers: HEADERS.NGROK,
+      body: formData,
+    });
+
+    if (!response.ok) {
+      const errorMessage = await response.json().catch(() => null);
+      throw new Error(errorMessage?.message || "Upload driver license failed");
+    }
+
+    return response.json();
+  },
+
+  // Approve license
+  approve: async (licenseNumber) => {
+    return apiRequest(`${BASE_URL}/Driver_License/${licenseNumber}/approve`, {
+      method: "PUT",
+      body: JSON.stringify({
+        is_read: true,
+        is_verified: true,
+        verified_at: new Date().toISOString()
+      }),
+    });
+  },
+
+  // Reject license
+  reject: async (licenseNumber, reason) => {
+    return apiRequest(`${BASE_URL}/Driver_License/${licenseNumber}/reject`, {
+      method: "PUT",
+      body: JSON.stringify({
+        is_read: true,
+        is_verified: false,
+        message: reason,
+        rejected_at: new Date().toISOString()
+      }),
+    });
+  },
+};
+
+// ==================== CCCD/CMND API (Updated for real database) ====================
+export const cccdVerificationAPI = {
+  // Get all pending CCCD
+  getPending: async () => {
+    return apiRequest(`${BASE_URL}/CCCD/pending`);
+  },
+
+  // Get all CCCD
+  getAll: async () => {
+    return apiRequest(`${BASE_URL}/CCCD`);
+  },
+
+  // Get CCCD by renter ID
+  getByRenter: async (renterId) => {
+    return apiRequest(`${BASE_URL}/CCCD/${renterId}`);
+  },
+
+  // Upload CCCD image
+  uploadCCCD: async (formData) => {
+    const response = await fetch(`${BASE_URL}/CCCD/upload`, {
+      method: "POST",
+      headers: HEADERS.NGROK,
+      body: formData,
+    });
+
+    if (!response.ok) {
+      const errorMessage = await response.json().catch(() => null);
+      throw new Error(errorMessage?.message || "Upload CCCD failed");
+    }
+
+    return response.json();
+  },
+
+  // Approve CCCD
+  approve: async (renterId) => {
+    return apiRequest(`${BASE_URL}/CCCD/${renterId}/approve`, {
+      method: "PUT",
+      body: JSON.stringify({
+        is_read: true,
+        is_verified: true,
+        verified_at: new Date().toISOString()
+      }),
+    });
+  },
+
+  // Reject CCCD
+  reject: async (renterId, reason) => {
+    return apiRequest(`${BASE_URL}/CCCD/${renterId}/reject`, {
+      method: "PUT",
+      body: JSON.stringify({
+        is_read: true,
+        is_verified: false,
+        message: reason,
+        rejected_at: new Date().toISOString()
+      }),
+    });
+  },
+};
+
+// ==================== EXPORTS ====================
 export default userAPI;
+
+// ==================== STATIONS API ====================
+export const stationAPI = {
+  // Get all stations
+  getAll: async () => {
+    return apiRequest(`${BASE_URL}/Stations`);
+  },
+  // Get nearest station from backend by coordinates (if backend supports it)
+  // Expects query params ?lat=...&lng=... and returns nearest station or { station, distanceKm }
+  getNearest: async (lat, lng) => {
+    if (lat == null || lng == null) {
+      throw new Error('Latitude and longitude are required');
+    }
+    const url = `${BASE_URL}/Stations/nearest?lat=${encodeURIComponent(lat)}&lng=${encodeURIComponent(lng)}`;
+      return apiRequest(url);
+  },
+};

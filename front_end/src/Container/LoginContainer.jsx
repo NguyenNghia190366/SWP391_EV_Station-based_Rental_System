@@ -2,7 +2,8 @@ import React, { useState } from "react";
 import { message } from "antd";
 import { useNavigate } from "react-router-dom";
 import { userAPI } from "../api/api";
-import LoginForm from "../Components/Form/LoginForm";
+import LoginForm from "../Components/Common/Form/LoginForm";
+import { normalizeUserData } from "../utils/normalizeData";
 
 // Cấu hình mặc định cho toast messages
 message.config({
@@ -13,79 +14,25 @@ message.config({
 
 const LoginContainer = () => {
   const navigate = useNavigate();
-
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
 
-  const handleEmailChange = (e) => {
-    setEmail(e.target.value);
-    setError("");
-  };
-
-  const handlePasswordChange = (e) => {
-    setPassword(e.target.value);
-    setError("");
-  };
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setError("");
-
-    // Validation
-    if (!email.trim()) {
-      setError("Vui lòng nhập email!");
-      message.warning({
-        content: "Vui lòng nhập email!",
-        icon: "⚠️",
-        className: "custom-message-warning"
-      });
-      return;
-    }
-    if (!password.trim()) {
-      setError("Vui lòng nhập mật khẩu!");
-      message.warning({
-        content: "Vui lòng nhập mật khẩu!",
-        icon: "⚠️",
-        className: "custom-message-warning"
-      });
-      return;
-    }
-    if (!email.includes("@")) {
-      setError("Email không hợp lệ!");
-      message.error({
-        content: "Email không hợp lệ!",
-        icon: "❌",
-        className: "custom-message-error"
-      });
-      return;
-    }
-    if (password.length < 6) {
-      setError("Mật khẩu phải có ít nhất 6 ký tự!");
-      message.error({
-        content: "Mật khẩu phải có ít nhất 6 ký tự!",
-        icon: "❌",
-        className: "custom-message-error"
-      });
-      return;
-    }
-
+  const handleSubmit = async (values) => {
+    const { email, password } = values;
     setLoading(true);
 
     try {
-      console.log("🔐 Gửi:", { email: email.trim(), password });
+      console.log(" Gửi:", { email: email.trim(), password });
       const result = await userAPI.loginUser({
         email: email.trim(),
         password,
       });
 
-      console.log("📦 Nhận từ API:", result);
+      console.log(" Nhận từ API:", result);
 
-      // 🔥 XỬ LÝ NHIỀU TRƯỜNG HỢP
+      //  XỬ LÝ NHIỀU TRƯỜNG HỢP (Compatible với cả BE local và BE real)
       let token, user;
 
-      // Case 1: { token, user }
+      // Case 1: { token, user } - BE local format
       if (result.token && result.user) {
         token = result.token;
         user = result.user;
@@ -100,28 +47,39 @@ const LoginContainer = () => {
         token = result.data.token || result.data.accessToken;
         user = result.data.user || result.data;
       }
-      // Case 4: Backend trả user trực tiếp (không có token)
+      // Case 4: BE real format - { email, role, userName, token }
+      else if (result.email && result.token) {
+        token = result.token;
+        user = result; // Toàn bộ response là user data
+      }
+      // Case 5: Backend trả user trực tiếp (không có token)
       else if (result.email || result.userId) {
         user = result;
-        token = "dummy-token"; // Nếu backend không cần token
+        token = "dummy-token";
       } else {
         throw new Error("Format dữ liệu không đúng từ server");
       }
 
+      // ===== NORMALIZE USER DATA - Tương thích cả 2 BE =====
+      // Sử dụng helper function để chuẩn hóa
+      const normalizedUser = normalizeUserData(user);
+
+      console.log(" Normalized User:", normalizedUser);
+
       // Kiểm tra user có role không
-      if (!user || !user.role) {
-        console.error("❌ User object:", user);
+      if (!normalizedUser.role) {
+        console.error(" User object:", user);
         throw new Error("Dữ liệu người dùng không hợp lệ (thiếu role)");
       }
 
       // Lưu vào localStorage
       if (token) localStorage.setItem("token", token);
-      localStorage.setItem("currentUser", JSON.stringify(user));
+      localStorage.setItem("currentUser", JSON.stringify(normalizedUser));
       localStorage.setItem("isLoggedIn", "true");
-      localStorage.setItem("role", user.role);
-      localStorage.setItem("userId", user.userId || user.id);
+      localStorage.setItem("role", normalizedUser.role);
+      localStorage.setItem("userId", normalizedUser.userId);
 
-      console.log("✅ Đã lưu localStorage:", {
+      console.log(" Đã lưu localStorage:", {
         token: localStorage.getItem("token"),
         isLoggedIn: localStorage.getItem("isLoggedIn"),
         role: localStorage.getItem("role"),
@@ -129,10 +87,14 @@ const LoginContainer = () => {
       });
 
       // Hiển thị thông báo chào mừng
-      alert("Welcome! ", user.fullName);
+      const currentHour = new Date().getHours();
+      let greeting = "Chào buổi sáng";
+      if (currentHour >= 12 && currentHour < 18) greeting = "Chào buổi chiều";
+      else if (currentHour >= 18) greeting = "Chào buổi tối";
+
       message.success({
-        content: `Xin chào ${user.fullName || user.email}! 🎉`,
-        icon: "✨",
+        content: `${greeting}, ${normalizedUser.userName || normalizedUser.fullName}! `,
+        icon: "",
         duration: 4,
         className: "custom-message-success"
       });
@@ -146,23 +108,23 @@ const LoginContainer = () => {
 
       // Điều hướng sau 1 giây
       setTimeout(() => {
-        const role = user.role.toUpperCase();
+        const role = normalizedUser.role.toUpperCase();
         if (role === "ADMIN") navigate("/admin/dashboard");
         else if (role === "STAFF") navigate("/staff/verification");
         else navigate("/home");
       }, 1000);
     } catch (err) {
-      console.error("❌ Login error:", err);
+      console.error(" Login error:", err);
       
       // Xử lý các loại lỗi khác nhau
       let errorMessage = "Lỗi đăng nhập không xác định";
       
       if (err.message?.includes('Network') || err.message?.includes('fetch')) {
-        errorMessage = "Không thể kết nối đến máy chủ. Vui lòng kiểm tra kết nối mạng! 🌐";
+        errorMessage = "Không thể kết nối đến máy chủ. Vui lòng kiểm tra kết nối mạng! ";
       } else if (err.message?.includes('password')) {
-        errorMessage = "Mật khẩu không chính xác! 🔒";
+        errorMessage = "Mật khẩu không chính xác! ";
       } else if (err.message?.includes('email')) {
-        errorMessage = "Email không tồn tại trong hệ thống! 📧";
+        errorMessage = "Email không tồn tại trong hệ thống! ";
       } else if (err.message) {
         errorMessage = err.message;
       }
@@ -170,24 +132,18 @@ const LoginContainer = () => {
       // Hiển thị toast error
       message.error({
         content: errorMessage,
-        icon: "❌",
+        icon: "",
         duration: 5,
         className: "custom-message-error"
       });
-
-      setError(errorMessage);
     } finally {
       setLoading(false);
     }
   };
+
   return (
     <LoginForm
-      email={email}
-      password={password}
-      error={error}
       loading={loading}
-      onEmailChange={handleEmailChange}
-      onPasswordChange={handlePasswordChange}
       onSubmit={handleSubmit}
     />
   );
