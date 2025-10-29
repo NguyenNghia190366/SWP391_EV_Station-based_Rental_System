@@ -5,35 +5,52 @@ const ContractView = ({
   contractData, 
   onAccept, 
   onDecline,
-  onSignatureChange 
+  onSignatureChange,
+  signingMethod,
+  onSigningMethodChange
 }) => {
   const { vehicle, bookingData, user, totalPrice, deposit } = contractData;
   
-  // State for signature method selection
-  const [signatureMethod, setSignatureMethod] = useState('electronic'); // 'electronic' or 'paper'
+  // State for signature method selection - use prop if provided, otherwise local state
+  const [localSignatureMethod, setLocalSignatureMethod] = useState('electronic');
+  const signatureMethod = signingMethod !== undefined ? signingMethod : localSignatureMethod;
+  
   const [isAgreed, setIsAgreed] = useState(false);
   const [signature, setSignature] = useState('');
   
   const handleSignatureMethodChange = (method) => {
-    setSignatureMethod(method);
+    if (onSigningMethodChange) {
+      onSigningMethodChange(method);
+    } else {
+      setLocalSignatureMethod(method);
+    }
     setIsAgreed(false);
     setSignature('');
+    if (onSignatureChange) {
+      onSignatureChange('');
+    }
   };
   
   const handleAgreementChange = (checked) => {
     setIsAgreed(checked);
-    if (signatureMethod === 'electronic' && checked) {
-      setSignature(user.fullName);
-      onSignatureChange(user.fullName);
-    } else {
+    // Don't auto-fill signature, let user type
+    if (!checked) {
       setSignature('');
-      onSignatureChange('');
+      if (onSignatureChange) {
+        onSignatureChange('');
+      }
     }
   };
   
   const handleSignatureInput = (value) => {
     setSignature(value);
-    onSignatureChange(value);
+    if (onSignatureChange) {
+      onSignatureChange(value);
+    }
+    // Automatically check agreement when user starts typing signature
+    if (value && !isAgreed) {
+      setIsAgreed(true);
+    }
   };
 
   const calculateDays = () => {
@@ -208,7 +225,9 @@ const ContractView = ({
                         onClick={() => {
                           setSignature('');
                           setIsAgreed(false);
-                          onSignatureChange('');
+                          if (onSignatureChange) {
+                            onSignatureChange('');
+                          }
                         }}
                       >
                         ✕ Xóa chữ ký
