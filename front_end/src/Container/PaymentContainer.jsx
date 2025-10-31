@@ -25,7 +25,7 @@ const PaymentContainer = () => {
     const finalBooking = {
       ...contractData,
       payment: paymentInfo,
-      status: 'confirmed',
+      status: 'payment_completed', // Changed from 'confirmed' to 'payment_completed'
       bookingId: `BK-${Date.now()}`,
       createdAt: new Date().toISOString()
     };
@@ -34,13 +34,21 @@ const PaymentContainer = () => {
     const existingBookings = JSON.parse(localStorage.getItem('myBookings') || '[]');
     existingBookings.push(finalBooking);
     localStorage.setItem('myBookings', JSON.stringify(existingBookings));
+    
+    // Save current booking for vehicle preview flow
+    localStorage.setItem('currentBooking', JSON.stringify(finalBooking));
+
+    // Save to all bookings (for staff view)
+    const allBookings = JSON.parse(localStorage.getItem('allBookings') || '[]');
+    allBookings.push(finalBooking);
+    localStorage.setItem('allBookings', JSON.stringify(allBookings));
 
     // Clear temporary data
     localStorage.removeItem('pendingBooking');
     localStorage.removeItem('pendingContract');
 
-    // Navigate to success page
-    navigate('/booking-success', { 
+    // Navigate to payment success bill page first
+    navigate('/payment-success', { 
       state: { booking: finalBooking } 
     });
   };

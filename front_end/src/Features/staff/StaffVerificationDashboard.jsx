@@ -8,9 +8,7 @@ import {
   IdcardOutlined,
   CarOutlined,
 } from "@ant-design/icons";
-// eslint-disable-next-line no-unused-vars
-import { driverLicenseAPI, cccdVerificationAPI } from "../../api/api";
-import "./StaffVerificationDashboard.css";
+import { driverLicenseVerifyAPI, cccdVerifyAPI } from "../../api/useVerify";
 
 const { TextArea } = Input;
 const { TabPane } = Tabs;
@@ -34,64 +32,59 @@ export default function StaffVerificationDashboard() {
     try {
       setLoading(true);
 
-      // OPTION 1: Use real API (when backend is ready)
-      // const licensesData = await driverLicenseAPI.getPending();
-      // const idCardsData = await cccdVerificationAPI.getPending();
-      // setLicenses(licensesData);
-      // setIdCards(idCardsData);
+      // Fetch real data from backend
+      const [licensesResponse, idCardsResponse] = await Promise.all([
+        driverLicenseVerifyAPI.getPending(),
+        cccdVerifyAPI.getPending(),
+      ]);
 
-      // OPTION 2: Mock data for now (remove when backend is ready)
-      const mockLicenses = [
-        {
-          driver_license_number: "DL001",
-          renter_id: 1,
-          renter_name: "Nguyen Van A",
-          renter_email: "nguyenvana@email.com",
-          renter_phone: "0123456789",
-          url_image_license: "https://via.placeholder.com/400x250?text=Driver+License+Front",
-          is_read: false,
-          created_at: "2025-10-28T10:30:00",
-        },
-        {
-          driver_license_number: "DL002",
-          renter_id: 2,
-          renter_name: "Tran Thi B",
-          renter_email: "tranthib@email.com",
-          renter_phone: "0987654321",
-          url_image_license: "https://via.placeholder.com/400x250?text=Driver+License+Back",
-          is_read: true,
-          created_at: "2025-10-27T14:20:00",
-        },
-      ];
+      console.log('📊 Licenses Response:', licensesResponse);
+      console.log('📊 CCCDs Response:', idCardsResponse);
 
-      const mockIdCards = [
-        {
-          renter_id: 1,
-          renter_name: "Nguyen Van A",
-          renter_email: "nguyenvana@email.com",
-          renter_phone: "0123456789",
-          id_card_number: "123456789012",
-          url_cccd_cmnd: "https://via.placeholder.com/400x250?text=ID+Card+Front",
-          is_read: false,
-          created_at: "2025-10-28T10:35:00",
-        },
-        {
-          renter_id: 3,
-          renter_name: "Le Van C",
-          renter_email: "levanc@email.com",
-          renter_phone: "0912345678",
-          id_card_number: "987654321098",
-          url_cccd_cmnd: "https://via.placeholder.com/400x250?text=ID+Card+Back",
-          is_read: true,
-          created_at: "2025-10-26T09:15:00",
-        },
-      ];
+      // Transform backend data (camelCase) to match component format
+      const transformedLicenses = (licensesResponse.data || []).map(item => ({
+        driver_license_number: item.id,  // Backend returns camelCase
+        renter_id: item.renterId,
+        renter_name: item.renterName,
+        renter_email: item.renterEmail,
+        renter_phone: item.renterPhone || "N/A",
+        license_number_text: item.licenseNumber,
+        url_image_license: item.frontImageUrl,
+        url_image_license_back: item.backImageUrl,
+        is_read: item.status !== 0, // 0 = pending (not read yet)
+        created_at: item.uploadedAt,
+        status: item.status
+      }));
 
-      setLicenses(mockLicenses);
-      setIdCards(mockIdCards);
+      const transformedIdCards = (idCardsResponse.data || []).map(item => ({
+        renter_id: item.renterId,
+        renter_name: item.renterName,
+        renter_email: item.renterEmail,
+        renter_phone: item.renterPhone || "N/A",
+        id_card_number: item.cccdNumber,
+        full_name: item.fullName,
+        dob: item.dob,
+        address: item.address,
+        url_cccd_cmnd: item.frontImageUrl,
+        url_cccd_cmnd_back: item.backImageUrl,
+        is_read: item.status !== 0, // 0 = pending (not read yet)
+        created_at: item.uploadedAt,
+        status: item.status,
+        verification_id: item.id
+      }));
+
+      console.log('✅ Transformed Licenses:', transformedLicenses);
+      console.log('✅ Transformed CCCDs:', transformedIdCards);
+
+      setLicenses(transformedLicenses);
+      setIdCards(transformedIdCards);
     } catch (error) {
       console.error("Error fetching verifications:", error);
       message.error("Không thể tải dữ liệu xác thực!");
+      
+      // Fallback to empty arrays on error
+      setLicenses([]);
+      setIdCards([]);
     } finally {
       setLoading(false);
     }
@@ -110,31 +103,34 @@ export default function StaffVerificationDashboard() {
     try {
       message.loading({ content: "Đang xác thực...", key: "verify" });
 
-      // OPTION 1: Use real API (when backend is ready)
-      // if (selectedItem.type === 'license') {
-      //   await driverLicenseAPI.approve(selectedItem.driver_license_number);
-      // } else {
-      //   await cccdVerificationAPI.approve(selectedItem.renter_id);
-      // }
+      // Get current staff info from localStorage
+      const currentUser = JSON.parse(localStorage.getItem("user") || "{}");
+      const staffInfo = {
+        StaffId: currentUser.userId || "staff_unknown",
+        StaffName: currentUser.fullName || "Unknown Staff"
+      };
 
-      // OPTION 2: Mock success (remove when backend is ready)
-      await new Promise(resolve => setTimeout(resolve, 1000));
-
-      // Update local state
+      // Call real API based on document type
       if (selectedItem.type === "license") {
+        await driverLicenseVerifyAPI.approve(selectedItem.driver_license_number, staffInfo);
+        // Remove from local state
         setLicenses((prev) =>
           prev.filter((item) => item.driver_license_number !== selectedItem.driver_license_number)
         );
       } else {
-        setIdCards((prev) => prev.filter((item) => item.renter_id !== selectedItem.renter_id));
+        await cccdVerifyAPI.approve(selectedItem.verification_id, staffInfo);
+        // Remove from local state
+        setIdCards((prev) => 
+          prev.filter((item) => item.verification_id !== selectedItem.verification_id)
+        );
       }
 
-      message.success({ content: " Xác thực thành công!", key: "verify" });
+      message.success({ content: "✅ Xác thực thành công!", key: "verify" });
       setVerifyModalVisible(false);
       setSelectedItem(null);
     } catch (error) {
       console.error("Approve error:", error);
-      message.error({ content: " Xác thực thất bại!", key: "verify" });
+      message.error({ content: "❌ Xác thực thất bại: " + error.message, key: "verify" });
     }
   };
 
@@ -148,32 +144,36 @@ export default function StaffVerificationDashboard() {
     try {
       message.loading({ content: "Đang từ chối...", key: "reject" });
 
-      // OPTION 1: Use real API (when backend is ready)
-      // if (selectedItem.type === 'license') {
-      //   await driverLicenseAPI.reject(selectedItem.driver_license_number, rejectReason);
-      // } else {
-      //   await cccdVerificationAPI.reject(selectedItem.renter_id, rejectReason);
-      // }
+      // Get current staff info from localStorage
+      const currentUser = JSON.parse(localStorage.getItem("user") || "{}");
+      const rejectData = {
+        StaffId: currentUser.userId || "staff_unknown",
+        StaffName: currentUser.fullName || "Unknown Staff",
+        Reason: rejectReason.trim()
+      };
 
-      // OPTION 2: Mock success (remove when backend is ready)
-      await new Promise(resolve => setTimeout(resolve, 1000));
-
-      // Update local state
+      // Call real API based on document type
       if (selectedItem.type === "license") {
+        await driverLicenseVerifyAPI.reject(selectedItem.driver_license_number, rejectData);
+        // Remove from local state
         setLicenses((prev) =>
           prev.filter((item) => item.driver_license_number !== selectedItem.driver_license_number)
         );
       } else {
-        setIdCards((prev) => prev.filter((item) => item.renter_id !== selectedItem.renter_id));
+        await cccdVerifyAPI.reject(selectedItem.verification_id, rejectData);
+        // Remove from local state
+        setIdCards((prev) => 
+          prev.filter((item) => item.verification_id !== selectedItem.verification_id)
+        );
       }
 
-      message.success({ content: " Đã từ chối và gửi thông báo!", key: "reject" });
+      message.success({ content: "✅ Đã từ chối và gửi thông báo!", key: "reject" });
       setVerifyModalVisible(false);
       setSelectedItem(null);
       setRejectReason("");
     } catch (error) {
       console.error("Reject error:", error);
-      message.error({ content: " Từ chối thất bại!", key: "reject" });
+      message.error({ content: "❌ Từ chối thất bại: " + error.message, key: "reject" });
     }
   };
 

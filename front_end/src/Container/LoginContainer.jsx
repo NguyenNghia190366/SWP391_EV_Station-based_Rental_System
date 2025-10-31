@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { message } from "antd";
+import { message, Modal } from "antd";
 import { useNavigate } from "react-router-dom";
 import { userAPI } from "../api/api";
 import LoginForm from "../Components/Common/Form/LoginForm";
@@ -21,13 +21,22 @@ const LoginContainer = () => {
     setLoading(true);
 
     try {
-      console.log(" Gửi:", { email: email.trim(), password });
-      const result = await userAPI.loginUser({
-        email: email.trim(),
-        password,
-      });
+      // Normalize email to lowercase để tránh case-sensitive issue
+      const normalizedEmail = email.trim().toLowerCase();
+      
+      console.log("📤 Gửi request với:", { email: normalizedEmail, password });
+      
+      // Thử cả 2 format để tương thích với BE
+      const requestBody = {
+        email: normalizedEmail,
+        password: password,
+      };
+      
+      console.log("📦 Request body:", JSON.stringify(requestBody));
+      
+      const result = await userAPI.loginUser(requestBody);
 
-      console.log(" Nhận từ API:", result);
+      console.log("📥 Nhận từ API:", result);
 
       //  XỬ LÝ NHIỀU TRƯỜNG HỢP (Compatible với cả BE local và BE real)
       let token, user;
@@ -115,26 +124,39 @@ const LoginContainer = () => {
       }, 1000);
     } catch (err) {
       console.error(" Login error:", err);
-      
+
       // Xử lý các loại lỗi khác nhau
       let errorMessage = "Lỗi đăng nhập không xác định";
-      
-      if (err.message?.includes('Network') || err.message?.includes('fetch')) {
-        errorMessage = "Không thể kết nối đến máy chủ. Vui lòng kiểm tra kết nối mạng! ";
-      } else if (err.message?.includes('password')) {
-        errorMessage = "Mật khẩu không chính xác! ";
-      } else if (err.message?.includes('email')) {
-        errorMessage = "Email không tồn tại trong hệ thống! ";
+
+      if (err.message?.includes("Network") || err.message?.includes("fetch")) {
+        errorMessage = "Không thể kết nối đến máy chủ. Vui lòng kiểm tra kết nối mạng!";
+      } else if (
+        err.message?.toLowerCase().includes("password") ||
+        err.message?.toLowerCase().includes("invalid") ||
+        err.message?.toLowerCase().includes("credential") ||
+        err.message?.toLowerCase().includes("unauthorized") ||
+        err.message?.includes("401")
+      ) {
+        errorMessage = "Email hoặc mật khẩu không chính xác.";
+
+        // Hiện modal rõ ràng cho lỗi xác thực
+        Modal.error({
+          title: "Đăng nhập thất bại",
+          content: "Email hoặc mật khẩu không đúng. Vui lòng kiểm tra lại.",
+          okText: "Thử lại",
+        });
+      } else if (err.message?.toLowerCase().includes("email")) {
+        errorMessage = "Email không tồn tại trong hệ thống!";
       } else if (err.message) {
         errorMessage = err.message;
       }
 
-      // Hiển thị toast error
+      // Hiển thị toast error (bổ sung)
       message.error({
         content: errorMessage,
         icon: "",
         duration: 5,
-        className: "custom-message-error"
+        className: "custom-message-error",
       });
     } finally {
       setLoading(false);

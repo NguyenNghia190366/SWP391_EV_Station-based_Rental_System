@@ -1,6 +1,5 @@
 import { useState } from 'react';
 import { QRCodeSVG } from 'qrcode.react';
-import './CheckInView.css';
 
 const CheckInView = ({ booking, onCheckIn }) => {
   const [checkInMethod, setCheckInMethod] = useState('qr'); // 'qr' or 'code'

@@ -1,45 +1,5 @@
-// Configuration
-// 🌐 BE của team (đang dùng)
-const BASE_URL = "https://alani-uncorroboratory-sympetaly.ngrok-free.dev/api";
-
-// 🏠 Local BE với Vite proxy (comment lại khi dùng ngrok)
-// const BASE_URL = "/api";
-
-// Headers
-const HEADERS = {
-  JSON: {
-    "Content-Type": "application/json",
-    "ngrok-skip-browser-warning": "true",
-  },
-};
-
-// Helper function for fetch requests
-const apiRequest = async (url, options = {}) => {
-  const response = await fetch(url, {
-    headers: HEADERS.JSON,
-    ...options,
-  });
-
-  if (!response.ok) {
-    let errorBody = null;
-    try {
-      const text = await response.text();
-      errorBody = text ? JSON.parse(text) : null;
-    } catch {
-      errorBody = null;
-    }
-    throw new Error(errorBody?.message || errorBody || `HTTP ${response.status}`);
-  }
-
-  if (response.status === 204) return null;
-
-  const contentType = response.headers.get("content-type") || "";
-  if (contentType.includes("application/json")) {
-    return response.json();
-  }
-
-  return response.text();
-};
+// EV Vehicles, Stations, Bookings/Rentals, Check-In/Check-Out APIs
+import { BASE_URL, apiRequest, buildHeaders } from "./client";
 
 // ==================== VEHICLE API ====================
 export const vehicleAPI = {
@@ -116,6 +76,7 @@ export const stationAPI = {
 
   // Create station (Admin only)
   create: async (payload) => {
+    console.log("🏢 [stationAPI] Creating station:", payload);
     return apiRequest(`${BASE_URL}/Stations`, {
       method: "POST",
       body: JSON.stringify(payload),
@@ -124,6 +85,7 @@ export const stationAPI = {
 
   // Update station (Admin/Staff only)
   update: async (id, payload) => {
+    console.log("📤 [stationAPI] Updating station:", id, payload);
     return apiRequest(`${BASE_URL}/Stations/${id}`, {
       method: "PUT",
       body: JSON.stringify(payload),
@@ -132,6 +94,7 @@ export const stationAPI = {
 
   // Delete station (Admin only)
   delete: async (id) => {
+    console.log("🗑️ [stationAPI] Deleting station:", id);
     return apiRequest(`${BASE_URL}/Stations/${id}`, {
       method: "DELETE",
     });
@@ -230,9 +193,7 @@ export const checkInAPI = {
   uploadConditionPhotos: async (rentalId, formData) => {
     const response = await fetch(`${BASE_URL}/rentals/${rentalId}/condition-photos`, {
       method: "POST",
-      headers: {
-        "ngrok-skip-browser-warning": "true",
-      },
+      headers: buildHeaders({ "Content-Type": undefined }),
       body: formData,
     });
 
@@ -258,4 +219,53 @@ export const checkInAPI = {
   },
 };
 
+// ==================== VEHICLE PREVIEW/HANDOVER API ====================
+export const vehiclePreviewAPI = {
+  // Staff: Send vehicle preview (photos + condition) to customer
+  sendVehiclePreview: async (bookingId, formData) => {
+    const response = await fetch(`${BASE_URL}/bookings/${bookingId}/vehicle-preview`, {
+      method: "POST",
+      headers: buildHeaders({ "Content-Type": undefined }),
+      body: formData,
+    });
+
+    if (!response.ok) {
+      const errorMessage = await response.json().catch(() => null);
+      throw new Error(errorMessage?.message || "Send vehicle preview failed");
+    }
+
+    return response.json();
+  },
+
+  // Customer: Get vehicle preview sent by staff
+  getVehiclePreview: async (bookingId) => {
+    return apiRequest(`${BASE_URL}/bookings/${bookingId}/vehicle-preview`);
+  },
+
+  // Customer: Confirm vehicle after viewing preview
+  confirmVehiclePreview: async (bookingId, payload = {}) => {
+    return apiRequest(`${BASE_URL}/bookings/${bookingId}/confirm-vehicle`, {
+      method: "POST",
+      body: JSON.stringify(payload),
+    });
+  },
+
+  // Customer: Request vehicle change (reject current vehicle)
+  requestVehicleChange: async (bookingId, reason) => {
+    return apiRequest(`${BASE_URL}/bookings/${bookingId}/request-change`, {
+      method: "POST",
+      body: JSON.stringify({ reason }),
+    });
+  },
+
+  // Update vehicle status (available -> booked -> in_use -> available)
+  updateVehicleStatus: async (vehicleId, status) => {
+    return apiRequest(`${BASE_URL}/vehicles/${vehicleId}/status`, {
+      method: "PUT",
+      body: JSON.stringify({ status }),
+    });
+  },
+};
+
 export default vehicleAPI;
+

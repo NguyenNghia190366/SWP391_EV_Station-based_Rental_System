@@ -17,6 +17,7 @@
     "@goongmaps/goong-js": "^1.0.9",
     "antd": "^5.27.4",
     "axios": "^1.12.2",
+    "dayjs": "^1.11.18",
     "leaflet": "^1.9.4",
     "maplibre-gl": "^5.10.0",
     "qrcode.react": "^4.2.0",

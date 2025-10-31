@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import './PaymentView.css';
 
 const PaymentView = ({ 
   contractData, 
@@ -25,155 +24,178 @@ const PaymentView = ({
   };
 
   return (
-    <div className="payment-view">
-      <div className="payment-container">
-        <div className="payment-header">
-          <h1> THANH TOÁN</h1>
-          <p>Hoàn tất thanh toán để xác nhận đặt xe</p>
+    <div className="min-h-screen bg-gradient-to-br from-green-50 via-emerald-50 to-teal-50 py-8 px-4">
+      <div className="max-w-6xl mx-auto">
+        {/* Header */}
+        <div className="text-center mb-8">
+          <h1 className="text-4xl font-bold bg-gradient-to-r from-green-600 to-emerald-600 bg-clip-text text-transparent mb-2">
+            💳 THANH TOÁN
+          </h1>
+          <p className="text-gray-600">Hoàn tất thanh toán để xác nhận đặt xe</p>
         </div>
 
-        <div className="payment-content">
+        <div className="grid lg:grid-cols-2 gap-8">
           {/* Order Summary */}
-          <div className="order-summary">
-            <h2> Thông tin đơn hàng</h2>
-            <div className="order-details">
-              <div className="order-item">
-                <img src={contractData.vehicle.image} alt={contractData.vehicle.name} />
-                <div className="item-info">
-                  <h3>{contractData.vehicle.name}</h3>
-                  <p>{contractData.days} ngày × {contractData.vehicle.price}k VNĐ</p>
+          <div className="bg-white rounded-2xl shadow-lg p-6">
+            <h2 className="text-2xl font-bold text-gray-800 mb-6 flex items-center gap-2">
+              📋 Thông tin đơn hàng
+            </h2>
+            <div className="space-y-6">
+              <div className="flex gap-4 p-4 bg-gray-50 rounded-xl">
+                <img 
+                  src={contractData.vehicle.image} 
+                  alt={contractData.vehicle.name} 
+                  className="w-24 h-24 object-cover rounded-lg"
+                />
+                <div className="flex-1">
+                  <h3 className="font-bold text-gray-800 text-lg">{contractData.vehicle.name}</h3>
+                  <p className="text-gray-600">{contractData.days} ngày × {contractData.vehicle.price}k VNĐ</p>
                 </div>
               </div>
 
-              <div className="order-breakdown">
-                <div className="breakdown-row">
-                  <span>Tổng giá thuê:</span>
-                  <span>{contractData.totalPrice.toLocaleString('vi-VN')} VNĐ</span>
+              <div className="space-y-3">
+                <div className="flex justify-between py-2 border-b border-gray-200">
+                  <span className="text-gray-700">Tổng giá thuê:</span>
+                  <span className="font-semibold text-gray-900">{contractData.totalPrice.toLocaleString('vi-VN')} VNĐ</span>
                 </div>
-                <div className="breakdown-row deposit">
-                  <span>Đặt cọc (30%):</span>
-                  <span>{contractData.deposit.toLocaleString('vi-VN')} VNĐ</span>
+                <div className="flex justify-between py-2 border-b border-gray-200">
+                  <span className="text-gray-700">Đặt cọc (30%):</span>
+                  <span className="font-semibold text-orange-600">{contractData.deposit.toLocaleString('vi-VN')} VNĐ</span>
                 </div>
-                <div className="breakdown-row total">
-                  <span>TỔNG THANH TOÁN:</span>
-                  <span>{contractData.totalPrice.toLocaleString('vi-VN')} VNĐ</span>
+                <div className="flex justify-between py-3 bg-gradient-to-r from-green-50 to-emerald-50 rounded-lg px-4">
+                  <span className="text-lg font-bold text-gray-900">TỔNG THANH TOÁN:</span>
+                  <span className="text-2xl font-bold text-green-600">{contractData.totalPrice.toLocaleString('vi-VN')} VNĐ</span>
                 </div>
               </div>
 
-              <div className="rental-period">
-                <p><strong> Thời gian:</strong></p>
-                <p>{new Date(contractData.bookingData.startDate).toLocaleString('vi-VN')}</p>
-                <p>đến</p>
-                <p>{new Date(contractData.bookingData.endDate).toLocaleString('vi-VN')}</p>
+              <div className="bg-blue-50 rounded-xl p-4">
+                <p className="font-semibold text-gray-800 mb-2">⏰ Thời gian:</p>
+                <p className="text-gray-700">{new Date(contractData.bookingData.startDate).toLocaleString('vi-VN')}</p>
+                <p className="text-gray-500 text-center my-1">↓</p>
+                <p className="text-gray-700">{new Date(contractData.bookingData.endDate).toLocaleString('vi-VN')}</p>
               </div>
 
-              <div className="pickup-location">
-                <p><strong> Nhận xe tại:</strong> {contractData.bookingData.pickupLocation}</p>
+              <div className="bg-purple-50 rounded-xl p-4">
+                <p className="font-semibold text-gray-800">📍 Nhận xe tại: <span className="text-purple-600">{contractData.bookingData.pickupLocation}</span></p>
               </div>
             </div>
           </div>
 
           {/* Payment Methods */}
-          <div className="payment-methods">
-            <h2> Phương thức thanh toán</h2>
+          <div className="bg-white rounded-2xl shadow-lg p-6">
+            <h2 className="text-2xl font-bold text-gray-800 mb-6 flex items-center gap-2">
+              💰 Phương thức thanh toán
+            </h2>
             
-            <div className="method-list">
-              <label className={`payment-method ${paymentMethod === 'momo' ? 'active' : ''}`}>
+            <div className="space-y-3 mb-6">
+              <label className={`block p-4 border-2 rounded-xl cursor-pointer transition-all ${paymentMethod === 'momo' ? 'border-pink-500 bg-pink-50' : 'border-gray-200 hover:border-pink-300'}`}>
                 <input 
                   type="radio" 
                   name="payment" 
                   value="momo"
                   checked={paymentMethod === 'momo'}
                   onChange={(e) => setPaymentMethod(e.target.value)}
+                  className="hidden"
                 />
-                <div className="method-content">
-                  <img src="https://developers.momo.vn/v3/img/logo.svg" alt="MoMo" />
-                  <span>Ví MoMo</span>
+                <div className="flex items-center gap-3">
+                  <img src="https://developers.momo.vn/v3/img/logo.svg" alt="MoMo" className="w-10 h-10" />
+                  <span className="font-semibold text-gray-800">Ví MoMo</span>
                 </div>
               </label>
 
-              <label className={`payment-method ${paymentMethod === 'vnpay' ? 'active' : ''}`}>
+              <label className={`block p-4 border-2 rounded-xl cursor-pointer transition-all ${paymentMethod === 'vnpay' ? 'border-blue-500 bg-blue-50' : 'border-gray-200 hover:border-blue-300'}`}>
                 <input 
                   type="radio" 
                   name="payment" 
                   value="vnpay"
                   checked={paymentMethod === 'vnpay'}
                   onChange={(e) => setPaymentMethod(e.target.value)}
+                  className="hidden"
                 />
-                <div className="method-content">
-                  <img src="https://vnpay.vn/s1/statics.vnpay.vn/2023/6/0oxhzjmxbksr1686814746087.png" alt="VNPay" />
-                  <span>VNPay</span>
+                <div className="flex items-center gap-3">
+                  <img src="https://vnpay.vn/s1/statics.vnpay.vn/2023/6/0oxhzjmxbksr1686814746087.png" alt="VNPay" className="w-10 h-10" />
+                  <span className="font-semibold text-gray-800">VNPay</span>
                 </div>
               </label>
 
-              <label className={`payment-method ${paymentMethod === 'zalopay' ? 'active' : ''}`}>
+              <label className={`block p-4 border-2 rounded-xl cursor-pointer transition-all ${paymentMethod === 'zalopay' ? 'border-blue-400 bg-blue-50' : 'border-gray-200 hover:border-blue-300'}`}>
                 <input 
                   type="radio" 
                   name="payment" 
                   value="zalopay"
                   checked={paymentMethod === 'zalopay'}
                   onChange={(e) => setPaymentMethod(e.target.value)}
+                  className="hidden"
                 />
-                <div className="method-content">
-                  <img src="https://cdn.haitrieu.com/wp-content/uploads/2022/10/Logo-ZaloPay-Square.png" alt="ZaloPay" />
-                  <span>ZaloPay</span>
+                <div className="flex items-center gap-3">
+                  <img src="https://cdn.haitrieu.com/wp-content/uploads/2022/10/Logo-ZaloPay-Square.png" alt="ZaloPay" className="w-10 h-10" />
+                  <span className="font-semibold text-gray-800">ZaloPay</span>
                 </div>
               </label>
 
-              <label className={`payment-method ${paymentMethod === 'banking' ? 'active' : ''}`}>
+              <label className={`block p-4 border-2 rounded-xl cursor-pointer transition-all ${paymentMethod === 'banking' ? 'border-purple-500 bg-purple-50' : 'border-gray-200 hover:border-purple-300'}`}>
                 <input 
                   type="radio" 
                   name="payment" 
                   value="banking"
                   checked={paymentMethod === 'banking'}
                   onChange={(e) => setPaymentMethod(e.target.value)}
+                  className="hidden"
                 />
-                <div className="method-content">
-                  <span className="icon"></span>
-                  <span>Chuyển khoản ngân hàng</span>
+                <div className="flex items-center gap-3">
+                  <span className="text-3xl">🏦</span>
+                  <span className="font-semibold text-gray-800">Chuyển khoản ngân hàng</span>
                 </div>
               </label>
 
-              <label className={`payment-method ${paymentMethod === 'cash' ? 'active' : ''}`}>
+              <label className={`block p-4 border-2 rounded-xl cursor-pointer transition-all ${paymentMethod === 'cash' ? 'border-green-500 bg-green-50' : 'border-gray-200 hover:border-green-300'}`}>
                 <input 
                   type="radio" 
                   name="payment" 
                   value="cash"
                   checked={paymentMethod === 'cash'}
                   onChange={(e) => setPaymentMethod(e.target.value)}
+                  className="hidden"
                 />
-                <div className="method-content">
-                  <span className="icon"></span>
-                  <span>Thanh toán khi nhận xe</span>
+                <div className="flex items-center gap-3">
+                  <span className="text-3xl">💵</span>
+                  <span className="font-semibold text-gray-800">Thanh toán khi nhận xe</span>
                 </div>
               </label>
             </div>
 
-            <div className="payment-note">
-              <p> Thông tin thanh toán được mã hóa và bảo mật tuyệt đối</p>
-              <p> Bạn có thể hủy đơn miễn phí trước 24h</p>
+            <div className="bg-gradient-to-r from-green-50 to-emerald-50 rounded-xl p-4 space-y-2 mb-6">
+              <p className="text-sm text-gray-700 flex items-center gap-2">
+                <span>🔒</span> Thông tin thanh toán được mã hóa và bảo mật tuyệt đối
+              </p>
+              <p className="text-sm text-gray-700 flex items-center gap-2">
+                <span>✅</span> Bạn có thể hủy đơn miễn phí trước 24h
+              </p>
             </div>
-          </div>
 
-          {/* Payment Actions */}
-          <div className="payment-actions">
-            <button className="btn-back" onClick={onBack}>
-              ← Quay lại
-            </button>
-            <button 
-              className="btn-pay" 
-              onClick={handlePayment}
-              disabled={processing}
-            >
-              {processing ? (
-                <span className="processing">
-                  <span className="spinner"></span>
-                  Đang xử lý...
-                </span>
-              ) : (
-                `Thanh toán ${contractData.totalPrice.toLocaleString('vi-VN')} VNĐ`
-              )}
-            </button>
+            {/* Payment Actions */}
+            <div className="flex gap-4">
+              <button 
+                className="flex-1 px-6 py-3 bg-gray-200 hover:bg-gray-300 text-gray-700 font-semibold rounded-lg transition-colors" 
+                onClick={onBack}
+              >
+                ← Quay lại
+              </button>
+              <button 
+                className="flex-[2] px-6 py-4 bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white font-bold rounded-lg shadow-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                onClick={handlePayment}
+                disabled={processing}
+              >
+                {processing ? (
+                  <span className="flex items-center justify-center gap-2">
+                    <span className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
+                    Đang xử lý...
+                  </span>
+                ) : (
+                  `💳 Thanh toán ${contractData.totalPrice.toLocaleString('vi-VN')} VNĐ`
+                )}
+              </button>
+            </div>
           </div>
         </div>
       </div>

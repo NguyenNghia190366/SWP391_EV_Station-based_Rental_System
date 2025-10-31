@@ -1,70 +1,26 @@
-// Configuration
-// 🌐 BE của team (đang dùng)
-const BASE_URL = "https://alani-uncorroboratory-sympetaly.ngrok-free.dev/api";
+// User & Authentication API
+import { BASE_URL, apiRequest, buildHeaders } from "./client";
 
-// 🏠 Local BE với Vite proxy (comment lại khi dùng ngrok)
-// const BASE_URL = "/api";
-
-// Headers
-const HEADERS = {
-  JSON: {
-    "Content-Type": "application/json",
-    "ngrok-skip-browser-warning": "true",
-  },
-  NGROK: {
-    "ngrok-skip-browser-warning": "true",
-  },
-};
-
-// Helper function for fetch requests
-const apiRequest = async (url, options = {}) => {
-  const response = await fetch(url, {
-    headers: HEADERS.JSON,
-    ...options,
-  });
-
-  if (!response.ok) {
-    let errorBody = null;
-    try {
-      const text = await response.text();
-      errorBody = text ? JSON.parse(text) : null;
-    } catch {
-      errorBody = null;
-    }
-    throw new Error(errorBody?.message || errorBody || `HTTP ${response.status}`);
-  }
-
-  if (response.status === 204) return null;
-
-  const contentType = response.headers.get("content-type") || "";
-  if (contentType.includes("application/json")) {
-    return response.json();
-  }
-
-  return response.text();
-};
-
-// ==================== USER API ====================
+// ==================== USER/AUTH API ====================
 export const userAPI = {
   // Authentication
-  loginUser: async (credentials) => {
-    const data = await apiRequest(`${BASE_URL}/UserAccount/login`, {
-      method: "POST",
-      body: JSON.stringify(credentials),
-    });
-
-    if (!data) {
-      throw new Error("Không nhận được dữ liệu từ server");
-    }
-
-    return data;
-  },
-
   registerUser: async (newUser) => {
     return apiRequest(`${BASE_URL}/Users/Register`, {
       method: "POST",
       body: JSON.stringify(newUser),
     });
+  },
+
+  loginUser: async (credentials) => {
+    console.log("🔐 [authAPI] Calling login with:", credentials);
+    const data = await apiRequest(`${BASE_URL}/UserAccount/login`, {
+      method: "POST",
+      headers: buildHeaders({ "Content-Type": "application/json" }),
+      body: JSON.stringify(credentials),
+    });
+    if (!data) throw new Error("Không nhận được dữ liệu từ server");
+    console.log("✅ [authAPI] Login success:", data);
+    return data;
   },
 
   // User Management
@@ -75,13 +31,6 @@ export const userAPI = {
   getUnverifiedUsers: async () => {
     const users = await apiRequest(`${BASE_URL}/Users`);
     return users.filter((user) => user.role === "renter" && !user.isVerified);
-  },
-
-  updateUser: async (user) => {
-    return apiRequest(`${BASE_URL}/Users/${user.userId}`, {
-      method: "PUT",
-      body: JSON.stringify(user),
-    });
   },
 
   verifyUser: async (userId, staffId) => {
@@ -105,26 +54,29 @@ export const userAPI = {
       }),
     });
   },
+
+  updateUser: async (user) => {
+    return apiRequest(`${BASE_URL}/Users/${user.userId}`, {
+      method: "PUT",
+      body: JSON.stringify(user),
+    });
+  },
 };
 
 // ==================== DRIVER LICENSE API ====================
 export const driverLicenseAPI = {
-  // Get all driver licenses
   getAll: async () => {
     return apiRequest(`${BASE_URL}/Driver_License`);
   },
 
-  // Get pending driver licenses
   getPending: async () => {
     return apiRequest(`${BASE_URL}/Driver_License/pending`);
   },
 
-  // Get license by renter ID
   getByRenter: async (renterId) => {
     return apiRequest(`${BASE_URL}/Driver_License?renter_id=${renterId}`);
   },
 
-  // Create driver license record
   create: async (payload) => {
     return apiRequest(`${BASE_URL}/Driver_License`, {
       method: "POST",
@@ -132,7 +84,6 @@ export const driverLicenseAPI = {
     });
   },
 
-  // Update license status
   updateStatus: async (id, payload) => {
     return apiRequest(`${BASE_URL}/Driver_License/${id}`, {
       method: "PUT",
@@ -140,7 +91,6 @@ export const driverLicenseAPI = {
     });
   },
 
-  // Approve license
   approve: async (licenseNumber) => {
     return apiRequest(`${BASE_URL}/Driver_License/${licenseNumber}/approve`, {
       method: "PUT",
@@ -152,7 +102,6 @@ export const driverLicenseAPI = {
     });
   },
 
-  // Reject license
   reject: async (licenseNumber, reason) => {
     return apiRequest(`${BASE_URL}/Driver_License/${licenseNumber}/reject`, {
       method: "PUT",
@@ -168,22 +117,18 @@ export const driverLicenseAPI = {
 
 // ==================== CCCD/CMND API ====================
 export const cccdVerificationAPI = {
-  // Get all CCCD
   getAll: async () => {
     return apiRequest(`${BASE_URL}/CCCD`);
   },
 
-  // Get pending CCCD
   getPending: async () => {
     return apiRequest(`${BASE_URL}/CCCD/pending`);
   },
 
-  // Get CCCD by renter ID
   getByRenter: async (renterId) => {
     return apiRequest(`${BASE_URL}/CCCD/${renterId}`);
   },
 
-  // Create CCCD record
   create: async (payload) => {
     return apiRequest(`${BASE_URL}/CCCD`, {
       method: "POST",
@@ -191,7 +136,6 @@ export const cccdVerificationAPI = {
     });
   },
 
-  // Update CCCD status
   updateStatus: async (id, payload) => {
     return apiRequest(`${BASE_URL}/CCCD/${id}`, {
       method: "PUT",
@@ -199,7 +143,6 @@ export const cccdVerificationAPI = {
     });
   },
 
-  // Approve CCCD
   approve: async (renterId) => {
     return apiRequest(`${BASE_URL}/CCCD/${renterId}/approve`, {
       method: "PUT",
@@ -211,7 +154,6 @@ export const cccdVerificationAPI = {
     });
   },
 
-  // Reject CCCD
   reject: async (renterId, reason) => {
     return apiRequest(`${BASE_URL}/CCCD/${renterId}/reject`, {
       method: "PUT",
@@ -225,7 +167,7 @@ export const cccdVerificationAPI = {
   },
 };
 
-// Legacy CCCD API (for backward compatibility)
+// Legacy CCCD API (old format)
 export const cccdAPI = {
   getAll: async () => {
     return apiRequest(`${BASE_URL}/Cccd_Cmnd`);
@@ -250,7 +192,7 @@ export const cccdAPI = {
   },
 };
 
-// Legacy License API (for backward compatibility)
+// Legacy License API (old format)
 export const licenseAPI = {
   getAll: async () => {
     return apiRequest(`${BASE_URL}/licenses`);
@@ -281,3 +223,4 @@ export const licenseAPI = {
 };
 
 export default userAPI;
+

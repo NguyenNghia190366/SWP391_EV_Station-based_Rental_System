@@ -21,8 +21,8 @@ export const normalizeUserData = (user) => {
     phone: user.phone || user.phoneNumber || '',
     phoneNumber: user.phoneNumber || user.phone || '',
     
-    // Role & Status
-    role: (user.role || '').toLowerCase(),
+    // Role & Status - KEEP UPPERCASE for consistency with backend
+    role: (user.role || '').toUpperCase(), // Always uppercase: ADMIN, STAFF, RENTER
     isVerified: user.isVerified !== undefined ? user.isVerified : (user.status === 'active' || true),
     status: user.status || (user.isVerified ? 'active' : 'inactive'),
     
