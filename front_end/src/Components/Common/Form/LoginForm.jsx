@@ -6,7 +6,6 @@ import {
   LoginOutlined,
 } from "@ant-design/icons";
 import { Link } from "react-router-dom";
-import "./LoginForm.css";
 
 const { Title, Text } = Typography;
 
@@ -14,25 +13,24 @@ const LoginForm = ({ onSubmit, loading }) => {
   const [form] = Form.useForm();
 
   return (
-    <div className="login-container">
-      <div className="login-background">
-        <div className="floating-shapes">
-          <div className="shape shape-1"></div>
-          <div className="shape shape-2"></div>
-          <div className="shape shape-3"></div>
-        </div>
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-indigo-500 via-purple-600 to-pink-500 p-4">
+      {/* Animated Background */}
+      <div className="fixed inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-white rounded-full mix-blend-overlay filter blur-3xl opacity-20 animate-pulse"></div>
+        <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-yellow-300 rounded-full mix-blend-overlay filter blur-3xl opacity-20 animate-pulse" style={{ animationDelay: '2s' }}></div>
+        <div className="absolute top-1/2 left-1/2 w-96 h-96 bg-pink-300 rounded-full mix-blend-overlay filter blur-3xl opacity-20 animate-pulse" style={{ animationDelay: '4s' }}></div>
       </div>
 
-      <Card className="login-card">
-        <div className="login-header">
-          <div className="icon-wrapper">
-            <LoginOutlined className="login-icon" />
+      <Card className="w-full max-w-md shadow-2xl rounded-2xl backdrop-blur-sm bg-white/95 relative z-10">
+        <div className="text-center mb-8">
+          <div className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-full mb-4 shadow-lg">
+            <LoginOutlined className="text-4xl text-white" />
           </div>
-          <Title level={2} className="login-title">
+          <Title level={2} className="mb-2 bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
             Chào mừng trở lại!
           </Title>
-          <Text className="login-subtitle">
-             Đăng nhập để tiếp tục trải nghiệm dịch vụ thuê xe điện
+          <Text className="text-gray-600">
+            ⚡ Đăng nhập để tiếp tục trải nghiệm dịch vụ thuê xe điện
           </Text>
         </div>
 
@@ -41,7 +39,6 @@ const LoginForm = ({ onSubmit, loading }) => {
           layout="vertical"
           onFinish={onSubmit}
           requiredMark={false}
-          className="login-form"
         >
           <Form.Item
             name="email"
@@ -51,11 +48,11 @@ const LoginForm = ({ onSubmit, loading }) => {
             ]}
           >
             <Input
-              prefix={<MailOutlined className="input-icon" />}
+              prefix={<MailOutlined className="text-indigo-500" />}
               placeholder="Email của bạn"
               size="large"
               disabled={loading}
-              className="custom-input"
+              className="rounded-lg"
             />
           </Form.Item>
 
@@ -67,40 +64,40 @@ const LoginForm = ({ onSubmit, loading }) => {
             ]}
           >
             <Input.Password
-              prefix={<LockOutlined className="input-icon" />}
+              prefix={<LockOutlined className="text-indigo-500" />}
               placeholder="Mật khẩu"
               size="large"
               disabled={loading}
-              className="custom-input"
+              className="rounded-lg"
             />
           </Form.Item>
 
-          <div className="form-extras">
+          <div className="flex items-center justify-between mb-4">
             <Form.Item name="remember" valuePropName="checked" noStyle>
-              <Checkbox className="remember-checkbox">Ghi nhớ đăng nhập</Checkbox>
+              <Checkbox className="text-gray-600">Ghi nhớ đăng nhập</Checkbox>
             </Form.Item>
-            <Link to="/forgot-password" className="forgot-link">
+            <Link to="/forgot-password" className="text-indigo-600 hover:text-indigo-700 transition-colors">
               Quên mật khẩu?
             </Link>
           </div>
 
-          <Form.Item className="submit-button-wrapper">
+          <Form.Item className="mb-4">
             <Button
               type="primary"
               htmlType="submit"
               size="large"
               loading={loading}
-              className="submit-button"
+              className="w-full h-12 bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 border-0 rounded-lg shadow-lg text-white font-semibold"
               block
             >
-              {loading ? "Đang đăng nhập..." : " Đăng nhập"}
+              {loading ? "Đang đăng nhập..." : "⚡ Đăng nhập"}
             </Button>
           </Form.Item>
 
-          <div className="register-link">
-            <Text className="register-text">
+          <div className="text-center">
+            <Text className="text-gray-600">
               Chưa có tài khoản?{" "}
-              <Link to="/register" className="register-link-text">
+              <Link to="/register" className="text-indigo-600 hover:text-indigo-700 font-semibold transition-colors">
                 Đăng ký ngay
               </Link>
             </Text>

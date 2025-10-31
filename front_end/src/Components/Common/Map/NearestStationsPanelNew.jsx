@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import './NearestStationsPanel.css';
 
 const NearestStationsPanelNew = ({ onFindNearest, nearestStation, nearestSearching }) => {
   const [lat, setLat] = useState('');

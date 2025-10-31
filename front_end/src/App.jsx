@@ -17,6 +17,12 @@ import BookingSuccessPage from "./Components/Common/Page/BookingSuccessPage";
 import CheckInContainer from "./Container/CheckInContainer";
 import CheckInMethodSelectionPage from "./Components/Common/Page/CheckInMethodSelectionPage";
 import DocumentVerificationPage from "./Components/Common/Page/DocumentVerificationPage";
+import VehiclePreviewNotification from "./Components/Common/Page/VehiclePreviewNotification";
+import SendVehiclePreview from "./Components/StationStaff/SendVehiclePreview";
+import PaymentSuccessBill from "./Components/Common/Page/PaymentSuccessBill";
+import NotificationsPage from "./Components/Common/Page/NotificationsPage";
+import MyBookingsPage from "./Components/Common/Page/MyBookingsPage";
+import StationRegistrationContainer from "./Container/StationRegistrationContainer";
 
 function App() {
   console.log(" App component rendered");
@@ -34,7 +40,16 @@ function App() {
         <Route path="/booking/:vehicleId" element={<BookingContainer />} />
         <Route path="/contract/:vehicleId" element={<ContractContainer />} />
         <Route path="/payment/:vehicleId" element={<PaymentContainer />} />
+        <Route path="/payment-success" element={<PaymentSuccessBill />} />
         <Route path="/booking-success" element={<BookingSuccessPage />} />
+        
+        {/* User Account Routes */}
+        <Route path="/notifications" element={<NotificationsPage />} />
+        <Route path="/my-bookings" element={<MyBookingsPage />} />
+        
+        {/* Vehicle Preview & Handover Routes */}
+        <Route path="/vehicle-preview/:bookingId" element={<VehiclePreviewNotification />} />
+        <Route path="/checkin-prepare/:bookingId" element={<CheckInMethodSelectionPage />} />
         
         {/* Check-in Flow Routes */}
         <Route path="/checkin-method/:bookingId" element={<CheckInMethodSelectionPage />} />
@@ -45,8 +60,11 @@ function App() {
         {/* Admin & Staff Routes */}
         <Route element={<RequireAuth allowRole={[roles.ADMIN]} />}>
           <Route path="/admin/dashboard" element={<AdminDashboard />} />
+          <Route path="/admin/register-station" element={<StationRegistrationContainer />} />
         </Route>
         <Route path="/staff/dashboard" element={<RequireAuth allowRole={[roles.STAFF]}><StaffDashboard /></RequireAuth>} />
+        <Route path="/staff/register-station" element={<RequireAuth allowRole={[roles.STAFF]}><StationRegistrationContainer /></RequireAuth>} />
+        <Route path="/staff/send-vehicle-preview/:bookingId" element={<RequireAuth allowRole={[roles.STAFF]}><SendVehiclePreview /></RequireAuth>} />
       </Route>
 
       {/* Routes without Layout (Auth pages - Login/Register) */}

@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { Avatar, Dropdown, Badge, Button } from "antd";
+import NotificationBell from "../Components/Common/Notifications/NotificationBell";
 import {
   UserOutlined,
   LogoutOutlined,
@@ -11,7 +12,6 @@ import {
   BellOutlined,
   SettingOutlined,
 } from "@ant-design/icons";
-import "./Header.css";
 
 export default function Header() {
   const [user, setUser] = useState(null);
@@ -66,7 +66,7 @@ export default function Header() {
       label: "Trang cá nhân",
       onClick: () => navigate("/profile"),
     },
-    ...(user?.role === "admin"
+    ...(user?.role === "ADMIN"
       ? [
           {
             key: "admin-dashboard",
@@ -76,13 +76,24 @@ export default function Header() {
           },
         ]
       : []),
-    ...(user?.role === "staff"
+    ...(user?.role === "STAFF"
       ? [
           {
             key: "staff-dashboard",
             icon: <DashboardOutlined />,
             label: "Staff Dashboard",
             onClick: () => navigate("/staff/dashboard"),
+          },
+        ]
+      : []),
+    // Only show "Lịch sử thuê xe" for RENTER role
+    ...(user?.role === "RENTER"
+      ? [
+          {
+            key: "my-bookings",
+            icon: <CarOutlined />,
+            label: "Lịch sử thuê xe",
+            onClick: () => navigate("/my-bookings"),
           },
         ]
       : []),
@@ -115,40 +126,51 @@ export default function Header() {
   const isActive = (path) => location.pathname === path;
 
   return (
-    <header className="app-header">
-      <div className="header-container">
+    <header className="sticky top-0 z-[1000] bg-gradient-to-r from-indigo-500 to-purple-600 shadow-lg backdrop-blur-md">
+      <div className="max-w-[1400px] mx-auto px-6 flex items-center justify-between h-16">
         {/* Logo */}
-        <Link to="/home" className="header-logo">
-          <CarOutlined className="logo-icon" />
-          <span className="logo-text">EV Rental</span>
+        <Link 
+          to="/home" 
+          className="flex items-center gap-3 text-2xl font-bold text-white no-underline transition-all duration-300 hover:scale-105 hover:text-yellow-300"
+        >
+          <CarOutlined className="text-[28px] animate-bounce" style={{ animationDuration: '3s' }} />
+          <span className="bg-gradient-to-r from-white to-yellow-300 bg-clip-text text-transparent hidden sm:inline">
+            EV Rental
+          </span>
         </Link>
 
         {/* Desktop Navigation */}
-        <nav className="header-nav desktop-nav">
+        <nav className="hidden md:flex flex-1 justify-center items-center gap-2">
           {navItems.map((item) => (
             <Link
               key={item.path}
               to={item.path}
-              className={`nav-link ${isActive(item.path) ? "active" : ""}`}
+              className={`
+                px-4 py-2 rounded-lg font-medium transition-all duration-300
+                relative
+                ${isActive(item.path) 
+                  ? 'text-white bg-white/20 font-semibold' 
+                  : 'text-white/90 hover:text-white hover:bg-white/10'
+                }
+              `}
             >
               {item.label}
+              <span className={`
+                absolute bottom-0 left-1/2 -translate-x-1/2 h-0.5 bg-yellow-300 transition-all duration-300
+                ${isActive(item.path) ? 'w-4/5' : 'w-0 group-hover:w-4/5'}
+              `} />
             </Link>
           ))}
         </nav>
 
         {/* Right Section */}
-        <div className="header-right">
+        <div className="flex items-center gap-4">
           {isLoggedIn ? (
             <>
               {/* Notifications */}
-              <Badge count={5} offset={[-5, 5]}>
-                <Button
-                  type="text"
-                  icon={<BellOutlined />}
-                  className="notification-btn"
-                  onClick={() => navigate("/notifications")}
-                />
-              </Badge>
+              <div>
+                <NotificationBell />
+              </div>
 
               {/* User Menu */}
               <Dropdown
@@ -157,22 +179,32 @@ export default function Header() {
                 arrow
                 trigger={["click"]}
               >
-                <div className="user-profile">
+                <div className="flex items-center gap-3 px-3 py-1.5 rounded-full bg-white/10 cursor-pointer transition-all duration-300 hover:bg-white/20 hover:-translate-y-0.5">
                   <Avatar
                     src={user?.avatar}
                     icon={!user?.avatar && <UserOutlined />}
-                    className="user-avatar"
+                    className="border-2 border-white shadow-md"
                   />
-                  <span className="user-name">{user?.fullName || user?.name || "User"}</span>
+                  <span className="hidden md:inline text-white font-semibold max-w-[150px] overflow-hidden text-ellipsis whitespace-nowrap">
+                    {user?.fullName || user?.name || "User"}
+                  </span>
                 </div>
               </Dropdown>
             </>
           ) : (
-            <div className="auth-buttons">
-              <Button type="default" onClick={() => navigate("/login")}>
+            <div className="hidden md:flex gap-3">
+              <Button 
+                type="default" 
+                onClick={() => navigate("/login")}
+                className="rounded-lg font-medium h-9 px-5 border-white text-white bg-transparent hover:border-yellow-300 hover:text-yellow-300 hover:bg-white/10"
+              >
                 Đăng nhập
               </Button>
-              <Button type="primary" onClick={() => navigate("/register")}>
+              <Button 
+                type="primary" 
+                onClick={() => navigate("/register")}
+                className="rounded-lg font-medium h-9 px-5 bg-white border-white text-indigo-500 hover:bg-yellow-300 hover:border-yellow-300 hover:text-gray-800"
+              >
                 Đăng ký
               </Button>
             </div>
@@ -182,7 +214,7 @@ export default function Header() {
           <Button
             type="text"
             icon={mobileMenuOpen ? <CloseOutlined /> : <MenuOutlined />}
-            className="mobile-menu-toggle"
+            className="md:hidden text-white text-xl"
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
           />
         </div>
@@ -190,19 +222,25 @@ export default function Header() {
 
       {/* Mobile Navigation */}
       {mobileMenuOpen && (
-        <nav className="header-nav mobile-nav">
+        <nav className="md:hidden flex flex-col p-4 bg-indigo-500/95 border-t border-white/10 animate-slideDown">
           {navItems.map((item) => (
             <Link
               key={item.path}
               to={item.path}
-              className={`nav-link ${isActive(item.path) ? "active" : ""}`}
+              className={`
+                px-4 py-2 rounded-lg font-medium transition-all duration-300
+                ${isActive(item.path) 
+                  ? 'text-white bg-white/20 font-semibold' 
+                  : 'text-white/90 hover:text-white hover:bg-white/10'
+                }
+              `}
               onClick={() => setMobileMenuOpen(false)}
             >
               {item.label}
             </Link>
           ))}
           {!isLoggedIn && (
-            <div className="mobile-auth-buttons">
+            <div className="flex flex-col gap-3 mt-4 pt-4 border-t border-white/20">
               <Button
                 type="default"
                 block
@@ -210,6 +248,7 @@ export default function Header() {
                   navigate("/login");
                   setMobileMenuOpen(false);
                 }}
+                className="rounded-lg font-medium border-white text-white bg-transparent hover:border-yellow-300 hover:text-yellow-300"
               >
                 Đăng nhập
               </Button>
@@ -220,6 +259,7 @@ export default function Header() {
                   navigate("/register");
                   setMobileMenuOpen(false);
                 }}
+                className="rounded-lg font-medium bg-white text-indigo-500 hover:bg-yellow-300 hover:text-gray-800"
               >
                 Đăng ký
               </Button>

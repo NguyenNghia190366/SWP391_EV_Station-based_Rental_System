@@ -1,16 +1,5 @@
-// Configuration
-// 🌐 BE của team (đang dùng)
-const BASE_URL = "https://alani-uncorroboratory-sympetaly.ngrok-free.dev/api";
-
-// 🏠 Local BE với Vite proxy (comment lại khi dùng ngrok)
-// const BASE_URL = "/api";
-
-// Headers
-const HEADERS = {
-  NGROK: {
-    "ngrok-skip-browser-warning": "true",
-  },
-};
+// File Upload APIs (avatar, license, CCCD, vehicle images)
+import { BASE_URL, buildHeaders } from "./client";
 
 // ==================== USER FILE UPLOAD API ====================
 export const userFileAPI = {
@@ -18,7 +7,7 @@ export const userFileAPI = {
   uploadAvatar: async (formData) => {
     const response = await fetch(`${BASE_URL}/Users/upload-avatar`, {
       method: "POST",
-      headers: HEADERS.NGROK,
+      headers: buildHeaders({ "Content-Type": undefined }),
       body: formData,
     });
 
@@ -34,7 +23,7 @@ export const userFileAPI = {
   uploadLicense: async (formData) => {
     const response = await fetch(`${BASE_URL}/Users/upload-license`, {
       method: "POST",
-      headers: HEADERS.NGROK,
+      headers: buildHeaders({ "Content-Type": undefined }),
       body: formData,
     });
 
@@ -50,7 +39,7 @@ export const userFileAPI = {
   uploadIdCard: async (formData) => {
     const response = await fetch(`${BASE_URL}/Users/upload-idcard`, {
       method: "POST",
-      headers: HEADERS.NGROK,
+      headers: buildHeaders({ "Content-Type": undefined }),
       body: formData,
     });
 
@@ -69,7 +58,7 @@ export const driverLicenseFileAPI = {
   uploadLicense: async (formData) => {
     const response = await fetch(`${BASE_URL}/Driver_License/upload`, {
       method: "POST",
-      headers: HEADERS.NGROK,
+      headers: buildHeaders({ "Content-Type": undefined }),
       body: formData,
     });
 
@@ -88,7 +77,7 @@ export const driverLicenseFileAPI = {
 
     const response = await fetch(`${BASE_URL}/licenses/upload`, {
       method: "POST",
-      headers: HEADERS.NGROK,
+      headers: buildHeaders({ "Content-Type": undefined }),
       body: formData,
     });
 
@@ -108,7 +97,7 @@ export const cccdFileAPI = {
   uploadCCCD: async (formData) => {
     const response = await fetch(`${BASE_URL}/CCCD/upload`, {
       method: "POST",
-      headers: HEADERS.NGROK,
+      headers: buildHeaders({ "Content-Type": undefined }),
       body: formData,
     });
 
@@ -127,7 +116,7 @@ export const vehicleFileAPI = {
   uploadImage: async (formData) => {
     const response = await fetch(`${BASE_URL}/vehicles/upload-image`, {
       method: "POST",
-      headers: HEADERS.NGROK,
+      headers: buildHeaders({ "Content-Type": undefined }),
       body: formData,
     });
 
@@ -143,7 +132,7 @@ export const vehicleFileAPI = {
   uploadImages: async (formData) => {
     const response = await fetch(`${BASE_URL}/vehicles/upload-images`, {
       method: "POST",
-      headers: HEADERS.NGROK,
+      headers: buildHeaders({ "Content-Type": undefined }),
       body: formData,
     });
 
@@ -157,3 +146,4 @@ export const vehicleFileAPI = {
 };
 
 export default userFileAPI;
+

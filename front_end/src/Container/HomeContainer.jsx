@@ -244,6 +244,21 @@ const HomeContainer = () => {
       return;
     }
 
+    // 🔄 HYBRID VERIFICATION LOGIC - Supports both Mock BE and Real BE
+    // Mock BE Pattern: EXACT match - admin001, staff001, renter001, renter002 (3 digits)
+    // Real BE Pattern: Any other userId format (GUIDs, numbers, etc.)
+    const userId = String(user.userId || '');
+    const isMockAccount = /^(admin|staff|renter)\d{3}$/i.test(userId);
+
+    if (isMockAccount) {
+      console.log('✅ Mock BE account detected:', userId, '- Skipping API verification check');
+      navigate(`/booking/${vehicleId}`);
+      return;
+    }
+
+    // 🔍 Real BE account - Check verification via API
+    console.log('🔍 Real BE account detected:', userId, '- Checking verification via API');
+
     // Check verification status
     try {
       let licenseVerified = false;
