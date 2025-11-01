@@ -93,8 +93,8 @@ namespace BusinessLogicLayer.Services
         public async Task<(IEnumerable<VehicleViewDto> data, int total)> GetPagedAsync(VehicleListQuery q)
         {
             var query = _context.Vehicles
-                .Include(v => v.vehicle_model) // Include để search
                 .Include(v => v.station) // Include để search
+                .Include(v => v.vehicle_model) // Include để search
                 .AsQueryable();
 
             // Filter

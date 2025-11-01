@@ -36,14 +36,22 @@ namespace BusinessLogicLayer.Helpers
                 .ForMember(dest => dest.NumberOfSeats, opt => opt.MapFrom(src => src.number_of_seats))
                 .ForMember(dest => dest.Mileage, opt => opt.MapFrom(src => src.mileage))
                 // Rule 1.2: Lấy VehiclesCount
-                .ForMember(dest => dest.VehiclesCount, opt => opt.MapFrom(src => src.Vehicles.Count)); 
-        
-            
+                .ForMember(dest => dest.VehiclesCount, opt => opt.MapFrom(src => src.Vehicles.Count));
+
+
             // ==========  VEHICLE ==========
 
             // Map cho các DTO lồng nhau
-            CreateMap<Vehicle_Model, VehicleModelNestedDto>();
-            CreateMap<Station, StationNestedDto>();
+            CreateMap<Vehicle_Model, VehicleModelNestedDto>()
+                .ForMember(dest => dest.VehicleModelId, opt => opt.MapFrom(src => src.vehicle_model_id))
+                .ForMember(dest => dest.BrandName, opt => opt.MapFrom(src => src.brand_name))
+                .ForMember(dest => dest.ModelName, opt => opt.MapFrom(src => src.model_name))
+                .ForMember(dest => dest.NumberOfSeats, opt => opt.MapFrom(src => src.number_of_seats));
+            
+            CreateMap<Station, StationNestedDto>()
+                .ForMember(dest => dest.StationId, opt => opt.MapFrom(src => src.station_id))
+                .ForMember(dest => dest.StationName, opt => opt.MapFrom(src => src.station_name))
+                .ForMember(dest => dest.Address, opt => opt.MapFrom(src => src.address));
 
             // 1. Map Create DTO -> Entity Vehicle
             CreateMap<VehicleCreateDto, Vehicle>()
@@ -66,6 +74,7 @@ namespace BusinessLogicLayer.Helpers
                 .ForMember(dest => dest.Condition, opt => opt.MapFrom(src => src.condition))
                 .ForMember(dest => dest.CurrentMileage, opt => opt.MapFrom(src => src.current_mileage))
                 .ForMember(dest => dest.ReleaseYear, opt => opt.MapFrom(src => src.release_year))
+                
                 // Map các object lồng nhau (AutoMapper sẽ dùng 2 map lồng nhau ở trên)
                 .ForMember(dest => dest.VehicleModel, opt => opt.MapFrom(src => src.vehicle_model)) 
                 .ForMember(dest => dest.Station, opt => opt.MapFrom(src => src.station));
