@@ -1101,7 +1101,10 @@
         },
         "runtime": {
           "bin/placeholder/BusinessLogicLayer.dll": {}
-        }
+        },
+        "frameworkReferences": [
+          "Microsoft.AspNetCore.App"
+        ]
       },
       "DataAccessLayer/1.0.0": {
         "type": "project",
