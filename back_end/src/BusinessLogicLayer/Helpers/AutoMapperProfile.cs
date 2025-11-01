@@ -2,6 +2,7 @@ using AutoMapper;
 using DataAccessLayer.Models;
 using BusinessLogicLayer.DTOs.VehicleModels;
 using BusinessLogicLayer.DTOs.Vehicles;
+using BusinessLogicLayer.DTOs.RentalOrder;
 
 namespace BusinessLogicLayer.Helpers
 {
@@ -85,10 +86,39 @@ namespace BusinessLogicLayer.Helpers
                 .ForMember(dest => dest.is_available, opt => opt.MapFrom(src => src.IsAvailable))
                 .ForMember(dest => dest.battery_capacity, opt => opt.MapFrom(src => src.BatteryCapacity))
                 .ForMember(dest => dest.current_mileage, opt => opt.MapFrom(src => src.CurrentMileage));
-            
+
             CreateMap<VehicleLocationUpdateDto, Vehicle>()
                 .ForMember(dest => dest.station_id, opt => opt.MapFrom(src => src.StationId));
-        
+
+
+            // ========== RentalOrder ==========
+
+            // Map DTO lồng nhau (Lấy thông tin User gán vào RenterNestedDto)
+            CreateMap<Renter, RenterNestedDto>()
+                .ForMember(dest => dest.FullName, opt => opt.MapFrom(src => src.user.full_name))
+                .ForMember(dest => dest.Email, opt => opt.MapFrom(src => src.user.email));
+
+            // Map DTO lồng nhau cho Payment
+            CreateMap<Payment, PaymentNestedDto>();
+
+            // 1. Map Create DTO -> Entity RentalOrder
+            CreateMap<RentalOrderCreateDto, RentalOrder>()
+                .ForMember(dest => dest.vehicle_id, opt => opt.MapFrom(src => src.VehicleId))
+                .ForMember(dest => dest.pickup_station_id, opt => opt.MapFrom(src => src.PickupStationId))
+                .ForMember(dest => dest.return_station_id, opt => opt.MapFrom(src => src.ReturnStationId))
+                .ForMember(dest => dest.start_time, opt => opt.MapFrom(src => src.StartTime))
+                .ForMember(dest => dest.end_time, opt => opt.MapFrom(src => src.EndTime))
+                .ForMember(dest => dest.deposit_amount, opt => opt.MapFrom(src => src.DepositAmount));
+            
+            // 2. Map Entity RentalOrder -> View DTO
+            CreateMap<RentalOrder, RentalOrderViewDto>()
+                .ForMember(dest => dest.OrderId, opt => opt.MapFrom(src => src.order_id))
+                .ForMember(dest => dest.Status, opt => opt.MapFrom(src => src.status))
+                .ForMember(dest => dest.PickupStation, opt => opt.MapFrom(src => src.pickup_station))
+                .ForMember(dest => dest.ReturnStation, opt => opt.MapFrom(src => src.return_station))
+                .ForMember(dest => dest.Payments, opt => opt.MapFrom(src => src.Payments));
+                
+
         }
     }
 }
