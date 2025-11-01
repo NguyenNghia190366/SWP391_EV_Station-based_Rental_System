@@ -30,7 +30,10 @@ builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IVehicleModelsService, VehicleModelsService>();
 builder.Services.AddScoped<IVehicleService, VehicleService>();
+builder.Services.AddScoped<IRentalOrdersService, RentalOrdersService>();
 
+// THÊM DÒNG NÀY (Để đọc User ID từ Token):
+builder.Services.AddHttpContextAccessor();
 builder.Services.AddAutoMapper(typeof(BusinessLogicLayer.Helpers.AutoMapperProfile)); // Đăng ký AutoMapper
 
 // -----------------------------
