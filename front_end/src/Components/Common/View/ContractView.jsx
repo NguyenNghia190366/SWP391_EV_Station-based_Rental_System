@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import './ContractView.css';
 
 const ContractView = ({ 
   contractData, 
