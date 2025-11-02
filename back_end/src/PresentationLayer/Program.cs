@@ -31,6 +31,7 @@ builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IVehicleModelsService, VehicleModelsService>();
 builder.Services.AddScoped<IVehicleService, VehicleService>();
 builder.Services.AddScoped<IRentalOrdersService, RentalOrdersService>();
+builder.Services.AddScoped<IContractsService, ContractsService>();
 
 // THÊM DÒNG NÀY (Để đọc User ID từ Token):
 builder.Services.AddHttpContextAccessor();
