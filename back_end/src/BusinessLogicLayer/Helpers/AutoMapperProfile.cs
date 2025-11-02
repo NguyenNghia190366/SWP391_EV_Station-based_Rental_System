@@ -3,6 +3,11 @@ using DataAccessLayer.Models;
 using BusinessLogicLayer.DTOs.VehicleModels;
 using BusinessLogicLayer.DTOs.Vehicles;
 using BusinessLogicLayer.DTOs.RentalOrder;
+using BusinessLogicLayer.DTOs.Contract;
+using BusinessLogicLayer.DTOs.Staff;
+using BusinessLogicLayer.DTOs.Renter;
+using BusinessLogicLayer.DTOs.Vehicle;
+// using BusinessLogicLayer.DTOs.Contract;
 
 namespace BusinessLogicLayer.Helpers
 {
@@ -48,7 +53,7 @@ namespace BusinessLogicLayer.Helpers
                 .ForMember(dest => dest.BrandName, opt => opt.MapFrom(src => src.brand_name))
                 .ForMember(dest => dest.ModelName, opt => opt.MapFrom(src => src.model_name))
                 .ForMember(dest => dest.NumberOfSeats, opt => opt.MapFrom(src => src.number_of_seats));
-            
+
             CreateMap<Station, StationNestedDto>()
                 .ForMember(dest => dest.StationId, opt => opt.MapFrom(src => src.station_id))
                 .ForMember(dest => dest.StationName, opt => opt.MapFrom(src => src.station_name))
@@ -64,7 +69,7 @@ namespace BusinessLogicLayer.Helpers
                 .ForMember(dest => dest.current_mileage, opt => opt.MapFrom(src => src.CurrentMileage))
                 .ForMember(dest => dest.img_car_url, opt => opt.MapFrom(src => src.ImgCarUrl))
                 .ForMember(dest => dest.condition, opt => opt.MapFrom(src => src.Condition));
-            
+
             // 2. Map Entity Vehicle -> View DTO
             CreateMap<Vehicle, VehicleViewDto>()
                 .ForMember(dest => dest.VehicleId, opt => opt.MapFrom(src => src.vehicle_id))
@@ -75,9 +80,9 @@ namespace BusinessLogicLayer.Helpers
                 .ForMember(dest => dest.Condition, opt => opt.MapFrom(src => src.condition))
                 .ForMember(dest => dest.CurrentMileage, opt => opt.MapFrom(src => src.current_mileage))
                 .ForMember(dest => dest.ReleaseYear, opt => opt.MapFrom(src => src.release_year))
-                
+
                 // Map các object lồng nhau (AutoMapper sẽ dùng 2 map lồng nhau ở trên)
-                .ForMember(dest => dest.VehicleModel, opt => opt.MapFrom(src => src.vehicle_model)) 
+                .ForMember(dest => dest.VehicleModel, opt => opt.MapFrom(src => src.vehicle_model))
                 .ForMember(dest => dest.Station, opt => opt.MapFrom(src => src.station));
 
             // 3. Map Update DTOs (Dùng cho PUT/PATCH)
@@ -109,7 +114,7 @@ namespace BusinessLogicLayer.Helpers
                 .ForMember(dest => dest.start_time, opt => opt.MapFrom(src => src.StartTime))
                 .ForMember(dest => dest.end_time, opt => opt.MapFrom(src => src.EndTime))
                 .ForMember(dest => dest.deposit_amount, opt => opt.MapFrom(src => src.DepositAmount));
-            
+
             // 2. Map Entity RentalOrder -> View DTO
             CreateMap<RentalOrder, RentalOrderViewDto>()
                 .ForMember(dest => dest.OrderId, opt => opt.MapFrom(src => src.order_id))
@@ -117,7 +122,37 @@ namespace BusinessLogicLayer.Helpers
                 .ForMember(dest => dest.PickupStation, opt => opt.MapFrom(src => src.pickup_station))
                 .ForMember(dest => dest.ReturnStation, opt => opt.MapFrom(src => src.return_station))
                 .ForMember(dest => dest.Payments, opt => opt.MapFrom(src => src.Payments));
-                
+
+            // ==========  CONTRACT ==========
+            // --- Mapping cho Contract ---
+            CreateMap<Contract, ContractViewDto>()
+                // Map các DTO lồng nhau
+                .ForMember(dest => dest.StaffInfo, opt => opt.MapFrom(src => src.staff))
+                .ForMember(dest => dest.RenterInfo, opt => opt.MapFrom(src => src.order.renter))
+                .ForMember(dest => dest.VehicleInfo, opt => opt.MapFrom(src => src.order.vehicle))
+                .ForMember(dest => dest.OrderInfo, opt => opt.MapFrom(src => src.order));
+
+            // --- Mapping cho các DTO tóm tắt (Brief) ---
+
+            // Staff -> StaffBriefDto
+            CreateMap<Staff, StaffBriefDto>()
+                .ForMember(dest => dest.FullName, opt => opt.MapFrom(src => src.user.full_name))
+                .ForMember(dest => dest.Email, opt => opt.MapFrom(src => src.user.email));
+
+            // Renter -> RenterBriefDto
+            CreateMap<Renter, RenterBriefDto>()
+                .ForMember(dest => dest.FullName, opt => opt.MapFrom(src => src.user.full_name))
+                .ForMember(dest => dest.Email, opt => opt.MapFrom(src => src.user.email))
+                .ForMember(dest => dest.PhoneNumber, opt => opt.MapFrom(src => src.user.phone_number));
+
+            // Vehicle -> VehicleBriefDto
+            CreateMap<Vehicle, VehicleBriefDto>()
+                .ForMember(dest => dest.BrandName, opt => opt.MapFrom(src => src.vehicle_model.brand_name))
+                .ForMember(dest => dest.ModelName, opt => opt.MapFrom(src => src.vehicle_model.model_name));
+
+            // RentalOrder -> RentalOrderBriefDto
+            // Các trường tên giống nhau, AutoMapper tự xử lý
+            CreateMap<RentalOrder, RentalOrderBriefDto>();
 
         }
     }
