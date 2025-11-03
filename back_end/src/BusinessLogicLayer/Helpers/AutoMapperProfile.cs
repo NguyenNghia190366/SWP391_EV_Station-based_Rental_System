@@ -7,6 +7,8 @@ using BusinessLogicLayer.DTOs.Contract;
 using BusinessLogicLayer.DTOs.Staff;
 using BusinessLogicLayer.DTOs.Renter;
 using BusinessLogicLayer.DTOs.Vehicle;
+using BusinessLogicLayer.DTOs.FeeType;
+using BusinessLogicLayer.DTOs.ExtraFee;
 // using BusinessLogicLayer.DTOs.Contract;
 
 namespace BusinessLogicLayer.Helpers
@@ -153,6 +155,39 @@ namespace BusinessLogicLayer.Helpers
             // RentalOrder -> RentalOrderBriefDto
             // Các trường tên giống nhau, AutoMapper tự xử lý
             CreateMap<RentalOrder, RentalOrderBriefDto>();
+
+
+            // ========== FeeType (Admin) ==========
+            
+            // Map Create DTO -> Entity
+            CreateMap<FeeTypeCreateDto, FeeType>()
+                .ForMember(dest => dest.FeeType1, opt => opt.MapFrom(src => src.FeeType))
+                .ForMember(dest => dest.amount, opt => opt.MapFrom(src => src.Amount));
+            
+            // Map Update DTO -> Entity
+            CreateMap<FeeTypeUpdateDto, FeeType>()
+                .ForMember(dest => dest.FeeType1, opt => opt.MapFrom(src => src.FeeType))
+                .ForMember(dest => dest.amount, opt => opt.MapFrom(src => src.Amount));
+
+            // Map Entity -> View DTO
+            CreateMap<FeeType, FeeTypeViewDto>()
+                .ForMember(dest => dest.FeeTypeId, opt => opt.MapFrom(src => src.FeeType_id))
+                .ForMember(dest => dest.FeeType, opt => opt.MapFrom(src => src.FeeType1))
+                .ForMember(dest => dest.Amount, opt => opt.MapFrom(src => src.amount));
+
+            // ========== ExtraFee (Staff) ==========
+
+            // Map Create DTO -> Entity
+            CreateMap<ExtraFeeCreateDto, ExtraFee>()
+                .ForMember(dest => dest.order_id, opt => opt.MapFrom(src => src.OrderId))
+                .ForMember(dest => dest.FeeType_id, opt => opt.MapFrom(src => src.FeeTypeId))
+                .ForMember(dest => dest.description, opt => opt.MapFrom(src => src.Description));
+            
+            // Map Entity -> View DTO (Mapping này phức tạp hơn, 
+            // vì cần join, tớ sẽ dùng 'Select' trong Service để rõ ràng)
+
+
+
 
         }
     }
