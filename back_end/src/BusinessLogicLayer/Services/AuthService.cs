@@ -74,7 +74,7 @@ namespace BusinessLogicLayer.Services
             }
 
             // --- BƯỚC 4: TẠO TOKEN VÀ TRẢ VỀ ---
-            return CreateLoginResponse(newUser);
+            return await CreateLoginResponse(newUser);
         }
 
         public async Task<LoginResponse?> LoginAsync(LoginRequest request)
@@ -101,14 +101,14 @@ namespace BusinessLogicLayer.Services
                 return null; // Sai mật khẩu
             }
 
-            // Kiểm tra trạng thái tài khoản [cite: 14]
+            // Kiểm tra trạng thái tài khoản 
             if (!"Active".Equals(user.status, StringComparison.OrdinalIgnoreCase))
             {
                 return null; // Tài khoản không hoạt động
             }
 
             // --- BƯỚC 3: TẠO TOKEN VÀ TRẢ VỀ ---
-            return CreateLoginResponse(user);
+            return await CreateLoginResponse(user);
         }
 
         // --- PRIVATE HELPER METHODS ---
@@ -118,21 +118,56 @@ namespace BusinessLogicLayer.Services
         /// 2 HÀM LoginAsync VÀ RegisterAsync đều:  tạo token + return LoginResponse
         /// nên tạo "CreateLoginResponse" tách logic này ra thành hàm riêng để tái sử dụng.
         /// </summary>
-        private LoginResponse CreateLoginResponse(User user)
+        private async Task<LoginResponse> CreateLoginResponse(User user)
         {
-            var token = GenerateJwt(user.user_id, user.role);
+            int? renterId = null;
+            int? staffId = null;
+
+            // B1: tạo list claims
+            var claims = new List<Claim>
+            {
+                new Claim(JwtRegisteredClaimNames.Sub, user.user_id.ToString()),
+                new Claim(ClaimTypes.Role, user.role ?? "RENTER"), // Phòng vệ null role
+                new Claim("UserId", user.user_id.ToString())
+            };
+
+            // B2: Truy cập RenterId hoặc StaffId và thêm vào Claims
+            if (user.role == "RENTER")
+            {
+                var renter = await _db.Renters.AsNoTracking().FirstOrDefaultAsync(r => r.user_id == user.user_id);
+                if (renter != null)
+                {
+                    renterId = renter.renter_id;
+                    claims.Add(new Claim("RenterId", renterId.Value.ToString())); // Add RenterId vào token
+                }
+            }
+            else if (user.role == "STAFF")
+            {
+                var staff = await _db.Staff.AsNoTracking().FirstOrDefaultAsync(s => s.user_id == user.user_id);
+                if (staff != null)
+                {
+                    staffId = staff.staff_id;
+                    claims.Add(new Claim("StaffId", staffId.Value.ToString())); // Add StaffId vào token
+                }
+            }
+            // B3: Tạo token từ danh sách claims
+            var token = GenerateJwt(claims);
+            // B4: Trả về DTO mới
             return new LoginResponse
             {
                 Token = token,
-                Role = user.role,
-                UserId = user.user_id
+                Role = user.role ?? "RENTER",
+                UserId = user.user_id,
+                RenterId = renterId, // Trả về cho FE
+                StaffId = staffId   // Trả về cho FE
             };
+                
         }
 
         /// <summary>
         /// Tạo chuỗi JWT token.
         /// </summary>
-        private string GenerateJwt(int userId, string role)
+        private string GenerateJwt(IEnumerable<Claim> claims)
         {
             var jwtSettings = _cfg.GetSection("Jwt");
             var keyString = jwtSettings["Key"];
@@ -144,18 +179,11 @@ namespace BusinessLogicLayer.Services
 
             var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(keyString));
             var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
-
-            var claims = new[]
-            {
-                new Claim(JwtRegisteredClaimNames.Sub, userId.ToString()),
-                // Dù role đã được gán tường minh, việc kiểm tra null ở đây vẫn là một lớp phòng vệ tốt.
-                new Claim(ClaimTypes.Role, role ?? "RENTER")
-            };
-
+            
             var token = new JwtSecurityToken(
                 issuer: jwtSettings["Issuer"],
                 audience: jwtSettings["Audience"],
-                claims: claims,
+                claims: claims, // Dùng danh sách claims dc truyền vào
                 expires: DateTime.UtcNow.AddMinutes(double.Parse(jwtSettings["ExpiresMinutes"]!)),
                 signingCredentials: creds
             );
