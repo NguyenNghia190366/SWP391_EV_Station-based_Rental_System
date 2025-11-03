@@ -67,7 +67,7 @@ const HomeView = ({
         
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative z-10">
           <h2 className="text-4xl md:text-6xl font-extrabold mb-6 animate-fadeInUp">
-            ⚡ Thuê xe điện dễ dàng
+            Thuê xe điện dễ dàng
           </h2>
           <p className="text-xl md:text-2xl text-white/90 mb-10 animate-fadeInUp" style={{ animationDelay: '0.1s' }}>
             Trải nghiệm tương lai của việc di chuyển với xe điện cao cấp
@@ -78,7 +78,7 @@ const HomeView = ({
             <div className="flex gap-3">
               <input
                 type="text"
-                placeholder="🔍 Tìm kiếm xe điện..."
+                placeholder="Tìm kiếm xe điện..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="flex-1 px-6 py-4 rounded-xl text-gray-800 text-lg border-2 border-white/30 focus:border-yellow-300 focus:ring-4 focus:ring-yellow-200 outline-none transition-all placeholder-gray-400"
@@ -97,7 +97,7 @@ const HomeView = ({
               onClick={() => onNavigate("/vehicles")}
               className="px-8 py-4 bg-white text-indigo-600 font-bold rounded-xl hover:bg-yellow-300 hover:text-gray-900 hover:shadow-2xl hover:-translate-y-1 transition-all duration-300"
             >
-              🚗 Khám phá ngay
+              Khám phá ngay
             </button>
             {typeof onFindNearest === 'function' && (
               <button
@@ -105,7 +105,7 @@ const HomeView = ({
                 disabled={nearestSearching}
                 className="px-8 py-4 bg-white/10 backdrop-blur-md border-2 border-white/30 text-white font-bold rounded-xl hover:bg-white/20 hover:shadow-2xl hover:-translate-y-1 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                {nearestSearching ? '🔄 Đang tìm...' : '📍 Tìm trạm thuê gần nhất'}
+                {nearestSearching ? 'Đang tìm...' : 'Tìm trạm thuê gần nhất'}
               </button>
             )}
           </div>
@@ -116,7 +116,7 @@ const HomeView = ({
       <section className="py-16 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <h2 className="text-3xl md:text-4xl font-extrabold text-gray-900 mb-8 text-center">
-            📍 Trạm thuê xe gần bạn
+            Trạm thuê xe gần bạn
           </h2>
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             {/* Map */}
@@ -140,7 +140,7 @@ const HomeView = ({
       <section className="py-16 bg-gradient-to-br from-gray-50 to-blue-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <h2 className="text-3xl md:text-4xl font-extrabold text-gray-900 mb-8 text-center">
-            ⭐ Xe nổi bật
+            Xe nổi bật
           </h2>
           
           {featuredVehicles.length === 0 ? (
@@ -163,9 +163,9 @@ const HomeView = ({
                     <h3 className="text-xl font-bold text-gray-900 mb-2">{vehicle.name}</h3>
                     <p className="text-indigo-600 font-semibold text-sm mb-4 uppercase">{vehicle.type}</p>
                     <div className="flex justify-between items-center text-sm text-gray-600 mb-4">
-                      <span className="flex items-center gap-1">💵 ${vehicle.price}/ngày</span>
-                      <span className="flex items-center gap-1">🚗 {vehicle.range} km</span>
-                      <span className="flex items-center gap-1">⭐ {vehicle.rating}</span>
+                      <span className="flex items-center gap-1">${vehicle.price}/ngày</span>
+                      <span className="flex items-center gap-1">{vehicle.range} km</span>
+                      <span className="flex items-center gap-1">{vehicle.rating}</span>
                     </div>
                     <div className="flex gap-2">
                       <button 
@@ -200,15 +200,15 @@ const HomeView = ({
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             <div className="text-center">
               <h3 className="text-5xl md:text-6xl font-extrabold mb-2">{statistics.totalVehicles}+</h3>
-              <p className="text-xl text-white/90">🚗 Xe điện</p>
+              <p className="text-xl text-white/90">Xe điện</p>
             </div>
             <div className="text-center">
               <h3 className="text-5xl md:text-6xl font-extrabold mb-2">{statistics.totalBookings}+</h3>
-              <p className="text-xl text-white/90">📋 Lượt thuê</p>
+              <p className="text-xl text-white/90">Lượt thuê</p>
             </div>
             <div className="text-center">
               <h3 className="text-5xl md:text-6xl font-extrabold mb-2">{statistics.happyCustomers}+</h3>
-              <p className="text-xl text-white/90">😊 Khách hàng hài lòng</p>
+              <p className="text-xl text-white/90">Khách hàng hài lòng</p>
             </div>
           </div>
         </div>
@@ -219,7 +219,7 @@ const HomeView = ({
         <section className="py-16 bg-white">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <h2 className="text-3xl md:text-4xl font-extrabold text-gray-900 mb-12 text-center">
-              💬 Đánh giá từ khách hàng
+              Đánh giá từ khách hàng
             </h2>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {testimonials.map((testimonial) => (
@@ -238,7 +238,7 @@ const HomeView = ({
                     </div>
                   </div>
                   <p className="text-gray-700 leading-relaxed mb-3">{testimonial.comment}</p>
-                  <span className="text-sm text-gray-500">📅 {testimonial.date}</span>
+                  <span className="text-sm text-gray-500">{testimonial.date}</span>
                 </div>
               ))}
             </div>

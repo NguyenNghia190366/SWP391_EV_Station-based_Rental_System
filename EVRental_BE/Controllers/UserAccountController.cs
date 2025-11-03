@@ -93,6 +93,42 @@ namespace EVRental_BE.Controllers
                     isVerified = false,
                     avatar = (string?)null,
                     createdAt = DateTime.UtcNow.AddDays(-5)
+                },
+                new {
+                    userId = "renter005",
+                    email = "renter005@gmail.com",
+                    password = "Renter@123",
+                    userName = "Nguyễn Thị Test 1",
+                    fullName = "Nguyễn Thị Test 1",
+                    role = "RENTER",
+                    phone = "0934567890",
+                    isVerified = false,
+                    avatar = (string?)null,
+                    createdAt = DateTime.UtcNow.AddDays(-3)
+                },
+                new {
+                    userId = "renter006",
+                    email = "renter006@gmail.com",
+                    password = "Renter@123",
+                    userName = "Trần Văn Test 2",
+                    fullName = "Trần Văn Test 2",
+                    role = "RENTER",
+                    phone = "0945678901",
+                    isVerified = false,
+                    avatar = (string?)null,
+                    createdAt = DateTime.UtcNow.AddDays(-2)
+                },
+                new {
+                    userId = "renter007",
+                    email = "renter007@gmail.com",
+                    password = "Renter@123",
+                    userName = "Lê Thị Test 3",
+                    fullName = "Lê Thị Test 3",
+                    role = "RENTER",
+                    phone = "0956789012",
+                    isVerified = false,
+                    avatar = (string?)null,
+                    createdAt = DateTime.UtcNow.AddDays(-1)
                 }
             };
 

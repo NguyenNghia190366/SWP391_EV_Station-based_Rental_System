@@ -2,7 +2,7 @@
 
 // 🔧 Get BASE_URL from environment variable (.env file)
 // Switch backend by editing .env file
-const BASE_URL = import.meta.env.VITE_API_BASE_URL || "/api";
+const BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
 // Log current API endpoint (helpful for debugging)
 console.log("🌐 [API Client] Using BASE_URL:", BASE_URL);
@@ -46,7 +46,18 @@ export const handleApiError = (response, errorBody) => {
   if (status === 404) throw new Error("Không tìm thấy tài nguyên yêu cầu.");
   if (status >= 500) throw new Error("Lỗi máy chủ. Vui lòng thử lại sau.");
 
-  const errorMessage = errorBody?.message || errorBody?.error || errorBody || `HTTP ${status}: ${response.statusText}`;
+  // Make sure the thrown Error contains a readable string (not [object Object])
+  let errorMessage = null;
+  if (!errorBody) {
+    errorMessage = `HTTP ${status}: ${response.statusText}`;
+  } else if (typeof errorBody === "string") {
+    errorMessage = errorBody;
+  } else if (typeof errorBody === "object") {
+    // Prefer human-friendly fields, fall back to JSON string
+    errorMessage = errorBody.message || errorBody.error || JSON.stringify(errorBody);
+  } else {
+    errorMessage = String(errorBody);
+  }
   throw new Error(errorMessage);
 };
 

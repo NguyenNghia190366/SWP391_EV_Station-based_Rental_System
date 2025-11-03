@@ -7,12 +7,13 @@ export const userAPI = {
   registerUser: async (newUser) => {
     return apiRequest(`${BASE_URL}/Users/Register`, {
       method: "POST",
+      headers: buildHeaders({ "Content-Type": "application/json" }),
       body: JSON.stringify(newUser),
     });
   },
 
   loginUser: async (credentials) => {
-    console.log("🔐 [authAPI] Calling login with:", credentials);
+    console.log("[authAPI] Calling login with:", credentials);
     const data = await apiRequest(`${BASE_URL}/UserAccount/login`, {
       method: "POST",
       headers: buildHeaders({ "Content-Type": "application/json" }),

@@ -4,11 +4,36 @@ import { BASE_URL, apiRequest, buildHeaders } from "./client";
 // ==================== DRIVER LICENSE VERIFICATION API ====================
 export const driverLicenseVerifyAPI = {
   // RENTER: Upload driver license for verification
+  // Backend teammate's endpoint: POST /api/DriverLicenses
   uploadLicense: async (licenseData) => {
-    return apiRequest(`${BASE_URL}/Driver_License/upload`, {
+    // Send minimal PascalCase payload expected by backend validation
+    // Backend validated earlier: Renter.User is required => include UserId only
+    const backendData = {
+      DriverLicenseNumber: licenseData.driverLicenseNumber || licenseData.licenseNumber || "PENDING",
+      UrlDriverLicense: licenseData.urlDriverLicense || licenseData.frontImageUrl || "",
+      Renter: {
+        RenterId: licenseData.renterId || 0,
+        User: {
+          UserId: licenseData.userId || 0
+        }
+      }
+    }
+
+    // Log summary (hide full base64 in log)
+    const frontSize = (String(backendData.UrlDriverLicense).length / 1024).toFixed(2)
+    console.log("🔄 Sending PascalCase payload (minimal Renter.User):", {
+      DriverLicenseNumber: backendData.DriverLicenseNumber,
+      UrlDriverLicense: `[Base64 ${frontSize} KB]`,
+      Renter: {
+        RenterId: backendData.Renter.RenterId,
+        User: { UserId: backendData.Renter.User.UserId }
+      }
+    })
+
+    return apiRequest(`${BASE_URL}/DriverLicenses`, {
       method: "POST",
       headers: buildHeaders({ "Content-Type": "application/json" }),
-      body: JSON.stringify(licenseData),
+      body: JSON.stringify(backendData),
     });
   },
 
@@ -16,12 +41,14 @@ export const driverLicenseVerifyAPI = {
   getPending: async () => {
     return apiRequest(`${BASE_URL}/Driver_License/pending`, {
       method: "GET",
+
+      
     });
   },
 
   // STAFF: Get license verification by ID
   getById: async (verificationId) => {
-    return apiRequest(`${BASE_URL}/Driver_License/verification/${verificationId}`, {
+    return apiRequest(`${BASE_URL}/DriverLicenses/${verificationId}`, {
       method: "GET",
     });
   },
@@ -65,8 +92,12 @@ export const driverLicenseVerifyAPI = {
 // ==================== CCCD VERIFICATION API ====================
 export const cccdVerifyAPI = {
   // RENTER: Upload CCCD for verification
+  // Backend teammate's endpoint: POST /api/Cccds
+  // ⚠️ WARNING: Backend expects nested renter object, not string!
   uploadCCCD: async (cccdData) => {
-    return apiRequest(`${BASE_URL}/CCCD/upload`, {
+
+    
+    return apiRequest(`${BASE_URL}/Cccds/UploadCanCuoc`, {
       method: "POST",
       headers: buildHeaders({ "Content-Type": "application/json" }),
       body: JSON.stringify(cccdData),
@@ -82,7 +113,7 @@ export const cccdVerifyAPI = {
 
   // STAFF: Get CCCD verification by ID
   getById: async (verificationId) => {
-    return apiRequest(`${BASE_URL}/CCCD/verification/${verificationId}`, {
+    return apiRequest(`${BASE_URL}/Cccds/${verificationId}`, {
       method: "GET",
     });
   },
@@ -100,7 +131,7 @@ export const cccdVerifyAPI = {
   reject: async (verificationId, rejectData) => {
     return apiRequest(`${BASE_URL}/CCCD/reject/${verificationId}`, {
       method: "POST",
-      headers: buildHeaders({ "Content-Type": "application/json" }),
+      headers: buildHeaders({ "Content-Type": "multipart/form-data" }),
       body: JSON.stringify(rejectData),
     });
   },

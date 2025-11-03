@@ -12,32 +12,30 @@ const RegisterContainer = () => {
     setLoading(true);
 
     try {
-      // Chuẩn bị dữ liệu user
+      // Chuẩn bị dữ liệu theo schema BE yêu cầu
       const newUser = {
         fullName: values.name,
         email: values.email,
         phoneNumber: values.phone,
-        address: values.address || "chưa cập nhật",
         password: values.password,
-        role: "renter",
-        isVerified: false,
-        createdAt: new Date().toISOString(),
+        confirmPassword: values.confirm, // Map từ form field 'confirm'
+        dateOfBirth: values.dateOfBirth ? values.dateOfBirth.format("YYYY-MM-DD") : "2000-01-01",
+        address: values.address || "chưa cập nhật"
       };
 
-      console.log(" Sending new user:", newUser);
+      console.log("📝 Sending new user:", newUser);
 
       const result = await userAPI.registerUser(newUser);
       
       if (result) {
-        message.success(" Đăng ký thành công!");
-        alert("Welcome! " + result.fullName);
+        message.success("✅ Đăng ký thành công!");
         navigate("/login");
       } else {
         message.error("Không thể tạo tài khoản, vui lòng thử lại!");
       }
     } catch (error) {
-      console.error(" Register error:", error);
-      message.error("Lỗi khi đăng ký. Kiểm tra console để xem chi tiết.");
+      console.error("❌ Register error:", error);
+      message.error(error.message || "Lỗi khi đăng ký. Vui lòng thử lại!");
     } finally {
       setLoading(false);
     }

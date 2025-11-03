@@ -112,21 +112,36 @@ export const useUserAPI = () => {
         body: JSON.stringify(credentials),
       });
 
+      // Xử lý lỗi HTTP status
       if (!res.ok) {
+        // Xử lý lỗi 401 Unauthorized (sai mật khẩu)
+        if (res.status === 401) {
+          throw new Error("Email hoặc mật khẩu không chính xác!");
+        }
+        
+        // Xử lý lỗi 404 Not Found (email không tồn tại)
+        if (res.status === 404) {
+          throw new Error("Email không tồn tại trong hệ thống!");
+        }
+
+        // Thử lấy error message từ response
         try {
           const errorData = await res.json();
-          throw new Error(errorData.message || "Đăng nhập thất bại");
-        } catch {
-          throw new Error(`Đăng nhập thất bại: ${res.status}`);
+          throw new Error(errorData.message || errorData.error || `Lỗi ${res.status}: Đăng nhập thất bại`);
+        } catch (jsonError) {
+          // Nếu không parse được JSON, throw error với status code
+          throw new Error(`Lỗi ${res.status}: Đăng nhập thất bại`);
         }
       }
 
+      // Parse response thành công
       try {
         const data = await res.json();
-        console.log(data);
+        console.log("✅ Login successful:", data);
         if (!data) throw new Error("Không nhận được dữ liệu từ server");
         return data;
-      } catch {
+      } catch (parseError) {
+        console.error("❌ Parse error:", parseError);
         throw new Error("Lỗi xử lý dữ liệu đăng nhập");
       }
     });

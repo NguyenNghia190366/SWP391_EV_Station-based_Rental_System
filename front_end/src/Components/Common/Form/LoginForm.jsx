@@ -1,5 +1,5 @@
 import React from "react";
-import { Form, Input, Button, Card, Typography, Checkbox } from "antd";
+import { Form, Input, Button, Card, Typography, Checkbox, Alert } from "antd";
 import {
   LockOutlined,
   MailOutlined,
@@ -9,7 +9,7 @@ import { Link } from "react-router-dom";
 
 const { Title, Text } = Typography;
 
-const LoginForm = ({ onSubmit, loading }) => {
+const LoginForm = ({ onSubmit, loading, error }) => {
   const [form] = Form.useForm();
 
   return (
@@ -71,6 +71,18 @@ const LoginForm = ({ onSubmit, loading }) => {
               className="rounded-lg"
             />
           </Form.Item>
+
+          {/* Hiển thị lỗi đăng nhập */}
+          {error && (
+            <Alert
+              message="Đăng nhập thất bại"
+              description={error}
+              type="error"
+              showIcon
+              closable
+              className="mb-4 rounded-lg"
+            />
+          )}
 
           <div className="flex items-center justify-between mb-4">
             <Form.Item name="remember" valuePropName="checked" noStyle>

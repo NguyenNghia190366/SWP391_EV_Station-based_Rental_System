@@ -6,11 +6,16 @@ export const normalizeUserData = (user) => {
   if (!user) return null;
 
   // Generate a temporary userId if not provided (for BE real)
-  const tempUserId = user.userId || user.id || `temp_${user.email?.split('@')[0]}_${Date.now()}`;
+  const tempUserId = user.userId || user.user_id || `temp_${user.email?.split('@')[0]}_${Date.now()}`;
 
   return {
-    // IDs
-    userId: tempUserId,
+    // IDs - Support both snake_case (backend) and camelCase (frontend)
+  userId: user.user_id || user.userId || tempUserId,
+  user_id: user.user_id || user.userId || tempUserId, // Keep snake_case for backend compatibility
+  renterId: user.renter_id || user.renterId || null,
+  renter_id: user.renter_id || user.renterId || null, // Keep snake_case for backend compatibility
+  staffId: user.staff_id || user.staffId || null,
+  staff_id: user.staff_id || user.staffId || null, // Keep snake_case for backend compatibility
     
     // Names
     fullName: user.fullName || user.userName || user.email?.split('@')[0] || '',
@@ -23,8 +28,8 @@ export const normalizeUserData = (user) => {
     
     // Role & Status - KEEP UPPERCASE for consistency with backend
     role: (user.role || '').toUpperCase(), // Always uppercase: ADMIN, STAFF, RENTER
-    isVerified: user.isVerified !== undefined ? user.isVerified : (user.status === 'active' || true),
-    status: user.status || (user.isVerified ? 'active' : 'inactive'),
+    isVerified: user.isVerified !== undefined ? user.isVerified : false, // Default to false for new users
+    status: user.status || 'inactive', // Default to inactive until verified
     
     // Additional Info
     avatar: user.avatar || null,
