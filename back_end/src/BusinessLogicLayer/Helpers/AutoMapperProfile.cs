@@ -9,6 +9,7 @@ using BusinessLogicLayer.DTOs.Renter;
 using BusinessLogicLayer.DTOs.Vehicle;
 using BusinessLogicLayer.DTOs.FeeType;
 using BusinessLogicLayer.DTOs.ExtraFee;
+using BusinessLogicLayer.DTOs.Payment;
 // using BusinessLogicLayer.DTOs.Contract;
 
 namespace BusinessLogicLayer.Helpers
@@ -187,7 +188,14 @@ namespace BusinessLogicLayer.Helpers
             // vì cần join, tớ sẽ dùng 'Select' trong Service để rõ ràng)
 
 
-
+            // ========== PAYMENT ==========
+            CreateMap<Payment, PaymentViewDto>()
+                .ForMember(dest => dest.PaymentId, opt => opt.MapFrom(src => src.payment_id))
+                .ForMember(dest => dest.OrderId, opt => opt.MapFrom(src => src.order_id))
+                .ForMember(dest => dest.Amount, opt => opt.MapFrom(src => src.amount))
+                .ForMember(dest => dest.PaymentMethod, opt => opt.MapFrom(src => src.payment_method))
+                .ForMember(dest => dest.PaymentDate, opt => opt.MapFrom(src => src.payment_date))
+                .ForMember(dest => dest.ExternalRef, opt => opt.MapFrom(src => src.external_ref));
 
         }
     }
