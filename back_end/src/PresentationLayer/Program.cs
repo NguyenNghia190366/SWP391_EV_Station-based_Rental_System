@@ -25,6 +25,12 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 // -----------------------------
 builder.Services.AddControllers();
 
+// -----------------------------
+// Config MomoSettings from appsettings.json
+// -----------------------------
+builder.Services.Configure<MomoSettings>(builder.Configuration.GetSection("Momo"));
+
+
 // Add service 
 builder.Services.AddScoped<IStationService, StationService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
@@ -34,10 +40,15 @@ builder.Services.AddScoped<IVehicleService, VehicleService>();
 builder.Services.AddScoped<IRentalOrdersService, RentalOrdersService>();
 builder.Services.AddScoped<IContractsService, ContractsService>();
 builder.Services.AddScoped<IExtrasService, ExtrasService>();
+builder.Services.AddScoped<IPaymentsService, PaymentsService>();
 
-// THÊM DÒNG NÀY (Để đọc User ID từ Token):
+
+// (Để đọc User ID từ Token):
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddAutoMapper(typeof(AutoMapperProfile)); // Đăng ký AutoMapper
+
+// Đăng ký HttpClientFactory (cách tốt nhất để gọi API).
+builder.Services.AddHttpClient();
 
 // -----------------------------
 // Authentication + Authorization (JWT)
