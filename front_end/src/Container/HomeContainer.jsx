@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import HomeView from "../Components/Common/View/HomeView";
 import { stationAPI, driverLicenseAPI, cccdVerificationAPI } from "../api/api";
 import { findNearestStation } from "../utils/geo";
+import { clearUserData } from "../utils/auth";
 import BookingVerificationModal from "../Components/Common/Modal/BookingVerificationModal";
 
 const HomeContainer = () => {
@@ -194,9 +195,13 @@ const HomeContainer = () => {
   }, []);
 
   const handleLogout = () => {
-    localStorage.removeItem('currentUser');
-    localStorage.removeItem('isLoggedIn');
+    // Sử dụng helper function để xóa toàn bộ user data
+    clearUserData();
+    
+    // Reset state
     setUser(null);
+    
+    // Redirect về trang login
     navigate('/login');
   };
 

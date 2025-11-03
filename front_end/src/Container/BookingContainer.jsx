@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import BookingView from '../Components/Common/View/BookingView';
-import { vehicleAPI } from '../api/vehicleAPI';
+import { vehicleAPI } from '../api/useEV';
 
 const BookingContainer = () => {
   const navigate = useNavigate();

@@ -15,10 +15,12 @@ message.config({
 const LoginContainer = () => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
 
   const handleSubmit = async (values) => {
     const { email, password } = values;
     setLoading(true);
+    setError(""); // Reset error khi submit lại
 
     try {
       // Normalize email to lowercase để tránh case-sensitive issue
@@ -86,12 +88,28 @@ const LoginContainer = () => {
       localStorage.setItem("currentUser", JSON.stringify(normalizedUser));
       localStorage.setItem("isLoggedIn", "true");
       localStorage.setItem("role", normalizedUser.role);
-      localStorage.setItem("userId", normalizedUser.userId);
+      
+      // Lưu các IDs - support cả snake_case và camelCase
+      localStorage.setItem("userId", normalizedUser.userId || normalizedUser.user_id);
+      localStorage.setItem("user_id", normalizedUser.user_id || normalizedUser.userId);
+      
+      if (normalizedUser.renterId || normalizedUser.renter_id) {
+        localStorage.setItem("renterId", normalizedUser.renterId || normalizedUser.renter_id);
+        localStorage.setItem("renter_id", normalizedUser.renter_id || normalizedUser.renterId);
+      }
 
-      console.log(" Đã lưu localStorage:", {
+      if (normalizedUser.staffId || normalizedUser.staff_id) {
+        localStorage.setItem("staffId", normalizedUser.staffId || normalizedUser.staff_id);
+        localStorage.setItem("staff_id", normalizedUser.staff_id || normalizedUser.staffId);
+      }
+
+      console.log("✅ Đã lưu localStorage:", {
         token: localStorage.getItem("token"),
         isLoggedIn: localStorage.getItem("isLoggedIn"),
         role: localStorage.getItem("role"),
+        userId: localStorage.getItem("userId"),
+        renterId: localStorage.getItem("renterId"),
+        staffId: localStorage.getItem("staffId"),
         user: localStorage.getItem("currentUser"),
       });
 
@@ -123,38 +141,71 @@ const LoginContainer = () => {
         else navigate("/home");
       }, 1000);
     } catch (err) {
-      console.error(" Login error:", err);
+      console.error("❌ Login error:", err);
 
       // Xử lý các loại lỗi khác nhau
-      let errorMessage = "Lỗi đăng nhập không xác định";
+      let errorMessage = "Đăng nhập thất bại. Vui lòng thử lại!";
+      let errorTitle = "Lỗi đăng nhập";
 
+      // Kiểm tra lỗi network
       if (err.message?.includes("Network") || err.message?.includes("fetch")) {
         errorMessage = "Không thể kết nối đến máy chủ. Vui lòng kiểm tra kết nối mạng!";
-      } else if (
+        errorTitle = "Lỗi kết nối";
+      } 
+      // Kiểm tra lỗi xác thực (401 Unauthorized)
+      else if (
         err.message?.toLowerCase().includes("password") ||
         err.message?.toLowerCase().includes("invalid") ||
         err.message?.toLowerCase().includes("credential") ||
         err.message?.toLowerCase().includes("unauthorized") ||
-        err.message?.includes("401")
+        err.message?.includes("401") ||
+        err.message?.toLowerCase().includes("sai")
       ) {
-        errorMessage = "Email hoặc mật khẩu không chính xác.";
+        errorMessage = "Email hoặc mật khẩu không chính xác. Vui lòng kiểm tra lại!";
+        errorTitle = "❌ Sai thông tin đăng nhập";
 
         // Hiện modal rõ ràng cho lỗi xác thực
         Modal.error({
-          title: "Đăng nhập thất bại",
-          content: "Email hoặc mật khẩu không đúng. Vui lòng kiểm tra lại.",
+          title: errorTitle,
+          content: (
+            <div>
+              <p style={{ marginBottom: 10 }}>
+                <strong>Email hoặc mật khẩu không đúng.</strong>
+              </p>
+              <p style={{ marginBottom: 5 }}>Vui lòng kiểm tra:</p>
+              <ul style={{ paddingLeft: 20 }}>
+                <li>Email có đúng định dạng không?</li>
+                <li>Mật khẩu có đúng không?</li>
+                <li>Có gõ nhầm ký tự nào không?</li>
+              </ul>
+            </div>
+          ),
           okText: "Thử lại",
+          okType: "primary",
         });
-      } else if (err.message?.toLowerCase().includes("email")) {
+      } 
+      // Kiểm tra lỗi email không tồn tại
+      else if (err.message?.toLowerCase().includes("email") || err.message?.toLowerCase().includes("not found")) {
         errorMessage = "Email không tồn tại trong hệ thống!";
-      } else if (err.message) {
+        errorTitle = "Email không hợp lệ";
+        
+        Modal.warning({
+          title: errorTitle,
+          content: "Email này chưa được đăng ký. Vui lòng kiểm tra lại hoặc đăng ký tài khoản mới.",
+          okText: "Đã hiểu",
+        });
+      } 
+      // Lỗi khác
+      else if (err.message) {
         errorMessage = err.message;
       }
 
-      // Hiển thị toast error (bổ sung)
+      // Set error state để hiển thị dưới form
+      setError(errorMessage);
+
+      // Hiển thị toast error (bổ sung cho mọi lỗi)
       message.error({
-        content: errorMessage,
-        icon: "",
+        content: `❌ ${errorMessage}`,
         duration: 5,
         className: "custom-message-error",
       });
@@ -166,6 +217,7 @@ const LoginContainer = () => {
   return (
     <LoginForm
       loading={loading}
+      error={error}
       onSubmit={handleSubmit}
     />
   );

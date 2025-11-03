@@ -1,139 +1,248 @@
-import React from "react";
-import { useNavigate } from "react-router-dom";
-import { Button, Card } from "antd";
+import React, { useState } from "react";
+import { Menu, Card, Statistic } from "antd";
 import { 
   EnvironmentOutlined, 
   CarOutlined, 
   UserOutlined, 
-  BarChartOutlined 
+  BarChartOutlined,
+  SafetyCertificateOutlined,
+  DashboardOutlined
 } from "@ant-design/icons";
+import StaffVerificationDashboard from "../staff/StaffVerificationDashboard";
+import StationRegistrationContainer from "../../Container/StationRegistrationContainer";
 
 const AdminDashboard = () => {
-  const navigate = useNavigate();
+  const [selectedMenu, setSelectedMenu] = useState("overview");
 
-  const adminActions = [
+  const menuItems = [
     {
-      title: "🏢 Đăng Ký Trạm Sạc",
-      description: "Thêm trạm sạc mới vào hệ thống",
-      icon: <EnvironmentOutlined style={{ fontSize: 40, color: "#6366f1" }} />,
-      path: "/admin/register-station",
-      color: "from-purple-500 to-blue-500"
+      key: "overview",
+      icon: <DashboardOutlined />,
+      label: "Tổng quan",
     },
     {
-      title: "🚗 Quản Lý Xe",
-      description: "Xem và quản lý danh sách xe",
-      icon: <CarOutlined style={{ fontSize: 40, color: "#10b981" }} />,
-      path: "/vehicles",
-      color: "from-green-500 to-teal-500"
+      key: "verification",
+      icon: <SafetyCertificateOutlined />,
+      label: "Xác minh tài liệu",
     },
     {
-      title: "👥 Quản Lý User",
-      description: "Xem và quản lý người dùng",
-      icon: <UserOutlined style={{ fontSize: 40, color: "#f59e0b" }} />,
-      path: "/admin/users",
-      color: "from-orange-500 to-yellow-500"
+      key: "register-station",
+      icon: <EnvironmentOutlined />,
+      label: "Đăng ký trạm",
     },
     {
-      title: "📊 Thống Kê",
-      description: "Xem báo cáo và thống kê",
-      icon: <BarChartOutlined style={{ fontSize: 40, color: "#ec4899" }} />,
-      path: "/admin/statistics",
-      color: "from-pink-500 to-rose-500"
-    }
+      key: "vehicles",
+      icon: <CarOutlined />,
+      label: "Quản lý xe",
+    },
+    {
+      key: "users",
+      icon: <UserOutlined />,
+      label: "Quản lý user",
+    },
+    {
+      key: "statistics",
+      icon: <BarChartOutlined />,
+      label: "Thống kê",
+    },
   ];
 
-  return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 py-12 px-4">
-      <div className="max-w-7xl mx-auto">
-        {/* Header */}
-        <div className="text-center mb-12">
-          <h1 className="text-5xl font-bold bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 bg-clip-text text-transparent mb-4">
-            🎛️ Admin Dashboard
-          </h1>
-          <p className="text-gray-600 text-lg">
-            Quản lý hệ thống EV Rental - Station Based
-          </p>
-        </div>
+  const renderContent = () => {
+    switch (selectedMenu) {
+      case "overview":
+        return (
+          <Card className="shadow-lg" style={{ minHeight: '500px' }}>
+            <h2 className="text-3xl font-bold text-gray-800 mb-6">📊 Tổng quan hệ thống</h2>
+            
+            {/* Quick Stats */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+              <Card className="shadow-md hover:shadow-lg transition-shadow">
+                <Statistic
+                  title="Tổng Trạm Xe"
+                  value={12}
+                  prefix={<EnvironmentOutlined className="text-blue-500" />}
+                  valueStyle={{ color: '#1890ff' }}
+                />
+              </Card>
+              <Card className="shadow-md hover:shadow-lg transition-shadow">
+                <Statistic
+                  title="Tổng Xe"
+                  value={48}
+                  prefix={<CarOutlined className="text-green-500" />}
+                  valueStyle={{ color: '#52c41a' }}
+                />
+              </Card>
+              <Card className="shadow-md hover:shadow-lg transition-shadow">
+                <Statistic
+                  title="Người Dùng"
+                  value={234}
+                  prefix={<UserOutlined className="text-purple-500" />}
+                  valueStyle={{ color: '#722ed1' }}
+                />
+              </Card>
+            </div>
 
-        {/* Action Cards Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          {adminActions.map((action, index) => (
-            <Card
-              key={index}
-              hoverable
-              className="rounded-2xl shadow-lg border-0 overflow-hidden transition-all duration-300 hover:shadow-2xl hover:scale-105"
-              onClick={() => navigate(action.path)}
-              style={{ 
-                background: 'white',
-                cursor: 'pointer' 
-              }}
-            >
-              <div className="text-center p-4">
-                {/* Icon with gradient background */}
-                <div className={`inline-flex items-center justify-center w-20 h-20 rounded-full bg-gradient-to-r ${action.color} mb-4`}>
-                  <div className="bg-white bg-opacity-30 rounded-full p-2">
-                    {action.icon}
-                  </div>
+            {/* Welcome Card */}
+            <Card className="shadow-md bg-gradient-to-r from-indigo-50 to-purple-50 border border-indigo-200">
+              <h3 className="text-2xl font-bold text-indigo-900 mb-4">
+                🎯 Chào mừng đến Admin Dashboard
+              </h3>
+              <p className="text-gray-700 mb-4">
+                Quản lý toàn bộ hệ thống EV Rental - Station Based. Sử dụng menu bên trái để truy cập các chức năng.
+              </p>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6">
+                <div className="bg-white rounded-lg p-4 border border-indigo-200 hover:shadow-md transition-shadow">
+                  <h4 className="font-semibold text-indigo-800 mb-2">✅ Xác minh tài liệu</h4>
+                  <p className="text-sm text-gray-600">Duyệt GPLX và CCCD từ renters</p>
                 </div>
-
-                {/* Title */}
-                <h3 className="text-xl font-bold text-gray-800 mb-2">
-                  {action.title}
-                </h3>
-
-                {/* Description */}
-                <p className="text-gray-600 text-sm mb-4">
-                  {action.description}
-                </p>
-
-                {/* Button */}
-                <Button 
-                  type="primary"
-                  className={`bg-gradient-to-r ${action.color} border-0 hover:opacity-90 transition-opacity`}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    navigate(action.path);
-                  }}
-                >
-                  Truy cập →
-                </Button>
+                <div className="bg-white rounded-lg p-4 border border-indigo-200 hover:shadow-md transition-shadow">
+                  <h4 className="font-semibold text-indigo-800 mb-2">🏢 Đăng ký trạm</h4>
+                  <p className="text-sm text-gray-600">Thêm trạm xe mới vào hệ thống</p>
+                </div>
+                <div className="bg-white rounded-lg p-4 border border-indigo-200 hover:shadow-md transition-shadow">
+                  <h4 className="font-semibold text-indigo-800 mb-2">🚗 Quản lý xe</h4>
+                  <p className="text-sm text-gray-600">Xem và quản lý danh sách xe</p>
+                </div>
+                <div className="bg-white rounded-lg p-4 border border-indigo-200 hover:shadow-md transition-shadow">
+                  <h4 className="font-semibold text-indigo-800 mb-2">👥 Quản lý user</h4>
+                  <p className="text-sm text-gray-600">Quản lý tài khoản người dùng</p>
+                </div>
               </div>
             </Card>
-          ))}
+          </Card>
+        );
+
+      case "verification":
+        return (
+          <Card className="shadow-lg" style={{ minHeight: '500px' }}>
+            <div className="mb-6">
+              <h2 className="text-3xl font-bold text-gray-800 flex items-center gap-2">
+                <SafetyCertificateOutlined className="text-red-500" />
+                Xác minh tài liệu
+              </h2>
+              <p className="text-gray-600 mt-2">
+                Duyệt Giấy phép lái xe (GPLX) và Căn cước công dân (CCCD) từ renters
+              </p>
+            </div>
+            <StaffVerificationDashboard />
+          </Card>
+        );
+
+      case "register-station":
+        return (
+          <Card className="shadow-lg" style={{ minHeight: '500px' }}>
+            <div className="mb-6">
+              <h2 className="text-3xl font-bold text-gray-800 flex items-center gap-2">
+                <EnvironmentOutlined className="text-purple-500" />
+                Đăng ký trạm xe
+              </h2>
+              <p className="text-gray-600 mt-2">
+                Thêm trạm xe mới vào hệ thống
+              </p>
+            </div>
+            <StationRegistrationContainer />
+          </Card>
+        );
+
+      case "vehicles":
+        return (
+          <Card className="shadow-lg" style={{ minHeight: '500px' }}>
+            <div className="mb-6">
+              <h2 className="text-3xl font-bold text-gray-800 flex items-center gap-2">
+                <CarOutlined className="text-green-500" />
+                Quản lý xe
+              </h2>
+              <p className="text-gray-600 mt-2">
+                Xem và quản lý danh sách xe trong hệ thống
+              </p>
+            </div>
+            <div className="bg-gray-50 rounded-lg p-8 text-center">
+              <CarOutlined className="text-6xl text-gray-300 mb-4" />
+              <p className="text-gray-500 text-lg">Chức năng đang phát triển...</p>
+            </div>
+          </Card>
+        );
+
+      case "users":
+        return (
+          <Card className="shadow-lg" style={{ minHeight: '500px' }}>
+            <div className="mb-6">
+              <h2 className="text-3xl font-bold text-gray-800 flex items-center gap-2">
+                <UserOutlined className="text-orange-500" />
+                Quản lý người dùng
+              </h2>
+              <p className="text-gray-600 mt-2">
+                Quản lý tài khoản và phân quyền người dùng
+              </p>
+            </div>
+            <div className="bg-gray-50 rounded-lg p-8 text-center">
+              <UserOutlined className="text-6xl text-gray-300 mb-4" />
+              <p className="text-gray-500 text-lg">Chức năng đang phát triển...</p>
+            </div>
+          </Card>
+        );
+
+      case "statistics":
+        return (
+          <Card className="shadow-lg" style={{ minHeight: '500px' }}>
+            <div className="mb-6">
+              <h2 className="text-3xl font-bold text-gray-800 flex items-center gap-2">
+                <BarChartOutlined className="text-pink-500" />
+                Thống kê
+              </h2>
+              <p className="text-gray-600 mt-2">
+                Xem báo cáo và thống kê hệ thống
+              </p>
+            </div>
+            <div className="bg-gray-50 rounded-lg p-8 text-center">
+              <BarChartOutlined className="text-6xl text-gray-300 mb-4" />
+              <p className="text-gray-500 text-lg">Chức năng đang phát triển...</p>
+            </div>
+          </Card>
+        );
+
+      default:
+        return null;
+    }
+  };
+
+  return (
+    <div className="flex min-h-screen bg-gradient-to-br from-gray-50 to-blue-50">
+      {/* Sidebar */}
+      <div
+        className="bg-white shadow-2xl flex flex-col"
+        style={{
+          width: '280px',
+          minWidth: '280px',
+          height: '100vh',
+          position: 'sticky',
+          top: 0,
+          overflowY: 'auto',
+        }}
+      >
+        {/* Header */}
+        <div className="p-6 border-b border-gray-200 bg-gradient-to-r from-indigo-600 to-purple-600">
+          <h3 className="text-xl font-bold text-white mb-1">Admin Dashboard</h3>
+          <p className="text-indigo-100 text-sm">Quản lý hệ thống</p>
         </div>
 
-        {/* Quick Stats */}
-        <div className="mt-12 grid grid-cols-1 md:grid-cols-3 gap-6">
-          <div className="bg-white rounded-2xl shadow-lg p-6 border-l-4 border-blue-500">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-gray-600 text-sm">Tổng Trạm Sạc</p>
-                <p className="text-3xl font-bold text-gray-800">12</p>
-              </div>
-              <EnvironmentOutlined className="text-5xl text-blue-500 opacity-20" />
-            </div>
-          </div>
+        {/* Menu */}
+        <Menu
+          mode="inline"
+          selectedKeys={[selectedMenu]}
+          items={menuItems}
+          onClick={({ key }) => setSelectedMenu(key)}
+          className="border-0 pt-4"
+          style={{
+            fontSize: "16px",
+            fontWeight: "500",
+          }}
+        />
+      </div>
 
-          <div className="bg-white rounded-2xl shadow-lg p-6 border-l-4 border-green-500">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-gray-600 text-sm">Tổng Xe</p>
-                <p className="text-3xl font-bold text-gray-800">48</p>
-              </div>
-              <CarOutlined className="text-5xl text-green-500 opacity-20" />
-            </div>
-          </div>
-
-          <div className="bg-white rounded-2xl shadow-lg p-6 border-l-4 border-purple-500">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-gray-600 text-sm">Người Dùng</p>
-                <p className="text-3xl font-bold text-gray-800">234</p>
-              </div>
-              <UserOutlined className="text-5xl text-purple-500 opacity-20" />
-            </div>
-          </div>
-        </div>
+      {/* Main Content */}
+      <div className="flex-1 p-6 md:p-8">
+        {renderContent()}
       </div>
     </div>
   );

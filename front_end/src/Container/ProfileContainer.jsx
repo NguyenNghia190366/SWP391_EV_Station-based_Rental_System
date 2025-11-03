@@ -4,37 +4,83 @@ import { useState, useEffect } from "react"
 import { message } from "antd"
 import { CheckCircleOutlined, ExclamationCircleOutlined, InfoCircleOutlined, CloseCircleOutlined } from "@ant-design/icons"
 import { userAPI, driverLicenseVerifyAPI, cccdVerifyAPI } from "../api/api"
-import ProfileView from "../Components/Common/View/ProfileView"
+import ProfileViewNew from "../Components/Common/View/ProfileView"
+import { Cloudinary } from '@cloudinary/url-gen';
+import { auto } from '@cloudinary/url-gen/actions/resize';
+import { autoGravity } from '@cloudinary/url-gen/qualifiers/gravity';
+import { AdvancedImage } from '@cloudinary/react';
 
 export default function ProfileContainer() {
   const [user, setUser] = useState(null)
   const [loading, setLoading] = useState(true)
 
   // Fetch verification status helper
+  // Backend API: /api/DriverLicenses/{id} and /api/Cccds/{id} - requires ID, not renterId
+  // TODO: Ask backend teammate to add /api/DriverLicenses/renter/{renterId} endpoint
   const fetchVerificationStatus = async (userId) => {
+    console.log(" Verification status check disabled - Backend API doesn't support GET by renterId yet")
+    console.log(" Using localStorage verification status instead")
+    
+    // Return stored verification status from user object
+    const storedUser = JSON.parse(localStorage.getItem("currentUser") || '{}')
+    return {
+      licenseVerified: storedUser.licenseVerified || false,
+      licenseVerifiedAt: storedUser.licenseVerifiedAt || null,
+      idCardVerified: storedUser.idCardVerified || false,
+      idCardVerifiedAt: storedUser.idCardVerifiedAt || null,
+      isVerified: storedUser.isVerified || false
+    }
+    
+    /* COMMENTED OUT - Backend endpoint not available yet
     try {
-      const licenseResponse = await driverLicenseVerifyAPI.getByRenterId(userId)
-      const cccdResponse = await cccdVerifyAPI.getByRenterId(userId)
-      
-      // Handle both array and object responses
-      const licenseData = Array.isArray(licenseResponse) ? licenseResponse[0] : licenseResponse
-      const cccdData = Array.isArray(cccdResponse) ? cccdResponse[0] : cccdResponse
-      
-      const licenseVerified = licenseData?.is_verified === true || licenseData?.status === 1
-      const idCardVerified = cccdData?.is_verified === true || cccdData?.status === 1
+      // Fetch license verification status
+      let licenseVerified = false
+      let licenseVerifiedAt = null
+      try {
+        const licenseResponse = await driverLicenseVerifyAPI.getByRenterId(userId)
+        const licenseData = Array.isArray(licenseResponse) ? licenseResponse[0] : licenseResponse
+        licenseVerified = licenseData?.is_verified === true || licenseData?.status === 1
+        licenseVerifiedAt = licenseData?.verified_at || licenseData?.verifiedAt
+        console.log("✅ License verification status fetched:", { licenseVerified, licenseVerifiedAt })
+      } catch (licenseErr) {
+        // 404 is normal - user hasn't uploaded license yet
+        if (licenseErr.message?.includes("404") || licenseErr.message?.includes("Không tìm thấy")) {
+          console.log("No license verification found (user hasn't uploaded yet)")
+        } else {
+          console.error("Error fetching license verification:", licenseErr.message)
+        }
+      }
+
+      // Fetch CCCD verification status
+      let idCardVerified = false
+      let idCardVerifiedAt = null
+      try {
+        const cccdResponse = await cccdVerifyAPI.getByRenterId(userId)
+        const cccdData = Array.isArray(cccdResponse) ? cccdResponse[0] : cccdResponse
+        idCardVerified = cccdData?.is_verified === true || cccdData?.status === 1
+        idCardVerifiedAt = cccdData?.verified_at || cccdData?.verifiedAt
+        console.log("CCCD verification status fetched:", { idCardVerified, idCardVerifiedAt })
+      } catch (cccdErr) {
+        // 404 is normal - user hasn't uploaded CCCD yet
+        if (cccdErr.message?.includes("404") || cccdErr.message?.includes("Không tìm thấy")) {
+          console.log("No CCCD verification found (user hasn't uploaded yet)")
+        } else {
+          console.error("Error fetching CCCD verification:", cccdErr.message)
+        }
+      }
       
       // Set isVerified to true ONLY if BOTH are verified
       const isFullyVerified = licenseVerified && idCardVerified
       
       return {
         licenseVerified,
-        licenseVerifiedAt: licenseData?.verified_at || licenseData?.verifiedAt,
+        licenseVerifiedAt,
         idCardVerified,
-        idCardVerifiedAt: cccdData?.verified_at || cccdData?.verifiedAt,
+        idCardVerifiedAt,
         isVerified: isFullyVerified
       }
     } catch (err) {
-      console.error("⚠️ Error fetching verification status:", err)
+      console.error("⚠️ Unexpected error in fetchVerificationStatus:", err)
       return {
         licenseVerified: false,
         licenseVerifiedAt: null,
@@ -43,6 +89,7 @@ export default function ProfileContainer() {
         isVerified: false
       }
     }
+    */
   }
 
   // Load user từ localStorage
@@ -88,6 +135,9 @@ export default function ProfileContainer() {
   }, [])
 
   // Auto-refresh verification status every 15 seconds
+  // ⚠️ TEMPORARILY DISABLED - Backend API not ready yet
+  // TODO: Re-enable when backend adds GET by renterId endpoint
+  /*
   useEffect(() => {
     if (!user || !(user.id || user.userId)) return
 
@@ -110,6 +160,7 @@ export default function ProfileContainer() {
     return () => clearInterval(interval)
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user?.id, user?.userId])
+  */
 
   // Cập nhật thông tin user
   const handleUpdateUser = async (updatedForm) => {
@@ -211,87 +262,172 @@ export default function ProfileContainer() {
     }
   }
 
-  // Upload giấy phép lái xe
+  // ------------------------------------------------
+  const UploadToCloudinary = () => {
+    const uploadProps = {
+      name: "file",
+      customRequest: async ({ file, onSuccess, onError }) => {
+        const url = "https://api.cloudinary.com/v1_1/duongkien/image/upload";
+        const data = new FormData();
+        data.append("file", file);
+        data.append("upload_preset", "ev_rental_upload");
+
+      try {
+        const res = await fetch(url, { method: "POST", body: data });
+        const result = await res.json();
+        onSuccess(result);
+        message.success("Upload thành công!");
+        console.log("URL:", result.secure_url);
+      } catch (err) {
+        onError(err);
+        message.error("Upload thất bại!");
+      }
+    },
+  };
+
+  return (
+    <Upload {...uploadProps} listType="picture-card">
+      <PlusOutlined />
+      <div>Upload</div>
+    </Upload>
+  );
+}
+
+  // ==================== UPLOAD GIẤY PHÉP LÁI XE ====================
   const handleUploadLicense = async (files) => {
-    if (!files || files.length === 0) return
-
-    // Validate files
-    const invalidFiles = files.filter(
-      (file) => !file.type.startsWith("image/") || file.size > 5 * 1024 * 1024
-    )
-
-    if (invalidFiles.length > 0) {
-      message.error("Chỉ chấp nhận file ảnh và dung lượng tối đa 5MB!")
-      return
+    // Validate input
+    if (!files || files.length === 0) {
+      message.warning("Vui lòng chọn ảnh!");
+      return;
     }
 
     try {
+      // Show loading message
       message.loading({
         content: `Đang tải lên ${files.length} ảnh giấy phép lái xe...`,
         key: "uploadLicense",
-      })
+      });
 
-      console.log("📤 Uploading license images:", files.length, "files")
-
-      // Convert to base64
-      const uploadPromises = files.map(file => {
+      // ========== STEP 1: Convert images to base64 ==========
+      const convertToBase64 = (file) => {
         return new Promise((resolve) => {
-          const reader = new FileReader()
-          reader.onloadend = () => {
-            resolve(reader.result) // base64 string
-          }
-          reader.readAsDataURL(file)
-        })
-      })
-      
-      const urls = await Promise.all(uploadPromises)
-      console.log("✅ License images converted to base64")
+          const reader = new FileReader();
+          reader.onloadend = () => resolve(reader.result);
+          reader.readAsDataURL(file);
+        });
+      };
 
-      // Prepare data for API
-      const uploadData = {
-        renterId: user.id || user.userId,
-        renterName: user.fullName || user.username || "Unknown",
-        licenseNumber: user.licenseNumber || "PENDING",
-        frontImageUrl: urls[0] || "",
-        backImageUrl: urls[1] || urls[0] || ""
+      const imageUrls = await Promise.all(files.map(convertToBase64));
+      console.log("✅ License images converted to base64");
+
+      // ========== STEP 2: Get and validate userId ==========
+      // IMPORTANT: Backend saves as "renter_Id" (with capital I), prioritize that!
+      const rawUserId = 
+        localStorage.getItem("renter_Id") ||     // Priority 1: Backend key (capital I)
+        localStorage.getItem("renter_id") ||    // Priority 2: snake_case
+        localStorage.getItem("renterId") ||     // Priority 3: camelCase
+        localStorage.getItem("userId") ||        // Fallback userId
+        localStorage.getItem("user_id") ||       // Fallback user_id
+        user?.renter_Id ||                       // From user object
+        user?.renterId ||
+        user?.renter_id ||
+        user?.userId ||
+        user?.user_id ||
+        user?.id ||
+        user?.Id;
+
+      console.log("🔍 Raw userId:", rawUserId, typeof rawUserId);
+
+      // Parse and validate userId
+      let userId;
+      if (typeof rawUserId === "number") {
+        userId = rawUserId;
+      } else if (typeof rawUserId === "string") {
+        // Check if string is numeric (e.g., "7", "123")
+        if (/^\d+$/.test(rawUserId)) {
+          userId = parseInt(rawUserId, 10);
+        } else {
+          // String is not numeric (e.g., "temp_f_...")
+          throw new Error(
+            "Bạn cần đăng nhập với tài khoản thật để upload giấy tờ. " +
+            "Tài khoản tạm thời không được phép upload."
+          );
+        }
+      } else {
+        throw new Error("Không tìm thấy user ID. Vui lòng đăng nhập lại.");
       }
 
-      console.log("📡 Sending to backend API:", uploadData)
+      // Final validation
+      if (isNaN(userId) || userId <= 0) {
+        throw new Error("User ID không hợp lệ. Vui lòng đăng nhập lại.");
+      }
 
-      // Call backend API
-      const response = await driverLicenseVerifyAPI.uploadLicense(uploadData)
-      console.log("✅ Backend response:", response)
+      console.log("✅ Parsed userId:", userId, typeof userId);
 
-      // Update localStorage
+      // ========== STEP 3: Prepare upload data ==========
+      // IMPORTANT: renterId (from renter_Id) ≠ userId (from user_id)!
+      // Get actual userId from localStorage separately
+      const actualUserId = 
+        localStorage.getItem("userId") ||
+        localStorage.getItem("user_id") ||
+        user?.userId ||
+        user?.user_id ||
+        userId; // fallback to renterId if no userId found
+      
+      const uploadData = {
+        renterId: userId,  // This is renter_id = 1
+        userId: parseInt(actualUserId, 10),  // This is user_id = 7
+        driverLicenseNumber: user?.licenseNumber || "PENDING",
+        urlDriverLicense: imageUrls[0] || "",
+        backImageUrl: imageUrls[1] || imageUrls[0] || "",
+        // User info for renter object
+        renterName: user?.fullName || user?.userName || user?.username || "Unknown",
+        fullName: user?.fullName || user?.userName || user?.username || "",
+        email: user?.email || localStorage.getItem("email") || "",
+        role: user?.role || localStorage.getItem("role") || "RENTER",
+        status: user?.status || "active",
+        address: user?.address || user?.currentAddress || "",
+        cccdNumber: user?.cccdNumber || user?.idCardNumber || "",
+      };
+
+      console.log("📡 Sending to backend API:", uploadData);
+      console.log("📋 renterId:", uploadData.renterId, "userId:", uploadData.userId);
+
+      // ========== STEP 4: Upload to backend ==========
+      const response = await driverLicenseVerifyAPI.uploadLicense(uploadData);
+      console.log("✅ Backend response:", response);
+
+      // ========== STEP 5: Update local state ==========
       const updatedUser = {
         ...user,
-        licenseImages: urls,
+        licenseImages: imageUrls,
         licenseVerified: false,
         licenseUploadedAt: new Date().toISOString(),
-        licenseId: response.id
-      }
+        licenseId: response?.id,
+      };
 
-      localStorage.setItem("currentUser", JSON.stringify(updatedUser))
-      setUser(updatedUser)
+      localStorage.setItem("currentUser", JSON.stringify(updatedUser));
+      setUser(updatedUser);
 
+      // Show success message
       message.success({
-        content: `✅ Đã gửi ${files.length} ảnh giấy phép lái xe đến staff để xác thực!`,
+        content: `✅ Đã gửi ${files.length} ảnh giấy phép lái xe thành công!`,
         key: "uploadLicense",
-        duration: 5
-      })
+        duration: 5,
+      });
 
-      return response
+      return response;
     } catch (err) {
-      console.error("❌ License upload error:", err)
+      console.error("❌ License upload error:", err);
       message.error({
         content: err.message || "❌ Tải ảnh thất bại! Vui lòng thử lại.",
         key: "uploadLicense",
-      })
-      throw err
+      });
+      throw err;
     }
-  }
+  };
 
-  // Upload CCCD/CMND
+  // ==================== UPLOAD CCCD/CMND ====================
   const handleUploadIdCard = async (files) => {
     if (!files || files.length === 0) return
 
@@ -327,19 +463,19 @@ export default function ProfileContainer() {
       const urls = await Promise.all(uploadPromises)
       console.log("✅ ID card images converted to base64")
 
-      // Prepare data for API
+      
+      // ✅ Parse userId - xử lý cả string và number
+      let renterId = localStorage.getItem("renter_Id")
+
       const uploadData = {
-        renterId: user.id || user.userId,
-        renterName: user.fullName || user.username || "Unknown",
-        cccdNumber: user.cccdNumber || user.idCardNumber || "PENDING",
-        fullName: user.fullName || user.username || "Unknown",
-        dob: user.dob || user.dateOfBirth || new Date().toISOString(),
-        address: user.address || "Chưa cập nhật",
-        frontImageUrl: urls[0] || "",
-        backImageUrl: urls[1] || urls[0] || ""
+        renter_id: renterId,
+        url_Cccd_Cmnd_front: urls[0] || "",
+        url_Cccd_Cmnd_back: urls[1] || urls[0] || "",
+        id_Card_Number: ""
       }
 
       console.log("📡 Sending CCCD to backend API:", uploadData)
+      console.log("📋 renterId type:", typeof uploadData.renterId)
 
       // Call backend API
       const response = await cccdVerifyAPI.uploadCCCD(uploadData)
@@ -425,7 +561,7 @@ export default function ProfileContainer() {
   }
 
   return (
-    <ProfileView 
+    <ProfileViewNew 
       user={user} 
       loading={loading} 
       onUpdateUser={handleUpdateUser} 

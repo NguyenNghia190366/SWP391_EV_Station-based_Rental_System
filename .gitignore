@@ -69,11 +69,11 @@ dist-ssr/
 vite.config.js.timestamp-*
 
 # Environment files (keep .env.example)
-.env
-.env.local
-.env.development.local
-.env.test.local
-.env.production.local
+# .env
+# .env.local
+# .env.development.local
+# .env.test.local
+# .env.production.local
 
 # Editor directories and files
 .vscode/*
@@ -126,6 +126,7 @@ vite.config.js.timestamp-*
 **/insert_dummy_*.sql
 **/insert_test_*.sql
 **/GeneratePasswordHash.cs
+*.cs
 
 # ==================== OS ====================
 # Windows

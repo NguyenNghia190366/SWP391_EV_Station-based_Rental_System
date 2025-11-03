@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import VehicleCard from "../VehicleCard/VehicleCard";
+import VehicleCard from "../Vehicles/VehicleCard";
 
 const VehiclesView = ({
   vehicles = [],
@@ -13,11 +13,11 @@ const VehiclesView = ({
   const [selectedType, setSelectedType] = useState("all");
 
   const vehicleTypes = [
-    { value: "all", label: "Tất cả", icon: "🚗" },
-    { value: "scooter", label: "Xe máy điện", icon: "🛵" },
-    { value: "bike", label: "Xe đạp điện", icon: "🚲" },
-    { value: "car", label: "Ô tô điện", icon: "🚙" },
-    { value: "motorcycle", label: "Mô tô điện", icon: "🏍️" },
+    { value: "all", label: "Tất cả"},
+    { value: "scooter", label: "Xe máy điện"},
+    { value: "bike", label: "Xe đạp điện"},
+    { value: "car", label: "Ô tô điện"},
+    { value: "motorcycle", label: "Mô tô điện"},
   ];
 
   const handleSearch = (e) => {
@@ -51,7 +51,7 @@ const VehiclesView = ({
       <section className="bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-500 text-white py-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <h1 className="text-4xl md:text-5xl font-extrabold mb-4 animate-fadeInUp">
-            🚗 Danh sách xe điện
+            Danh sách xe điện
           </h1>
           <p className="text-lg md:text-xl text-white/90 animate-fadeInUp" style={{ animationDelay: '0.1s' }}>
             Chọn chiếc xe điện phù hợp với nhu cầu của bạn
@@ -67,7 +67,7 @@ const VehiclesView = ({
             <div className="flex gap-3">
               <input
                 type="text"
-                placeholder="🔍 Tìm kiếm xe theo tên, model..."
+                placeholder=" Tìm kiếm xe theo tên, model..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="flex-1 px-6 py-4 rounded-xl border-2 border-gray-200 focus:border-indigo-500 focus:ring-4 focus:ring-indigo-100 outline-none transition-all text-gray-800 text-lg placeholder-gray-400"
@@ -111,14 +111,14 @@ const VehiclesView = ({
           <div className="mb-8">
             <h2 className="text-2xl md:text-3xl font-bold text-gray-800">
               {vehicles.length > 0
-                ? `✨ Tìm thấy ${vehicles.length} xe phù hợp`
-                : "❌ Không tìm thấy xe nào"}
+                ? ` Tìm thấy ${vehicles.length} xe phù hợp`
+                : " Không tìm thấy xe nào"}
             </h2>
           </div>
 
           {vehicles.length === 0 ? (
             <div className="text-center py-20">
-              <div className="text-9xl mb-6">🚫</div>
+              {/* <div className="text-9xl mb-6">🚫</div> */}
               <h3 className="text-2xl font-bold text-gray-800 mb-3">Không có xe điện nào</h3>
               <p className="text-gray-600 text-lg">Vui lòng thử lại với bộ lọc khác hoặc quay lại sau.</p>
             </div>

@@ -63,12 +63,12 @@ const VehicleCard = ({
           font-extrabold text-gray-900 leading-tight mb-2
           ${compact ? 'text-xl' : 'text-2xl md:text-xl'}
         `}>
-          {vehicle.name}
+          {vehicle.name || `${vehicle.brandName || ''} ${vehicle.model || ''}`.trim() || 'Xe điện'}
         </h3>
         
         {/* Type */}
         <p className="text-sdz-500 font-semibold uppercase tracking-wider text-sm mb-5">
-          {vehicle.type || 'Xe điện'}
+          {vehicle.type || vehicle.vehicleColor || 'Xe điện'}
         </p>
 
         {/* Specs Grid */}
@@ -93,6 +93,12 @@ const VehicleCard = ({
             <span className={compact ? 'text-xl' : 'text-2xl'}>📅</span>
             <span className={compact ? 'text-xs' : 'text-sm'}>
               {vehicle.releaseYear || 2023}
+            </span>
+          </div>
+          <div className="flex flex-col items-center gap-1.5 text-gray-700 font-bold">
+            <span className={compact ? 'text-xl' : 'text-2xl'}>�</span>
+            <span className={compact ? 'text-xs' : 'text-sm'}>
+              {vehicle.NumberOfSeats } chỗ
             </span>
           </div>
         </div>

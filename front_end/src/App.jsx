@@ -7,6 +7,7 @@ import VehiclesPage from "./Features/auth/Pages/VehiclesPage";
 import { roles } from "./Constant/Role";
 import { RequireAuth } from "./Router/RequireAuth.jsx";
 import AdminDashboard from "./Features/admin/AdminDashboard";
+import AdminVerificationDashboard from "./Features/admin/AdminVerificationDashboard";
 import StaffDashboard from "./Features/staff/StaffDashboard";
 import AuthRoute from "./Router/AuthRoute";
 import Layout from "./Components/Layout/Layout";
@@ -23,6 +24,7 @@ import PaymentSuccessBill from "./Components/Common/Page/PaymentSuccessBill";
 import NotificationsPage from "./Components/Common/Page/NotificationsPage";
 import MyBookingsPage from "./Components/Common/Page/MyBookingsPage";
 import StationRegistrationContainer from "./Container/StationRegistrationContainer";
+import VerifyPage from "./pages/VerifyPage.jsx";
 
 function App() {
   console.log(" App component rendered");
@@ -34,7 +36,8 @@ function App() {
         <Route path="/" element={<Navigate to="/home" replace />} />
         <Route path="/home" element={<HomePage />} />
         <Route path="/vehicles" element={<VehiclesPage />} />
-        <Route path="/profile" element={<ProfilePage />} />
+        <Route path="/profile/cccd" element={<VerifyPage />} />
+        
         
         {/* Booking Flow Routes */}
         <Route path="/booking/:vehicleId" element={<BookingContainer />} />
@@ -60,6 +63,7 @@ function App() {
         {/* Admin & Staff Routes */}
         <Route element={<RequireAuth allowRole={[roles.ADMIN]} />}>
           <Route path="/admin/dashboard" element={<AdminDashboard />} />
+          <Route path="/admin/verification" element={<AdminVerificationDashboard />} />
           <Route path="/admin/register-station" element={<StationRegistrationContainer />} />
         </Route>
         <Route path="/staff/dashboard" element={<RequireAuth allowRole={[roles.STAFF]}><StaffDashboard /></RequireAuth>} />
