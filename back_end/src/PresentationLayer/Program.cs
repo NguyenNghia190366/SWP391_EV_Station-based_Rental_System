@@ -4,6 +4,7 @@ using Microsoft.OpenApi.Models;
 
 using BusinessLogicLayer.Interfaces;
 using BusinessLogicLayer.Services;
+using BusinessLogicLayer.Helpers; // AutoMapper profile
 
 // Using cho JWT
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -32,10 +33,11 @@ builder.Services.AddScoped<IVehicleModelsService, VehicleModelsService>();
 builder.Services.AddScoped<IVehicleService, VehicleService>();
 builder.Services.AddScoped<IRentalOrdersService, RentalOrdersService>();
 builder.Services.AddScoped<IContractsService, ContractsService>();
+builder.Services.AddScoped<IExtrasService, ExtrasService>();
 
 // THÊM DÒNG NÀY (Để đọc User ID từ Token):
 builder.Services.AddHttpContextAccessor();
-builder.Services.AddAutoMapper(typeof(BusinessLogicLayer.Helpers.AutoMapperProfile)); // Đăng ký AutoMapper
+builder.Services.AddAutoMapper(typeof(AutoMapperProfile)); // Đăng ký AutoMapper
 
 // -----------------------------
 // Authentication + Authorization (JWT)
