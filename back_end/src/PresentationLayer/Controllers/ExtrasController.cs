@@ -23,7 +23,7 @@ namespace PresentationLayer.Controllers
 
         // --- Dành cho Staff (hoặc Renter) xem phí của đơn hàng ---
         [HttpGet("order/{orderId}")]
-        [Authorize(Roles = "Staff, Renter")] // [cite: 21]
+        [Authorize(Roles = "STAFF, RENTER")] // [cite: 21]
         public async Task<IActionResult> GetFeesForOrder(int orderId)
         {
             var fees = await _extrasService.GetExtraFeesForOrderAsync(orderId);
@@ -32,7 +32,7 @@ namespace PresentationLayer.Controllers
 
         // --- Dành cho Staff thêm/xóa phí ---
         [HttpPost]
-        [Authorize(Roles = "Staff")] // [cite: 21]
+        [Authorize(Roles = "STAFF")] // [cite: 21]
         public async Task<IActionResult> AddExtraFee([FromBody] ExtraFeeCreateDto dto)
         {
             // var newFee = await _extrasService.AddExtraFeeToOrderAsync(dto);
@@ -61,7 +61,7 @@ namespace PresentationLayer.Controllers
         }
 
         [HttpDelete("{feeId}")]
-        [Authorize(Roles = "Staff")] 
+        [Authorize(Roles = "STAFF")] 
         public async Task<IActionResult> DeleteExtraFee(int feeId)
         {
             await _extrasService.DeleteExtraFeeAsync(feeId);
@@ -70,14 +70,14 @@ namespace PresentationLayer.Controllers
         
         // --- Dành cho Admin quản lý các loại phí (FeeType) ---
         [HttpGet("fee-types")]
-        [Authorize(Roles = "Admin")] 
+        [Authorize(Roles = "ADMIN")] 
         public async Task<IActionResult> GetAllFeeTypes()
         {
             return Ok(await _extrasService.GetAllFeeTypesAsync());
         }
 
         [HttpPost("fee-types")]
-        [Authorize(Roles = "Admin")]
+        [Authorize(Roles = "ADMIN")]
         public async Task<IActionResult> CreateFeeType([FromBody] FeeTypeCreateDto dto)
         {
             return CreatedAtAction(nameof(GetAllFeeTypes),
@@ -87,7 +87,7 @@ namespace PresentationLayer.Controllers
 
         // ... (PUT và DELETE cho fee-types) ...
         [HttpPut("fee-types/{feeTypeId}")]
-        [Authorize(Roles = "Admin")]
+        [Authorize(Roles = "ADMIN")]
         public async Task<IActionResult> UpdateFeeType(int feeTypeId, [FromBody] FeeTypeUpdateDto dto)
         {
             await _extrasService.UpdateFeeTypeAsync(feeTypeId, dto);
@@ -95,7 +95,7 @@ namespace PresentationLayer.Controllers
         }
         
         [HttpDelete("fee-types/{feeTypeId}")]
-        [Authorize(Roles = "Admin")]
+        [Authorize(Roles = "ADMIN")]
         public async Task<IActionResult> DeleteFeeType(int feeTypeId)
         {
             // await _extrasService.DeleteFeeTypeAsync(feeTypeId);
