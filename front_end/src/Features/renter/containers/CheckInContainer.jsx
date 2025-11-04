@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { message } from 'antd';
-import CheckInView from '../Components/Common/View/CheckInView';
-import { checkInAPI } from '../api/useEV';
+import CheckInView from '../../../Components/Common/View/Checkin/CheckInView';
+import { checkInAPI } from '../../../api/useEV';
 
 const CheckInContainer = () => {
   const navigate = useNavigate();

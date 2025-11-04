@@ -1,10 +1,10 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import HomeView from "../Components/Common/View/HomeView";
-import { stationAPI, driverLicenseAPI, cccdVerificationAPI } from "../api/api";
-import { findNearestStation } from "../utils/geo";
-import { clearUserData } from "../utils/auth";
-import BookingVerificationModal from "../Components/Common/Modal/BookingVerificationModal";
+import HomeView from "../../../Components/Common/View/Home/HomeView";
+import { stationAPI, driverLicenseAPI, cccdVerificationAPI } from "../../../api/api";
+import { findNearestStation } from "../../../utils/geo";
+import { clearUserData } from "../../../utils/auth";
+import BookingVerificationModal from "../../../Components/Common/Modal/BookingVerificationModal";
 
 const HomeContainer = () => {
   const navigate = useNavigate();

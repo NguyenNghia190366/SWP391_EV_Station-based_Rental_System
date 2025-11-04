@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
-import PaymentView from '../Components/Common/View/PaymentView';
+import { useNavigate, useLocation } from 'react-router-dom';
+import PaymentView from '../../../Components/Common/View/Payment/PaymentView';
 
 const PaymentContainer = () => {
   const navigate = useNavigate();

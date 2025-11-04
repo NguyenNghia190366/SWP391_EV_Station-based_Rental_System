@@ -3,8 +3,8 @@
 import { useState, useEffect } from "react"
 import { message } from "antd"
 import { CheckCircleOutlined, ExclamationCircleOutlined, InfoCircleOutlined, CloseCircleOutlined } from "@ant-design/icons"
-import { userAPI, driverLicenseVerifyAPI, cccdVerifyAPI } from "../api/api"
-import ProfileViewNew from "../Components/Common/View/ProfileView"
+import { userAPI, driverLicenseVerifyAPI, cccdVerifyAPI } from "../../../../api/api"
+import ProfileViewNew from "../components/ProfileView"
 import { Cloudinary } from '@cloudinary/url-gen';
 import { auto } from '@cloudinary/url-gen/actions/resize';
 import { autoGravity } from '@cloudinary/url-gen/qualifiers/gravity';

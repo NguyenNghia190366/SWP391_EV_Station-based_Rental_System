@@ -1,30 +1,36 @@
 import { Routes, Route, Navigate } from "react-router-dom";
+// Auth
 import LoginPage from "./Features/auth/Pages/LoginPage";
 import HomePage from "./Features/auth/Pages/HomePage";
 import RegisterPage from "./Features/auth/Pages/RegisterPage";
-import ProfilePage from "./Features/auth/Pages/ProfilePage";
-import VehiclesPage from "./Features/auth/Pages/VehiclesPage";
+// Shared
+import ProfilePage from "./Features/shared/profile/pages/ProfilePage";
+// Renter
+import VehiclesPage from "./Features/renter/pages/VehiclesPage";
+import BookingContainer from "./Features/renter/containers/BookingContainer";
+import ContractContainer from "./Features/renter/containers/ContractContainer";
+import PaymentContainer from "./Features/renter/containers/PaymentContainer";
+import CheckInContainer from "./Features/renter/containers/CheckInContainer";
+import BookingSuccessPage from "./Features/renter/pages/BookingSuccessPage";
+import CheckInMethodSelectionPage from "./Features/renter/pages/CheckInMethodSelectionPage";
+import DocumentVerificationPage from "./Features/renter/pages/DocumentVerificationPage";
+import VehiclePreviewNotification from "./Features/renter/pages/VehiclePreviewNotification";
+import PaymentSuccessBill from "./Features/renter/pages/PaymentSuccessBill";
+import MyBookingsPage from "./Features/renter/pages/MyBookingsPage";
+// Admin
+import AdminDashboard from "./Features/admin/pages/AdminDashboard";
+import AdminVerificationDashboard from "./Features/admin/pages/AdminVerificationDashboard";
+import StationRegistrationContainer from "./Features/admin/containers/StationRegistrationContainer";
+// Staff
+import StaffDashboard from "./Features/staff/pages/StaffDashboard";
+import SendVehiclePreview from "./Features/staff/components/SendVehiclePreview";
+// Common
 import { roles } from "./Constant/Role";
 import { RequireAuth } from "./Router/RequireAuth.jsx";
-import AdminDashboard from "./Features/admin/AdminDashboard";
-import AdminVerificationDashboard from "./Features/admin/AdminVerificationDashboard";
-import StaffDashboard from "./Features/staff/StaffDashboard";
 import AuthRoute from "./Router/AuthRoute";
 import Layout from "./Components/Layout/Layout";
-import BookingContainer from "./Container/BookingContainer";
-import ContractContainer from "./Container/ContractContainer";
-import PaymentContainer from "./Container/PaymentContainer";
-import BookingSuccessPage from "./Components/Common/Page/BookingSuccessPage";
-import CheckInContainer from "./Container/CheckInContainer";
-import CheckInMethodSelectionPage from "./Components/Common/Page/CheckInMethodSelectionPage";
-import DocumentVerificationPage from "./Components/Common/Page/DocumentVerificationPage";
-import VehiclePreviewNotification from "./Components/Common/Page/VehiclePreviewNotification";
-import SendVehiclePreview from "./Components/StationStaff/SendVehiclePreview";
-import PaymentSuccessBill from "./Components/Common/Page/PaymentSuccessBill";
 import NotificationsPage from "./Components/Common/Page/NotificationsPage";
-import MyBookingsPage from "./Components/Common/Page/MyBookingsPage";
-import StationRegistrationContainer from "./Container/StationRegistrationContainer";
-import VerifyPage from "./pages/VerifyPage.jsx";
+import VerifyPage from "./Components/Common/Page/VerifyPage.jsx";
 
 function App() {
   console.log(" App component rendered");
@@ -36,7 +42,7 @@ function App() {
         <Route path="/" element={<Navigate to="/home" replace />} />
         <Route path="/home" element={<HomePage />} />
         <Route path="/vehicles" element={<VehiclesPage />} />
-        <Route path="/profile/cccd" element={<VerifyPage />} />
+        <Route path="/profile" element={<ProfilePage />} />
         
         
         {/* Booking Flow Routes */}

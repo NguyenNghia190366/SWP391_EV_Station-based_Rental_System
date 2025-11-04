@@ -5,8 +5,8 @@ import {
   BookOutlined, 
   DashboardOutlined
 } from "@ant-design/icons";
-import BookingRequestsManagement from "../../Components/StationStaff/BookingRequestsManagement";
-import StationRegistrationContainer from "../../Container/StationRegistrationContainer";
+import BookingRequestsManagement from "../components/BookingRequestsManagement";
+import StationRegistrationContainer from "../../admin/containers/StationRegistrationContainer";
 
 const StaffDashboard = () => {
   const [selectedMenu, setSelectedMenu] = useState("overview");

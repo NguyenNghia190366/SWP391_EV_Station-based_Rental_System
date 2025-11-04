@@ -1,5 +1,5 @@
 import React from "react";
-import StaffVerificationDashboard from "../staff/StaffVerificationDashboard";
+import VerificationDashboard from "../components/VerificationDashboard";
 
 const AdminVerificationDashboard = () => {
   return (
@@ -17,7 +17,7 @@ const AdminVerificationDashboard = () => {
 
         {/* Verification Dashboard */}
         <div className="bg-white rounded-2xl shadow-lg p-6">
-          <StaffVerificationDashboard />
+          <VerificationDashboard />
         </div>
       </div>
     </div>

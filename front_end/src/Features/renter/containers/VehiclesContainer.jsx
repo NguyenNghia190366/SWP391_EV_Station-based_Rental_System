@@ -1,10 +1,10 @@
 import React, { useEffect, useState, useCallback } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
-import VehiclesView from "../Components/Common/View/VehiclesView";
-import { vehicleAPI } from "../api/useEV";
-import { driverLicenseAPI, cccdVerificationAPI } from "../api/api";
-import BookingVerificationModal from "../Components/Common/Modal/BookingVerificationModal";
-import { normalizeVehicleData } from "../utils/normalizeData";
+import VehiclesView from "../../../Components/Common/View/Vehicles/VehiclesView";
+import { vehicleAPI } from "../../../api/useEV";
+import { driverLicenseAPI, cccdVerificationAPI } from "../../../api/api";
+import BookingVerificationModal from "../../../Components/Common/Modal/BookingVerificationModal";
+import { normalizeVehicleData } from "../../../utils/normalizeData";
 
 const VehiclesContainer = () => {
   const navigate = useNavigate();

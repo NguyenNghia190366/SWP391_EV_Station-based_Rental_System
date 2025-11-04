@@ -1,9 +1,9 @@
 import React, { useState } from "react";
 import { Form, Input, Upload, Button, Card, message } from "antd";
 import { InboxOutlined } from "@ant-design/icons";
-import { useCccd } from "../hooks/useCccd";
-import { useDriverLicense } from "../hooks/useDriverLicense";
-import { useCloudinary } from "../hooks/useCloudinary";
+import { useCccd } from "../../../hooks/useCccd";
+import { useDriverLicense } from "../../../hooks/useDriverLicense";
+import { useCloudinary } from "../../../hooks/useCloudinary";
 
 const { Dragger } = Upload;
 

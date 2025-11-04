@@ -1,9 +1,9 @@
 import React, { useState } from "react";
 import { message, Modal } from "antd";
 import { useNavigate } from "react-router-dom";
-import { userAPI } from "../api/api";
-import LoginForm from "../Components/Common/Form/LoginForm";
-import { normalizeUserData } from "../utils/normalizeData";
+import { userAPI } from "../../../api/api";
+import LoginForm from "../../../Components/Common/Form/LoginForm";
+import { normalizeUserData } from "../../../utils/normalizeData";
 
 // Cấu hình mặc định cho toast messages
 message.config({

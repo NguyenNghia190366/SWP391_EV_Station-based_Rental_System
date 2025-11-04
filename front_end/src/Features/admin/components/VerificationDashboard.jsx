@@ -8,12 +8,12 @@ import {
   IdcardOutlined,
   CarOutlined,
 } from "@ant-design/icons";
-import { driverLicenseVerifyAPI, cccdVerifyAPI } from "../../api/useVerify";
+import { driverLicenseVerifyAPI, cccdVerifyAPI } from "../../../api/useVerify";
 
 const { TextArea } = Input;
 const { TabPane } = Tabs;
 
-export default function StaffVerificationDashboard() {
+export default function VerificationDashboard() {
   const [licenses, setLicenses] = useState([]);
   const [idCards, setIdCards] = useState([]);
   const [loading, setLoading] = useState(true);

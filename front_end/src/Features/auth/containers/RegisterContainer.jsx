@@ -1,8 +1,8 @@
 import React, { useState } from "react";
 import { message } from "antd";
 import { useNavigate } from "react-router-dom";
-import RegisterForm from "../Components/Common/Form/RegisterForm";
-import { userAPI } from "../api/api";
+import RegisterForm from "../../../Components/Common/Form/RegisterForm";
+import { userAPI } from "../../../api/api";
 
 const RegisterContainer = () => {
   const [loading, setLoading] = useState(false);

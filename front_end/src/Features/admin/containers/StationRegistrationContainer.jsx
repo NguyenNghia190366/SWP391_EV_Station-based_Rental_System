@@ -1,8 +1,8 @@
 import React, { useState } from "react";
 import { message, Modal } from "antd";
 import { useNavigate } from "react-router-dom";
-import StationRegistrationForm from "../Components/Admin/StationRegistrationForm";
-import { stationAPI } from "../api/api";
+import StationRegistrationForm from "../components/StationRegistrationForm";
+import { stationAPI } from "../../../api/api";
 
 const StationRegistrationContainer = () => {
   const navigate = useNavigate();

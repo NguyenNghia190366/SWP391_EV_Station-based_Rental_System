@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import ContractView from '../Components/Common/View/ContractView';
+import ContractView from '../../../Components/Common/View/Contract/ContractView';
 
 const ContractContainer = () => {
   const navigate = useNavigate();

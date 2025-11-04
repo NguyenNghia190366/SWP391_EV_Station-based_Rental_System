@@ -8,8 +8,8 @@ import {
   SafetyCertificateOutlined,
   DashboardOutlined
 } from "@ant-design/icons";
-import StaffVerificationDashboard from "../staff/StaffVerificationDashboard";
-import StationRegistrationContainer from "../../Container/StationRegistrationContainer";
+import VerificationDashboard from "../components/VerificationDashboard";
+import StationRegistrationContainer from "../containers/StationRegistrationContainer";
 
 const AdminDashboard = () => {
   const [selectedMenu, setSelectedMenu] = useState("overview");
@@ -124,7 +124,7 @@ const AdminDashboard = () => {
                 Duyệt Giấy phép lái xe (GPLX) và Căn cước công dân (CCCD) từ renters
               </p>
             </div>
-            <StaffVerificationDashboard />
+            <VerificationDashboard />
           </Card>
         );
 
