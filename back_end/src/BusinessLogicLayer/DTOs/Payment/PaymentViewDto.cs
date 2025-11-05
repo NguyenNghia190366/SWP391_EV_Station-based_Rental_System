@@ -12,6 +12,6 @@ namespace BusinessLogicLayer.DTOs.Payment
         public decimal Amount { get; set; }
         public string PaymentMethod { get; set; } = string.Empty; // "E-Wallet", "Cash" (bỏ "Card"  vì ko dùng)
         public DateTime PaymentDate { get; set; }
-        public string ExternalRef { get; set; } = string.Empty; // Sẽ lưu MoMo's TransId
+        public string ExternalRef { get; set; } = string.Empty; // Sẽ lưu TransId
     }
 }
