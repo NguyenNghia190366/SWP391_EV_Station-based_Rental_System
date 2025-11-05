@@ -28,8 +28,11 @@ builder.Services.AddControllers();
 // -----------------------------
 // Config MomoSettings from appsettings.json
 // -----------------------------
-builder.Services.Configure<MomoSettings>(builder.Configuration.GetSection("Momo"));
-
+builder.Services.Configure<MomoSettings>(builder.Configuration.GetSection("Momo"));  
+// -----------------------------
+// Config VnpaySettings from appsettings.json
+// -----------------------------
+builder.Services.Configure<VnpaySettings>(builder.Configuration.GetSection("Vnpay"));
 
 // Add service 
 builder.Services.AddScoped<IStationService, StationService>();
