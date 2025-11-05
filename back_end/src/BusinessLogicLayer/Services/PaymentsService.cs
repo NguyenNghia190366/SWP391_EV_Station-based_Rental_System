@@ -1,11 +1,15 @@
+using System.Net;
 using System.Net.Http.Json;
 using AutoMapper;
 using AutoMapper.QueryableExtensions;
 using BusinessLogicLayer.DTOs.Payment;
+using BusinessLogicLayer.DTOs.Payment.VNPAY;
 using BusinessLogicLayer.Helpers;
 using BusinessLogicLayer.Interfaces;
 using DataAccessLayer;
 using DataAccessLayer.Models;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 
@@ -14,18 +18,28 @@ namespace BusinessLogicLayer.Services
     public class PaymentsService : IPaymentsService
     {
         private readonly ApplicationDbContext _context;
-        private readonly MomoSettings _momoSettings;
         private readonly IMapper _mapper;
         private readonly IHttpClientFactory _httpClientFactory;
+        
+        // CONFIG SETTINGS
+        private readonly MomoSettings _momoSettings;
+        private readonly VnpaySettings _vnpaySettings;
 
-        public PaymentsService(ApplicationDbContext context, 
+        // Helpers
+         private readonly IHttpContextAccessor _httpContextAccessor;
+
+        public PaymentsService(ApplicationDbContext context,
                                IOptions<MomoSettings> momoSettings,
+                               IOptions<VnpaySettings> vnpaySettings,
                                IHttpClientFactory httpClientFactory,
-                               IMapper mapper)
+                               IMapper mapper,
+                               IHttpContextAccessor httpContextAccessor)
         {
             _context = context;
             _momoSettings = momoSettings.Value;
+            _vnpaySettings = vnpaySettings.Value;
             _httpClientFactory = httpClientFactory;
+            _httpContextAccessor = httpContextAccessor;
             _mapper = mapper;
         }
 
@@ -224,6 +238,143 @@ namespace BusinessLogicLayer.Services
             return _mapper.Map<PaymentViewDto>(newPayment);
         }
 
+        // --- TRIỂN KHAI HÀM VNPAY 1: TẠO THANH TOÁN ---
+        public async Task<VnpayInitResponseDto> CreateVnpayPaymentRequestAsync(PaymentInitiationDto dto, int renterId, HttpContext httpContext)
+        {
+            // 1. Tìm Order và kiểm tra (Giữ nguyên)
+            var order = await _context.RentalOrders
+                .FirstOrDefaultAsync(o => o.order_id == dto.OrderId);
 
+            if (order == null) throw new KeyNotFoundException("Không tìm thấy đơn hàng.");
+            if (order.renter_id != renterId) throw new UnauthorizedAccessException("Bạn không có quyền thanh toán.");
+            if (order.payment_status == "PAID") throw new InvalidOperationException("Đơn hàng đã thanh toán.");
+
+            // 2. LOGIC IP (Refactor - Áp dụng feedback 1 & 4)
+            var ipAddress = "118.69.182.149";
+            // // (Không dùng _httpContextAccessor, dùng httpContext từ tham số)
+            
+            // // Ưu tiên X-Forwarded-For (khi chạy sau proxy, nginx, devtunnels...)
+            // var ipAddress = httpContext.Request.Headers["X-Forwarded-For"].FirstOrDefault();
+            
+            // if (string.IsNullOrEmpty(ipAddress))
+            // {
+            //     // Nếu không có, mới lấy IP kết nối trực tiếp
+            //     ipAddress = httpContext.Connection.RemoteIpAddress?.ToString();
+            // }
+
+            // // (Giữ lại "chữa cháy" cho localhost)
+            // if (string.IsNullOrEmpty(ipAddress) || ipAddress == "::1" || ipAddress == "127.0.0.1")
+            // {
+            //     ipAddress = "13.160.92.202"; // (Chỉ dùng khi dev)
+            // }
+
+
+            // 3. Chuẩn bị dữ liệu
+            
+            // (Áp dụng feedback 2 - an toàn hơn)
+            long vnpAmount = Convert.ToInt64(Math.Round(order.deposit_amount * 100M));
+
+            var data = new SortedDictionary<string, string>(StringComparer.Ordinal)
+            {
+                { "vnp_Version", "2.1.0" },
+                { "vnp_Command", "pay" },
+                { "vnp_TmnCode", _vnpaySettings.TmnCode },
+                { "vnp_Amount", vnpAmount.ToString() }, 
+                { "vnp_CreateDate", DateTime.Now.ToString("yyyyMMddHHmmss") },
+                { "vnp_CurrCode", "VND" },
+                { "vnp_IpAddr", ipAddress },
+                { "vnp_Locale", "vn" },
+                { "vnp_OrderInfo", $"Thanh toán đơn hàng {order.order_id}" },
+                { "vnp_OrderType", "other" },
+                { "vnp_ReturnUrl", _vnpaySettings.ReturnUrl },
+                { "vnp_IpnUrl", _vnpaySettings.IpnUrl },
+                
+                // (Áp dụng feedback 6)
+                { "vnp_TxnRef", $"{order.order_id}_{Guid.NewGuid().ToString("N")}" }, 
+                
+                // (Áp dụng feedback 3)
+                { "vnp_SecureHashType", "HMACSHA512" } 
+            };
+
+            // 4. Tạo chữ ký
+            string signature = SecurityHelper.CreateVnpayHmacSha512(data, _vnpaySettings.HashSecret);
+            data.Add("vnp_SecureHash", signature);
+
+            // 5. Tạo URL (Refactor - Áp dụng feedback 5)
+            // (Chuyển SortedDictionary thành Dictionary để QueryHelpers dùng)
+            var queryParams = data.ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
+            
+            // Dùng QueryHelpers để build URL an toàn (tự động UrlEncode)
+            string paymentUrl = QueryHelpers.AddQueryString(_vnpaySettings.Url, queryParams!);
+
+            return new VnpayInitResponseDto { PaymentUrl = paymentUrl };
+        }
+
+        // --- TRIỂN KHAI HÀM VNPAY 2: XỬ LÝ IPN ---
+        public async Task<string> ProcessVnpayIpnAsync(VnpayIpnDto ipnDto)
+        {
+            // 1. Chuyển DTO thành Dictionary để kiểm tra chữ ký
+            var queryParams = new Dictionary<string, string>();
+            foreach (var prop in ipnDto.GetType().GetProperties())
+            {
+                var value = prop.GetValue(ipnDto)?.ToString();
+                if (!string.IsNullOrEmpty(value))
+                {
+                    queryParams.Add(prop.Name, value);
+                }
+            }
+
+            // 2. KIỂM TRA CHỮ KÝ
+            bool isValidSignature = SecurityHelper.ValidateVnpaySignature(queryParams, _vnpaySettings.HashSecret);
+            if (!isValidSignature)
+            {
+                // Trả về mã lỗi cho VNPay (để họ không gửi lại)
+                return "{\"RspCode\":\"97\", \"Message\":\"Invalid Checksum\"}";
+            }
+            
+            // 3. Chữ ký hợp lệ -> Xử lý nghiệp vụ
+            if (ipnDto.vnp_ResponseCode == "00") // 00 = Thành công
+            {
+                int orderId;
+                try
+                {
+                    orderId = int.Parse(ipnDto.vnp_TxnRef.Split('_')[0]); // Lấy OrderId
+                }
+                catch
+                {
+                    return "{\"RspCode\":\"01\", \"Message\":\"Order not found\"}";
+                }
+
+                var order = await _context.RentalOrders.FirstOrDefaultAsync(o => o.order_id == orderId);
+
+                // 4. Kiểm tra (Idempotency)
+                if (order == null)
+                    return "{\"RspCode\":\"01\", \"Message\":\"Order not found\"}";
+                
+                if (order.payment_status == "PAID")
+                    return "{\"RspCode\":\"02\", \"Message\":\"Order already paid\"}";
+                
+                // 5. Cập nhật DB
+                order.payment_status = "PAID";
+                var newPayment = new Payment
+                {
+                    order_id = orderId,
+                    amount = ipnDto.vnp_Amount / 100, // Nhớ chia 100
+                    payment_method = "E-Wallet",
+                    payment_date = DateTime.UtcNow,
+                    external_ref = ipnDto.vnp_TransactionNo.ToString()
+                };
+
+                _context.Payments.Add(newPayment);
+                await _context.SaveChangesAsync();
+                
+                // 6. Trả về 00 cho VNPay
+                return "{\"RspCode\":\"00\", \"Message\":\"Confirm Success\"}";
+            }
+            
+            // (Nếu thanh toán thất bại, không cần làm gì DB, 
+            // nhưng vẫn báo 00 để VNPay không gửi lại)
+            return "{\"RspCode\":\"00\", \"Message\":\"Confirm Success\"}";
+        }
     }
 }
