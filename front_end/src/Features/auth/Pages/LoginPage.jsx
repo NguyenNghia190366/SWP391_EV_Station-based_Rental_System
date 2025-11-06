@@ -1,6 +1,6 @@
 // src/Features/auth/Pages/LoginPage.jsx
 import React from "react";
-import LoginContainer from "../../../Container/LoginContainer";
+import LoginContainer from "../containers/LoginContainer";
 
 const LoginPage = () => {
   return <LoginContainer />;

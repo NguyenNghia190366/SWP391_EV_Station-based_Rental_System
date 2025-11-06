@@ -125,7 +125,7 @@ const NearbyStationsSuggestions = ({
                 </span>
                 <span className="text-gray-500">
                   ⏱️ ~{Math.ceil(station.distance / 40 * 60)} phút
-                </span>
+                </span> 
               </div>
             </div>
             <div className="flex-shrink-0">
