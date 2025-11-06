@@ -18,8 +18,14 @@ namespace BusinessLogicLayer.DTOs.RentalOrder
         
         public string? Notes { get; set; } // Lý do hủy/ghi chú
 
-        // Dùng khi Staff nhận xe (RETURN_VEHICLE)
-        public string? VehicleConditionAfter { get; set; } // 'GOOD', 'DAMAGED'
-        public string? ImgVehicleAfterUrl { get; set; } 
+        // --- Dùng cho START_RENTAL ---
+        [Url]
+        public string? ImgVehicleBeforeUrl { get; set; } = string.Empty;
+
+        // --- Dùng cho RETURN_VEHICLE ---
+        [Url]
+        public string? ImgVehicleAfterUrl { get; set; } = string.Empty;
+        public string? VehicleConditionAfter { get; set; } = string.Empty; // 'GOOD', 'DAMAGED'
+        public int? CurrentMileage { get; set; }
     }
 }
