@@ -4,33 +4,33 @@ import LoginPage from "./Features/auth/Pages/LoginPage";
 import HomePage from "./Features/auth/Pages/HomePage";
 import RegisterPage from "./Features/auth/Pages/RegisterPage";
 // Shared
-import ProfilePage from "./Features/shared/profile/pages/ProfilePage";
+import ProfilePage from "./Components/Common/View/Profile/pages/ProfilePage.jsx";
 // Renter
-import VehiclesPage from "./Features/renter/pages/VehiclesPage";
-import BookingContainer from "./Features/renter/containers/BookingContainer";
-import ContractContainer from "./Features/renter/containers/ContractContainer";
-import PaymentContainer from "./Features/renter/containers/PaymentContainer";
-import CheckInContainer from "./Features/renter/containers/CheckInContainer";
-import BookingSuccessPage from "./Features/renter/pages/BookingSuccessPage";
-import CheckInMethodSelectionPage from "./Features/renter/pages/CheckInMethodSelectionPage";
-import DocumentVerificationPage from "./Features/renter/pages/DocumentVerificationPage";
-import VehiclePreviewNotification from "./Features/renter/pages/VehiclePreviewNotification";
-import PaymentSuccessBill from "./Features/renter/pages/PaymentSuccessBill";
-import MyBookingsPage from "./Features/renter/pages/MyBookingsPage";
+import VehiclesPage from "./Components/renter/pages/VehiclesPage";
+import BookingContainer from "./Components/Common/View/Booking/containers/BookingContainer.jsx";
+import ContractContainer from "./Components/renter/containers/ContractContainer";
+import PaymentContainer from "./Components/renter/containers/PaymentContainer";
+import CheckInContainer from "./Components/renter/containers/CheckInContainer";
+import BookingSuccessPage from "./Components/Common/View/Booking/pages/BookingSuccessPage";
+import CheckInMethodSelectionPage from "./Components/renter/pages/CheckInMethodSelectionPage";
+import DocumentVerificationPage from "./Components/renter/pages/DocumentVerificationPage";
+import VehiclePreviewNotification from "./Components/renter/pages/VehiclePreviewNotification";
+import PaymentSuccessBill from "./Components/renter/pages/PaymentSuccessBill";
+import MyBookingsPage from "./Components/Common/View/Booking/pages/MyBookingsPage.jsx";
 // Admin
-import AdminDashboard from "./Features/admin/pages/AdminDashboard";
-import AdminVerificationDashboard from "./Features/admin/pages/AdminVerificationDashboard";
-import StationRegistrationContainer from "./Features/admin/containers/StationRegistrationContainer";
+import AdminDashboard from "./Components/Admin/pages/AdminDashboard";
+import AdminVerificationDashboard from "./Components/Admin/pages/VerifyRenterPage.jsx";
+import StationRegistrationContainer from "./Components/Admin/containers/StationRegistrationContainer";
 // Staff
-import StaffDashboard from "./Features/staff/pages/StaffDashboard";
-import SendVehiclePreview from "./Features/staff/components/SendVehiclePreview";
+import StaffDashboard from "./Components/StationStaff/pages/StaffDashboard.jsx";
+import SendVehiclePreview from "./Components/StationStaff/components/SendVehiclePreview.jsx";
 // Common
 import { roles } from "./Constant/Role";
 import { RequireAuth } from "./Router/RequireAuth.jsx";
 import AuthRoute from "./Router/AuthRoute";
 import Layout from "./Components/Layout/Layout";
-import NotificationsPage from "./Components/Common/Page/NotificationsPage";
-import VerifyPage from "./Components/Common/Page/VerifyPage.jsx";
+import NotificationsPage from "./Components/Common/View/Notifications/pages/NotificationsPage.jsx";
+import VerifyPage from "./Components/renter/pages/VerifyPage.jsx";
 
 function App() {
   console.log(" App component rendered");
@@ -43,7 +43,6 @@ function App() {
         <Route path="/home" element={<HomePage />} />
         <Route path="/vehicles" element={<VehiclesPage />} />
         <Route path="/profile" element={<ProfilePage />} />
-        
         
         {/* Booking Flow Routes */}
         <Route path="/booking/:vehicleId" element={<BookingContainer />} />

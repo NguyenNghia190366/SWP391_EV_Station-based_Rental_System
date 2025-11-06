@@ -10,7 +10,7 @@ import {
   CloseOutlined,
   SettingOutlined,
 } from "@ant-design/icons";
-import { clearUserData } from "../utils/auth";
+import { clearUserData } from "../../../utils/auth";
 
 export default function Header() {
   const [user, setUser] = useState(null);

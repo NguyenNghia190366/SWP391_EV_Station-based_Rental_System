@@ -2,13 +2,13 @@ import { useState, useCallback } from 'react';
 
 //  Base URLs
 // 🌐 BE của team (uncomment khi team deploy)
-const BASE_URL = "https://alani-uncorroboratory-sympetaly.ngrok-free.dev/api";
+export const BASE_URL = "https://alani-uncorroboratory-sympetaly.ngrok-free.dev/api";
 
 // 🏠 Local BE (đang sử dụng)
 // const BASE_URL = "http://localhost:5189/api";
 
 //  Common headers
-const JSON_HEADERS = {
+export const JSON_HEADERS = {
   "Content-Type": "application/json",
   "ngrok-skip-browser-warning": "true",
 };

@@ -1,6 +1,6 @@
 import React, { useState } from "react";
-import MapLeaflet from "../Map/MapLeaflet";
-import NearbyStationsSuggestions from "../Map/NearbyStationsSuggestions";
+import MapLeaflet from "../../Map/MapLeaflet";
+import NearbyStationsSuggestions from "../../Map/NearbyStationsSuggestions";
 
 const HomeView = ({
   user,
