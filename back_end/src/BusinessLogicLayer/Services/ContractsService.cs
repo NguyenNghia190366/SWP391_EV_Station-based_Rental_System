@@ -25,68 +25,87 @@ namespace BusinessLogicLayer.Services
         // --- Nghiệp vụ chính: Tạo Hợp đồng ---
         public async Task<ContractViewDto> CreateContractAsync(ContractCreateDto createDto, int staffId)
         {
-            // 1. Validation: Kiểm tra RentalOrder
-            var order = await _context.RentalOrders
-                .FirstOrDefaultAsync(o => o.order_id == createDto.OrderId);
-
-            if (order == null)
+            // Bắt đầu một Transaction vì ta sẽ sửa 3 bảng
+            await using var transaction = await _context.Database.BeginTransactionAsync();
+            try
             {
-                // Thay thế bằng Exception tùy chỉnh (custom exception)
-                throw new KeyNotFoundException("RentalOrder không tồn tại.");
+                // 1. Validation: Kiểm tra RentalOrder và Vehicle liên quan
+                var order = await _context.RentalOrders
+                    .Include(o => o.vehicle) // Phải Include Vehicle
+                    .FirstOrDefaultAsync(o => o.order_id == createDto.OrderId);
+
+                if (order == null)
+                {
+                    throw new KeyNotFoundException("RentalOrder không tồn tại.");
+                }
+                
+                if (order.vehicle == null)
+                {
+                    // Cần thiết: Đơn hàng phải có xe mới giao được
+                    throw new InvalidOperationException("Đơn hàng này chưa được gán xe (Vehicle).");
+                }
+
+                // 2. Validation: Kiểm tra trạng thái Order
+                if (order.status != "BOOKED") 
+                {
+                    throw new InvalidOperationException($"Không thể tạo hợp đồng cho đơn hàng ở trạng thái {order.status}.");
+                }
+
+                // 3. Validation: Kiểm tra Hợp đồng trùng lặp
+                var contractExists = await _context.Contracts
+                    .AnyAsync(c => c.order_id == createDto.OrderId);
+
+                if (contractExists)
+                {
+                    throw new InvalidOperationException("Đơn hàng này đã có hợp đồng.");
+                }
+
+                // 4. Validation: Kiểm tra Staff ID (Logic cũ của cậu, rất tốt)
+                var staffExists = await _context.Staff.AnyAsync(s => s.staff_id == staffId);
+                if (!staffExists)
+                {
+                    throw new KeyNotFoundException("Nhân viên không tồn tại.");
+                }
+
+                // 5. Tạo mới Contract
+                var newContract = new Contract
+                {
+                    order_id = createDto.OrderId,
+                    staff_id = staffId
+                    // signed_date sẽ tự động gán default 
+                };
+                _context.Contracts.Add(newContract);
+
+                // 6. Cập nhật RentalOrder
+                order.status = "IN_USE"; // Chuyển trạng thái 
+                order.img_vehicle_before_URL = createDto.ImgVehicleBeforeUrl; // Lưu ảnh 
+
+                // 7. Cập nhật Vehicle
+                order.vehicle.is_available = false; // Xe không còn sẵn có 
+
+                // 8. Lưu tất cả thay đổi (Contract, Order, Vehicle)
+                await _context.SaveChangesAsync();
+                
+                // 9. Hoàn tất Transaction
+                await transaction.CommitAsync();
+
+                // 10. Lấy dữ liệu đầy đủ và trả về DTO
+                // Tái sử dụng logic của cậu, rất hay!
+                var resultDto = await GetContractByIdAsync(newContract.contract_id);
+
+                if (resultDto == null)
+                {
+                    throw new Exception("Lỗi nghiêm trọng: Không thể truy xuất hợp đồng vừa tạo.");
+                }
+
+                return resultDto;
             }
-
-            // 2. Validation: Kiểm tra trạng thái Order
-            // Chỉ tạo hợp đồng khi đơn ở trạng thái "BOOKED"
-            if (order.status != "BOOKED") // [cite: 29]
+            catch (Exception)
             {
-                throw new InvalidOperationException($"Không thể tạo hợp đồng cho đơn hàng ở trạng thái {order.status}.");
+                // Nếu có bất kỳ lỗi nào, hủy bỏ tất cả thay đổi
+                await transaction.RollbackAsync();
+                throw; // Ném lỗi ra để Controller bắt
             }
-
-            // 3. Validation: Kiểm tra Hợp đồng trùng lặp
-            // Bảng Contract có ràng buộc UNIQUE 1-1 với order_id [cite: 31]
-            var contractExists = await _context.Contracts
-                .AnyAsync(c => c.order_id == createDto.OrderId);
-
-            if (contractExists)
-            {
-                throw new InvalidOperationException("Đơn hàng này đã có hợp đồng.");
-            }
-
-            // 4. Validation: Kiểm tra Staff ID (dù FK đã ràng buộc)
-            var staffExists = await _context.Staff.AnyAsync(s => s.staff_id == staffId);
-            if (!staffExists)
-            {
-                throw new KeyNotFoundException("Nhân viên không tồn tại.");
-            }
-
-            // 5. Tạo mới Contract
-            var newContract = new Contract
-            {
-                order_id = createDto.OrderId,
-                staff_id = staffId
-                // signed_date sẽ được SQL tự động gán giá trị default [cite: 31]
-            };
-
-            _context.Contracts.Add(newContract);
-
-            // 6. Cập nhật trạng thái RentalOrder
-            // Khi ký hợp đồng, đơn hàng chuyển sang "IN_USE" [cite: 29]
-            order.status = "IN_USE";
-
-            // 7. Lưu thay đổi
-            await _context.SaveChangesAsync();
-
-            // 8. Lấy dữ liệu đầy đủ và trả về DTO
-            // Gọi hàm GetByIdAsync để tái sử dụng logic query
-            var resultDto = await GetContractByIdAsync(newContract.contract_id);
-
-            if (resultDto == null)
-            {
-                // Trường hợp này gần như không thể xảy ra
-                throw new Exception("Lỗi nghiêm trọng: Không thể truy xuất hợp đồng vừa tạo.");
-            }
-
-            return resultDto;
         }
 
         // --- Lấy chi tiết 1 Hợp đồng ---
