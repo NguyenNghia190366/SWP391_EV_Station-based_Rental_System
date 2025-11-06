@@ -1,5 +1,7 @@
 using System.Net;
 using System.Net.Http.Json;
+using System.Security.Cryptography;
+using System.Text;
 using AutoMapper;
 using AutoMapper.QueryableExtensions;
 using BusinessLogicLayer.DTOs.Payment;
@@ -249,63 +251,63 @@ namespace BusinessLogicLayer.Services
             if (order.renter_id != renterId) throw new UnauthorizedAccessException("Bạn không có quyền thanh toán.");
             if (order.payment_status == "PAID") throw new InvalidOperationException("Đơn hàng đã thanh toán.");
 
-            // 2. LOGIC IP (Refactor - Áp dụng feedback 1 & 4)
-            var ipAddress = "118.69.182.149";
-            // // (Không dùng _httpContextAccessor, dùng httpContext từ tham số)
-            
-            // // Ưu tiên X-Forwarded-For (khi chạy sau proxy, nginx, devtunnels...)
-            // var ipAddress = httpContext.Request.Headers["X-Forwarded-For"].FirstOrDefault();
-            
-            // if (string.IsNullOrEmpty(ipAddress))
-            // {
-            //     // Nếu không có, mới lấy IP kết nối trực tiếp
-            //     ipAddress = httpContext.Connection.RemoteIpAddress?.ToString();
-            // }
-
-            // // (Giữ lại "chữa cháy" cho localhost)
-            // if (string.IsNullOrEmpty(ipAddress) || ipAddress == "::1" || ipAddress == "127.0.0.1")
-            // {
-            //     ipAddress = "13.160.92.202"; // (Chỉ dùng khi dev)
-            // }
-
+            // 2. LOGIC IP (GÁN CỨNG IP THẬT CỦA CẬU ĐÃ WHITELIST)
+            var ipAddress = "118.69.182.149"; // <-- IP CỦA CẬU
 
             // 3. Chuẩn bị dữ liệu
-            
             // (Áp dụng feedback 2 - an toàn hơn)
             long vnpAmount = Convert.ToInt64(Math.Round(order.deposit_amount * 100M));
+            // (Feedback 2: Đổi vnp_TxnRef)
+            string txnRef = $"{order.order_id}{DateTime.Now:yyyyMMddHHmmss}";
 
             var data = new SortedDictionary<string, string>(StringComparer.Ordinal)
             {
                 { "vnp_Version", "2.1.0" },
                 { "vnp_Command", "pay" },
                 { "vnp_TmnCode", _vnpaySettings.TmnCode },
-                { "vnp_Amount", vnpAmount.ToString() }, 
+                { "vnp_Amount", vnpAmount.ToString() },
                 { "vnp_CreateDate", DateTime.Now.ToString("yyyyMMddHHmmss") },
                 { "vnp_CurrCode", "VND" },
                 { "vnp_IpAddr", ipAddress },
                 { "vnp_Locale", "vn" },
-                { "vnp_OrderInfo", $"Thanh toán đơn hàng {order.order_id}" },
+                { "vnp_OrderInfo", $"Thanh toan don hang {order.order_id}" },
                 { "vnp_OrderType", "other" },
                 { "vnp_ReturnUrl", _vnpaySettings.ReturnUrl },
-                { "vnp_IpnUrl", _vnpaySettings.IpnUrl },
-                
                 // (Áp dụng feedback 6)
-                { "vnp_TxnRef", $"{order.order_id}_{Guid.NewGuid().ToString("N")}" }, 
-                
-                // (Áp dụng feedback 3)
-                { "vnp_SecureHashType", "HMACSHA512" } 
+                { "vnp_TxnRef", txnRef }
             };
 
-            // 4. Tạo chữ ký
-            string signature = SecurityHelper.CreateVnpayHmacSha512(data, _vnpaySettings.HashSecret);
-            data.Add("vnp_SecureHash", signature);
+            // --- BƯỚC 4 & 5: SỬA LẠI THEO LOGIC CỦA VnPayLibrary.cs ---
 
-            // 5. Tạo URL (Refactor - Áp dụng feedback 5)
-            // (Chuyển SortedDictionary thành Dictionary để QueryHelpers dùng)
-            var queryParams = data.ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
+            // 4.1. Tạo chuỗi ký (signData) VÀ chuỗi URL (queryString)
+            // (Giống hệt logic của CreateRequestUrl)
+            var dataBuilder = new StringBuilder();
+            foreach (var kv in data)
+            {
+                if (!string.IsNullOrEmpty(kv.Value))
+                {
+                    // Encode CẢ Key VÀ Value
+                    dataBuilder.Append(WebUtility.UrlEncode(kv.Key) + "=" + WebUtility.UrlEncode(kv.Value) + "&");
+                }
+            }
             
-            // Dùng QueryHelpers để build URL an toàn (tự động UrlEncode)
-            string paymentUrl = QueryHelpers.AddQueryString(_vnpaySettings.Url, queryParams!);
+            string queryString = dataBuilder.ToString();
+
+            // 4.2. Lấy chuỗi signData (bằng cách xóa dấu '&' cuối)
+            string signData = queryString;
+            if (signData.Length > 0)
+            {
+                signData = signData.Remove(signData.Length - 1, 1);
+            }
+            
+            // 4.3. Hash chuỗi signData (Dùng logic HmacSHA512 của SecurityHelper)
+            // (Hàm HmacSHA512 của chúng ta và của Demo là tương đương)
+            string vnpSecureHash = SecurityHelper.CreateVnpayHmacSha512(signData, _vnpaySettings.HashSecret);
+            
+            // 5. Tạo URL cuối cùng
+            // (Nối cái queryString (vẫn còn dấu & cuối) với vnp_SecureHash)
+            //
+            string paymentUrl = _vnpaySettings.Url + "?" + queryString + "vnp_SecureHash=" + vnpSecureHash;
 
             return new VnpayInitResponseDto { PaymentUrl = paymentUrl };
         }
