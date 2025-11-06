@@ -1,9 +1,9 @@
-import React, { useState } from "react";
+﻿import React, { useState } from "react";
 import { Form, Input, Upload, Button, Card, message } from "antd";
 import { InboxOutlined } from "@ant-design/icons";
-import { useCccd } from "../../../hooks/useCccd";
-import { useDriverLicense } from "../../../hooks/useDriverLicense";
-import { useCloudinary } from "../../../hooks/useCloudinary";
+import { useCccd } from "../hooks/useCccd";
+import { useDriverLicense } from "../hooks/useDriverLicense";
+import { useCloudinary } from "../hooks/useCloudinary";
 
 const { Dragger } = Upload;
 
@@ -53,12 +53,12 @@ export default function VerifyPage() {
       const backFile = values.licenseBack?.[0]?.originFileObj;
 
       if (!frontFile || !backFile) {
-        message.warning("Vui lòng tải lên đủ 2 mặt Bằng lái xe!");
+        message.warning("Vui lòng tải lên đủ 2 mặt bằng lái xe!");
         return;
       }
 
       setLoading(true);
-      message.loading("Đang upload ảnh Bằng lái xe lên Cloudinary...");
+      message.loading("Đang upload ảnh bằng lái xe lên Cloudinary...");
 
       const frontUrl = await uploadToCloudinary(frontFile);
       const backUrl = await uploadToCloudinary(backFile);
@@ -70,10 +70,10 @@ export default function VerifyPage() {
       };
 
       await uploadDriverLicense(payload);
-      message.success("✅ Upload Bằng lái xe thành công!");
+      message.success("✅ Upload bằng lái xe thành công!");
     } catch (err) {
       console.error("❌ Upload License error:", err);
-      message.error("Có lỗi xảy ra khi upload Bằng lái xe!");
+      message.error("Có lỗi xảy ra khi upload bằng lái xe!");
     } finally {
       setLoading(false);
     }
@@ -81,7 +81,7 @@ export default function VerifyPage() {
 
   return (
     <div className="flex justify-center items-center min-h-screen bg-gray-50 p-6">
-      {/* ✅ Hai Card song song */}
+      {/* Hai Card song song */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8 w-full max-w-6xl">
         {/* --- CCCD --- */}
         <Card
@@ -156,7 +156,7 @@ export default function VerifyPage() {
             </Form.Item>
 
             <Form.Item
-              label="Ảnh mặt trước Bằng lái"
+              label="Ảnh mặt trước bằng lái"
               name="licenseFront"
               valuePropName="fileList"
               getValueFromEvent={(e) => e?.fileList}
@@ -171,7 +171,7 @@ export default function VerifyPage() {
             </Form.Item>
 
             <Form.Item
-              label="Ảnh mặt sau Bằng lái"
+              label="Ảnh mặt sau bằng lái"
               name="licenseBack"
               valuePropName="fileList"
               getValueFromEvent={(e) => e?.fileList}
@@ -193,7 +193,7 @@ export default function VerifyPage() {
                 block
                 className="rounded-lg"
               >
-                Gửi xác thực Bằng lái xe
+                Gửi bằng lái xe
               </Button>
             </Form.Item>
           </Form>
