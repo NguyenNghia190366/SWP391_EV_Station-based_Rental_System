@@ -1,3 +1,4 @@
+using System.Net;
 using System.Security.Cryptography;
 using System.Text;
 
@@ -15,30 +16,27 @@ namespace BusinessLogicLayer.Helpers
         }
 
         // --- HÀM MỚI CHO VNPAY (Tạo chữ ký) ---
-        public static string CreateVnpayHmacSha512(SortedDictionary<string, string> data, string key)
+        public static string CreateVnpayHmacSha512(string inputData, string key) // <-- SỬA: Nhận 'string inputData'
         {
-            var rawHash = new StringBuilder();
-            foreach (var item in data)
+            // (Dùng logic y hệt code demo VNPAY)
+            var hash = new StringBuilder();
+            byte[] keyBytes = Encoding.UTF8.GetBytes(key);
+            byte[] inputBytes = Encoding.UTF8.GetBytes(inputData);
+            using (var hmac = new HMACSHA512(keyBytes))
             {
-                if (!string.IsNullOrEmpty(item.Value))
+                byte[] hashValue = hmac.ComputeHash(inputBytes);
+                foreach (var theByte in hashValue)
                 {
-                    rawHash.Append($"{item.Key}={item.Value}&");
+                    hash.Append(theByte.ToString("x2"));
                 }
             }
-            rawHash.Remove(rawHash.Length - 1, 1); // Xóa dấu '&' cuối cùng
-
-            using (var hmac = new HMACSHA512(Encoding.UTF8.GetBytes(key)))
-            {
-                var hash = hmac.ComputeHash(Encoding.UTF8.GetBytes(rawHash.ToString()));
-                return Convert.ToHexString(hash).ToLower();
-            }
+            return hash.ToString();
         }
 
         // --- HÀM MỚI CHO VNPAY (Kiểm tra chữ ký IPN) ---
         public static bool ValidateVnpaySignature(Dictionary<string, string> queryParams, string secretKey)
         {
             if (!queryParams.ContainsKey("vnp_SecureHash")) return false;
-
             string receivedHash = queryParams["vnp_SecureHash"];
 
             // 1. Tạo SortedDictionary (sắp xếp theo alphabet)
@@ -47,14 +45,28 @@ namespace BusinessLogicLayer.Helpers
             {
                 if (!string.IsNullOrEmpty(item.Value) && 
                     item.Key.StartsWith("vnp_") && 
-                    item.Key != "vnp_SecureHash") // Quan trọng: không hash chính nó
+                    item.Key != "vnp_SecureHash") // Chỉ xóa vnp_SecureHash
                 {
                     data.Add(item.Key, item.Value);
                 }
             }
             
+            // --- SỬA LẠI LOGIC TẠO CHUỖI KÝ (RAW HASH) ---
+            var signDataBuilder = new StringBuilder();
+            foreach (var kvp in data)
+            {
+                if (signDataBuilder.Length > 0)
+                {
+                    signDataBuilder.Append('&');
+                }
+                // Encode CẢ Key VÀ Value
+                signDataBuilder.Append($"{WebUtility.UrlEncode(kvp.Key)}={WebUtility.UrlEncode(kvp.Value)}");
+            }
+            string rawHash = signDataBuilder.ToString();
+            // --- HẾT PHẦN SỬA ---
+
             // 2. Tạo lại chữ ký
-            string calculatedHash = CreateVnpayHmacSha512(data, secretKey);
+            string calculatedHash = CreateVnpayHmacSha512(rawHash, secretKey); 
 
             return receivedHash.Equals(calculatedHash, StringComparison.OrdinalIgnoreCase);
         }
