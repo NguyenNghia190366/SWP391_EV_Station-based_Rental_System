@@ -205,8 +205,22 @@ namespace BusinessLogicLayer.Helpers
 
             // Driver_License -> view (merge ở service)
             CreateMap<Driver_License, RenterDocumentsViewDto>()
-                .ForMember(d => d.DriverLicenseNumber,   m => m.MapFrom(s => s.driver_license_number))
+                .ForMember(d => d.DriverLicenseNumber, m => m.MapFrom(s => s.driver_license_number))
                 .ForMember(d => d.DriverLicenseImageUrl, m => m.MapFrom(s => s.url_driver_license));
+            
+            // 1. Map Upsert DTO -> CCCD (Dùng cho hàm PUT)
+            CreateMap<RenterDocumentsUpsertDto, CCCD>()
+                .ForMember(dest => dest.id_card_number, 
+                           opt => opt.MapFrom(src => src.IdCardNumber))
+                .ForMember(dest => dest.url_cccd_cmnd, 
+                           opt => opt.MapFrom(src => src.IdCardImageUrl));
+
+            // 2. Map Upsert DTO -> Driver_License (Dùng cho hàm PUT)
+            CreateMap<RenterDocumentsUpsertDto, Driver_License>()
+                .ForMember(dest => dest.driver_license_number, 
+                           opt => opt.MapFrom(src => src.DriverLicenseNumber))
+                .ForMember(dest => dest.url_driver_license, 
+                           opt => opt.MapFrom(src => src.DriverLicenseImageUrl));
         }
     }
 }
