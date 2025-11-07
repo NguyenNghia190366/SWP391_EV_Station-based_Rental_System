@@ -8,7 +8,6 @@ namespace PresentationLayer.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    // [Authorize] ở cấp controller yêu cầu tất cả các action bên trong phải được xác thực (gửi kèm JWT).
     [Authorize]
     public class UsersController : ControllerBase
     {
