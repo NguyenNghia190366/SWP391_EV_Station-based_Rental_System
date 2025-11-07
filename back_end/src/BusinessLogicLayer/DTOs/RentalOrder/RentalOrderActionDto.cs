@@ -6,8 +6,6 @@ namespace BusinessLogicLayer.DTOs.RentalOrder
     public enum RentalAction
     {
         CANCEL_BY_RENTER,
-        APPROVE_BY_STAFF,
-        REJECT_BY_STAFF,
         START_RENTAL, // Staff giao xe
         RETURN_VEHICLE // Staff nhận xe
     }
