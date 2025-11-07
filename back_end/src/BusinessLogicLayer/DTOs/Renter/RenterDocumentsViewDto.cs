@@ -11,10 +11,6 @@ namespace BusinessLogicLayer.DTOs.Renter
         public string IdCardImageUrl { get; set; } = string.Empty;
         public string DriverLicenseNumber { get; set; } = string.Empty;    // GPLX
         public string DriverLicenseImageUrl { get; set; } = string.Empty;
-        public bool IsVerified => 
-            !string.IsNullOrWhiteSpace(IdCardNumber) &&
-            !string.IsNullOrWhiteSpace(IdCardImageUrl) &&
-            !string.IsNullOrWhiteSpace(DriverLicenseNumber) &&
-            !string.IsNullOrWhiteSpace(DriverLicenseImageUrl);
+        public bool IsVerified { get; set; }  // Trạng thái xác thực của Renter
     }
 }
