@@ -13,11 +13,20 @@ import {
 
 const { TabPane } = Tabs;
 
-const RenterListTable = ({ renters, loading, error, onVerify }) => {
+const RenterListTable = ({ renters, loading, error, onVerify, onReject }) => {
   const [selectedRenter, setSelectedRenter] = useState(null);
   const [modalVisible, setModalVisible] = useState(false);
+  const [rejectModalVisible, setRejectModalVisible] = useState(false);
+  const [rejectReason, setRejectReason] = useState("");
 
   if (error) return <p className="text-red-500">{error}</p>;
+
+  // Kiểm tra xem có cả GPLX và CCCD không
+  const hasAllDocuments = (renter) => {
+    const hasLicense = renter.driverLicenseFrontUrl || renter.driverLicenseBackUrl;
+    const hasCCCD = renter.cccdFrontUrl || renter.cccdBackUrl;
+    return hasLicense && hasCCCD;
+  };
 
   // Mở modal xem chi tiết
   const handleViewDetails = (renter) => {
@@ -29,6 +38,21 @@ const RenterListTable = ({ renters, loading, error, onVerify }) => {
   const handleVerifyClick = async (id) => {
     await onVerify(id);
     setModalVisible(false);
+  };
+
+  // Từ chối renter
+  const handleRejectClick = async () => {
+    if (!selectedRenter) return;
+    if (!rejectReason.trim()) {
+      alert("Vui lòng nhập lý do từ chối!");
+      return;
+    }
+    if (onReject) {
+      await onReject(selectedRenter.id, rejectReason);
+      setRejectModalVisible(false);
+      setRejectReason("");
+      setModalVisible(false);
+    }
   };
 
   const columns = [
@@ -124,45 +148,85 @@ const RenterListTable = ({ renters, loading, error, onVerify }) => {
       dataIndex: "isVerified",
       key: "isVerified",
       align: "center",
-      render: (isVerified) =>
-        isVerified ? (
-          <Tag icon={<CheckCircleOutlined />} color="success">
-            Đã xác thực
-          </Tag>
-        ) : (
+      render: (isVerified, record) => {
+        const hasDocuments = hasAllDocuments(record);
+        
+        if (isVerified) {
+          return (
+            <Tag icon={<CheckCircleOutlined />} color="success">
+              Đã xác thực
+            </Tag>
+          );
+        }
+        
+        if (!hasDocuments) {
+          return (
+            <Tag icon={<CloseCircleOutlined />} color="default">
+              Chưa xác thực
+            </Tag>
+          );
+        }
+        
+        return (
           <Tag icon={<CloseCircleOutlined />} color="warning">
             Chờ duyệt
           </Tag>
-        ),
+        );
+      },
     },
     {
       title: "Hành động",
       key: "actions",
       align: "center",
-      render: (_, record) => (
-        <Space>
-          <Button
-            type="primary"
-            icon={<EyeOutlined />}
-            onClick={() => handleViewDetails(record)}
-            size="small"
-          >
-            Xem chi tiết
-          </Button>
-          {!record.isVerified && (
+      render: (_, record) => {
+        const hasDocuments = hasAllDocuments(record);
+        
+        // Nếu chưa có giấy tờ, không hiển thị nút nào
+        if (!hasDocuments) {
+          return (
+            <span className="text-gray-400 text-sm">
+              Chưa có giấy tờ
+            </span>
+          );
+        }
+        
+        return (
+          <Space>
             <Button
               type="primary"
-              icon={<CheckCircleOutlined />}
-              onClick={() => handleVerifyClick(record.id)}
-              loading={loading}
-              style={{ background: "#52c41a", borderColor: "#52c41a" }}
+              icon={<EyeOutlined />}
+              onClick={() => handleViewDetails(record)}
               size="small"
             >
-              Xác thực
+              Xem chi tiết
             </Button>
-          )}
-        </Space>
-      ),
+            {!record.isVerified && (
+              <>
+                <Button
+                  danger
+                  size="small"
+                  onClick={() => {
+                    setSelectedRenter(record);
+                    setRejectModalVisible(true);
+                  }}
+                >
+                  Từ chối
+                </Button>
+                <Button
+                  type="primary"
+                  icon={<CheckCircleOutlined />}
+                  onClick={() => handleVerifyClick(record.id)}
+                  loading={loading}
+                  style={{ background: "#52c41a", borderColor: "#52c41a" }}
+                  size="small"
+                >
+                  Xác thực
+                </Button>
+              </>
+            )}
+          </Space>
+        );
+      },
     },
   ];
 
@@ -198,13 +262,20 @@ const RenterListTable = ({ renters, loading, error, onVerify }) => {
             <Space>
               <Button onClick={() => setModalVisible(false)}>Đóng</Button>
               <Button
+                danger
+                icon={<CloseCircleOutlined />}
+                onClick={() => setRejectModalVisible(true)}
+              >
+                ❌ Từ chối
+              </Button>
+              <Button
                 type="primary"
                 icon={<CheckCircleOutlined />}
                 onClick={() => handleVerifyClick(selectedRenter.id)}
                 loading={loading}
                 style={{ background: "#52c41a", borderColor: "#52c41a" }}
               >
-                ✅ Xác thực người thuê
+                ✅ Xác thực
               </Button>
             </Space>
           ) : (
@@ -327,6 +398,65 @@ const RenterListTable = ({ renters, loading, error, onVerify }) => {
             </Card>
           </div>
         )}
+      </Modal>
+
+      {/* Modal từ chối */}
+      <Modal
+        title={
+          <div className="flex items-center gap-2">
+            <CloseCircleOutlined className="text-red-500" />
+            <span>Từ chối xác thực</span>
+          </div>
+        }
+        open={rejectModalVisible}
+        onCancel={() => {
+          setRejectModalVisible(false);
+          setRejectReason("");
+        }}
+        width={600}
+        footer={
+          <Space>
+            <Button
+              onClick={() => {
+                setRejectModalVisible(false);
+                setRejectReason("");
+              }}
+            >
+              Hủy
+            </Button>
+            <Button
+              danger
+              onClick={handleRejectClick}
+              loading={loading}
+            >
+              ❌ Xác nhận từ chối
+            </Button>
+          </Space>
+        }
+      >
+        <div className="space-y-4">
+          <div className="p-4 bg-red-50 border border-red-200 rounded-lg">
+            <p className="font-semibold text-red-800">
+              ⚠️ Bạn sắp từ chối xác thực cho {selectedRenter?.fullName}
+            </p>
+            <p className="text-sm text-red-700 mt-2">
+              Vui lòng nhập lý do từ chối để thông báo cho người dùng.
+            </p>
+          </div>
+
+          <div>
+            <label className="block text-sm font-semibold text-gray-700 mb-2">
+              Lý do từ chối:
+            </label>
+            <textarea
+              className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:border-red-500 focus:ring-2 focus:ring-red-200"
+              rows={4}
+              placeholder="Nhập lý do từ chối (vd: Ảnh không rõ, thông tin không khớp, ...)"
+              value={rejectReason}
+              onChange={(e) => setRejectReason(e.target.value)}
+            />
+          </div>
+        </div>
       </Modal>
     </div>
   );

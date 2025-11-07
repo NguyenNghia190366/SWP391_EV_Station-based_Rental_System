@@ -37,6 +37,7 @@ import {
   Statistic,
 } from "antd";
 import VerifyPage from "../../../../renter/pages/VerifyPage";
+import OverviewPage from "../../../../renter/pages/OverviewPage";
 
 const { Dragger } = Upload;
 
@@ -196,20 +197,94 @@ const ProfileView = ({ user, loading, onUpdateUser, onUpdateAvatar, onSubmitVeri
   const renderContent = () => {
     switch (selectedMenu) {
       case "overview":
-        // ... giữ nguyên
-        return (
-          <Card className="shadow-lg" style={{ minHeight: "500px" }}>
-            {/* nội dung tổng quan (không đổi) */}
-            {/* ... */}
-          </Card>
-        );
+        // ✅ Hiển thị OverviewPage
+        return <OverviewPage />;
 
       case "info":
-        // ... giữ nguyên logic thông tin cá nhân
+        // Thông tin cá nhân
         return (
-          <Card className="shadow-lg" style={{ minHeight: "500px" }}>
-            {/* nội dung thông tin cá nhân (không đổi) */}
-            {/* ... */}
+          <Card className="shadow-lg">
+            <div className="mb-6">
+              <h2 className="text-3xl font-bold text-gray-800 flex items-center gap-2 mb-2">
+                <UserOutlined className="text-blue-500" />
+                Thông tin cá nhân
+              </h2>
+            </div>
+
+            {isEditing ? (
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">Họ tên</label>
+                  <Input
+                    name="fullName"
+                    value={form.fullName || ""}
+                    onChange={handleChange}
+                    placeholder="Nhập họ tên"
+                    size="large"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">Email</label>
+                  <Input
+                    name="email"
+                    value={form.email || ""}
+                    onChange={handleChange}
+                    placeholder="Nhập email"
+                    disabled
+                    size="large"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">Số điện thoại</label>
+                  <Input
+                    name="phone_number"
+                    value={form.phone_number || form.phone || ""}
+                    onChange={handleChange}
+                    placeholder="Nhập số điện thoại"
+                    size="large"
+                  />
+                </div>
+
+                <div className="flex gap-2 mt-6">
+                  <Button type="primary" onClick={handleSave} size="large" className="bg-green-600 hover:bg-green-700">
+                    <SaveOutlined /> Lưu
+                  </Button>
+                  <Button onClick={() => setIsEditing(false)} size="large">
+                    <CloseOutlined /> Hủy
+                  </Button>
+                </div>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="p-4 bg-gray-50 rounded-lg border border-gray-200">
+                    <p className="text-gray-600 text-sm mb-1">Họ tên</p>
+                    <p className="text-lg font-semibold text-gray-800">{user.fullName || user.full_name || "N/A"}</p>
+                  </div>
+
+                  <div className="p-4 bg-gray-50 rounded-lg border border-gray-200">
+                    <p className="text-gray-600 text-sm mb-1">Email</p>
+                    <p className="text-lg font-semibold text-gray-800">{user.email || "N/A"}</p>
+                  </div>
+
+                  <div className="p-4 bg-gray-50 rounded-lg border border-gray-200">
+                    <p className="text-gray-600 text-sm mb-1">Số điện thoại</p>
+                    <p className="text-lg font-semibold text-gray-800">{user.phone_number || user.phone || "Chưa cập nhật"}</p>
+                  </div>
+
+                  <div className="p-4 bg-gray-50 rounded-lg border border-gray-200">
+                    <p className="text-gray-600 text-sm mb-1">Vai trò</p>
+                    <Tag color="purple">{user.role || "RENTER"}</Tag>
+                  </div>
+                </div>
+
+                <Button type="primary" onClick={() => setIsEditing(true)} size="large" className="mt-6">
+                  <EditOutlined /> Chỉnh sửa
+                </Button>
+              </div>
+            )}
           </Card>
         );
 
@@ -235,11 +310,51 @@ const ProfileView = ({ user, loading, onUpdateUser, onUpdateAvatar, onSubmitVeri
         );
 
       case "history":
-        // ... giữ nguyên logic lịch sử
+        // Lịch sử đặt xe
         return (
-          <Card className="shadow-lg" style={{ minHeight: "500px" }}>
-            {/* nội dung lịch sử đặt xe (không đổi) */}
-            {/* ... */}
+          <Card className="shadow-lg">
+            <div className="mb-6">
+              <h2 className="text-3xl font-bold text-gray-800 flex items-center gap-2 mb-2">
+                <ClockCircleOutlined className="text-orange-500" />
+                Lịch sử đặt xe
+              </h2>
+            </div>
+
+            {myBookings && myBookings.length > 0 ? (
+              <div className="space-y-4">
+                {myBookings.map((booking, index) => (
+                  <div key={index} className="p-4 border border-gray-200 rounded-lg hover:shadow-lg transition-shadow">
+                    <div className="flex justify-between items-start mb-3">
+                      <div>
+                        <h4 className="font-bold text-lg text-gray-800">{booking.vehicle?.name || "Xe"}</h4>
+                        <p className="text-sm text-gray-600">
+                          📅 {booking.startDate} → {booking.endDate}
+                        </p>
+                      </div>
+                      <Tag color={booking.status === "completed" ? "green" : "blue"}>
+                        {booking.status === "completed" ? "✅ Hoàn thành" : "⏳ Đang tiến hành"}
+                      </Tag>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-lg font-semibold text-green-600">
+                        💰 {(booking.totalPrice || 0).toLocaleString("vi-VN")} ₫
+                      </span>
+                      <Button type="link" onClick={() => alert("Xem chi tiết booking: " + booking.bookingId)}>
+                        Xem chi tiết →
+                      </Button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="text-center py-12">
+                <CarOutlined style={{ fontSize: 48, color: "#bfbfbf" }} />
+                <p className="text-gray-500 mt-4 text-lg">Chưa có lịch sử đặt xe nào</p>
+                <Button type="primary" onClick={() => navigate("/vehicles")} size="large" className="mt-4">
+                  🚗 Bắt đầu thuê xe
+                </Button>
+              </div>
+            )}
           </Card>
         );
 

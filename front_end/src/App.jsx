@@ -17,6 +17,7 @@ import DocumentVerificationPage from "./Components/renter/pages/DocumentVerifica
 import VehiclePreviewNotification from "./Components/renter/pages/VehiclePreviewNotification";
 import PaymentSuccessBill from "./Components/renter/pages/PaymentSuccessBill";
 import MyBookingsPage from "./Components/Common/View/Booking/pages/MyBookingsPage.jsx";
+import VerifyPage from "./Components/renter/pages/VerifyPage.jsx";
 // Admin
 import AdminDashboard from "./Components/Admin/pages/AdminDashboard";
 import AdminVerificationDashboard from "./Components/Admin/pages/VerifyRenterPage.jsx";
@@ -30,7 +31,6 @@ import { RequireAuth } from "./Router/RequireAuth.jsx";
 import AuthRoute from "./Router/AuthRoute";
 import Layout from "./Components/Layout/Layout";
 import NotificationsPage from "./Components/Common/View/Notifications/pages/NotificationsPage.jsx";
-import VerifyPage from "./Components/renter/pages/VerifyPage.jsx";
 
 function App() {
   console.log(" App component rendered");
@@ -43,6 +43,7 @@ function App() {
         <Route path="/home" element={<HomePage />} />
         <Route path="/vehicles" element={<VehiclesPage />} />
         <Route path="/profile" element={<ProfilePage />} />
+        <Route path="/verify" element={<VerifyPage />} />
         
         {/* Booking Flow Routes */}
         <Route path="/booking/:vehicleId" element={<BookingContainer />} />
