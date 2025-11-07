@@ -10,6 +10,7 @@ using BusinessLogicLayer.Helpers; // AutoMapper profile
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
+using BusinessLogicLayer.Helpers.CurrentUserAccessor;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -44,6 +45,9 @@ builder.Services.AddScoped<IRentalOrdersService, RentalOrdersService>();
 builder.Services.AddScoped<IContractsService, ContractsService>();
 builder.Services.AddScoped<IExtrasService, ExtrasService>();
 builder.Services.AddScoped<IPaymentsService, PaymentsService>();
+builder.Services.AddScoped<IRenterService, RenterService>();
+
+builder.Services.AddScoped<ICurrentUserAccessor, CurrentUserAccessor>(); // Đăng ký CurrentUserAccessor
 
 
 // (Để đọc User ID từ Token):
