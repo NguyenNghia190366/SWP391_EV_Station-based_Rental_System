@@ -38,7 +38,7 @@ namespace BusinessLogicLayer.Services
 
             // 2. Validation: Kiểm tra trạng thái Order
             // Chỉ tạo hợp đồng khi đơn ở trạng thái "BOOKED"
-            if (order.status != "BOOKED") // [cite: 29]
+            if (order.status != "BOOKED") 
             {
                 throw new InvalidOperationException($"Không thể tạo hợp đồng cho đơn hàng ở trạng thái {order.status}.");
             }
@@ -73,6 +73,15 @@ namespace BusinessLogicLayer.Services
             // 6. Cập nhật trạng thái RentalOrder
             // Khi ký hợp đồng, đơn hàng chuyển sang "IN_USE" [cite: 29]
             order.status = "IN_USE";
+            if (order.vehicle != null)
+            {
+                order.vehicle.is_available = false; // Khóa xe lại
+            }
+            else
+            {
+                // Điều này không nên xảy ra nếu DB toàn vẹn, nhưng nên log lại
+                throw new InvalidDataException($"Không tìm thấy Vehicle liên kết với Order ID {order.order_id}");
+            }
 
             // 7. Lưu thay đổi
             await _context.SaveChangesAsync();
