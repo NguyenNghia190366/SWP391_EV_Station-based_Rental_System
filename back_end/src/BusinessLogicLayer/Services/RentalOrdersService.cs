@@ -193,43 +193,16 @@ namespace BusinessLogicLayer.Services
                     {
                         order.status = "CANCELED"; //
                         // TODO: Xử lý hoàn cọc (nếu có)
-                    } else { throw new UnauthorizedAccessException("Cannot cancel this order."); }
+                    }
+                    else
+                    {
+                        throw new UnauthorizedAccessException("Cannot cancel this order."); 
+                    }
                     break;
 
-                case RentalAction.APPROVE_BY_STAFF:
-                case RentalAction.REJECT_BY_STAFF:
-                    // TODO: Rule 5 (Staff Authorization)
-                    // Cần lấy Staff ID và Station ID của Staff
-                    // var staff = await _context.Staff.FirstOrDefaultAsync(s => s.user_id == userId);
-                    // if (staff == null || staff.station_id != order.pickup_station_id)
-                    // {
-                    //    throw new UnauthorizedAccessException("Staff not authorized for this station.");
-                    // }
-                    
-                    if (userRole != "STAFF" && userRole != "ADMIN") 
-                        throw new UnauthorizedAccessException("Only staff or admin can approve/reject.");
-                    
-                    if (order.status != "BOOKED")
-                        throw new InvalidOperationException("Only BOOKED orders can be actioned.");
-
-                    order.status = (dto.Action == RentalAction.APPROVE_BY_STAFF) ? "APPROVED" : "REJECTED";
-                    // order.staff_id_processed = staff.staff_id; // <-- DB của cậu chưa có cột này
-                    break;
 
                 case RentalAction.START_RENTAL: // Staff giao xe
-                    if (userRole != "STAFF" && userRole != "ADMIN") 
-                        throw new UnauthorizedAccessException("Only staff or admin can start rentals.");
-                    
-                    // TODO: Check Rule 5 (Staff station_id)
-                    
-                    if (order.status != "APPROVED") // Chỉ đơn đã duyệt mới được lấy
-                        throw new InvalidOperationException("Order must be APPROVED to start.");
-
-                    // Rule 4: Cập nhật trạng thái
-                    order.status = "IN_USE"; //
-                    order.vehicle.is_available = false; //
-                    // order.img_vehicle_before_URL = dto.ImgVehicleBeforeUrl; //
-                    break;
+                    throw new NotSupportedException("Hành động START_RENTAL đã được thay thế bằng việc tạo hợp đồng (ContractsService).");
 
                 case RentalAction.RETURN_VEHICLE: // Staff nhận xe
                     if (userRole != "STAFF" && userRole != "ADMIN") 
@@ -242,7 +215,7 @@ namespace BusinessLogicLayer.Services
 
                     // Rule 4: Cập nhật trạng thái
                     order.status = "COMPLETED"; //
-                    order.payment_status = "PAID"; // Giả định đã thanh toán xong
+                    // order.payment_status = "PAID"; // Giả định đã thanh toán xong
                     order.end_time = DateTime.UtcNow; // Ghi nhận thời gian trả thực tế
                     order.img_vehicle_after_URL = dto.ImgVehicleAfterUrl; //
 
