@@ -103,7 +103,6 @@ namespace BusinessLogicLayer.Services
                 email = dto.Email, // Sửa lại: Dùng Email thay cho Username
                 phone_number = dto.PhoneNumber,
                 date_of_birth = dto.DateOfBirth,
-                // 🚨 CẢNH BÁO BẢO MẬT: Phải hash mật khẩu này!
                 password_hash = dto.Password,
                 role = dto.Role,     // "ADMIN" | "STAFF" | "RENTER"
                 status = dto.Status  // "Active" | "Inactive"
