@@ -19,7 +19,7 @@ namespace BusinessLogicLayer.Services
         }
 
         // Implement các phương thức của IRenterService ở đây
-        private async Task<(int renterId, CCCD? cccd, Driver_License? dl)> LoadDocumentsAsync(int userId)
+        private async Task<(Renter renter, CCCD? cccd, Driver_License? dl)> LoadDocumentsAsync(int userId)
         {
             var renter = await _db.Renters
                 .Include(r => r.CCCD)
@@ -31,42 +31,61 @@ namespace BusinessLogicLayer.Services
                 throw new KeyNotFoundException($"Renter not found for User ID: {userId}");
             }
 
-            return (renter.renter_id, renter.CCCD, renter.Driver_License); 
+            return (renter, renter.CCCD, renter.Driver_License); 
         }
 
         public async Task<RenterDocumentsViewDto> GetMyDocumentsAsync(int userId)
         {
-            var (_, cccd, dl) = await LoadDocumentsAsync(userId);
+            var (renter, cccd, dl) = await LoadDocumentsAsync(userId);
             var dto = new RenterDocumentsViewDto();
 
             if (cccd != null) _mapper.Map(cccd, dto);
-            if (dl   != null) _mapper.Map(dl, dto);
+            if (dl != null) _mapper.Map(dl, dto);
+            // 3. Thêm trạng thái 'isVerified' từ Renter 
+            dto.IsVerified = renter.is_verified;
 
             return dto;
         }
+        
         public async Task<RenterDocumentsViewDto> UpsertMyDocumentsAsync(int userId, RenterDocumentsUpsertDto dto)
         {
-            var (renterId, cccd, dl) = await LoadDocumentsAsync(userId);
+            // 1. Lấy (Renter renter, ...) từ hàm đã sửa
+            var (renter, cccd, dl) = await LoadDocumentsAsync(userId);
+            var renterId = renter.renter_id; // Vẫn lấy renterId như cũ
 
+            // 2. Logic tạo/cập nhật CCCD (như cũ)
             if (cccd == null)
             {
                 cccd = new CCCD { renter_id = renterId };
                 _db.CCCDs.Add(cccd);
             }
-            _mapper.Map(dto, cccd);
+            _mapper.Map(dto, cccd); // Map từ DTO -> CCCD
 
+            // 3. Logic tạo/cập nhật Driver_License (như cũ)
             if (dl == null)
             {
                 dl = new Driver_License { renter_id = renterId };
                 _db.Driver_Licenses.Add(dl);
             }
-            _mapper.Map(dto, dl);
+            _mapper.Map(dto, dl); // Map từ DTO -> Driver_License
 
+            // 4. ========== LOGIC MỚI ==========
+            // Bất kể Renter cập nhật/upload gì,
+            // tài khoản của họ phải được reset về "chưa xác thực" 
+            // để chờ Admin duyệt lại.
+            renter.is_verified = false;
+
+            // 5. SaveChanges sẽ lưu cả CCCD, Driver_License VÀ Renter
             await _db.SaveChangesAsync();
-            // Trả về view sau khi lưu
+            
+            // 6. Trả về DTO
             var view = new RenterDocumentsViewDto();
-            _mapper.Map(cccd, view);
-            _mapper.Map(dl, view);
+            _mapper.Map(cccd, view); // Map CCCD -> View
+            _mapper.Map(dl, view);  // Map DL -> View
+            
+            // Thêm trạng thái isVerified HIỆN TẠI (đã là 'false') vào DTO
+            view.IsVerified = renter.is_verified; 
+
             return view;
         }
 
