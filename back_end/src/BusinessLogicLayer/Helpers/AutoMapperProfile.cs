@@ -183,7 +183,7 @@ namespace BusinessLogicLayer.Helpers
                 .ForMember(dest => dest.order_id, opt => opt.MapFrom(src => src.OrderId))
                 .ForMember(dest => dest.FeeType_id, opt => opt.MapFrom(src => src.FeeTypeId))
                 .ForMember(dest => dest.description, opt => opt.MapFrom(src => src.Description));
-            
+
             // Map Entity -> View DTO (Mapping này phức tạp hơn, 
             // vì cần join, tớ sẽ dùng 'Select' trong Service để rõ ràng)
 
@@ -197,6 +197,16 @@ namespace BusinessLogicLayer.Helpers
                 .ForMember(dest => dest.PaymentDate, opt => opt.MapFrom(src => src.payment_date))
                 .ForMember(dest => dest.ExternalRef, opt => opt.MapFrom(src => src.external_ref));
 
+            // ========== CCCD & Driver License ==========
+            // CCCD -> view
+            CreateMap<CCCD, RenterDocumentsViewDto>()
+                .ForMember(d => d.IdCardNumber,      m => m.MapFrom(s => s.id_card_number))
+                .ForMember(d => d.IdCardImageUrl,    m => m.MapFrom(s => s.url_cccd_cmnd));
+
+            // Driver_License -> view (merge ở service)
+            CreateMap<Driver_License, RenterDocumentsViewDto>()
+                .ForMember(d => d.DriverLicenseNumber,   m => m.MapFrom(s => s.driver_license_number))
+                .ForMember(d => d.DriverLicenseImageUrl, m => m.MapFrom(s => s.url_driver_license));
         }
     }
 }
