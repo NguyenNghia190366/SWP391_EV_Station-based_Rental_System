@@ -1,16 +1,6 @@
-﻿import React, { useState, useEffect, useCallback } from "react";
-import {
-  Form,
-  Input,
-  Upload,
-  Button,
-  Card,
-  message,
-  Spin,
-} from "antd";
-import {
-  InboxOutlined,
-} from "@ant-design/icons";
+﻿import React, { useState, useEffect } from "react";
+import { Form, Input, Upload, Button, Card, message, Spin } from "antd";
+import { InboxOutlined } from "@ant-design/icons";
 import { useCccd } from "../../../hooks/useCccd";
 import { useDriverLicense } from "../../../hooks/useDriverLicense";
 import { useCloudinary } from "../../../hooks/useCloudinary";
@@ -24,110 +14,81 @@ export default function VerifyPage() {
   const { uploadDriverLicense } = useDriverLicense();
   const { uploadToCloudinary } = useCloudinary();
   const instance = useAxiosInstance();
-
-  const [loading, setLoading] = useState(true);
-  const [cccdData, setCccdData] = useState(null);
-  const [licenseData, setLicenseData] = useState(null);
+  
   const [loadingCccd, setLoadingCccd] = useState(false);
   const [loadingLicense, setLoadingLicense] = useState(false);
-  const [renterInfo, setRenterInfo] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [isVerified, setIsVerified] = useState(false);
 
-  // Fetch verification status
-  const fetchVerificationStatus = useCallback(async () => {
-    try {
-      const renterId =
-        localStorage.getItem("renterId") ||
-        localStorage.getItem("renter_Id") ||
-        localStorage.getItem("renter_id");
-
-      if (!renterId) {
-        console.error("❌ No renterId found");
-        setLoading(false);
-        return;
-      }
-
-      let renterName = "";
-
-      // Fetch Renter info
+  // Check verification status from Renter table
+  useEffect(() => {
+    const checkVerification = async () => {
       try {
-        const rentersRes = await instance.get(`/Users`);
+        const renterId =
+          localStorage.getItem("renterId") ||
+          localStorage.getItem("renter_Id") ||
+          localStorage.getItem("renter_id");
+
+        if (!renterId) {
+          console.error("❌ No renterId found");
+          setLoading(false);
+          return;
+        }
+
+        // Fetch Renter to get is_verified field
+        const rentersRes = await instance.get(`/Renters`);
         const renters = Array.isArray(rentersRes.data)
           ? rentersRes.data
           : rentersRes.data?.data || [];
-        const renterData = renters.find(r => r.id === Number(renterId));
-        setRenterInfo(renterData || null);
-        if (renterData?.fullName) {
-          renterName = renterData.fullName;
+        
+        console.log("📊 All Renters:", renters);
+        console.log("🔑 Looking for renterId:", renterId);
+        
+        // Fix: The field name is 'renterId', not 'id'
+        const renterData = renters.find(r => r.renterId === Number(renterId));
+        
+        console.log("👤 Found Renter:", renterData);
+        
+        if (renterData) {
+          // API returns 'isVerified' (camelCase), not 'is_verified'
+          const verifiedValue = renterData.isVerified || renterData.is_verified;
+          console.log("🔍 Checking isVerified field:");
+          console.log("   - renterData.isVerified:", renterData.isVerified);
+          console.log("   - Type:", typeof renterData.isVerified);
+          
+          // Handle multiple possible values: true, 1, "1", "true"
+          const verified = 
+            verifiedValue === true ||
+            verifiedValue === 1 ||
+            verifiedValue === "1" ||
+            verifiedValue === "true";
+            
+          setIsVerified(verified);
+          console.log("✅ Final verified status:", verified);
+        } else {
+          console.log("Renter not found with id:", renterId);
         }
-        console.log("👤 Renter Info:", renterData);
-      } catch (err) {
-        console.error("Error fetching Renter info:", err);
-        setRenterInfo(null);
+      } catch (error) {
+        console.error("Error checking verification:", error);
+      } finally {
+        setLoading(false);
       }
+    };
 
-      // Fetch CCCD
-      try {
-        const cccdRes = await instance.get(`/Cccds?renterId=${renterId}`);
-        const cccds = Array.isArray(cccdRes.data)
-          ? cccdRes.data
-          : cccdRes.data?.data || [];
-        const renterCccd = cccds.find(
-          (c) =>
-            (c.renter_Id || c.renterId) === Number(renterId) ||
-            (c.renter_id || c.renterId) === Number(renterId)
-        );
-        // Attach renterName to CCCD data
-        if (renterCccd) {
-          renterCccd.renter = { id: renterId, full_name: renterName };
-        }
-        setCccdData(renterCccd || null);
-        console.log("📋 CCCD Data:", renterCccd);
-      } catch (err) {
-        console.error("Error fetching CCCD:", err);
-        setCccdData(null);
-      }
+    checkVerification();
+  }, []);
 
-      // Fetch Driver License
-      try {
-        const licenseRes = await instance.get(
-          `/DriverLicenses?renterId=${renterId}`
-        );
-        const licenses = Array.isArray(licenseRes.data)
-          ? licenseRes.data
-          : licenseRes.data?.data || [];
-        const renterLicense = licenses.find(
-          (l) =>
-            (l.renter_Id || l.renterId) === Number(renterId) ||
-            (l.renter_id || l.renterId) === Number(renterId)
-        );
-        // Attach renterName to License data
-        if (renterLicense) {
-          renterLicense.renter = { id: renterId, full_name: renterName };
-        }
-        setLicenseData(renterLicense || null);
-        console.log("📋 License Data:", renterLicense);
-      } catch (err) {
-        console.error("Error fetching License:", err);
-        setLicenseData(null);
-      }
-    } catch (error) {
-      console.error("Error fetching verification status:", error);
-    } finally {
-      setLoading(false);
-    }
-  }, [instance]);
+  // If loading, show spinner
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <Spin size="large" />
+      </div>
+    );
+  }
 
-  useEffect(() => {
-    fetchVerificationStatus();
-  }, [fetchVerificationStatus]);
-
-  // Check if both verified
-  const isCccdVerified = cccdData?.is_verified === 1 || cccdData?.isVerified === true;
-  const isLicenseVerified = licenseData?.is_verified === 1 || licenseData?.isVerified === true;
-  const bothVerified = isCccdVerified && isLicenseVerified;
-
-  // If already verified - show success page
-  if (!loading && bothVerified) {
+  // If verified, show success page
+  if (isVerified) {
     return <VerifiedSuccessPage />;
   }
 
@@ -156,7 +117,6 @@ export default function VerifyPage() {
 
       await uploadCccd(payload);
       message.success("✅ Upload CCCD thành công!");
-      fetchVerificationStatus();
     } catch (err) {
       console.error("❌ Upload CCCD error:", err?.response?.data || err);
       message.error("Có lỗi xảy ra khi upload CCCD!");
@@ -190,7 +150,6 @@ export default function VerifyPage() {
 
       await uploadDriverLicense(payload);
       message.success("✅ Upload bằng lái xe thành công!");
-      fetchVerificationStatus();
     } catch (err) {
       console.error("❌ Upload License error:", err?.response?.data || err);
       message.error("Có lỗi xảy ra khi upload bằng lái xe!");
@@ -199,229 +158,125 @@ export default function VerifyPage() {
     }
   };
 
-  if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
-        <div className="text-center">
-          <Spin size="large" />
-          <p className="mt-4 text-gray-600">Đang tải trạng thái xác thực...</p>
-        </div>
-      </div>
-    );
-  }
+  return (
+    <div className="flex justify-center items-center min-h-screen bg-gray-50 p-6">
+      {/* Hai Card song song */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-8 w-full max-w-6xl">
+        {/* --- CCCD --- */}
+        <Card
+          title="📄 Xác thực CCCD/CMND"
+          className="shadow-lg rounded-2xl"
+        >
+          <Form layout="vertical" onFinish={handleCccdSubmit}>
+            <Form.Item
+              label="Số CCCD/CMND"
+              name="idNumber"
+              rules={[{ required: true, message: "Vui lòng nhập số CCCD/CMND!" }]}
+            >
+              <Input placeholder="Nhập số CCCD hoặc CMND" />
+            </Form.Item>
 
-  // If both verified - show success message
-  if (bothVerified) {
-    return (
-      <div className="min-h-screen bg-gray-50 py-8 px-4">
-        <div className="max-w-2xl mx-auto">
-          <Card className="bg-gradient-to-r from-green-50 to-emerald-50 border-2 border-green-500 shadow-lg">
-            <div className="text-center">
-              <div className="text-6xl mb-4">🎉</div>
-              <h2 className="text-3xl font-bold text-green-600 mb-3">
-                Xác thực thành công!
-              </h2>
-              <p className="text-gray-600 text-lg mb-6">
-                Tài khoản của bạn đã được xác thực. Bạn có thể bắt đầu thuê xe
-                ngay bây giờ.
-              </p>
+            <Form.Item
+              label="Ảnh mặt trước CCCD"
+              name="front"
+              valuePropName="fileList"
+              getValueFromEvent={(e) => e?.fileList}
+              rules={[{ required: true, message: "Vui lòng tải ảnh mặt trước!" }]}
+            >
+              <Dragger beforeUpload={() => false} multiple={false} maxCount={1}>
+                <p className="ant-upload-drag-icon">
+                  <InboxOutlined />
+                </p>
+                <p className="ant-upload-text">Kéo hoặc chọn ảnh mặt trước</p>
+              </Dragger>
+            </Form.Item>
+
+            <Form.Item
+              label="Ảnh mặt sau CCCD"
+              name="back"
+              valuePropName="fileList"
+              getValueFromEvent={(e) => e?.fileList}
+              rules={[{ required: true, message: "Vui lòng tải ảnh mặt sau!" }]}
+            >
+              <Dragger beforeUpload={() => false} multiple={false} maxCount={1}>
+                <p className="ant-upload-drag-icon">
+                  <InboxOutlined />
+                </p>
+                <p className="ant-upload-text">Kéo hoặc chọn ảnh mặt sau</p>
+              </Dragger>
+            </Form.Item>
+
+            <Form.Item>
               <Button
                 type="primary"
-                size="large"
-                className="bg-green-600 hover:bg-green-700"
-                onClick={() => (window.location.href = "/home")}
+                htmlType="submit"
+                loading={loadingCccd}
+                block
+                className="rounded-lg"
               >
-                🏠 Quay về trang chủ
+                Gửi xác thực CCCD
               </Button>
-            </div>
-          </Card>
-        </div>
-      </div>
-    );
-  }
+            </Form.Item>
+          </Form>
+        </Card>
 
-  // If pending - show lock message
-  if (cccdStatus.status === "pending" || licenseStatus.status === "pending") {
-    return (
-      <div className="min-h-screen bg-gray-50 py-8 px-4">
-        <div className="max-w-2xl mx-auto">
-          <Card className="bg-yellow-50 border-2 border-yellow-400 shadow-lg">
-            <div className="text-center">
-              <div className="text-6xl mb-4">⏳</div>
-              <h2 className="text-3xl font-bold text-yellow-600 mb-3">
-                Chờ xác thực
-              </h2>
-              <p className="text-gray-600 text-lg mb-6">
-                Giấy tờ của bạn đang được admin xem xét. Vui lòng chờ trong vòng
-                24 giờ.
-              </p>
-              <p className="text-sm text-gray-500">
-                Bạn sẽ nhận được thông báo khi admin xác thực hoặc từ chối giấy
-                tờ.
-              </p>
-            </div>
-          </Card>
-        </div>
-      </div>
-    );
-  }
+        {/* --- Bằng lái xe --- */}
+        <Card
+          title="🚗 Xác thực Giấy phép lái xe"
+          className="shadow-lg rounded-2xl"
+        >
+          <Form layout="vertical" onFinish={handleLicenseSubmit}>
+            <Form.Item
+              label="Số Giấy phép lái xe"
+              name="licenseNumber"
+              rules={[{ required: true, message: "Vui lòng nhập số bằng lái!" }]}
+            >
+              <Input placeholder="Nhập số bằng lái xe" />
+            </Form.Item>
 
-  return (
-    <div className="min-h-screen bg-gray-50 py-8 px-4">
-      <div className="max-w-6xl mx-auto">
-        {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-800 mb-2">
-            🔐 Xác thực tài khoản
-          </h1>
-          <p className="text-gray-600">
-            Hoàn thành xác thực giấy tờ để có thể thuê xe
-          </p>
-        </div>
+            <Form.Item
+              label="Ảnh mặt trước bằng lái"
+              name="licenseFront"
+              valuePropName="fileList"
+              getValueFromEvent={(e) => e?.fileList}
+              rules={[{ required: true, message: "Vui lòng tải ảnh mặt trước!" }]}
+            >
+              <Dragger beforeUpload={() => false} multiple={false} maxCount={1}>
+                <p className="ant-upload-drag-icon">
+                  <InboxOutlined />
+                </p>
+                <p className="ant-upload-text">Kéo hoặc chọn ảnh mặt trước</p>
+              </Dragger>
+            </Form.Item>
 
-        {/* Hai Card song song */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 w-full">
-          {/* --- CCCD --- */}
-          <Card title="📄 Xác thực CCCD/CMND" className="shadow-lg rounded-2xl">
-            <Form layout="vertical" onFinish={handleCccdSubmit}>
-              <Form.Item
-                label="Số CCCD/CMND"
-                name="idNumber"
-                rules={[
-                  { required: true, message: "Vui lòng nhập số CCCD/CMND!" },
-                ]}
+            <Form.Item
+              label="Ảnh mặt sau bằng lái"
+              name="licenseBack"
+              valuePropName="fileList"
+              getValueFromEvent={(e) => e?.fileList}
+              rules={[{ required: true, message: "Vui lòng tải ảnh mặt sau!" }]}
+            >
+              <Dragger beforeUpload={() => false} multiple={false} maxCount={1}>
+                <p className="ant-upload-drag-icon">
+                  <InboxOutlined />
+                </p>
+                <p className="ant-upload-text">Kéo hoặc chọn ảnh mặt sau</p>
+              </Dragger>
+            </Form.Item>
+
+            <Form.Item>
+              <Button
+                type="primary"
+                htmlType="submit"
+                loading={loadingLicense}
+                block
+                className="rounded-lg"
               >
-                <Input placeholder="Nhập số CCCD hoặc CMND" />
-              </Form.Item>
-
-              <Form.Item
-                label="Ảnh mặt trước CCCD"
-                name="front"
-                valuePropName="fileList"
-                getValueFromEvent={(e) => e?.fileList}
-                rules={[
-                  { required: true, message: "Vui lòng tải ảnh mặt trước!" },
-                ]}
-              >
-                <Dragger
-                  beforeUpload={() => false}
-                  multiple={false}
-                  maxCount={1}
-                >
-                  <p className="ant-upload-drag-icon">
-                    <InboxOutlined />
-                  </p>
-                  <p className="ant-upload-text">Kéo hoặc chọn ảnh mặt trước</p>
-                </Dragger>
-              </Form.Item>
-
-              <Form.Item
-                label="Ảnh mặt sau CCCD"
-                name="back"
-                valuePropName="fileList"
-                getValueFromEvent={(e) => e?.fileList}
-                rules={[
-                  { required: true, message: "Vui lòng tải ảnh mặt sau!" },
-                ]}
-              >
-                <Dragger
-                  beforeUpload={() => false}
-                  multiple={false}
-                  maxCount={1}
-                >
-                  <p className="ant-upload-drag-icon">
-                    <InboxOutlined />
-                  </p>
-                  <p className="ant-upload-text">Kéo hoặc chọn ảnh mặt sau</p>
-                </Dragger>
-              </Form.Item>
-
-              <Form.Item>
-                <Button
-                  type="primary"
-                  htmlType="submit"
-                  loading={loadingCccd}
-                  block
-                  className="rounded-lg"
-                >
-                  Gửi xác thực CCCD
-                </Button>
-              </Form.Item>
-            </Form>
-          </Card>
-
-          {/* --- Bằng lái xe --- */}
-          <Card
-            title="🚗 Xác thực Giấy phép lái xe"
-            className="shadow-lg rounded-2xl"
-          >
-            <Form layout="vertical" onFinish={handleLicenseSubmit}>
-              <Form.Item
-                label="Số Giấy phép lái xe"
-                name="licenseNumber"
-                rules={[
-                  { required: true, message: "Vui lòng nhập số bằng lái!" },
-                ]}
-              >
-                <Input placeholder="Nhập số bằng lái xe" />
-              </Form.Item>
-
-              <Form.Item
-                label="Ảnh mặt trước bằng lái"
-                name="licenseFront"
-                valuePropName="fileList"
-                getValueFromEvent={(e) => e?.fileList}
-                rules={[
-                  { required: true, message: "Vui lòng tải ảnh mặt trước!" },
-                ]}
-              >
-                <Dragger
-                  beforeUpload={() => false}
-                  multiple={false}
-                  maxCount={1}
-                >
-                  <p className="ant-upload-drag-icon">
-                    <InboxOutlined />
-                  </p>
-                  <p className="ant-upload-text">Kéo hoặc chọn ảnh mặt trước</p>
-                </Dragger>
-              </Form.Item>
-
-              <Form.Item
-                label="Ảnh mặt sau bằng lái"
-                name="licenseBack"
-                valuePropName="fileList"
-                getValueFromEvent={(e) => e?.fileList}
-                rules={[
-                  { required: true, message: "Vui lòng tải ảnh mặt sau!" },
-                ]}
-              >
-                <Dragger
-                  beforeUpload={() => false}
-                  multiple={false}
-                  maxCount={1}
-                >
-                  <p className="ant-upload-drag-icon">
-                    <InboxOutlined />
-                  </p>
-                  <p className="ant-upload-text">Kéo hoặc chọn ảnh mặt sau</p>
-                </Dragger>
-              </Form.Item>
-
-              <Form.Item>
-                <Button
-                  type="primary"
-                  htmlType="submit"
-                  loading={loadingLicense}
-                  block
-                  className="rounded-lg"
-                >
-                  Gửi bằng lái xe
-                </Button>
-              </Form.Item>
-            </Form>
-          </Card>
-        </div>
+                Gửi bằng lái xe
+              </Button>
+            </Form.Item>
+          </Form>
+        </Card>
       </div>
     </div>
   );

@@ -97,19 +97,7 @@ export const useCccd = () => {
     }
   }, [instance]);
 
-  // 🔹 4. Cập nhật CCCD theo ID (VD: duyệt / reject)
-  const updateCccd = useCallback(
-    async (id, data) => {
-      try {
-        const res = await instance.put(`/Cccds/${id}`, data);
-        return res.data;
-      } catch (error) {
-        console.error(`❌ Update CCCD with id=${id} failed:`, error);
-        throw error;
-      }
-    },
-    [instance]
-  );
 
-  return { uploadCccd, getCccdById, getAllCccds, updateCccd };
+
+  return { uploadCccd, getCccdById, getAllCccds };
 };

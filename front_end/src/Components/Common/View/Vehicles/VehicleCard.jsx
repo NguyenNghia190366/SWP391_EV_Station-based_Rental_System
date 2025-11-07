@@ -1,4 +1,5 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
+import { useVehicleAPI } from '@/hooks/useVehicles';
 
 const VehicleCard = ({ 
   vehicle, 
@@ -7,6 +8,29 @@ const VehicleCard = ({
   compact = false 
 }) => {
   const isAvailable = vehicle.isAvailable === true || vehicle.available === true;
+  const { getModelById } = useVehicleAPI();
+  
+  const [vehicleModel, setVehicleModel] = useState(null);
+  const [pricePerHour, setPricePerHour] = useState(0);
+
+  // Lấy thông tin model và giá tiền
+  useEffect(() => {
+    const fetchModelPrice = async () => {
+      try {
+        if (vehicle.vehicleModelId) {
+          const model = await getModelById(vehicle.vehicleModelId);
+          setVehicleModel(model);
+          setPricePerHour(model.price_per_hour || 0);
+          console.log(`✅ Model: ${model.model}, Giá: ${model.  _hour}k/giờ`);
+        }
+      } catch (error) {
+        console.error("❌ Lỗi lấy model:", error);
+        setPricePerHour(0);
+      }
+    };
+    
+    fetchModelPrice();
+  }, [vehicle.vehicleModelId, getModelById]);
 
   return (
     <div className={`
@@ -112,7 +136,7 @@ const VehicleCard = ({
             Giá thuê:
           </span>
           <span className="text-2xl font-extrabold bg-gradient-to-r from-indigo-500 to-purple-600 bg-clip-text text-transparent">
-            ${vehicle.price || 0}/ngày
+            {pricePerHour > 0 ? `${pricePerHour}k/giờ` : 'Đang cập nhật'}
           </span>
         </div>
 
