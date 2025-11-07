@@ -27,6 +27,7 @@ namespace BusinessLogicLayer.Services
         {
             // 1. Validation: Kiểm tra RentalOrder
             var order = await _context.RentalOrders
+                .Include(o => o.vehicle)
                 .FirstOrDefaultAsync(o => o.order_id == createDto.OrderId);
 
             if (order == null)
