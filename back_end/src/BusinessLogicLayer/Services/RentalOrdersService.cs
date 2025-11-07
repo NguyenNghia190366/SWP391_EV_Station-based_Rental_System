@@ -4,9 +4,10 @@ using BusinessLogicLayer.DTOs.RentalOrder;
 using BusinessLogicLayer.Interfaces;
 using DataAccessLayer;
 using DataAccessLayer.Models;
-using Microsoft.AspNetCore.Http;
+// using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
-using System.Security.Claims; // Để đọc User ID
+using BusinessLogicLayer.Helpers.CurrentUserAccessor;
+// using System.Security.Claims; // Để đọc User ID
 
 namespace BusinessLogicLayer.Services
 {
@@ -14,40 +15,44 @@ namespace BusinessLogicLayer.Services
     {
         private readonly ApplicationDbContext _context;
         private readonly IMapper _mapper;
-        private readonly IHttpContextAccessor _httpContextAccessor;
+        private readonly ICurrentUserAccessor _currentUser;
         
         // GIẢ ĐỊNH RULE 3: 200.000 / giờ
         private const decimal HOURLY_RATE = 200000; 
 
-        public RentalOrdersService(ApplicationDbContext context, IMapper mapper, IHttpContextAccessor httpContextAccessor)
+        public RentalOrdersService(ApplicationDbContext context, IMapper mapper, ICurrentUserAccessor currentUser)
         {
             _context = context;
             _mapper = mapper;
-            _httpContextAccessor = httpContextAccessor;
+            _currentUser = currentUser;
         }
 
-        // Lấy User ID của người đang gọi API (từ Token)
-        private int GetCurrentUserId()
-        {
-            var userIdClaim = _httpContextAccessor.HttpContext?.User?.FindFirst(ClaimTypes.NameIdentifier);
-            return int.TryParse(userIdClaim?.Value, out var id) ? id : 0;
-        }
+        // // Lấy User ID của người đang gọi API (từ Token)
+        // private int GetCurrentUserId()
+        // {
+        //     var userIdClaim = _httpContextAccessor.HttpContext?.User?.FindFirst(ClaimTypes.NameIdentifier);
+        //     return int.TryParse(userIdClaim?.Value, out var id) ? id : 0;
+        // }
 
-        // Lấy Renter ID (bảng Renter) từ User ID (bảng Users)
-        private async Task<int> GetCurrentRenterId()
-        {
-            var userId = GetCurrentUserId();
-            var renter = await _context.Renters.AsNoTracking()
-                            .FirstOrDefaultAsync(r => r.user_id == userId);
-            if (renter == null) 
-                throw new UnauthorizedAccessException("User is not a valid renter.");
-            return renter.renter_id;
-        }
+        // // Lấy Renter ID (bảng Renter) từ User ID (bảng Users)
+        // private async Task<int> GetCurrentRenterId()
+        // {
+        //     var userId = GetCurrentUserId();
+        //     var renter = await _context.Renters.AsNoTracking()
+        //                     .FirstOrDefaultAsync(r => r.user_id == userId);
+        //     if (renter == null) 
+        //         throw new UnauthorizedAccessException("User is not a valid renter.");
+        //     return renter.renter_id;
+        // }
 
         // 1. CREATE (Rule 1, 2, 3)
         public async Task<RentalOrderViewDto> CreateOrderAsync(RentalOrderCreateDto dto)
         {
-            var renterId = await GetCurrentRenterId();
+            var renterId = _currentUser.RenterId;
+            if (renterId == null)
+            {
+                throw new UnauthorizedAccessException("User is not a valid renter.");
+            }
             
             // Check thời gian
             if (dto.StartTime < DateTime.UtcNow || dto.EndTime <= dto.StartTime)
@@ -81,7 +86,7 @@ namespace BusinessLogicLayer.Services
             var calculatedTotal = (decimal)durationHours * HOURLY_RATE;
 
             var order = _mapper.Map<RentalOrder>(dto);
-            order.renter_id = renterId;
+            order.renter_id = renterId.Value;
             order.total_amount = calculatedTotal; //
             order.status = "BOOKED"; // Trạng thái ban đầu
             order.payment_status = "UNPAID"; //
@@ -95,16 +100,33 @@ namespace BusinessLogicLayer.Services
         // 2. GET BY ID (Chi tiết)
         public async Task<RentalOrderViewDto?> GetByIdAsync(int id)
         {
-            return await _context.RentalOrders
-                .Where(o => o.order_id == id)
-                .Include(o => o.renter).ThenInclude(r => r.user) // Lấy User qua Renter
-                .Include(o => o.vehicle).ThenInclude(v => v.vehicle_model) // Lấy Model qua Vehicle
-                .Include(o => o.vehicle).ThenInclude(v => v.station) // Lấy Station qua Vehicle
-                .Include(o => o.pickup_station) // Lấy trạm nhận
-                .Include(o => o.return_station) // Lấy trạm trả
-                .Include(o => o.Payments) // Lấy thanh toán
+            // Tạo câu query cơ sở
+            var query = _context.RentalOrders
+                .Where(o => o.order_id == id); // Lọc theo ID
+
+            // --- KIỂM TRA QUYỀN TRƯỚC KHI LẤY DỮ LIỆU ---
+            // Nếu user là RENTER, chúng ta bồi thêm 1 điều kiện Where
+            if (_currentUser.Role == "RENTER")
+            {
+                // Renter chỉ được xem đơn có renter_id == RenterId của token
+                query = query.Where(o => o.renter_id == _currentUser.RenterId);
+            }
+            // Nếu là ADMIN/STAFF thì không cần thêm Where (họ thấy hết)
+
+            // Bây giờ, chạy câu query đã an toàn
+            var orderDto = await query
+                .Include(o => o.renter).ThenInclude(r => r.user)
+                .Include(o => o.vehicle).ThenInclude(v => v.vehicle_model)
+                .Include(o => o.vehicle).ThenInclude(v => v.station)
+                .Include(o => o.pickup_station)
+                .Include(o => o.return_station)
+                .Include(o => o.Payments)
                 .ProjectTo<RentalOrderViewDto>(_mapper.ConfigurationProvider)
                 .FirstOrDefaultAsync();
+
+            // Nếu query không thấy (vì không có hoặc vì xem trộm)
+            // orderDto sẽ là null.
+            return orderDto;
         }
         
         // 3. GET PAGING (Cho Admin/Staff)
@@ -142,8 +164,12 @@ namespace BusinessLogicLayer.Services
         // 4. GET MY ORDERS (Cho Renter)
         public async Task<(IEnumerable<RentalOrderViewDto> data, int total)> GetMyOrdersAsync(RentalOrderListQuery q)
         {
-            var renterId = await GetCurrentRenterId();
-            q.RenterId = renterId; // Tự động lọc theo renter đang đăng nhập
+            // SỬA: Lấy RenterId từ helper (đơn giản hơn code cũ)
+            var renterId = _currentUser.RenterId;
+            if (renterId == null) 
+                throw new UnauthorizedAccessException("User is not a valid renter.");
+                
+            q.RenterId = renterId.Value; // Tự động lọc
             return await GetPagedAsync(q);
         }
         
@@ -154,14 +180,16 @@ namespace BusinessLogicLayer.Services
                 .FirstOrDefaultAsync(o => o.order_id == id);
             if (order == null) return false;
 
-            var userId = GetCurrentUserId();
-            var userRole = _httpContextAccessor.HttpContext?.User?.FindFirst(ClaimTypes.Role)?.Value ?? "";
+            // SỬA: Lấy thông tin user từ helper (đơn giản hơn)
+            var userRole = _currentUser.Role;
+            var renterId = _currentUser.RenterId; // ID của người thuê (nếu có)
+            var staffId = _currentUser.StaffId; // ID của nhân viên (nếu có)
 
             switch (dto.Action)
             {
                 case RentalAction.CANCEL_BY_RENTER:
                     // Renter chỉ được hủy đơn 'BOOKED' của chính mình
-                    if (userRole == "RENTER" && order.renter.user_id == userId && order.status == "BOOKED")
+                    if (userRole == "RENTER" && order.renter_id == renterId && order.status == "BOOKED")
                     {
                         order.status = "CANCELED"; //
                         // TODO: Xử lý hoàn cọc (nếu có)
