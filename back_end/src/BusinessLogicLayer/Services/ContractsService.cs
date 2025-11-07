@@ -217,14 +217,5 @@ namespace BusinessLogicLayer.Services
                     .ThenInclude(o => o.vehicle)
                         .ThenInclude(v => v.vehicle_model); // Contract -> Order -> Vehicle -> Vehicle_Model
         }
-
-
-
-
-
-
-
-
-
     }
 }
