@@ -127,18 +127,19 @@ namespace BusinessLogicLayer.Services
             var claims = new List<Claim>
             {
                 new Claim(JwtRegisteredClaimNames.Sub, user.user_id.ToString()),
-                new Claim(ClaimTypes.Role, user.role ?? "RENTER"), // Phòng vệ null role
-                new Claim("UserId", user.user_id.ToString())
+                new Claim(ClaimTypes.Role, user.role ?? "RENTER") // Phòng vệ null role
+                // new Claim("UserId", user.user_id.ToString())
             };
 
             // B2: Truy cập RenterId hoặc StaffId và thêm vào Claims
             if (user.role == "RENTER")
             {
-                var renter = await _db.Renters.AsNoTracking().FirstOrDefaultAsync(r => r.user_id == user.user_id);
+                var renter = await _db.Renters.AsNoTracking()
+                                              .FirstOrDefaultAsync(r => r.user_id == user.user_id);
                 if (renter != null)
                 {
                     renterId = renter.renter_id;
-                    claims.Add(new Claim("RenterId", renterId.Value.ToString())); // Add RenterId vào token
+                    claims.Add(new Claim("renterId", renterId.Value.ToString())); // Add RenterId vào token
                 }
             }
             else if (user.role == "STAFF")
@@ -147,7 +148,7 @@ namespace BusinessLogicLayer.Services
                 if (staff != null)
                 {
                     staffId = staff.staff_id;
-                    claims.Add(new Claim("StaffId", staffId.Value.ToString())); // Add StaffId vào token
+                    claims.Add(new Claim("staffId", staffId.Value.ToString())); // Add StaffId vào token
                 }
             }
             // B3: Tạo token từ danh sách claims
