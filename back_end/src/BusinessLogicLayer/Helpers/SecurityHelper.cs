@@ -6,7 +6,8 @@ namespace BusinessLogicLayer.Helpers
 {
     public class SecurityHelper
     {
-        public static string CreateHmacSha256(string input, string key) // của MoMo
+        // --- MOMO ---
+        public static string CreateHmacSha256(string input, string key) 
         {
             using (var hmac = new HMACSHA256(Encoding.UTF8.GetBytes(key)))
             {
