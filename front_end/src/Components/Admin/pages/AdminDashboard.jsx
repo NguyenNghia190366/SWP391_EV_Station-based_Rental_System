@@ -1,13 +1,13 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Menu, Card, Statistic } from "antd";
-import { 
-  EnvironmentOutlined, 
-  CarOutlined, 
-  UserOutlined, 
+import {
+  EnvironmentOutlined,
+  CarOutlined,
+  UserOutlined,
   BarChartOutlined,
   SafetyCertificateOutlined,
   DashboardOutlined,
-  UserAddOutlined
+  UserAddOutlined,
 } from "@ant-design/icons";
 import VerificationDashboard from "../components/VerificationDashboard";
 import VerifyRenterContainer from "../containers/VerifyRenterContainer";
@@ -15,6 +15,9 @@ import StationRegistrationContainer from "../containers/StationRegistrationConta
 
 const AdminDashboard = () => {
   const [selectedMenu, setSelectedMenu] = useState("overview");
+  const [totalStations, setTotalStations] = useState(0);
+  const [totalVehicles, setTotalVehicles] = useState(0);
+  const [totalUsers, setTotalUsers] = useState(0);
 
   const menuItems = [
     {
@@ -23,14 +26,9 @@ const AdminDashboard = () => {
       label: "Tổng quan",
     },
     {
-      key: "verification",
-      icon: <SafetyCertificateOutlined />,
-      label: "Xác minh tài liệu",
-    },
-    {
       key: "verify-renter",
       icon: <UserAddOutlined />,
-      label: "Xác minh Renter",
+      label: "Xác thực người dùng",
     },
     {
       key: "register-station",
@@ -55,36 +53,72 @@ const AdminDashboard = () => {
   ];
 
   const renderContent = () => {
+    useEffect(() => {
+      const fetchData = async () => {
+        try {
+          // 🔹 Nếu BE .NET của bạn có endpoint /api/Stations
+          const [vehiclesRes, stationsRes, usersRes] = await Promise.all([
+            axios.get(
+              "https://alani-uncorroboratory-sympetaly.ngrok-free.dev/api/Vehicles",
+              {
+                headers: { "ngrok-skip-browser-warning": "true" },
+              }
+            ),
+            axios.get(
+              "https://alani-uncorroboratory-sympetaly.ngrok-free.dev/api/Stations",
+              {
+                headers: { "ngrok-skip-browser-warning": "true" },
+              }
+            ),
+            axios.get("https://alani-uncorroboratory-sympetaly.ngrok-free.dev/api/Users", {
+              headers: { "ngrok-skip-browser-warning": "true" },
+            }),
+          ]);
+
+          // 🔹 Cập nhật số lượng trạm
+          setTotalStations(stationsRes.data.length);
+          setTotalVehicles(vehiclesRes.data.length);
+          setTotalUsers(usersRes.data.length);
+        } catch (error) {
+          console.error("❌ Lỗi khi lấy danh sách trạm:", error);
+        }
+      };
+
+      fetchData();
+    }, []);
+
     switch (selectedMenu) {
       case "overview":
         return (
-          <Card className="shadow-lg" style={{ minHeight: '500px' }}>
-            <h2 className="text-3xl font-bold text-gray-800 mb-6">📊 Tổng quan hệ thống</h2>
-            
+          <Card className="shadow-lg" style={{ minHeight: "500px" }}>
+            <h2 className="text-3xl font-bold text-gray-800 mb-6">
+              📊 Tổng quan hệ thống
+            </h2>
+
             {/* Quick Stats */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
               <Card className="shadow-md hover:shadow-lg transition-shadow">
                 <Statistic
                   title="Tổng Trạm Xe"
-                  value={12}
+                  value={totalStations}
                   prefix={<EnvironmentOutlined className="text-blue-500" />}
-                  valueStyle={{ color: '#1890ff' }}
+                  valueStyle={{ color: "#1890ff" }}
                 />
               </Card>
               <Card className="shadow-md hover:shadow-lg transition-shadow">
                 <Statistic
                   title="Tổng Xe"
-                  value={48}
+                  value={totalVehicles}
                   prefix={<CarOutlined className="text-green-500" />}
-                  valueStyle={{ color: '#52c41a' }}
+                  valueStyle={{ color: "#52c41a" }}
                 />
               </Card>
               <Card className="shadow-md hover:shadow-lg transition-shadow">
                 <Statistic
                   title="Người Dùng"
-                  value={234}
+                  value={totalUsers}
                   prefix={<UserOutlined className="text-purple-500" />}
-                  valueStyle={{ color: '#722ed1' }}
+                  valueStyle={{ color: "#722ed1" }}
                 />
               </Card>
             </div>
@@ -95,53 +129,47 @@ const AdminDashboard = () => {
                 🎯 Chào mừng đến Admin Dashboard
               </h3>
               <p className="text-gray-700 mb-4">
-                Quản lý toàn bộ hệ thống EV Rental - Station Based. Sử dụng menu bên trái để truy cập các chức năng.
+                Quản lý toàn bộ hệ thống EV Rental - Station Based. Sử dụng menu
+                bên trái để truy cập các chức năng.
               </p>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6">
+                
                 <div className="bg-white rounded-lg p-4 border border-indigo-200 hover:shadow-md transition-shadow">
-                  <h4 className="font-semibold text-indigo-800 mb-2">✅ Xác minh tài liệu</h4>
-                  <p className="text-sm text-gray-600">Duyệt GPLX và CCCD từ renters</p>
+                  <h4 className="font-semibold text-indigo-800 mb-2">
+                    👤 Xác thực người dùng  
+                  </h4>
+                  <p className="text-sm text-gray-600">
+                    Quản lý và xác minh người thuê
+                  </p>
                 </div>
                 <div className="bg-white rounded-lg p-4 border border-indigo-200 hover:shadow-md transition-shadow">
-                  <h4 className="font-semibold text-indigo-800 mb-2">👤 Xác minh Renter</h4>
-                  <p className="text-sm text-gray-600">Quản lý và xác minh người thuê</p>
+                  <h4 className="font-semibold text-indigo-800 mb-2">
+                    🏢 Đăng ký trạm
+                  </h4>
+                  <p className="text-sm text-gray-600">
+                    Thêm trạm xe mới vào hệ thống
+                  </p>
                 </div>
                 <div className="bg-white rounded-lg p-4 border border-indigo-200 hover:shadow-md transition-shadow">
-                  <h4 className="font-semibold text-indigo-800 mb-2">🏢 Đăng ký trạm</h4>
-                  <p className="text-sm text-gray-600">Thêm trạm xe mới vào hệ thống</p>
-                </div>
-                <div className="bg-white rounded-lg p-4 border border-indigo-200 hover:shadow-md transition-shadow">
-                  <h4 className="font-semibold text-indigo-800 mb-2">� Quản lý xe</h4>
-                  <p className="text-sm text-gray-600">Xem và quản lý danh sách xe</p>
+                  <h4 className="font-semibold text-indigo-800 mb-2">
+                    � Quản lý xe
+                  </h4>
+                  <p className="text-sm text-gray-600">
+                    Xem và quản lý danh sách xe
+                  </p>
                 </div>
               </div>
             </Card>
           </Card>
         );
 
-      case "verification":
-        return (
-          <Card className="shadow-lg" style={{ minHeight: '500px' }}>
-            <div className="mb-6">
-              <h2 className="text-3xl font-bold text-gray-800 flex items-center gap-2">
-                <SafetyCertificateOutlined className="text-red-500" />
-                Xác minh tài liệu
-              </h2>
-              <p className="text-gray-600 mt-2">
-                Duyệt Giấy phép lái xe (GPLX) và Căn cước công dân (CCCD) từ renters
-              </p>
-            </div>
-            <VerificationDashboard />
-          </Card>
-        );
-
       case "verify-renter":
         return (
-          <Card className="shadow-lg" style={{ minHeight: '500px' }}>
+          <Card className="shadow-lg" style={{ minHeight: "500px" }}>
             <div className="mb-6">
               <h2 className="text-3xl font-bold text-gray-800 flex items-center gap-2">
                 <UserAddOutlined className="text-blue-500" />
-                Xác minh Renter
+                Xác thực người dùng
               </h2>
               <p className="text-gray-600 mt-2">
                 Quản lý và xác thực thông tin người thuê xe
@@ -151,11 +179,9 @@ const AdminDashboard = () => {
           </Card>
         );
 
-      
-
       case "register-station":
         return (
-          <Card className="shadow-lg" style={{ minHeight: '500px' }}>
+          <Card className="shadow-lg" style={{ minHeight: "500px" }}>
             <div className="mb-6">
               <h2 className="text-3xl font-bold text-gray-800 flex items-center gap-2">
                 <EnvironmentOutlined className="text-purple-500" />
@@ -171,7 +197,7 @@ const AdminDashboard = () => {
 
       case "vehicles":
         return (
-          <Card className="shadow-lg" style={{ minHeight: '500px' }}>
+          <Card className="shadow-lg" style={{ minHeight: "500px" }}>
             <div className="mb-6">
               <h2 className="text-3xl font-bold text-gray-800 flex items-center gap-2">
                 <CarOutlined className="text-green-500" />
@@ -183,14 +209,16 @@ const AdminDashboard = () => {
             </div>
             <div className="bg-gray-50 rounded-lg p-8 text-center">
               <CarOutlined className="text-6xl text-gray-300 mb-4" />
-              <p className="text-gray-500 text-lg">Chức năng đang phát triển...</p>
+              <p className="text-gray-500 text-lg">
+                Chức năng đang phát triển...
+              </p>
             </div>
           </Card>
         );
 
       case "users":
         return (
-          <Card className="shadow-lg" style={{ minHeight: '500px' }}>
+          <Card className="shadow-lg" style={{ minHeight: "500px" }}>
             <div className="mb-6">
               <h2 className="text-3xl font-bold text-gray-800 flex items-center gap-2">
                 <UserOutlined className="text-orange-500" />
@@ -202,14 +230,16 @@ const AdminDashboard = () => {
             </div>
             <div className="bg-gray-50 rounded-lg p-8 text-center">
               <UserOutlined className="text-6xl text-gray-300 mb-4" />
-              <p className="text-gray-500 text-lg">Chức năng đang phát triển...</p>
+              <p className="text-gray-500 text-lg">
+                Chức năng đang phát triển...
+              </p>
             </div>
           </Card>
         );
 
       case "statistics":
         return (
-          <Card className="shadow-lg" style={{ minHeight: '500px' }}>
+          <Card className="shadow-lg" style={{ minHeight: "500px" }}>
             <div className="mb-6">
               <h2 className="text-3xl font-bold text-gray-800 flex items-center gap-2">
                 <BarChartOutlined className="text-pink-500" />
@@ -221,7 +251,9 @@ const AdminDashboard = () => {
             </div>
             <div className="bg-gray-50 rounded-lg p-8 text-center">
               <BarChartOutlined className="text-6xl text-gray-300 mb-4" />
-              <p className="text-gray-500 text-lg">Chức năng đang phát triển...</p>
+              <p className="text-gray-500 text-lg">
+                Chức năng đang phát triển...
+              </p>
             </div>
           </Card>
         );
@@ -239,12 +271,12 @@ const AdminDashboard = () => {
       <div
         className="bg-white shadow-2xl flex flex-col"
         style={{
-          width: '280px',
-          minWidth: '280px',
-          height: '100vh',
-          position: 'sticky',
+          width: "280px",
+          minWidth: "280px",
+          height: "100vh",
+          position: "sticky",
           top: 0,
-          overflowY: 'auto',
+          overflowY: "auto",
         }}
       >
         {/* Header */}

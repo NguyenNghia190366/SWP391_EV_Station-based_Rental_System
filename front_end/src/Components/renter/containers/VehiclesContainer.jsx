@@ -9,6 +9,7 @@ import { useAxiosInstance } from "../../../hooks/useAxiosInstance";
 const VehiclesContainer = () => {
   const navigate = useNavigate();
   const api = useAxiosInstance();
+  const { getAll } = useVehicleAPI();
   const [searchParams] = useSearchParams();
   const [user, setUser] = useState(null);
   const [vehicles, setVehicles] = useState([]);
@@ -16,6 +17,7 @@ const VehiclesContainer = () => {
   const [filteredVehicles, setFilteredVehicles] = useState([]);
   const [showVerificationModal, setShowVerificationModal] = useState(false);
   const [verificationType, setVerificationType] = useState("license");
+  const [hasLoadedVehicles, setHasLoadedVehicles] = useState(false);
 
   useEffect(() => {
     try {
@@ -27,14 +29,17 @@ const VehiclesContainer = () => {
     } catch (e) {
       console.error("Error reading user from localStorage", e);
     }
-  }, []);
+  }, [getAll]); 
 
   useEffect(() => {
     const fetchVehicles = async () => {
+      // Prevent multiple fetches
+      if (hasLoadedVehicles) return;
+      
       setLoading(true);
       try {
         // Try to fetch from API
-        const data = await vehicleAPI.getAll();
+        const data = await getAll();
         const vehiclesList = Array.isArray(data) ? data : data?.data || [];
 
         // Normalize vehicle data to match frontend expectations
@@ -48,6 +53,7 @@ const VehiclesContainer = () => {
         // Show ALL vehicles (available + unavailable)
         setVehicles(normalizedVehicles);
         setFilteredVehicles(normalizedVehicles);
+        setHasLoadedVehicles(true);
       } catch (err) {
         console.warn("Could not load vehicles from API, using dummy data", err);
         // Fallback to dummy data
@@ -133,13 +139,15 @@ const VehiclesContainer = () => {
         ];
         setVehicles(dummyVehicles);
         setFilteredVehicles(dummyVehicles);
+        setHasLoadedVehicles(true);
       } finally {
         setLoading(false);
       }
     };
 
     fetchVehicles();
-  }, []);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // Only run once on mount
 
   // Handle search with useCallback to prevent dependency issues
   const handleSearch = useCallback(

@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { userAPI } from "../../../api/api";
 import LoginForm from "../../../Components/Common/Form/LoginForm";
 import { normalizeUserData } from "../../../utils/normalizeData";
-
+import { useAxiosInstance } from "@/hooks/useAxiosInstance";
 // Cấu hình mặc định cho toast messages
 message.config({
   top: 80, // Hiển thị cao hơn một chút so với mặc định
@@ -58,28 +58,31 @@ const LoginContainer = () => {
         token = result.data.token || result.data.accessToken;
         user = result.data.user || result.data;
       }
-      // Case 4: BE real format - { email, role, userName, token }
-      else if (result.email && result.token) {
+      // Case 4: BE real format - { email, role, userName, token, user_id, renter_Id, ... }
+      else if (result.email && result.role && result.token) {
         token = result.token;
         user = result; // Toàn bộ response là user data
       }
       // Case 5: Backend trả user trực tiếp (không có token)
-      else if (result.email || result.userId) {
+      else if (result.email || result.user_id) {
         user = result;
-        token = "dummy-token";
+        token = result.token || "dummy-token";
       } else {
         throw new Error("Format dữ liệu không đúng từ server");
       }
+
+      console.log("📦 Extracted - token:", token ? "✅" : "❌", "user:", user ? "✅" : "❌");
 
       // ===== NORMALIZE USER DATA - Tương thích cả 2 BE =====
       // Sử dụng helper function để chuẩn hóa
       const normalizedUser = normalizeUserData(user);
 
-      console.log(" Normalized User:", normalizedUser);
+      console.log("📋 Normalized User:", normalizedUser);
+      console.log("📋 Raw user object:", user);
 
       // Kiểm tra user có role không
-      if (!normalizedUser.role) {
-        console.error(" User object:", user);
+      if (!normalizedUser || !normalizedUser.role) {
+        console.error("❌ User object không hợp lệ:", { normalizedUser, user });
         throw new Error("Dữ liệu người dùng không hợp lệ (thiếu role)");
       }
 
@@ -90,12 +93,47 @@ const LoginContainer = () => {
       localStorage.setItem("role", normalizedUser.role);
       
       // Lưu các IDs - support cả snake_case và camelCase
-      localStorage.setItem("userId", normalizedUser.userId || normalizedUser.user_id);
-      localStorage.setItem("user_id", normalizedUser.user_id || normalizedUser.userId);
+      const userId = normalizedUser.userId || normalizedUser.user_id;
+      localStorage.setItem("userId", userId);
+      localStorage.setItem("user_id", userId);
       
-      if (normalizedUser.renterId || normalizedUser.renter_id) {
-        localStorage.setItem("renterId", normalizedUser.renterId || normalizedUser.renter_id);
-        localStorage.setItem("renter_id", normalizedUser.renter_id || normalizedUser.renterId);
+      // 🔹 Nếu backend không trả renterId, query từ Renters table
+      let renterId = normalizedUser.renterId || normalizedUser.renter_id;
+      
+      if (!renterId && userId) {
+        try {
+          console.log("📡 Backend không trả renterId, query từ Renters table...");
+          // Fetch từ Renters table để lấy renterId dựa vào userId
+          const rentersRes = await useAxiosInstance().get("/Renters", {
+            headers: { "ngrok-skip-browser-warning": "true" }
+          });
+          
+          if (rentersRes.ok) {
+            const renters = await rentersRes.json();
+            const renterArray = Array.isArray(renters) ? renters : renters.data || [];
+            const renter = renterArray.find(r => 
+              (r.user_id || r.userId) === userId ||
+              Number(r.user_id) === Number(userId) ||
+              Number(r.userId) === Number(userId)
+            );
+            
+            if (renter) {
+              renterId = renter.renter_id || renter.renterId;
+              console.log("✅ Tìm thấy renterId từ DB:", renterId);
+            } else {
+              console.warn("⚠️ Không tìm thấy renter cho userId:", userId);
+            }
+          }
+        } catch (err) {
+          console.warn("⚠️ Lỗi khi query Renters:", err);
+        }
+      }
+      
+      // Lưu renterId nếu có
+      if (renterId) {
+        localStorage.setItem("renterId", renterId);
+        localStorage.setItem("renter_id", renterId);
+        localStorage.setItem("renter_Id", renterId); // Backend uses this key
       }
 
       if (normalizedUser.staffId || normalizedUser.staff_id) {
@@ -109,6 +147,7 @@ const LoginContainer = () => {
         role: localStorage.getItem("role"),
         userId: localStorage.getItem("userId"),
         renterId: localStorage.getItem("renterId"),
+        renter_Id: localStorage.getItem("renter_Id"),
         staffId: localStorage.getItem("staffId"),
         user: localStorage.getItem("currentUser"),
       });
@@ -135,7 +174,9 @@ const LoginContainer = () => {
 
       // Điều hướng sau 1 giây
       setTimeout(() => {
-        const role = normalizedUser.role.toUpperCase();
+        const role = (normalizedUser?.role || localStorage.getItem("role") || "").toUpperCase();
+        console.log("🔀 Navigating based on role:", role);
+        
         if (role === "ADMIN") navigate("/admin/dashboard");
         else if (role === "STAFF") navigate("/staff/verification");
         else navigate("/home");

@@ -9,8 +9,16 @@ export const clearUserData = () => {
     'currentUser',
     'isLoggedIn',
     'authToken',
+    'token',
     'userId',
+    'user_id',
     'userRole',
+    'role',
+    'renterId',
+    'renter_id',
+    'renter_Id',
+    'staffId',
+    'staff_id',
     'myBookings',
     // Add any other user-related keys here
   ];

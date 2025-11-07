@@ -13,26 +13,35 @@ const VerifyRenterContainer = () => {
   const fetchRenters = async () => {
     setFetchingRenters(true);
     try {
-      // Fetch tất cả 3 endpoints song song
-      const [rentersRes, licensesRes, cccdsRes] = await Promise.all([ //chờ cả 3 api phản h
+      // Fetch tất cả 4 endpoints song song
+      const [rentersRes, usersRes, licensesRes, cccdsRes] = await Promise.all([
         api.get("/Renters"),
+        api.get("/Users"),
         api.get("/DriverLicenses"),
         api.get("/Cccds"),
       ]);
 
       console.log("📦 Raw data:");
       console.log("  - Renters:", rentersRes.data);
+      console.log("  - Users:", usersRes.data);
       console.log("  - Licenses:", licensesRes.data);
       console.log("  - CCCDs:", cccdsRes.data);
 
       // Lấy arrays
       const rentersList = Array.isArray(rentersRes.data) ? rentersRes.data : rentersRes.data?.data || [];
+      const usersList = Array.isArray(usersRes.data) ? usersRes.data : usersRes.data?.data || [];
       const licensesList = Array.isArray(licensesRes.data) ? licensesRes.data : licensesRes.data?.data || [];
       const cccdsList = Array.isArray(cccdsRes.data) ? cccdsRes.data : cccdsRes.data?.data || [];
 
-      // Merge dữ liệu: JOIN renters với licenses và cccds
+      // Merge dữ liệu: JOIN renters với users, licenses và cccds
       const mergedRenters = rentersList.map(renter => {
-        const renterId = renter.renterId || renter.renter_Id || renter.id;
+        const renterId = renter.renter_id || renter.renterId || renter.id;
+        const userId = renter.user_id || renter.userId;
+        
+        // Tìm user tương ứng (lấy fullName và email từ Users)
+        const user = usersList.find(u => 
+          (u.user_id || u.userId || u.id) === userId
+        );
         
         // Tìm license tương ứng
         const license = licensesList.find(lic => 
@@ -46,12 +55,13 @@ const VerifyRenterContainer = () => {
 
         return {
           id: renterId,
-          fullName: renter.renter?.fullName || renter.fullName || "N/A",
-          email: renter.renter?.email || renter.email || "N/A",
-          phone: renter.renter?.phone || renter.phone || "",
-          isVerified: renter.isVerified ?? false,
-          currentAddress: renter.currentAddress || "",
-          registrationDate: renter.registrationDate || "",
+          userId: userId,
+          fullName: user?.full_name || user?.fullName || "N/A",
+          email: user?.email || "N/A",
+          phone: user?.phone_number || user?.phone || "",
+          isVerified: renter.is_verified || renter.isVerified || false,
+          currentAddress: renter.current_address || renter.currentAddress || "",
+          registrationDate: renter.registration_date || renter.registrationDate || "",
           // Driver License
           driverLicenseFrontUrl: license?.url_Driver_License_front || "",
           driverLicenseBackUrl: license?.url_Driver_License_back || "",
@@ -64,7 +74,11 @@ const VerifyRenterContainer = () => {
       });
 
       console.log("✅ Merged renters:", mergedRenters.length, "records");
-      console.log("📊 Sample:", mergedRenters[0]);
+      console.log("📊 Sample renter object:", mergedRenters[0]);
+      console.log("🔍 Full renter data from API:", rentersList[0]);
+      console.log("🔍 Full user data from API:", usersList[0]);
+      console.log("🔍 Sample license:", licensesList[0]);
+      console.log("🔍 Sample cccd:", cccdsList[0]);
       
       setRenters(mergedRenters);
     } catch (err) {
@@ -82,12 +96,32 @@ const VerifyRenterContainer = () => {
   const handleVerify = async (id) => {
     try {
       const result = await verifyRenter(id);
+      
+      // Tìm renter để lấy email
+      const renterToVerify = renters.find(r => r.id === id);
+      const email = renterToVerify?.email;
+
       // Cập nhật state local sau khi verify thành công
       setRenters((prev) =>
         prev.map((r) =>
           r.id === id ? { ...r, isVerified: true } : r
         )
       );
+
+      // Gửi notification email tới renter
+      if (email) {
+        try {
+          await api.post("/Notifications/SendEmail", {
+            to: email,
+            subject: "✅ Xác thực tài khoản thành công",
+            body: `Chúc mừng! Tài khoản của bạn đã được xác thực thành công. Bạn có thể bắt đầu thuê xe ngay bây giờ.`,
+            type: "VERIFICATION_APPROVED"
+          });
+          console.log("📧 Notification email sent to:", email);
+        } catch (emailErr) {
+          console.warn("⚠️ Could not send notification email:", emailErr);
+        }
+      }
 
       // Nếu người được verify là người đang đăng nhập, cập nhật localStorage để client nhận biết
       try {
@@ -114,10 +148,58 @@ const VerifyRenterContainer = () => {
       } catch (e) {
         // ignore
       }
-      message.success("Xác thực người thuê thành công");
+      message.success("✅ Xác thực người thuê thành công - Email đã được gửi");
     } catch (err) {
       console.error("Lỗi khi xác thực renter:", err);
       message.error("Xác thực thất bại: " + (err.message || "Có lỗi xảy ra"));
+    }
+  };
+
+  const handleReject = async (id, reason) => {
+    try {
+      // Tìm renter để lấy email
+      const renterToReject = renters.find(r => r.id === id);
+      const email = renterToReject?.email;
+
+      // Gọi API để cập nhật is_verified = 0 với lý do từ chối
+      await api.put(`/Renters/${id}`, {
+        is_verified: 0,
+        rejection_reason: reason,
+        rejected_at: new Date().toISOString(),
+      });
+
+      // Cập nhật state local sau khi từ chối thành công
+      setRenters((prev) =>
+        prev.map((r) =>
+          r.id === id ? { ...r, isVerified: false } : r
+        )
+      );
+
+      // Gửi notification email tới renter
+      if (email) {
+        try {
+          await api.post("/Notifications/SendEmail", {
+            to: email,
+            subject: "❌ Yêu cầu xác thực bị từ chối",
+            body: `Yêu cầu xác thực tài khoản của bạn đã bị từ chối.\n\nLý do: ${reason}\n\nVui lòng kiểm tra và tải lên lại giấy tờ.`,
+            type: "VERIFICATION_REJECTED",
+            metadata: {
+              rejection_reason: reason
+            }
+          });
+          console.log("📧 Rejection notification email sent to:", email);
+        } catch (emailErr) {
+          console.warn("⚠️ Could not send rejection notification email:", emailErr);
+        }
+      }
+
+      message.success("✅ Đã từ chối - Email thông báo đã được gửi");
+      
+      // Refresh list
+      await fetchRenters();
+    } catch (err) {
+      console.error("Lỗi khi từ chối renter:", err);
+      message.error("Từ chối thất bại: " + (err.message || "Có lỗi xảy ra"));
     }
   };
 
@@ -127,6 +209,7 @@ const VerifyRenterContainer = () => {
       loading={fetchingRenters || loading}
       error={error}
       onVerify={handleVerify}
+      onReject={handleReject}
     />
   );
 };

@@ -15,8 +15,8 @@ export const normalizeUserData = (user) => {
     // IDs - Support both snake_case (backend) and camelCase (frontend)
     userId: user.user_id || user.userId || tempUserId,
     user_id: user.user_id || user.userId || tempUserId, // Keep snake_case for backend compatibility
-    renterId: user.renter_id || user.renterId || null,
-    renter_id: user.renter_id || user.renterId || null, // Keep snake_case for backend compatibility
+    renterId: user.renter_Id || user.renter_id || user.renterId || null,
+    renter_id: user.renter_Id || user.renter_id || user.renterId || null, // Keep snake_case for backend compatibility
     staffId: user.staff_id || user.staffId || null,
     staff_id: user.staff_id || user.staffId || null, // Keep snake_case for backend compatibility
 
