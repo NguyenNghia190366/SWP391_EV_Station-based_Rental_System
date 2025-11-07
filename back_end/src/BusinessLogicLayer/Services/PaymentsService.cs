@@ -335,20 +335,12 @@ namespace BusinessLogicLayer.Services
             }
             
             // 3. Chữ ký hợp lệ -> Xử lý nghiệp vụ
-            if (ipnDto.vnp_ResponseCode == "00")
+            if (ipnDto.vnp_ResponseCode == "00") // 00 = Thành công
             {
                 int orderId;
                 try
                 {
-                    // --- SỬA LOGIC Ở ĐÂY ---
-                    string txnRef = ipnDto.vnp_TxnRef; // (Ví dụ: 520251106165844)
-                    // Lấy timestamp (14 ký tự cuối)
-                    string timeStamp = txnRef.Substring(txnRef.Length - 14, 14);
-                    // Lấy OrderId (là phần còn lại ở đầu)
-                    string orderIdStr = txnRef.Substring(0, txnRef.Length - 14);
-                    
-                    orderId = int.Parse(orderIdStr); // (sẽ là int.Parse("5"))
-                    // --- HẾT PHẦN SỬA ---
+                    orderId = int.Parse(ipnDto.vnp_TxnRef.Split('_')[0]); // Lấy OrderId
                 }
                 catch
                 {
