@@ -1,10 +1,10 @@
 import React, { useEffect, useState, useCallback } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
-import VehiclesView from "../../../Components/Common/View/Vehicles/VehiclesView";
-import { useVehicleAPI } from "../../../hooks/useVehicles";
-import BookingVerificationModal from "../../../Components/Common/View/Modal/BookingVerificationModal";
-import { normalizeVehicleData } from "../../../utils/normalizeData";
-import { useAxiosInstance } from "../../../hooks/useAxiosInstance";
+import VehiclesView from "../pages/VehiclesView";
+import { useVehicleAPI } from "../../../../../hooks/useVehicles";
+import BookingVerificationModal from "../../Modal/BookingVerificationModal";
+import { normalizeVehicleData } from "../../../../../utils/normalizeData";
+import { useAxiosInstance } from "../../../../../hooks/useAxiosInstance";
 
 const VehiclesContainer = () => {
   const navigate = useNavigate();
@@ -253,7 +253,7 @@ const VehiclesContainer = () => {
 
       // ✅ Renter đã verified, cho phép thuê xe
       console.log('✅ Renter đã verified, proceeding to booking...');
-      navigate(`/booking/${vehicleId}`);
+      navigate(`/booking-request/${vehicleId}`);
 
     } catch (error) {
       console.error('❌ Error checking renter verification:', error);

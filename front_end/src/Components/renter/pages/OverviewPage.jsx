@@ -130,13 +130,13 @@ const OverviewPage = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 py-8 px-4">
+    <div className="min-h-screen bg-gradient-to-br from-green-50 via-green-50 to-emerald-50 py-8 px-4">
       <div className="max-w-7xl mx-auto">
         {/* Header Section */}
         <div className="mb-8">
           <div className="flex justify-between items-center mb-6">
             <div>
-              <h1 className="text-4xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
+              <h1 className="text-4xl font-bold bg-gradient-to-r from-green-600 to-emerald-600 bg-clip-text text-transparent">
                 👋 Xin chào, {user?.fullName || 'Bạn'}!
               </h1>
               <p className="text-gray-600 mt-2">Quản lý và theo dõi các đơn thuê xe của bạn</p>
@@ -145,7 +145,7 @@ const OverviewPage = () => {
               type="primary" 
               size="large"
               onClick={handleRentNow}
-              className="bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 border-0"
+              className="bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 border-0"
             >
               <CarOutlined /> Thuê xe ngay
             </Button>
@@ -334,7 +334,7 @@ const OverviewPage = () => {
                   <Button 
                     type="primary"
                     onClick={handleRentNow}
-                    className="bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 border-0"
+                    className="bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 border-0"
                   >
                     🚗 Bắt đầu thuê xe
                   </Button>

@@ -182,7 +182,7 @@ const HomeContainer = () => {
 
       // ✅ Renter đã verified, cho phép thuê xe
       console.log('✅ Renter đã verified, proceeding to booking...');
-      navigate(`/booking/${vehicleId}`);
+      navigate(`/booking-request/${vehicleId}`);
 
     } catch (error) {
       console.error('❌ Error checking renter verification:', error);

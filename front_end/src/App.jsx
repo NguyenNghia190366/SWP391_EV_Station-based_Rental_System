@@ -6,17 +6,14 @@ import RegisterPage from "./Features/auth/Pages/RegisterPage";
 // Shared
 import ProfilePage from "./Components/Common/View/Profile/pages/ProfilePage.jsx";
 // Renter
-import VehiclesPage from "./Components/renter/pages/VehiclesPage";
+import VehiclesPage from "./Components/Common/View/Vehicles/pages/VehiclesPage.jsx";
+import BookingRequestPage from "./Components/Common/View/Booking/pages/BookingRequestPage.jsx";
 import BookingContainer from "./Components/Common/View/Booking/containers/BookingContainer.jsx";
-import ContractContainer from "./Components/renter/containers/ContractContainer";
+import ContractContainer from "./Components/Common/View/Contract/ContractContainer.jsx";
 import PaymentContainer from "./Components/renter/containers/PaymentContainer";
-import CheckInContainer from "./Components/renter/containers/CheckInContainer";
 import BookingSuccessPage from "./Components/Common/View/Booking/pages/BookingSuccessPage";
-import CheckInMethodSelectionPage from "./Components/renter/pages/CheckInMethodSelectionPage";
-import DocumentVerificationPage from "./Components/renter/pages/DocumentVerificationPage";
 import VehiclePreviewNotification from "./Components/renter/pages/VehiclePreviewNotification";
-import PaymentSuccessBill from "./Components/renter/pages/PaymentSuccessBill";
-import MyBookingsPage from "./Components/Common/View/Booking/pages/MyBookingsPage.jsx";
+import PaymentSuccessBill from "./Components/Common/View/Payment/PaymentSuccessBill.jsx";
 import VerifyPage from "./Components/renter/pages/VerifyPage.jsx";
 // Admin
 import AdminDashboard from "./Components/Admin/pages/AdminDashboard";
@@ -46,6 +43,7 @@ function App() {
         <Route path="/verify" element={<VerifyPage />} />
         
         {/* Booking Flow Routes */}
+        <Route path="/booking-request/:vehicleId" element={<BookingRequestPage />} />
         <Route path="/booking/:vehicleId" element={<BookingContainer />} />
         <Route path="/contract/:vehicleId" element={<ContractContainer />} />
         <Route path="/payment/:vehicleId" element={<PaymentContainer />} />
@@ -54,17 +52,9 @@ function App() {
         
         {/* User Account Routes */}
         <Route path="/notifications" element={<NotificationsPage />} />
-        <Route path="/my-bookings" element={<MyBookingsPage />} />
         
         {/* Vehicle Preview & Handover Routes */}
         <Route path="/vehicle-preview/:bookingId" element={<VehiclePreviewNotification />} />
-        <Route path="/checkin-prepare/:bookingId" element={<CheckInMethodSelectionPage />} />
-        
-        {/* Check-in Flow Routes */}
-        <Route path="/checkin-method/:bookingId" element={<CheckInMethodSelectionPage />} />
-        <Route path="/verify-documents/:bookingId" element={<DocumentVerificationPage />} />
-        <Route path="/checkin/:bookingId" element={<CheckInContainer />} />
-        <Route path="/checkin" element={<CheckInContainer />} />
         
         {/* Admin & Staff Routes */}
         <Route element={<RequireAuth allowRole={[roles.ADMIN]} />}>

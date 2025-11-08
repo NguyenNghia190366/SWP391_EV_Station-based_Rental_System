@@ -9,7 +9,8 @@
   }
   
   body {
-    @apply bg-gradient-to-br from-sdz-700 via-indigo-900 to-sdz-500 text-slate-100 min-h-screen font-inter;
+    /* Sử dụng nền đơn giản, không màu mè */
+    @apply bg-gray-50 text-slate-900 min-h-screen font-inter;
   }
   
   * {

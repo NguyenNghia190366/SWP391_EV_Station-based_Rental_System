@@ -1,27 +1,36 @@
-import { useEffect } from "react";
+import { useMemo } from "react";
 import axios from "axios";
 import { apiUrl } from "../config/env";
 
 export const useAxiosInstance = () => {
+    // 🔐 Lấy token từ localStorage
     const token = localStorage.getItem("token");
-    const instance = axios.create({ 
-        baseURL: apiUrl,
-        headers: {
-            'ngrok-skip-browser-warning': 'true', // ✅ Bypass ngrok warning page
-            'Content-Type': 'application/json'
-        }
-    });
     
-    useEffect(() => {
-        instance.interceptors.request.use((config) => {
-            if (token) {
-                config.headers["Authorization"] = `Bearer ${token}`;
+    // 📋 Tạo instance axios với interceptor ngay lập tức (không chờ useEffect)
+    const instance = useMemo(() => {
+        const newInstance = axios.create({ 
+            baseURL: apiUrl,
+            headers: {
+                'ngrok-skip-browser-warning': 'true', // ✅ Bypass ngrok warning page
+                'Content-Type': 'application/json',
+                // 🔑 Gắn token trực tiếp vào header nếu có
+                ...(token && { Authorization: `Bearer ${token}` })
+            }
+        });
+        
+        // ⚡ Thiết lập interceptor request để đảm bảo token luôn được gắn
+        newInstance.interceptors.request.use((config) => {
+            const currentToken = localStorage.getItem("token");
+            if (currentToken) {
+                config.headers["Authorization"] = `Bearer ${currentToken}`;
             }
             return config;
         }, (error) => {
             return Promise.reject(error);
         });
-    }, [token, instance]);
+        
+        return newInstance;
+    }, [token]); // 🔄 Tạo lại instance khi token thay đổi
 
     return instance;
 }

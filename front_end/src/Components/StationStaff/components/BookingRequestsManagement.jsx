@@ -212,7 +212,7 @@ const BookingRequestsManagement = () => {
               size="small"
               icon={<SendOutlined />}
               onClick={() => handleSendVehicleInfo(record.bookingId)}
-              className="bg-gradient-to-r from-blue-500 to-cyan-500 border-0 hover:from-blue-600 hover:to-cyan-600"
+              className="bg-gradient-to-r from-green-500 to-emerald-500 border-0 hover:from-green-600 hover:to-emerald-600"
             >
               Gửi ảnh
             </Button>
@@ -242,7 +242,7 @@ const BookingRequestsManagement = () => {
           type="primary" 
           icon={<ReloadOutlined />}
           onClick={loadBookingRequests}
-          className="bg-gradient-to-r from-blue-500 to-cyan-500 border-0 hover:from-blue-600 hover:to-cyan-600 shadow-md"
+          className="bg-gradient-to-r from-green-500 to-emerald-500 border-0 hover:from-green-600 hover:to-emerald-600 shadow-md"
           size="large"
         >
           Làm mới
@@ -253,7 +253,7 @@ const BookingRequestsManagement = () => {
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
         <Card className="border-0 shadow-lg hover:shadow-xl transition-all duration-300 rounded-xl overflow-hidden">
           <div className="flex items-center gap-4">
-            <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-purple-500 to-indigo-600 flex items-center justify-center shadow-lg">
+            <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-green-500 to-emerald-600 flex items-center justify-center shadow-lg">
               <FileTextOutlined className="text-2xl text-white" />
             </div>
             <div>
