@@ -72,5 +72,22 @@ export const useVehicleAPI = () => {
     [instance]
   );
 
-  return { getAll, getById, getAllModels, getModelById };
+  // 🔹 Tạo booking mới
+  const createBooking = useCallback(
+    async (bookingPayload) => {
+      try {
+        const res = await instance.post("/Bookings", bookingPayload);
+        return res.data;
+      } catch (error) {
+        console.error("❌ Không thể tạo booking:", error);
+        throw (
+          error.response?.data?.message ||
+          new Error("Không thể tạo booking")
+        );
+      }
+    },
+    [instance]
+  );
+
+  return { getAll, getById, getAllModels, getModelById, createBooking };
 };

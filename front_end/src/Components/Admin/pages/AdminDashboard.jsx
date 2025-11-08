@@ -124,7 +124,7 @@ const AdminDashboard = () => {
             </div>
 
             {/* Welcome Card */}
-            <Card className="shadow-md bg-gradient-to-r from-indigo-50 to-purple-50 border border-indigo-200">
+            <Card className="shadow-md bg-gradient-to-r from-green-50 to-emerald-50 border border-green-200">
               <h3 className="text-2xl font-bold text-indigo-900 mb-4">
                 🎯 Chào mừng đến Admin Dashboard
               </h3>
@@ -280,7 +280,7 @@ const AdminDashboard = () => {
         }}
       >
         {/* Header */}
-        <div className="p-6 border-b border-gray-200 bg-gradient-to-r from-indigo-600 to-purple-600">
+        <div className="p-6 border-b border-gray-200 bg-gradient-to-r from-green-600 to-emerald-600">
           <h3 className="text-xl font-bold text-white mb-1">Admin Dashboard</h3>
           <p className="text-indigo-100 text-sm">Quản lý hệ thống</p>
         </div>

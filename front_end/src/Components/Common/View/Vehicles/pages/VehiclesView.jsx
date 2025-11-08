@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import VehicleCard from "../Vehicles/VehicleCard";
+import VehicleCard from "./VehicleCard";
 
 const VehiclesView = ({
   vehicles = [],
@@ -36,9 +36,9 @@ const VehiclesView = ({
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 flex items-center justify-center">
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
-          <div className="inline-block animate-spin rounded-full h-16 w-16 border-4 border-indigo-500 border-t-transparent"></div>
+          <div className="inline-block animate-spin rounded-full h-16 w-16 border-4 border-gray-300 border-t-transparent"></div>
           <p className="mt-4 text-lg text-gray-700 font-semibold">Đang tải danh sách xe...</p>
         </div>
       </div>
@@ -46,16 +46,12 @@ const VehiclesView = ({
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50 to-indigo-50">
+    <div className="min-h-screen bg-gray-50">
       {/* Header Section */}
-      <section className="bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-500 text-white py-16">
+      <section className="bg-white text-gray-900 py-8">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h1 className="text-4xl md:text-5xl font-extrabold mb-4 animate-fadeInUp">
-            Danh sách xe điện
-          </h1>
-          <p className="text-lg md:text-xl text-white/90 animate-fadeInUp" style={{ animationDelay: '0.1s' }}>
-            Chọn chiếc xe điện phù hợp với nhu cầu của bạn
-          </p>
+          <h1 className="text-4xl md:text-5xl font-extrabold mb-2">Danh sách xe điện</h1>
+          <p className="text-lg md:text-xl text-gray-700">Chọn chiếc xe điện phù hợp với nhu cầu của bạn</p>
         </div>
       </section>
 

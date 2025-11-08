@@ -13,24 +13,17 @@ const LoginForm = ({ onSubmit, loading, error }) => {
   const [form] = Form.useForm();
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-indigo-500 via-purple-600 to-pink-500 p-4">
-      {/* Animated Background */}
-      <div className="fixed inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-white rounded-full mix-blend-overlay filter blur-3xl opacity-20 animate-pulse"></div>
-        <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-yellow-300 rounded-full mix-blend-overlay filter blur-3xl opacity-20 animate-pulse" style={{ animationDelay: '2s' }}></div>
-        <div className="absolute top-1/2 left-1/2 w-96 h-96 bg-pink-300 rounded-full mix-blend-overlay filter blur-3xl opacity-20 animate-pulse" style={{ animationDelay: '4s' }}></div>
-      </div>
-
-      <Card className="w-full max-w-md shadow-2xl rounded-2xl backdrop-blur-sm bg-white/95 relative z-10">
-        <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-full mb-4 shadow-lg">
-            <LoginOutlined className="text-4xl text-white" />
+    <div className="min-h-screen flex items-center justify-center bg-gray-100 p-4">
+      <Card className="w-full max-w-md shadow rounded-lg bg-white relative z-10">
+        <div className="text-center mb-6">
+          <div className="inline-flex items-center justify-center w-16 h-16 bg-blue-600 rounded-full mb-3 shadow">
+            <LoginOutlined className="text-2xl text-white" />
           </div>
-          <Title level={2} className="mb-2 bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
-            Chào mừng trở lại!
+          <Title level={2} className="mb-2 text-2xl text-gray-800">
+            Chào mừng trở lại
           </Title>
           <Text className="text-gray-600">
-            ⚡ Đăng nhập để tiếp tục trải nghiệm dịch vụ thuê xe điện
+            Đăng nhập để tiếp tục
           </Text>
         </div>
 
@@ -99,18 +92,18 @@ const LoginForm = ({ onSubmit, loading, error }) => {
               htmlType="submit"
               size="large"
               loading={loading}
-              className="w-full h-12 bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 border-0 rounded-lg shadow-lg text-white font-semibold"
+              className="w-full h-12 bg-blue-600 hover:bg-blue-700 border-0 rounded text-white font-medium"
               block
             >
-              {loading ? "Đang đăng nhập..." : "⚡ Đăng nhập"}
+              {loading ? "Đang đăng nhập..." : "Đăng nhập"}
             </Button>
           </Form.Item>
 
           <div className="text-center">
             <Text className="text-gray-600">
-              Chưa có tài khoản?{" "}
-              <Link to="/register" className="text-indigo-600 hover:text-indigo-700 font-semibold transition-colors">
-                Đăng ký ngay
+              Chưa có tài khoản?{' '}
+              <Link to="/register" className="text-blue-600 hover:text-blue-700 font-medium">
+                Đăng ký
               </Link>
             </Text>
           </div>

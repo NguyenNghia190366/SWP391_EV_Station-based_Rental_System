@@ -9,7 +9,8 @@ const BookingContainer = () => {
   const [user, setUser] = useState(null);
   const [vehicle, setVehicle] = useState(null);
   const [loading, setLoading] = useState(true);
-  const { getById } = useVehicleAPI();
+  const [submitting, setSubmitting] = useState(false);
+  const { getById, createBooking } = useVehicleAPI();
   
   const [bookingData, setBookingData] = useState({
     phone: '',
@@ -39,7 +40,7 @@ const BookingContainer = () => {
     }
   }, [navigate]);
 
-  // Fetch vehicle details
+  // Fetch vehicle details and pre-fill booking request data
   useEffect(() => {
     const fetchVehicle = async () => {
       if (!vehicleId) {
@@ -58,6 +59,23 @@ const BookingContainer = () => {
             ...prev, 
             pickupLocation: data.station.name 
           }));
+        }
+
+        // Pre-fill booking request data from localStorage if available
+        const bookingRequest = localStorage.getItem('bookingRequest');
+        if (bookingRequest) {
+          try {
+            const requestData = JSON.parse(bookingRequest);
+            setBookingData(prev => ({
+              ...prev,
+              startDate: requestData.startDate,
+              endDate: requestData.endDate
+            }));
+            // Clear the booking request from localStorage after use
+            localStorage.removeItem('bookingRequest');
+          } catch (err) {
+            console.warn('Could not parse bookingRequest from localStorage:', err);
+          }
         }
       } catch (err) {
         console.error('Error fetching vehicle:', err);
@@ -109,7 +127,7 @@ const BookingContainer = () => {
     fetchVehicle();
   }, [vehicleId, navigate]);
 
-  const handleProceedToContract = () => {
+  const handleProceedToContract = async () => {
     // Validate booking data
     if (!bookingData.startDate || !bookingData.endDate) {
       alert('Vui lòng chọn ngày bắt đầu và kết thúc!');
@@ -121,15 +139,42 @@ const BookingContainer = () => {
       return;
     }
 
-    // Save booking data to localStorage
-    localStorage.setItem('pendingBooking', JSON.stringify({
-      vehicle,
-      bookingData,
-      user
-    }));
+    try {
+      setSubmitting(true);
 
-    // Navigate to contract page
-    navigate(`/contract/${vehicleId}`);
+      // Prepare booking payload for API
+      const bookingPayload = {
+        vehicleId: parseInt(vehicleId),
+        renterId: user.id || user.userId, // adjust based on your backend
+        startDate: new Date(bookingData.startDate).toISOString(),
+        endDate: new Date(bookingData.endDate).toISOString(),
+        pickupLocation: bookingData.pickupLocation,
+        phoneNumber: bookingData.phone,
+        notes: bookingData.notes,
+        status: 'pending' // Initial status
+      };
+
+      // Call API to create booking
+      const createdBooking = await createBooking(bookingPayload);
+      
+      console.log('✅ Booking created:', createdBooking);
+
+      // Save booking to localStorage for contract page
+      localStorage.setItem('pendingBooking', JSON.stringify({
+        vehicle,
+        bookingData,
+        user,
+        bookingId: createdBooking.id || createdBooking.bookingId
+      }));
+
+      // Navigate to contract page
+      navigate(`/contract/${vehicleId}`);
+    } catch (error) {
+      console.error('❌ Error creating booking:', error);
+      alert(`Tạo booking thất bại: ${error.message}`);
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   const handleCancel = () => {
@@ -161,6 +206,7 @@ const BookingContainer = () => {
       onBookingDataChange={setBookingData}
       onProceedToContract={handleProceedToContract}
       onCancel={handleCancel}
+      isSubmitting={submitting}
     />
   );
 };

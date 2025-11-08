@@ -175,14 +175,14 @@ const ProfileView = ({ user, loading, onUpdateUser, onUpdateAvatar, onSubmitVeri
   // === Loading and unauth ===
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-50 to-blue-50">
+      <div className="min-h-screen flex items-center justify-center from-gray-50 to-blue-50">
         <Spin indicator={<LoadingOutlined style={{ fontSize: 48 }} spin />} tip="Đang tải thông tin..." size="large" />
       </div>
     );
   }
   if (!user) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-50 to-blue-50 p-4">
+      <div className="min-h-screen flex items-center justify-center from-gray-50 to-blue-50 p-4">
         <Card className="max-w-md w-full text-center shadow-xl">
           <UserOutlined className="text-6xl text-gray-400 mb-4" />
           <h2 className="text-2xl font-bold text-gray-800 mb-3">Bạn chưa đăng nhập</h2>
@@ -364,10 +364,10 @@ const ProfileView = ({ user, loading, onUpdateUser, onUpdateAvatar, onSubmitVeri
   };
 
   return (
-    <div className="flex min-h-screen bg-gradient-to-br from-gray-50 to-blue-50">
+    <div className="flex min-h-screen bg-gray-50">
       {/* Sidebar */}
       <div
-        className="bg-white shadow-2xl flex flex-col"
+        className="bg-white shadow flex flex-col"
         style={{
           width: "280px",
           minWidth: "280px",
@@ -377,15 +377,15 @@ const ProfileView = ({ user, loading, onUpdateUser, onUpdateAvatar, onSubmitVeri
           overflowY: "auto",
         }}
       >
-        <div className="p-6 border-b border-gray-200 bg-gradient-to-r from-purple-600 to-indigo-600">
+        <div className="p-6 border-b border-gray-200 bg-white">
           <div className="text-center">
             <Avatar
               size={80}
               src={user.avatar || "https://cdn-icons-png.flaticon.com/512/149/149071.png"}
               className="border-4 border-white shadow-xl mx-auto mb-3"
             />
-            <h3 className="text-lg font-bold text-white mb-1">{user.userName || user.name || "User"}</h3>
-            <Tag color="purple" className="text-xs">{user.role || "RENTER"}</Tag>
+            <h3 className="text-lg font-bold text-gray-800 mb-1">{user.userName || user.name || "User"}</h3>
+            <Tag color="default" className="text-xs">{user.role || "RENTER"}</Tag>
           </div>
         </div>
 

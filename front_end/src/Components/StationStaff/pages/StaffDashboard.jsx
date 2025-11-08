@@ -57,7 +57,7 @@ const StaffDashboard = () => {
             </div>
 
             {/* Welcome Card */}
-            <Card className="shadow-md bg-gradient-to-r from-blue-50 to-cyan-50 border border-blue-200">
+            <Card className="shadow-md bg-gradient-to-r from-green-50 to-emerald-50 border border-green-200">
               <h3 className="text-2xl font-bold text-blue-900 mb-4">
                 Chào mừng đến Staff Dashboard
               </h3>
@@ -120,7 +120,7 @@ const StaffDashboard = () => {
   };
 
   return (
-    <div className="flex min-h-screen bg-gradient-to-br from-gray-50 to-blue-50">
+    <div className="flex min-h-screen bg-gradient-to-br from-green-50 to-emerald-50">
       {/* Sidebar */}
       <div
         className="bg-white shadow-2xl flex flex-col"
@@ -134,7 +134,7 @@ const StaffDashboard = () => {
         }}
       >
         {/* Header */}
-        <div className="p-6 border-b border-gray-200 bg-gradient-to-r from-blue-600 to-cyan-600">
+        <div className="p-6 border-b border-gray-200 bg-gradient-to-r from-green-600 to-emerald-600">
           <h3 className="text-xl font-bold text-white mb-1">Staff Dashboard</h3>
           <p className="text-blue-100 text-sm">Quản lý hỗ trợ</p>
         </div>

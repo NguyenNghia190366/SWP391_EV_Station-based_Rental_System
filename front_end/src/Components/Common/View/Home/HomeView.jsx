@@ -38,9 +38,9 @@ const HomeView = ({
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-50 to-gray-100">
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
         <div className="text-center">
-          <div className="inline-block animate-spin rounded-full h-16 w-16 border-4 border-indigo-500 border-t-transparent"></div>
+          <div className="inline-block animate-spin rounded-full h-16 w-16 border-4 border-gray-300 border-t-transparent"></div>
           <p className="mt-4 text-lg text-gray-700 font-semibold">Đang tải...</p>
         </div>
       </div>
@@ -56,46 +56,40 @@ const HomeView = ({
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50 to-indigo-50">
+    <div className="min-h-screen bg-red-50">
       {/* HERO SECTION */}
-      <section className="relative bg-gradient-to-br from-indigo-600 via-purple-600 to-pink-500 text-white py-20 md:py-32 overflow-hidden">
-        {/* Animated Background Pattern */}
-        <div className="absolute inset-0 opacity-10">
-          <div className="absolute top-10 left-10 w-72 h-72 bg-white rounded-full mix-blend-overlay filter blur-3xl animate-pulse"></div>
-          <div className="absolute bottom-10 right-10 w-96 h-96 bg-yellow-300 rounded-full mix-blend-overlay filter blur-3xl animate-pulse" style={{ animationDelay: '2s' }}></div>
-        </div>
-        
+      <section className="relative bg-white text-gray-900 py-20 md:py-32 overflow-hidden">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative z-10">
-          <h2 className="text-4xl md:text-6xl font-extrabold mb-6 animate-fadeInUp">
+          <h2 className="text-4xl md:text-6xl font-extrabold mb-6">
             Thuê xe điện dễ dàng
           </h2>
-          <p className="text-xl md:text-2xl text-white/90 mb-10 animate-fadeInUp" style={{ animationDelay: '0.1s' }}>
+          <p className="text-xl md:text-2xl text-gray-700 mb-10">
             Trải nghiệm tương lai của việc di chuyển với xe điện cao cấp
           </p>
-          
+
           {/* Search Bar */}
-          <form onSubmit={handleSearchSubmit} className="max-w-2xl mx-auto mb-8 animate-fadeInUp" style={{ animationDelay: '0.2s' }}>
+          <form onSubmit={handleSearchSubmit} className="max-w-2xl mx-auto mb-8">
             <div className="flex gap-3">
               <input
                 type="text"
                 placeholder="Tìm kiếm xe điện..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="flex-1 px-6 py-4 rounded-xl text-gray-800 text-lg border-2 border-white/30 focus:border-yellow-300 focus:ring-4 focus:ring-yellow-200 outline-none transition-all placeholder-gray-400"
+                className="flex-1 px-6 py-4 rounded-lg text-gray-800 text-lg border border-gray-300 focus:border-blue-400 focus:ring-2 focus:ring-blue-100 outline-none transition-all placeholder-gray-400"
               />
               <button 
                 type="submit" 
-                className="px-8 py-4 bg-yellow-400 hover:bg-yellow-300 text-gray-900 font-bold rounded-xl hover:shadow-2xl hover:-translate-y-0.5 transition-all duration-300"
+                className="px-8 py-4 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-lg transition-all duration-150"
               >
                 Tìm kiếm
               </button>
             </div>
           </form>
-          
-          <div className="flex flex-wrap gap-4 justify-center animate-fadeInUp" style={{ animationDelay: '0.3s' }}>
+
+          <div className="flex flex-wrap gap-4 justify-center">
             <button 
               onClick={() => onNavigate("/vehicles")}
-              className="px-8 py-4 bg-white text-indigo-600 font-bold rounded-xl hover:bg-yellow-300 hover:text-gray-900 hover:shadow-2xl hover:-translate-y-1 transition-all duration-300"
+              className="px-8 py-4 bg-white text-blue-600 font-bold rounded-lg border border-gray-200 hover:bg-gray-50 transition-all duration-150"
             >
               Khám phá ngay
             </button>
@@ -103,7 +97,7 @@ const HomeView = ({
               <button
                 onClick={() => onFindNearest()}
                 disabled={nearestSearching}
-                className="px-8 py-4 bg-white/10 backdrop-blur-md border-2 border-white/30 text-white font-bold rounded-xl hover:bg-white/20 hover:shadow-2xl hover:-translate-y-1 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="px-8 py-4 bg-white text-gray-700 border border-gray-200 font-bold rounded-lg hover:bg-gray-50 transition-all duration-150 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {nearestSearching ? 'Đang tìm...' : 'Tìm trạm thuê gần nhất'}
               </button>
