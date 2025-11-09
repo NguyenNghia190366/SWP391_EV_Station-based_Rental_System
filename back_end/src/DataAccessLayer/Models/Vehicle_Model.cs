@@ -25,7 +25,15 @@ public partial class Vehicle_Model
 
     public int number_of_seats { get; set; }
 
+    public decimal? battery_capacity { get; set; } // 
+
+    public string type_of_battery { get; set; } = null!;
+    
     public int? mileage { get; set; }
+    
+    public decimal price_per_hour { get; set; } // 
+    
+    public decimal deposit { get; set; }
 
     [InverseProperty("vehicle_model")]
     public virtual ICollection<Vehicle> Vehicles { get; set; } = new List<Vehicle>();
