@@ -11,7 +11,15 @@ namespace BusinessLogicLayer.Helpers.CurrentUserAccessor
             _httpContextAccessor = httpContextAccessor;
         }
 
-        private ClaimsPrincipal? User => _httpContextAccessor.HttpContext?.User;
+        private ClaimsPrincipal? User
+        {
+            get
+            {
+                var httpContext = _httpContextAccessor.HttpContext;
+                if (httpContext == null) return null;
+                return httpContext.User;
+            }
+        }
         
         // Lấy từ claim "sub" (NameIdentifier)
         public int UserId 
