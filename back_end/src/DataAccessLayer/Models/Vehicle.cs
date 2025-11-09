@@ -21,8 +21,6 @@ public partial class Vehicle
 
     public int? release_year { get; set; }
 
-    public int? battery_capacity { get; set; }
-
     public int current_mileage { get; set; }
 
     [StringLength(255)]
