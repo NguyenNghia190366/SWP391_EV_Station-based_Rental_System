@@ -17,8 +17,8 @@ namespace BusinessLogicLayer.Services
         private readonly IMapper _mapper;
         private readonly ICurrentUserAccessor _currentUser;
         
-        // GIẢ ĐỊNH RULE 3: 200.000 / giờ
-        private const decimal HOURLY_RATE = 200000; 
+        // // GIẢ ĐỊNH RULE 3: 200.000 / giờ
+        // private const decimal HOURLY_RATE = 200000; 
 
         public RentalOrdersService(ApplicationDbContext context, IMapper mapper, ICurrentUserAccessor currentUser)
         {
