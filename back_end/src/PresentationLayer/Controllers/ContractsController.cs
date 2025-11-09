@@ -21,7 +21,7 @@ namespace PresentationLayer.Controllers
         /// [Staff, Admin] Tạo hợp đồng mới (khi check-in cho khách)
         /// </summary>
         [HttpPost]
-        [Authorize(Roles = "Staff, Admin")] // Chỉ Staff hoặc Admin
+        [Authorize(Roles = "STAFF, ADMIN")] // Chỉ Staff hoặc Admin
         public async Task<IActionResult> CreateContract([FromBody] ContractCreateDto createDto)
         {
             try
@@ -61,7 +61,7 @@ namespace PresentationLayer.Controllers
         /// [Staff, Admin] Lấy danh sách tất cả hợp đồng (cho Admin/Staff)
         /// </summary>
         [HttpGet]
-        [Authorize(Roles = "Staff, Admin")]
+        [Authorize(Roles = "STAFF, ADMIN")] // Chỉ Staff hoặc Admin
         public async Task<IActionResult> GetAllContracts([FromQuery] ContractListQuery query)
         {
             var result = await _contractsService.GetAllContractsAsync(query);
@@ -72,7 +72,7 @@ namespace PresentationLayer.Controllers
         /// [Renter] Lấy danh sách hợp đồng của cá nhân tôi
         /// </summary>
         [HttpGet("my-contracts")]
-        [Authorize(Roles = "Renter")] // Chỉ Renter
+        [Authorize(Roles = "RENTER")] // Chỉ Renter
         public async Task<IActionResult> GetMyContracts([FromQuery] ContractListQuery query)
         {
             // Lấy renter_id từ token
@@ -122,7 +122,7 @@ namespace PresentationLayer.Controllers
         /// [Staff, Admin] Cập nhật URL file PDF (sau khi upload file)
         /// </summary>
         [HttpPut("{id}/pdf-url")]
-        [Authorize(Roles = "Staff, Admin")]
+        [Authorize(Roles = "STAFF, ADMIN")]
         public async Task<IActionResult> UpdatePdfUrl(int id, [FromBody] string pdfUrl)
         {
             if (string.IsNullOrWhiteSpace(pdfUrl))
