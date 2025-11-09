@@ -62,7 +62,8 @@ namespace BusinessLogicLayer.Services
             
             // Rule 1: Check Tồn kho (xe có sẵn không)
             var vehicle = await _context.Vehicles
-                .FirstOrDefaultAsync(v => v.vehicle_id == dto.VehicleId && v.is_available); //
+                                            .Include(v => v.vehicle_model)
+                                            .FirstOrDefaultAsync(v => v.vehicle_id == dto.VehicleId && v.is_available); //
             
             if (vehicle == null)
             {
