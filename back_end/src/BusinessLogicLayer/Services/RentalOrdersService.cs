@@ -82,13 +82,20 @@ namespace BusinessLogicLayer.Services
                 throw new InvalidOperationException("Vehicle is already booked for the selected time slot.");
             }
 
-            // Rule 3: Tính giá
+            // Rule 3: Tính giá (Lấy động từ Vehicle_Model)
             var durationHours = (dto.EndTime - dto.StartTime).TotalHours;
-            var calculatedTotal = (decimal)durationHours * HOURLY_RATE;
+
+            // Lấy giá từ model của xe (đã include ở trên)
+            var pricePerHour = vehicle.vehicle_model.price_per_hour; 
+            var calculatedTotal = (decimal)durationHours * pricePerHour;
 
             var order = _mapper.Map<RentalOrder>(dto);
             order.renter_id = renterId.Value;
-            order.total_amount = calculatedTotal; //
+
+            // SỬA: Gán giá trị tính toán VÀ tiền cọc động
+            order.total_amount = calculatedTotal; 
+            order.deposit_amount = vehicle.vehicle_model.deposit; // <--- LẤY CỌC TỪ DB
+
             order.status = "BOOKED"; // Trạng thái ban đầu
             order.payment_status = "UNPAID"; //
 
