@@ -15,7 +15,7 @@ export default function BookingFormPage() {
   const [loading, setLoading] = useState(false);
   const [vehicle, setVehicle] = useState(null);
   const [price, setPrice] = useState(null);
-  const [stations, setStations] = useState([]);
+  const [stations, setStations] = useState([]); 
   const { createRentalOrder } = useRentalOrders();
   const { getById, getModelById } = useVehicleAPI();
   const { getAll: getAllStations } = useStations();
