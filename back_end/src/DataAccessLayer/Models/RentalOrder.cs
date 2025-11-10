@@ -13,6 +13,13 @@ namespace DataAccessLayer.Models;
 [Index("vehicle_id", Name = "IX_RentalOrder_vehicle_id")]
 public partial class RentalOrder
 {
+    public RentalOrder()
+    {
+        Img_Vehicle_Befores = new HashSet<Img_Vehicle_Before>();
+        Img_Vehicle_Afters = new HashSet<Img_Vehicle_After>();
+    }
+
+
     [Key]
     public int order_id { get; set; }
 
@@ -23,6 +30,12 @@ public partial class RentalOrder
     public int? pickup_station_id { get; set; }
 
     public int? return_station_id { get; set; }
+
+    // THÊM CÁC DÒNG MỚI NÀY:
+    public int? pickup_staff_id { get; set; }
+    public string? pickup_staff_cccd_number { get; set; }
+    public int? return_staff_id { get; set; }
+    public string? return_staff_cccd_number { get; set; }
 
     [Precision(3)]
     public DateTime start_time { get; set; }
@@ -42,12 +55,6 @@ public partial class RentalOrder
     [StringLength(50)]
     public string status { get; set; } = null!;
 
-    [StringLength(255)]
-    public string? img_vehicle_before_URL { get; set; }
-
-    [StringLength(255)]
-    public string? img_vehicle_after_URL { get; set; }
-
     [Precision(3)]
     public DateTime created_at { get; set; }
 
@@ -56,9 +63,6 @@ public partial class RentalOrder
 
     [InverseProperty("order")]
     public virtual Contract? Contract { get; set; }
-
-    [InverseProperty("order")]
-    public virtual ICollection<ExtraFee> ExtraFees { get; set; } = new List<ExtraFee>();
 
     [InverseProperty("order")]
     public virtual ICollection<Payment> Payments { get; set; } = new List<Payment>();
@@ -78,4 +82,10 @@ public partial class RentalOrder
     [ForeignKey("vehicle_id")]
     [InverseProperty("RentalOrders")]
     public virtual Vehicle vehicle { get; set; } = null!;
+    // THÊM 2 NAVIGATION PROPERTIES MỚI (ở cuối file):
+    public virtual Staff? pickup_staff { get; set; }
+    public virtual Staff? return_staff { get; set; }
+
+    public virtual ICollection<Img_Vehicle_Before> Img_Vehicle_Befores { get; set; }
+    public virtual ICollection<Img_Vehicle_After> Img_Vehicle_Afters { get; set; }
 }
