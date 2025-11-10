@@ -17,9 +17,6 @@ namespace BusinessLogicLayer.DTOs.Vehicles
         [Range(1970, 2100)]
         public int? ReleaseYear { get; set; } //
 
-        [Range(0, 100)]
-        public int? BatteryCapacity { get; set; } = 100; //
-
         [Range(0, int.MaxValue)]
         public int CurrentMileage { get; set; } = 0; //
 

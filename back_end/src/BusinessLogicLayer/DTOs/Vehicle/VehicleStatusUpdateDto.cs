@@ -11,9 +11,6 @@ namespace BusinessLogicLayer.DTOs.Vehicles
         [Required]
         public bool IsAvailable { get; set; } = true;
 
-        [Range(0, 100)]
-        public int? BatteryCapacity { get; set; } //
-
         [Range(0, int.MaxValue)]
         public int CurrentMileage { get; set; } //
     }
