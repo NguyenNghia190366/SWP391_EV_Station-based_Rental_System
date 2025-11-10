@@ -18,9 +18,5 @@ namespace BusinessLogicLayer.DTOs.RentalOrder
 
         [Required]
         public DateTime EndTime { get; set; } 
-        
-        [Required]
-        [Range(0, double.MaxValue)]
-        public decimal DepositAmount { get; set; } // số tiền đặt cọc
     }
 }
