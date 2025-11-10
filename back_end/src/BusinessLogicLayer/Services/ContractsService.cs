@@ -71,8 +71,12 @@ namespace BusinessLogicLayer.Services
             _context.Contracts.Add(newContract);
 
             // 6. Cập nhật trạng thái RentalOrder
+            
             // Khi ký hợp đồng, đơn hàng chuyển sang "IN_USE" [cite: 29]
             order.status = "IN_USE";
+
+            // === THÊM DÒNG NÀY (LOGIC MỚI TỪ CSDL) ===
+            order.pickup_staff_id = staffId; // Ghi nhận Staff đã giao xe
             if (order.vehicle != null)
             {
                 order.vehicle.is_available = false; // Khóa xe lại
