@@ -24,9 +24,8 @@ public partial class ApplicationDbContext : DbContext
 
     public virtual DbSet<Driver_License> Driver_Licenses { get; set; }
 
-    public virtual DbSet<ExtraFee> ExtraFees { get; set; }
-
-    public virtual DbSet<FeeType> FeeTypes { get; set; }
+    // THÊM DBSSET MỚI VÀO ĐÂY (hoặc ở trên):
+    public virtual DbSet<ExtraFeeType> ExtraFeeTypes { get; set; }
 
     public virtual DbSet<Log_History> Log_Histories { get; set; }
 
@@ -38,18 +37,24 @@ public partial class ApplicationDbContext : DbContext
 
     public virtual DbSet<Renter> Renters { get; set; }
 
+    // THÊM 2 DBSSET MỚI NÀY VÀO:
+    public virtual DbSet<Report> Reports { get; set; }
+    public virtual DbSet<Report_EV_Img> Report_EV_Imgs { get; set; }
+
     public virtual DbSet<Staff> Staff { get; set; }
 
     public virtual DbSet<Station> Stations { get; set; }
 
     public virtual DbSet<User> Users { get; set; }
 
+
     public virtual DbSet<Vehicle> Vehicles { get; set; }
 
     public virtual DbSet<Vehicle_Model> Vehicle_Models { get; set; }
 
-    // protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-    //     => optionsBuilder.UseSqlServer("Server=DESKTOP-F35FAEM\\SQLEXPRESS;uid=sa;pwd=12345;Database=rental_ev_system;Trusted_Connection=True;TrustServerCertificate=True");
+    // THÊM 2 DBSSET MỚI:
+    public virtual DbSet<Img_Vehicle_Before> Img_Vehicle_Befores { get; set; }
+    public virtual DbSet<Img_Vehicle_After> Img_Vehicle_Afters { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -96,22 +101,14 @@ public partial class ApplicationDbContext : DbContext
             entity.HasOne(d => d.renter).WithOne(p => p.Driver_License).HasConstraintName("FK_DriverLicense_Renter");
         });
 
-        modelBuilder.Entity<ExtraFee>(entity =>
+        modelBuilder.Entity<ExtraFeeType>(entity =>
         {
-            entity.HasKey(e => e.fee_id).HasName("PK__ExtraFee__A19C8AFB3C7ECCEC");
+            entity.HasKey(e => e.extra_fee_type_id);
 
-            entity.Property(e => e.created_at).HasDefaultValueSql("(sysutcdatetime())");
+            // Cấu hình unique cho tên loại phí
+            entity.HasIndex(e => e.extra_fee_type_name).IsUnique();
 
-            entity.HasOne(d => d.FeeType).WithMany(p => p.ExtraFees)
-                .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK_ExtraFee_FeeType");
-
-            entity.HasOne(d => d.order).WithMany(p => p.ExtraFees).HasConstraintName("FK_ExtraFee_Order");
-        });
-
-        modelBuilder.Entity<FeeType>(entity =>
-        {
-            entity.HasKey(e => e.FeeType_id).HasName("PK__FeeType__91551701460FAAEB");
+            entity.Property(e => e.extra_fee_type_name).IsRequired();
         });
 
         modelBuilder.Entity<Log_History>(entity =>
@@ -138,7 +135,7 @@ public partial class ApplicationDbContext : DbContext
         {
             entity.HasKey(e => e.payment_id).HasName("PK__Payment__ED1FC9EAB5A713F1");
 
-            entity.Property(e => e.payment_date).HasDefaultValueSql("(sysutcdatetime())");
+            entity.Property(e => e.created_at).HasDefaultValueSql("(sysutcdatetime())");
 
             entity.HasOne(d => d.order).WithMany(p => p.Payments).HasConstraintName("FK_Payment_Order");
         });
@@ -162,6 +159,19 @@ public partial class ApplicationDbContext : DbContext
             entity.HasOne(d => d.vehicle).WithMany(p => p.RentalOrders)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_Order_Vehicle");
+
+            // THÊM 2 KHỐI NÀY:
+            entity.HasOne(d => d.pickup_staff)
+                .WithMany(p => p.RentalOrderpickup_staffs) // Trỏ đến ICollection ta vừa tạo
+                .HasForeignKey(d => d.pickup_staff_id)
+                .OnDelete(DeleteBehavior.Cascade) // Giống CSDL mới
+                .HasConstraintName("FK_Order_PickupStaff");
+
+            entity.HasOne(d => d.return_staff)
+                .WithMany(p => p.RentalOrderreturn_staffs) // Trỏ đến ICollection ta vừa tạo
+                .HasForeignKey(d => d.return_staff_id)
+                .OnDelete(DeleteBehavior.Cascade) // Giống CSDL mới
+                .HasConstraintName("FK_Order_ReturnStaff");
         });
 
         modelBuilder.Entity<Renter>(entity =>
@@ -222,6 +232,58 @@ public partial class ApplicationDbContext : DbContext
             entity.HasKey(e => e.vehicle_model_id).HasName("PK__Vehicle___79AAE30DA73640ED");
 
             entity.Property(e => e.number_of_seats).HasDefaultValue(1);
+        });
+
+        // THÊM CẤU HÌNH CHO 2 BẢNG MỚI (ở cuối hàm):
+        modelBuilder.Entity<Img_Vehicle_Before>(entity =>
+        {
+            entity.HasKey(e => e.img_before_ID);
+
+            entity.HasOne(d => d.order)
+                .WithMany(p => p.Img_Vehicle_Befores)
+                .HasForeignKey(d => d.order_id)
+                .OnDelete(DeleteBehavior.Cascade) // Khớp với CSDL
+                .HasConstraintName("FK_ImgBefore_Order");
+        });
+
+        modelBuilder.Entity<Img_Vehicle_After>(entity =>
+        {
+            entity.HasKey(e => e.img_after_ID);
+
+            entity.HasOne(d => d.order)
+                .WithMany(p => p.Img_Vehicle_Afters)
+                .HasForeignKey(d => d.order_id)
+                .OnDelete(DeleteBehavior.Cascade) // Khớp với CSDL
+                .HasConstraintName("FK_ImgAfter_Order");
+        });
+
+        // THÊM 2 KHỐI CẤU HÌNH CHO 2 BẢNG REPORT MỚI (ở cuối hàm):
+        modelBuilder.Entity<Report>(entity =>
+        {
+            entity.HasKey(e => e.report_id);
+
+            entity.HasOne(d => d.order)
+                .WithMany() // Vì RentalOrder ko có collection cho Report
+                .HasForeignKey(d => d.order_id)
+                .OnDelete(DeleteBehavior.ClientSetNull) // Hoặc .NoAction
+                .HasConstraintName("FK_Report_Order");
+
+            entity.HasOne(d => d.staff)
+                .WithMany() // Vì Staff ko có collection cho Report
+                .HasForeignKey(d => d.staff_id)
+                .OnDelete(DeleteBehavior.ClientSetNull) // Hoặc .NoAction
+                .HasConstraintName("FK_Report_Staff");
+        });
+
+        modelBuilder.Entity<Report_EV_Img>(entity =>
+        {
+            entity.HasKey(e => e.img_id);
+
+            entity.HasOne(d => d.report)
+                .WithMany(p => p.Report_EV_Imgs) // Trỏ đến ICollection trong Report.cs
+                .HasForeignKey(d => d.report_id)
+                .OnDelete(DeleteBehavior.Cascade)
+                .HasConstraintName("FK_ReportImg_Report");
         });
 
         OnModelCreatingPartial(modelBuilder);
