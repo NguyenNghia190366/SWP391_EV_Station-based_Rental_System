@@ -92,17 +92,19 @@ namespace BusinessLogicLayer.Services
             var order = _mapper.Map<RentalOrder>(dto);
             order.renter_id = renterId.Value;
 
-            // SỬA: Gán giá trị tính toán VÀ tiền cọc động
+            // CSDL MỚI: Gán giá trị tính toán VÀ tiền cọc động
             order.total_amount = calculatedTotal; 
             order.deposit_amount = vehicle.vehicle_model.deposit; // <--- LẤY CỌC TỪ DB
 
             order.status = "BOOKED"; // Trạng thái ban đầu
-            order.payment_status = "UNPAID"; //
+            // order.payment_status = "UNPAID"; // (Trường này đã bị xóa khỏi RentalOrder)
 
             _context.RentalOrders.Add(order);
             await _context.SaveChangesAsync();
             
-            return (await GetByIdAsync(order.order_id))!;
+            // (Phải gọi GetByIdAsync để nạp DTO đầy đủ)
+            var resultDto = await GetByIdAsync(order.order_id);
+            return resultDto!;
         }
 
         // 2. GET BY ID (Chi tiết)
@@ -121,19 +123,27 @@ namespace BusinessLogicLayer.Services
             }
             // Nếu là ADMIN/STAFF thì không cần thêm Where (họ thấy hết)
 
-            // Bây giờ, chạy câu query đã an toàn
-            var orderDto = await query
+            // CSDL MỚI: Phải Include các bảng ảnh mới (Img_Vehicle_Befores/Afters)
+            // (AutoMapper ProjectTo sẽ KHÔNG tự động nạp các ICollection này)
+            // (Chúng ta sẽ sửa lại logic này sau, khi sửa DTO)
+            var order = await query
                 .Include(o => o.renter).ThenInclude(r => r.user)
                 .Include(o => o.vehicle).ThenInclude(v => v.vehicle_model)
                 .Include(o => o.vehicle).ThenInclude(v => v.station)
                 .Include(o => o.pickup_station)
                 .Include(o => o.return_station)
-                .Include(o => o.Payments)
-                .ProjectTo<RentalOrderViewDto>(_mapper.ConfigurationProvider)
+                .Include(o => o.Payments) // Dùng Payments thay cho payment_status
+                .Include(o => o.Img_Vehicle_Befores) // <-- CSDL MỚI
+                .Include(o => o.Img_Vehicle_Afters)  // <-- CSDL MỚI
+                .Include(o => o.pickup_staff)        // <-- CSDL MỚI
+                .Include(o => o.return_staff)        // <-- CSDL MỚI
                 .FirstOrDefaultAsync();
 
-            // Nếu query không thấy (vì không có hoặc vì xem trộm)
-            // orderDto sẽ là null.
+            if (order == null) return null;
+
+            // Map thủ công (hoặc sửa AutoMapper Profile)
+            var orderDto = _mapper.Map<RentalOrderViewDto>(order);
+            
             return orderDto;
         }
         
@@ -163,6 +173,7 @@ namespace BusinessLogicLayer.Services
                 .OrderByDescending(o => o.created_at)
                 .Skip((q.Page - 1) * q.PageSize)
                 .Take(q.PageSize)
+                // Dùng ProjectTo ở đây sẽ hiệu quả hơn GetByIdAsync
                 .ProjectTo<RentalOrderViewDto>(_mapper.ConfigurationProvider)
                 .ToListAsync();
             
@@ -184,29 +195,47 @@ namespace BusinessLogicLayer.Services
         // 5. UPDATE STATUS (Rule 4, 5)
         public async Task<bool> UpdateOrderStatusAsync(int id, RentalOrderActionDto dto)
         {
-            var order = await _context.RentalOrders.Include(o => o.vehicle)
+            // Phải Include cả Vehicle để cập nhật trạng thái
+            var order = await _context.RentalOrders
+                .Include(o => o.vehicle)
                 .FirstOrDefaultAsync(o => o.order_id == id);
+                
             if (order == null) return false;
 
-            // SỬA: Lấy thông tin user từ helper (đơn giản hơn)
             var userRole = _currentUser.Role;
-            var renterId = _currentUser.RenterId; // ID của người thuê (nếu có)
-            var staffId = _currentUser.StaffId; // ID của nhân viên (nếu có)
+            var renterId = _currentUser.RenterId;
+            var staffId = _currentUser.StaffId;
 
             switch (dto.Action)
             {
                 case RentalAction.CANCEL_BY_RENTER:
                     // Renter chỉ được hủy đơn 'BOOKED' của chính mình
-                    if (userRole == "RENTER" && order.renter_id == renterId && order.status == "BOOKED")
+                    if (userRole == "RENTER" && order.renter_id == renterId && 
+                        (order.status == "BOOKED" || order.status == "APPROVED")) // Renter có thể hủy cả đơn đã duyệt
                     {
                         order.status = "CANCELED"; //
-                        // TODO: Xử lý hoàn cọc (nếu có)
+                        // TODO: Xử lý hoàn cọc (nếu có - Sẽ làm ở PaymentsService
                     }
                     else
                     {
                         throw new UnauthorizedAccessException("Cannot cancel this order."); 
                     }
                     break;
+
+                // === LOGIC MỚI CHO CSDL MỚI ===
+                case RentalAction.APPROVE_ORDER: // Staff/Admin duyệt đơn
+                    if (userRole != "STAFF" && userRole != "ADMIN") 
+                        throw new UnauthorizedAccessException("Only staff or admin can approve orders.");
+                    
+                    if (order.status != "BOOKED")
+                        throw new InvalidOperationException("Only BOOKED orders can be approved.");
+
+                    order.status = "APPROVED";
+                    // (Không set pickup_staff_id ở đây, chỉ set khi tạo hợp đồng)
+                    
+                    // TODO: Tạo thông báo cho Renter (sẽ làm ở NotificationService)
+                    break;
+                // ==============================
 
 
                 case RentalAction.START_RENTAL: // Staff giao xe
@@ -222,10 +251,27 @@ namespace BusinessLogicLayer.Services
                         throw new InvalidOperationException("Order is not IN_USE.");
 
                     // Rule 4: Cập nhật trạng thái
-                    order.status = "COMPLETED"; //
-                    // order.payment_status = "PAID"; // Giả định đã thanh toán xong
-                    order.end_time = DateTime.UtcNow; // Ghi nhận thời gian trả thực tế
-                    order.img_vehicle_after_URL = dto.ImgVehicleAfterUrl; //
+                    // === LOGIC CẬP NHẬT CHO CSDL MỚI ===
+                    order.status = "COMPLETED";
+                    order.end_time = DateTime.UtcNow;
+                    order.return_staff_id = staffId; // Ghi nhận Staff nhận xe
+                    // order.return_staff_cccd_number = ... (cần query thêm)
+                    
+
+                    // THÊM LOGIC MỚI (Lưu vào bảng 1-N):
+                    // (Giả định DTO của cậu đã đổi thành List<string>)
+                    if (dto.ImgVehicleAfterUrls != null && dto.ImgVehicleAfterUrls.Any())
+                    {
+                        foreach (var imageUrl in dto.ImgVehicleAfterUrls)
+                        {
+                            var imgAfter = new Img_Vehicle_After
+                            {
+                                order_id = order.order_id,
+                                img_vehicle_after_URL = imageUrl
+                            };
+                            _context.Img_Vehicle_Afters.Add(imgAfter);
+                        }
+                    }
 
                     // Cập nhật xe
                     order.vehicle.is_available = true; //
