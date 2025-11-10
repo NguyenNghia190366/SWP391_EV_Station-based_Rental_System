@@ -72,9 +72,9 @@ namespace BusinessLogicLayer.Services
             
             // Rule 2: Check Xung đột Lịch (Overlap)
             var existingOrders = await _context.RentalOrders.AnyAsync(o =>
-                o.vehicle_id == dto.VehicleId && //
-                (o.status == "BOOKED" || o.status == "IN_USE") && //
-                (dto.StartTime < o.end_time && dto.EndTime > o.start_time) //
+                o.vehicle_id == dto.VehicleId &&
+                (o.status == "BOOKED" || o.status == "APPROVED" || o.status == "IN_USE") && // Thêm 'APPROVED'
+                (dto.StartTime < o.end_time && dto.EndTime > o.start_time) 
             );
 
             if (existingOrders)
