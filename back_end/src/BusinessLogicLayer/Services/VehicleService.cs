@@ -116,7 +116,7 @@ namespace BusinessLogicLayer.Services
             }
             if (q.MinBattery.HasValue)
             {
-                query = query.Where(v => v.vehicle_model.battery_capacity >= q.MinBattery.Value); //
+                query = query.Where(v => v.vehicle_model.battery_capacity >= q.MinBattery.Value);
             }
 
             // TODO: Sorting
