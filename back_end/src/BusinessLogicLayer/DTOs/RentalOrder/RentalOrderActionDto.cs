@@ -6,6 +6,7 @@ namespace BusinessLogicLayer.DTOs.RentalOrder
     public enum RentalAction
     {
         CANCEL_BY_RENTER,
+        APPROVE_ORDER, // Staff duyệt đơn
         START_RENTAL, // Staff giao xe
         RETURN_VEHICLE // Staff nhận xe
     }
@@ -16,13 +17,8 @@ namespace BusinessLogicLayer.DTOs.RentalOrder
         
         public string? Notes { get; set; } // Lý do hủy/ghi chú
 
-        // --- Dùng cho START_RENTAL ---
-        [Url]
-        public string? ImgVehicleBeforeUrl { get; set; } = string.Empty;
-
-        // --- Dùng cho RETURN_VEHICLE ---
-        [Url]
-        public string? ImgVehicleAfterUrl { get; set; } = string.Empty;
+        // --- SỬA DÒNG NÀY (từ string sang List<string>) ---
+        public List<string>? ImgVehicleAfterUrls { get; set; } // <-- Đổi tên và kiểu thành List<string>
         public string? VehicleConditionAfter { get; set; } = string.Empty; // 'GOOD', 'DAMAGED'
         public int? CurrentMileage { get; set; }
     }

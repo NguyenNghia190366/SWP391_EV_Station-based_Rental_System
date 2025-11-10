@@ -24,7 +24,7 @@ namespace BusinessLogicLayer.DTOs.Vehicles
         public string LicensePlate { get; set; } = string.Empty;
         public string? ImgCarUrl { get; set; }
         public bool IsAvailable { get; set; }
-        public int? BatteryCapacity { get; set; }
+        public decimal? BatteryCapacity { get; set; }
         public string Condition { get; set; } = string.Empty;
         public int CurrentMileage { get; set; }
         public int? ReleaseYear { get; set; }
