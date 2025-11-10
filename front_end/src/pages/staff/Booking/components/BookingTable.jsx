@@ -8,39 +8,56 @@ import { useStationStaff } from "@/hooks/useStationStaff";
 export default function BookingTable({ bookings = [], loading, onRefresh }) {
   const navigate = useNavigate();
   const { approveRentalOrder, rejectRentalOrder } = useStationStaff();
-  const [updatingId, setUpdatingId] = useState(null);
 
-  // 🔹 Xử lý Approve
+  // ✅ tách riêng 2 state
+  const [approvingId, setApprovingId] = useState(null);
+  const [rejectingId, setRejectingId] = useState(null);
+
+  // 🔹 Duyệt yêu cầu
   const handleApprove = async (record) => {
-    if (updatingId) return;
+    if (approvingId) return;
+
+    // ✅ THÊM DEBUG
+    console.log("🔍 Full record:", record);
+    console.log("🔍 record.orderId:", record.orderId);
+    console.log("🔍 Type of orderId:", typeof record.orderId);
+
+    setApprovingId(record.orderId);
 
     try {
-      setUpdatingId(record.orderId);
       await approveRentalOrder(record.orderId);
       message.success("✅ Đã duyệt yêu cầu booking!");
       setTimeout(() => onRefresh?.(), 500);
     } catch (error) {
       console.error("❌ Approve error:", error);
-      message.error("❌ Không thể duyệt yêu cầu!");
+      console.error("❌ Error response:", error.response?.data);
+      message.error("Không thể duyệt yêu cầu!");
     } finally {
-      setUpdatingId(null);
+      setApprovingId(null);
     }
   };
 
-  // 🔹 Xử lý Reject
+  // 🔹 Từ chối yêu cầu
   const handleReject = async (record) => {
-    if (updatingId) return;
+    if (rejectingId) return;
+
+    // ✅ THÊM DEBUG
+    console.log("🔍 Full record:", record);
+    console.log("🔍 record.orderId:", record.orderId);
+    console.log("🔍 Type of orderId:", typeof record.orderId);
+
+    setRejectingId(record.orderId);
 
     try {
-      setUpdatingId(record.orderId);
       await rejectRentalOrder(record.orderId);
-      message.success("✅ Đã từ chối yêu cầu booking!");
+      message.success("🚫 Đã từ chối yêu cầu booking!");
       setTimeout(() => onRefresh?.(), 500);
     } catch (error) {
       console.error("❌ Reject error:", error);
-      message.error("❌ Không thể từ chối yêu cầu!");
+      console.error("❌ Error response:", error.response?.data);
+      message.error("Không thể từ chối yêu cầu!");
     } finally {
-      setUpdatingId(null);
+      setRejectingId(null);
     }
   };
 
@@ -49,7 +66,9 @@ export default function BookingTable({ bookings = [], loading, onRefresh }) {
       title: "Mã đơn",
       dataIndex: "orderId",
       key: "orderId",
-      render: (id) => <span className="font-semibold text-blue-600">#{id}</span>,
+      render: (id) => (
+        <span className="font-semibold text-blue-600">#{id}</span>
+      ),
       width: 80,
     },
     {
@@ -70,9 +89,11 @@ export default function BookingTable({ bookings = [], loading, onRefresh }) {
       title: "Trạm (nhận → trả)",
       key: "stations",
       render: (_, record) => (
-        <span>{record.pickupStationName} → {record.returnStationName}</span>
+        <span>
+          {record.pickupStationName} → {record.returnStationName}
+        </span>
       ),
-      width: 200,
+      width: 220,
     },
     {
       title: "Thời gian thuê",
@@ -91,19 +112,18 @@ export default function BookingTable({ bookings = [], loading, onRefresh }) {
       key: "status",
       render: (status) => {
         const statusMap = {
-          BOOKED: { color: "blue", text: "Chờ duyệt"},
-          APPROVED: { color: "green", text: "Đã duyệt"},
+          BOOKED: { color: "blue", text: "Chờ duyệt" },
+          APPROVED: { color: "green", text: "Đã duyệt" },
           REJECTED: { color: "red", text: "Từ chối" },
           IN_PROGRESS: { color: "orange", text: "Đang thuê" },
           COMPLETED: { color: "cyan", text: "Hoàn tất" },
           CANCELLED: { color: "default", text: "Huỷ" },
         };
-        const statusInfo = statusMap[status] || { color: "default", text: "Không xác định" };
-        return (
-          <Tag color={statusInfo.color}>
-            {statusInfo.text}
-          </Tag>
-        );
+        const info = statusMap[status] || {
+          color: "default",
+          text: "Không xác định",
+        };
+        return <Tag color={info.color}>{info.text}</Tag>;
       },
       width: 140,
     },
@@ -123,18 +143,25 @@ export default function BookingTable({ bookings = [], loading, onRefresh }) {
             <Button
               type="text"
               icon={<EyeOutlined />}
-              onClick={() => navigate(`/staff/booking-detail/${record.orderId}`)}
-              disabled={updatingId === record.orderId}
+              onClick={(e) => {
+                e.stopPropagation();
+                navigate(`/staff/booking-detail/${record.orderId}`);
+              }}
+              disabled={
+                approvingId === record.orderId || rejectingId === record.orderId
+              }
             />
           </Tooltip>
 
-          {/* Chỉ hiển thị Approve/Reject khi status là BOOKED */}
           {record.status === "BOOKED" && (
             <>
               <Popconfirm
                 title="Duyệt yêu cầu?"
                 description="Bạn có chắc muốn duyệt đơn thuê này?"
-                onConfirm={() => handleApprove(record)}
+                onConfirm={(e) => {
+                  e?.stopPropagation();
+                  handleApprove(record);
+                }}
                 okText="Có"
                 cancelText="Không"
               >
@@ -142,17 +169,19 @@ export default function BookingTable({ bookings = [], loading, onRefresh }) {
                   type="primary"
                   icon={<CheckOutlined />}
                   size="small"
-                  loading={updatingId !== null}
-                  disabled={updatingId !== null}
+                  loading={approvingId === record.orderId}
+                  disabled={rejectingId === record.orderId}
                   style={{ backgroundColor: "#52c41a" }}
-                  title="Duyệt yêu cầu"
                 />
               </Popconfirm>
 
               <Popconfirm
                 title="Từ chối yêu cầu?"
                 description="Bạn có chắc muốn từ chối đơn thuê này?"
-                onConfirm={() => handleReject(record)}
+                onConfirm={(e) => {
+                  e?.stopPropagation();
+                  handleReject(record);
+                }}
                 okText="Có"
                 cancelText="Không"
               >
@@ -161,16 +190,15 @@ export default function BookingTable({ bookings = [], loading, onRefresh }) {
                   icon={<CloseOutlined />}
                   size="small"
                   danger
-                  loading={updatingId !== null}
-                  disabled={updatingId !== null}
-                  title="Từ chối yêu cầu"
+                  loading={rejectingId === record.orderId}
+                  disabled={approvingId === record.orderId}
                 />
               </Popconfirm>
             </>
           )}
         </Space>
       ),
-      width: 180,
+      width: 200,
     },
   ];
 
