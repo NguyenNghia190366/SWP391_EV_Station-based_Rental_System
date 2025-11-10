@@ -1,5 +1,6 @@
 import { use } from "react"
 import { useAxiosInstance } from "./useAxiosInstance"
+import { message, notification } from "antd";
 
 export const useRentalOrders = () => {
     const instance = useAxiosInstance();
@@ -14,5 +15,17 @@ export const useRentalOrders = () => {
         }
     }
 
-    return { getRentalOrdersByRenterId };
+    const createRentalOrder = async (orderData) => {
+        try {
+            const res = await instance.post(`/RentalOrders`, orderData);
+            notification({message: "Đã tạo đơn thuê thành công!", type: "success"});
+            return res.data;
+        } catch (error) {
+            console.log(error)
+            throw error;
+        }
+    }
+
+    return { getRentalOrdersByRenterId, createRentalOrder };
 }
+
