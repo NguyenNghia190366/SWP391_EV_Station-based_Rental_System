@@ -20,7 +20,7 @@ import { MapContainer, TileLayer, Marker, useMapEvents } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
 import L from "leaflet";
 import { useNavigate } from "react-router-dom";
-import { stationAPI } from "../../api/api";
+import { useStations } from "@/hooks/useStations";
 
 // 🗺️ Fix Leaflet marker icon issue
 delete L.Icon.Default.prototype._getIconUrl;
@@ -59,6 +59,7 @@ const StationRegistrationPage = () => {
   const [mapPosition, setMapPosition] = useState([10.7756, 106.7004]); // Saigon default
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+  const { create } = useStations();
 
   // 🎯 Lấy vị trí hiện tại từ GPS
   const handleGetCurrentLocation = () => {
@@ -105,7 +106,7 @@ const StationRegistrationPage = () => {
 
       console.log("📦 Formatted data:", stationData);
 
-      const result = await stationAPI.create(stationData);
+      const result = await create(stationData);
       console.log("✅ Station created:", result);
 
       Modal.success({

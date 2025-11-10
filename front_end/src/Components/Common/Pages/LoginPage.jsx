@@ -2,7 +2,9 @@ import React, { useState } from "react";
 import { Form, Input, Button, Card, Typography, Checkbox, Alert, message, Modal } from "antd";
 import { LockOutlined, MailOutlined, LoginOutlined } from "@ant-design/icons";
 import { Link, useNavigate } from "react-router-dom";
-import { userAPI } from "@/api/api";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+import { useUsers } from "@/hooks/useUsers";
 import { normalizeUserData } from "@/utils/normalizeData";
 import { useAxiosInstance } from "@/hooks/useAxiosInstance";
 
@@ -14,6 +16,7 @@ const LoginPage = () => {
   const [form] = Form.useForm();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const { loginUser } = useUsers();
 
   message.config({
     top: 80,
@@ -31,7 +34,7 @@ const LoginPage = () => {
       console.log("📤 Gửi request:", { email: normalizedEmail, password });
 
       const requestBody = { email: normalizedEmail, password };
-      const result = await userAPI.loginUser(requestBody);
+      const result = await loginUser(requestBody);
 
       console.log("📥 Kết quả API:", result);
 
@@ -110,15 +113,17 @@ const LoginPage = () => {
           ? "Chào buổi chiều"
           : "Chào buổi tối";
 
-      message.success(`${greeting}, ${normalizedUser.userName || normalizedUser.fullName}!`);
-      message.loading({ content: "Đang chuyển hướng...", duration: 1 });
+      toast.success(`${greeting}, ${normalizedUser.userName || normalizedUser.fullName}!`, {
+        position: "top-right",
+        autoClose: 2000,
+      });
 
       setTimeout(() => {
         const role = (normalizedUser?.role || "").toUpperCase();
         if (role === "ADMIN") navigate("/admin/dashboard");
-        else if (role === "STAFF") navigate("/staff/verification");
+        else if (role === "STAFF") navigate("/staff/dashboard");
         else navigate("/home");
-      }, 1000);
+      }, 1500);
     } catch (err) {
       console.error("❌ Login error:", err);
       let errorMessage = "Đăng nhập thất bại. Vui lòng thử lại!";
@@ -127,6 +132,7 @@ const LoginPage = () => {
       if (err.message?.includes("Network")) {
         errorMessage = "Không thể kết nối đến máy chủ.";
         errorTitle = "Lỗi kết nối";
+        toast.error(errorMessage, { position: "top-right", autoClose: 3000 });
       } else if (
         err.message?.toLowerCase().includes("invalid") ||
         err.message?.toLowerCase().includes("password") ||
@@ -134,31 +140,19 @@ const LoginPage = () => {
       ) {
         errorMessage = "Email hoặc mật khẩu không chính xác.";
         errorTitle = "Sai thông tin đăng nhập";
-        Modal.error({
-          title: errorTitle,
-          content: (
-            <div>
-              <p><strong>Email hoặc mật khẩu không đúng.</strong></p>
-              <ul>
-                <li>Kiểm tra định dạng email.</li>
-                <li>Kiểm tra mật khẩu có gõ nhầm không.</li>
-              </ul>
-            </div>
-          ),
-          okText: "Thử lại",
-        });
+        toast.error(errorMessage, { position: "top-right", autoClose: 3000 });
       } else if (err.message?.toLowerCase().includes("email")) {
         errorMessage = "Email không tồn tại trong hệ thống!";
         errorTitle = "Email không hợp lệ";
-        Modal.warning({
-          title: errorTitle,
-          content: "Email này chưa được đăng ký. Vui lòng đăng ký tài khoản mới.",
-          okText: "Đã hiểu",
-        });
-      } else if (err.message) errorMessage = err.message;
+        toast.error(errorMessage, { position: "top-right", autoClose: 3000 });
+      } else if (err.message) {
+        errorMessage = err.message;
+        toast.error(errorMessage, { position: "top-right", autoClose: 3000 });
+      } else {
+        toast.error(errorMessage, { position: "top-right", autoClose: 3000 });
+      }
 
       setError(errorMessage);
-      message.error(`❌ ${errorMessage}`);
     } finally {
       setLoading(false);
     }
@@ -166,6 +160,17 @@ const LoginPage = () => {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-100 p-4">
+      <ToastContainer
+        position="top-right"
+        autoClose={3000}
+        hideProgressBar={false}
+        newestOnTop={false}
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+      />
       <Card className="w-full max-w-md shadow rounded-lg bg-white relative z-10">
         <div className="text-center mb-6">
           <div className="inline-flex items-center justify-center w-16 h-16 bg-blue-600 rounded-full mb-3 shadow">

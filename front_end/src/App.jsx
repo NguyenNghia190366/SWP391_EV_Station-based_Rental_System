@@ -8,6 +8,7 @@ import ProfilePage from "./Components/Common/Profile/ProfilePage.jsx";
 // Renter
 import VehiclesPage from "./pages/renter/vehicles/VehiclesPage.jsx";
 import BookingRequestPage from "./pages/renter/booking/BookingRequestPage.jsx";
+import BookingFormPage from "./pages/renter/booking/BookingFormPage.jsx";
 import ContractPage from "./pages/renter/ContractPage.jsx";
 import PaymentPage from "./pages/renter/payment/PaymentPage.jsx";
 import VehiclePreviewNotification from "./pages/renter/VehiclePreviewNotification";
@@ -41,10 +42,13 @@ function App() {
 
         {/* Booking Flow Routes */}
         <Route
+          path="/booking/:vehicleId"
+          element={<BookingFormPage />}
+        />
+        <Route
           path="/booking-request/:vehicleId"
           element={<BookingRequestPage />}
         />
-        <Route path="/booking/:vehicleId" element={<ContractPage />} />
         <Route path="/contract/:vehicleId" element={<ContractPage />} />
         <Route path="/payment/:vehicleId" element={<PaymentPage />} />
 

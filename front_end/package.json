@@ -25,6 +25,7 @@
     "react-dom": "^19.1.1",
     "react-leaflet": "^5.0.0",
     "react-router-dom": "^6.30.1",
+    "react-toastify": "^11.0.5",
     "sonner": "^2.0.7"
   },
   "devDependencies": {

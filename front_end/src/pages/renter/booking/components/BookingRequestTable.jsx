@@ -1,8 +1,12 @@
 import React from "react";
-import { Table, Tag, Button, Space } from "antd";
+import { Table, Tag, Button, Space, message } from "antd";
 import { EyeOutlined, SendOutlined } from "@ant-design/icons";
 
 export default function BookingRequestsTable({ bookings, loading, onViewDetail }) {
+  const handleSendRequest = (record) => {
+    message.success("✅ Đã gửi yêu cầu đặt xe thành công!");
+  };
+
   const columns = [
     { title: "Mã Booking", dataIndex: "bookingId", key: "id" },
     {
@@ -33,7 +37,11 @@ export default function BookingRequestsTable({ bookings, loading, onViewDetail }
             Xem
           </Button>
           {record.status === "payment_completed" && (
-            <Button type="primary" icon={<SendOutlined />}>
+            <Button 
+              type="primary" 
+              icon={<SendOutlined />}
+              onClick={() => handleSendRequest(record)}
+            >
               Gửi ảnh
             </Button>
           )}
