@@ -20,7 +20,6 @@ public partial class Vehicle
     public int vehicle_model_id { get; set; }
 
     public int? release_year { get; set; }
-
     public int current_mileage { get; set; }
 
     [StringLength(255)]
