@@ -4,6 +4,7 @@ using BusinessLogicLayer.Interfaces;
 using DataAccessLayer;
 using DataAccessLayer.Models;
 using Microsoft.EntityFrameworkCore;
+using BusinessLogicLayer.Helpers.CurrentUserAccessor;
 
 namespace BusinessLogicLayer.Services
 {
@@ -11,11 +12,13 @@ namespace BusinessLogicLayer.Services
     {
         private readonly ApplicationDbContext _db;
         private readonly IMapper _mapper;
+        private readonly ICurrentUserAccessor _currentUser;
 
-        public RenterService(ApplicationDbContext db, IMapper mapper)
+        public RenterService(ApplicationDbContext db, IMapper mapper, ICurrentUserAccessor currentUser)
         {
             _db = db;
             _mapper = mapper;
+            _currentUser = currentUser;
         }
 
         // Implement các phương thức của IRenterService ở đây
@@ -36,12 +39,19 @@ namespace BusinessLogicLayer.Services
 
         public async Task<RenterDocumentsViewDto> GetMyDocumentsAsync(int userId)
         {
-            var (renter, cccd, dl) = await LoadDocumentsAsync(userId);
-            var dto = new RenterDocumentsViewDto();
+            if (_currentUser.UserId != userId)
+            {
+               throw new UnauthorizedAccessException("You can only view your own documents.");
+            }
 
+            var (renter, cccd, dl) = await LoadDocumentsAsync(userId);
+            
+            // (Giả định AutoMapper Profile của cậu đã được cập nhật
+            // để map 'UrlCccdCmndFront' (DTO) sang 'url_cccd_cmnd_front' (Model))
+            var dto = new RenterDocumentsViewDto();
             if (cccd != null) _mapper.Map(cccd, dto);
             if (dl != null) _mapper.Map(dl, dto);
-            // 3. Thêm trạng thái 'isVerified' từ Renter 
+            
             dto.IsVerified = renter.is_verified;
 
             return dto;
@@ -49,11 +59,17 @@ namespace BusinessLogicLayer.Services
         
         public async Task<RenterDocumentsViewDto> UpsertMyDocumentsAsync(int userId, RenterDocumentsUpsertDto dto)
         {
-            // 1. Lấy (Renter renter, ...) từ hàm đã sửa
-            var (renter, cccd, dl) = await LoadDocumentsAsync(userId);
-            var renterId = renter.renter_id; // Vẫn lấy renterId như cũ
+            // (Nếu cậu dùng CurrentUserAccessor, hãy thêm bước xác thực này)
+            if (_currentUser.UserId != userId)
+            {
+                
+               throw new UnauthorizedAccessException("You can only update your own documents.");
+            }
 
-            // 2. Logic tạo/cập nhật CCCD (như cũ)
+            var (renter, cccd, dl) = await LoadDocumentsAsync(userId);
+            var renterId = renter.renter_id;
+
+            // Logic tạo/cập nhật CCCD (AutoMapper sẽ map 4 trường: front, back, number)
             if (cccd == null)
             {
                 cccd = new CCCD { renter_id = renterId };
@@ -61,7 +77,7 @@ namespace BusinessLogicLayer.Services
             }
             _mapper.Map(dto, cccd); // Map từ DTO -> CCCD
 
-            // 3. Logic tạo/cập nhật Driver_License (như cũ)
+            // Logic tạo/cập nhật Driver_License (AutoMapper sẽ map 4 trường)
             if (dl == null)
             {
                 dl = new Driver_License { renter_id = renterId };
@@ -69,56 +85,39 @@ namespace BusinessLogicLayer.Services
             }
             _mapper.Map(dto, dl); // Map từ DTO -> Driver_License
 
-            // 4. ========== LOGIC MỚI ==========
-            // Bất kể Renter cập nhật/upload gì,
-            // tài khoản của họ phải được reset về "chưa xác thực" 
-            // để chờ Admin duyệt lại.
+            // Logic này vẫn đúng: Bất cứ khi nào upload, reset về chưa xác thực
             renter.is_verified = false;
 
-            // 5. SaveChanges sẽ lưu cả CCCD, Driver_License VÀ Renter
             await _db.SaveChangesAsync();
             
-            // 6. Trả về DTO
-            var view = new RenterDocumentsViewDto();
-            _mapper.Map(cccd, view); // Map CCCD -> View
-            _mapper.Map(dl, view);  // Map DL -> View
-            
-            // Thêm trạng thái isVerified HIỆN TẠI (đã là 'false') vào DTO
-            view.IsVerified = renter.is_verified; 
-
-            return view;
+            // Tối ưu: Gọi lại hàm Get để lấy DTO, thay vì map thủ công
+            return await GetMyDocumentsAsync(userId);
         }
 
         public async Task<bool> HasVerifiedDocumentsAsync(int userId)
         {
-            // 1. Lấy Renter và các giấy tờ liên quan
-            var renter = await _db.Renters
-                .Include(r => r.CCCD)
-                .Include(r => r.Driver_License)
-                // Thay vì lọc bằng renter_id, cậu lọc bằng user_id 
-                .SingleOrDefaultAsync(r => r.user_id == userId); 
+            var (renter, cccd, dl) = await LoadDocumentsAsync(userId);
 
-            // 2. Nếu không tìm thấy renter (tức là user này không phải Renter),
-            //    chắc chắn là false
             if (renter == null) 
             {
                 return false;
             }
 
-            // 3. Kiểm tra logic giấy tờ trong C# (an toàn)
-
-            // Kiểm tra CCCD: Phải tồn tại (khác null) VÀ 2 trường con không được rỗng
-            bool hasValidCccd = renter.CCCD != null 
-                                && !string.IsNullOrWhiteSpace(renter.CCCD.id_card_number)
-                                && !string.IsNullOrWhiteSpace(renter.CCCD.url_cccd_cmnd);
+            // === LOGIC MỚI: KIỂM TRA 4 ẢNH ===
+            // Kiểm tra CCCD: Phải tồn tại VÀ 3 trường con không được rỗng
+            bool hasValidCccd = cccd != null 
+                                && !string.IsNullOrWhiteSpace(cccd.id_card_number)
+                                && !string.IsNullOrWhiteSpace(cccd.url_cccd_cmnd_front) // <-- SỬA
+                                && !string.IsNullOrWhiteSpace(cccd.url_cccd_cmnd_back);  // <-- SỬA
 
             // Kiểm tra Driver License: Tương tự
-            bool hasValidDl = renter.Driver_License != null
-                            && !string.IsNullOrWhiteSpace(renter.Driver_License.driver_license_number)
-                            && !string.IsNullOrWhiteSpace(renter.Driver_License.url_driver_license);
+            bool hasValidDl = dl != null
+                            && !string.IsNullOrWhiteSpace(dl.driver_license_number)
+                            && !string.IsNullOrWhiteSpace(dl.url_driver_license_front) // <-- SỬA
+                            && !string.IsNullOrWhiteSpace(dl.url_driver_license_back);  // <-- SỬA
 
-            // 4. Trả về kết quả: Phải có cả 2
-            return hasValidCccd && hasValidDl;
+            // 4. Trả về kết quả: Phải có cả 2 VÀ renter phải được 'verified'
+            return hasValidCccd && hasValidDl && renter.is_verified;
         }
 
     }

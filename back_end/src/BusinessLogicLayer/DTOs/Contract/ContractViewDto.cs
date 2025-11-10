@@ -11,7 +11,10 @@ namespace BusinessLogicLayer.DTOs.Contract
         public DateTime SignedDate { get; set; }
         public string? ContractPdfUrl { get; set; }
 
-
+        // --- THÊM 2 DÒNG NÀY ĐỂ SỬA LỖI ---
+        public string? ContractRenterSigningimgUrl { get; set; }
+        public string? ContractOwnerSigningimgUrl { get; set; }
+        
        // --- Thông tin lồng nhau (Nested Info) ---
         public StaffBriefDto? StaffInfo { get; set; }
         public RenterBriefDto? RenterInfo { get; set; }
