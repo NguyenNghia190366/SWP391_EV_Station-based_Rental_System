@@ -22,6 +22,10 @@ public partial class Contract
 
     [StringLength(255)]
     public string? contract_pdf_url { get; set; }
+    
+    // THÊM 2 DÒNG MỚI NÀY:
+    public string? contract_renter_signingimg_url { get; set; }
+    public string? contract_owner_signingimg_url { get; set; }
 
     [ForeignKey("order_id")]
     [InverseProperty("Contract")]
