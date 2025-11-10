@@ -175,7 +175,7 @@ const VehiclesPage = () => {
         return;
       }
 
-      navigate(`/booking-request/${vehicleId}`);
+      navigate(`/booking/${vehicleId}`);
     } catch (error) {
       console.error("❌ Error checking renter verification:", error);
       alert("Có lỗi khi kiểm tra xác thực. Vui lòng thử lại.");

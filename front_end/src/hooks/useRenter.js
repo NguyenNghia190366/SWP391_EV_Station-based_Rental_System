@@ -85,6 +85,6 @@ export const useRenter = () => {
     },
     [getRenterIdByUserId]
   );
-
+  
   return { getRenterId, getRenterIdByUserId };
 };

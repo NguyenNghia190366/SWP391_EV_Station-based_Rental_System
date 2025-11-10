@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { stationAPI } from "@/api/api";
+import { useStations } from "@/hooks/useStations";
 import { findNearestStation } from "@/utils/geo";
 import { clearUserData } from "@/utils/auth";
 import BookingVerificationModal from "@/pages/renter/booking/BookingVerificationModal";
@@ -11,6 +11,7 @@ import NearbyStationsSuggestions from "@/components/common/Map/NearbyStationsSug
 const HomePage = () => {
   const navigate = useNavigate();
   const api = useAxiosInstance();
+  const { getAll, getNearest } = useStations();
 
   // ==== State ====
   const [user, setUser] = useState(null);
@@ -53,7 +54,7 @@ const HomePage = () => {
     let mounted = true;
     const fetchStations = async () => {
       try {
-        const stations = await stationAPI.getAll();
+        const stations = await getAll();
         if (mounted) {
           if (stations.length > 0) {
             console.log("Loaded stations from API:", stations.length);
@@ -72,7 +73,7 @@ const HomePage = () => {
     return () => {
       mounted = false;
     };
-  }, []);
+  }, [getAll]);
 
   // ==== Logout ====
   const handleLogout = () => {
@@ -99,7 +100,7 @@ const HomePage = () => {
         lng = pos.coords.longitude;
       }
       try {
-        const apiResult = await stationAPI.getNearest(lat, lng);
+        const apiResult = await getNearest(lat, lng);
         const station = apiResult?.station || apiResult;
         const distanceKm = apiResult?.distanceKm ?? apiResult?.distance ?? null;
         const payload = { station, distanceKm };

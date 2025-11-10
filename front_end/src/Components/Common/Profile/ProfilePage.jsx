@@ -5,14 +5,21 @@ import {
   EditOutlined, SaveOutlined, CloseOutlined, CarOutlined, LoadingOutlined
 } from "@ant-design/icons";
 import {
-  Button, Input, Card, Tag, Avatar, message, Modal, Spin, Menu
+  Button, Input, Card, Tag, Avatar, message, Modal, Spin, Menu, Table
 } from "antd";
-import { userAPI, driverLicenseVerifyAPI, cccdVerifyAPI } from "@/api/api";
+import dayjs from "dayjs";
+import { useUsers } from "@/hooks/useUsers";
+import { useDriverLicense } from "@/hooks/useDriverLicense";
+import { useCccd } from "@/hooks/useCccd";
+import { useAxiosInstance } from "@/hooks/useAxiosInstance";
+import { useRenters } from "@/hooks/useRenters";
 import VerifyPage from "@/pages/renter/VerifyPage";
 import OverviewPage from "@/pages/renter/OverviewPage";
 
 const ProfilePage = () => {
   const navigate = useNavigate();
+  const instance = useAxiosInstance();
+  const { getRenterIdByUserId } = useRenters();
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [selectedMenu, setSelectedMenu] = useState("overview");
@@ -24,6 +31,11 @@ const ProfilePage = () => {
   const [licenseImages, setLicenseImages] = useState([]);
   const [idCardImages, setIdCardImages] = useState([]);
   const [myBookings, setMyBookings] = useState([]);
+  const [bookingsLoading, setBookingsLoading] = useState(false);
+
+  const { updateProfile, uploadAvatar } = useUsers();
+  const { updateStatus: updateLicenseStatus } = useDriverLicense();
+  const { updateStatus: updateCcqdStatus } = useCccd();
 
   // ===== Load user =====
   useEffect(() => {
@@ -33,13 +45,65 @@ const ProfilePage = () => {
     setLoading(false);
   }, []);
 
+  // ===== Load rental history =====
+  useEffect(() => {
+    if (selectedMenu === "history" && user) {
+      fetchRentalHistory();
+    }
+  }, [selectedMenu, user]);
+
+  const fetchRentalHistory = async () => {
+    try {
+      setBookingsLoading(true);
+      const userId = localStorage.getItem("userId");
+      if (!userId) {
+        message.warning("Không tìm thấy userId!");
+        return;
+      }
+
+      const renterId = await getRenterIdByUserId(userId);
+      const [rentalOrdersRes, vehiclesRes, stationsRes] = await Promise.all([
+        instance.get(`/RentalOrders?renter_id=${renterId}`),
+        instance.get("/Vehicles"),
+        instance.get("/Stations"),
+      ]);
+
+      const rentalOrders = Array.isArray(rentalOrdersRes.data)
+        ? rentalOrdersRes.data
+        : rentalOrdersRes.data?.data || [];
+
+      const vehicles = Array.isArray(vehiclesRes.data)
+        ? vehiclesRes.data
+        : vehiclesRes.data?.data || [];
+
+      const stations = Array.isArray(stationsRes.data)
+        ? stationsRes.data
+        : stationsRes.data?.data || [];
+
+      const merged = rentalOrders.map((order) => ({
+        ...order,
+        vehicleName: vehicles.find((v) => v.vehicleId === order.vehicleId)?.vehicleName || `#${order.vehicleId}`,
+        pickupStationName: stations.find((s) => s.stationId === order.pickupStationId)?.stationName || `#${order.pickupStationId}`,
+        returnStationName: stations.find((s) => s.stationId === order.returnStationId)?.stationName || `#${order.returnStationId}`,
+      }));
+
+      setMyBookings(merged);
+    } catch (err) {
+      console.error("❌ Lỗi tải lịch sử thuê:", err);
+      message.error("Không thể tải lịch sử thuê!");
+    } finally {
+      setBookingsLoading(false);
+    }
+  };
+
   // ===== Update user =====
   const handleUpdateUser = async (updated) => {
     if (!updated.fullName?.trim()) return message.error("Vui lòng nhập họ tên!");
     if (!updated.email?.includes("@")) return message.error("Email không hợp lệ!");
     try {
+      const userId = user?.user_id || user?.userId;
       message.loading({ content: "Đang cập nhật...", key: "update" });
-      const res = await userAPI.updateUser(updated);
+      const res = await updateProfile(userId, updated);
       localStorage.setItem("currentUser", JSON.stringify(res));
       setUser(res);
       message.success({ content: "Cập nhật thành công!", key: "update" });
@@ -83,9 +147,11 @@ const ProfilePage = () => {
   const handleSubmitVerification = async (licenseFiles, idCardFiles) => {
     if (!licenseFiles?.length && !idCardFiles?.length)
       return message.warning("Vui lòng tải lên ít nhất 1 loại giấy tờ!");
+    const { uploadDriverLicense } = useDriverLicense();
+    const { uploadCccd } = useCccd();
     await Promise.all([
-      licenseFiles?.length && handleUploadFiles(licenseFiles, driverLicenseVerifyAPI.uploadLicense, "license"),
-      idCardFiles?.length && handleUploadFiles(idCardFiles, cccdVerifyAPI.uploadCCCD, "cccd")
+      licenseFiles?.length && handleUploadFiles(licenseFiles, uploadDriverLicense, "license"),
+      idCardFiles?.length && handleUploadFiles(idCardFiles, uploadCccd, "cccd")
     ]);
     message.success("Đã gửi giấy tờ xác thực!");
   };
@@ -142,13 +208,62 @@ const ProfilePage = () => {
   const renderHistory = () => (
     <Card className="shadow-lg">
       <h2 className="text-2xl font-bold mb-4 flex items-center gap-2"><ClockCircleOutlined />Lịch sử đặt xe</h2>
-      {myBookings.length > 0 ? (
-        myBookings.map((b, i) => (
-          <div key={i} className="p-3 border-b">
-            <b>{b.vehicle?.name}</b> – {b.startDate} → {b.endDate}
-            <Tag color={b.status === "completed" ? "green" : "blue"} className="ml-2">{b.status}</Tag>
-          </div>
-        ))
+      {bookingsLoading ? (
+        <Spin tip="Đang tải lịch sử..." />
+      ) : myBookings.length > 0 ? (
+        <Table
+          columns={[
+            {
+              title: "Mã đơn",
+              dataIndex: "orderId",
+              key: "orderId",
+              render: (id) => <span className="font-semibold text-blue-600">#{id}</span>,
+            },
+            {
+              title: "Xe",
+              dataIndex: "vehicleName",
+              key: "vehicleName",
+            },
+            {
+              title: "Trạm (nhận → trả)",
+              key: "stations",
+              render: (_, record) => (
+                <span>{record.pickupStationName} → {record.returnStationName}</span>
+              ),
+            },
+            {
+              title: "Thời gian thuê",
+              key: "rentalTime",
+              render: (_, record) => (
+                <span>
+                  {dayjs(record.startTime).format("DD/MM HH:mm")} →{" "}
+                  {dayjs(record.endTime).format("DD/MM HH:mm")}
+                </span>
+              ),
+            },
+            {
+              title: "Trạng thái",
+              dataIndex: "status",
+              key: "status",
+              render: (status) => {
+                const statusMap = {
+                  BOOKED: { color: "blue", text: "Chờ duyệt" },
+                  APPROVED: { color: "green", text: "Đã duyệt" },
+                  REJECTED: { color: "red", text: "Từ chối" },
+                  IN_USE: { color: "orange", text: "Đang sử dụng" },
+                  COMPLETED: { color: "cyan", text: "Hoàn tất" },
+                  CANCELLED: { color: "default", text: "Huỷ" },
+                };
+                const statusInfo = statusMap[status] || { color: "default", text: status };
+                return <Tag color={statusInfo.color}>{statusInfo.text}</Tag>;
+              },
+            },
+          ]}
+          dataSource={myBookings}
+          rowKey="orderId"
+          pagination={{ pageSize: 10 }}
+          size="small"
+        />
       ) : (
         <div className="text-center py-6">
           <CarOutlined style={{ fontSize: 40, color: "#bbb" }} />

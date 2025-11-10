@@ -1,31 +1,117 @@
-import { use } from "react"
-import { useAxiosInstance } from "./useAxiosInstance"
+import { useCallback } from "react";
+import { useAxiosInstance } from "./useAxiosInstance";
 import { message, notification } from "antd";
 
 export const useRentalOrders = () => {
-    const instance = useAxiosInstance();
-    // 🔹 1. Lấy danh sách đơn thuê theo renterId
-    const getRentalOrdersByRenterId = async (renterId) => {
-        try {
-            const res = await instance.get(`/RentalOrders?renter_id=${renterId}`);
-            return res.data;
-        } catch (error) {
-            console.error(`❌ Fetch Rental Orders for renterId=${renterId} failed:`, error);
-            throw error;
-        }
-    }
+  const instance = useAxiosInstance();
 
-    const createRentalOrder = async (orderData) => {
-        try {
-            const res = await instance.post(`/RentalOrders`, orderData);
-            notification({message: "Đã tạo đơn thuê thành công!", type: "success"});
-            return res.data;
-        } catch (error) {
-            console.log(error)
-            throw error;
-        }
-    }
+  // 🔹 1. Lấy danh sách đơn thuê theo renterId
+  const getRentalOrdersByRenterId = useCallback(
+    async (renterId) => {
+      try {
+        const res = await instance.get(`/RentalOrders?renter_id=${renterId}`);
+        return res.data;
+      } catch (error) {
+        console.error(
+          `❌ Fetch Rental Orders for renterId=${renterId} failed:`,
+          error
+        );
+        throw error;
+      }
+    },
+    [instance]
+  );
 
-    return { getRentalOrdersByRenterId, createRentalOrder };
-}
+  // 🔹 2. Tạo đơn thuê
+  const createRentalOrder = useCallback(
+    async (orderData) => {
+      try {
+        console.log("📤 POST /RentalOrders với data:", JSON.stringify(orderData, null, 2));
+        const res = await instance.post(`/RentalOrders`, orderData, {
+          headers: { "Content-Type": "application/json" },
+        });
+        console.log("✅ Response từ server:", res.data);
+        return res.data;
+      } catch (error) {
+        console.error("❌ Lỗi tạo đơn thuê:");
+        console.error("  Status:", error.response?.status);
+        console.error("  Response Data:", JSON.stringify(error.response?.data, null, 2));
+        console.error("  Error Message:", error.message);
+        console.error("  Full Error:", error);
+        
+        // Hiển thị chi tiết lỗi từ backend
+        const errorMsg = error.response?.data?.message || 
+                        error.response?.data?.error ||
+                        error.response?.data?.title ||
+                        "Không thể tạo đơn thuê. Vui lòng thử lại!";
+        
+        message.error(`❌ ${errorMsg}`);
+        throw error;
+      }
+    },
+    [instance]
+  );
 
+  // 🔹 3. Duyệt booking (Approve)
+  const approveRentalOrder = useCallback(
+    async (orderId, orderData) => {
+      try {
+        const res = await instance.put(`/RentalOrders/${orderId}`, {
+          ...orderData,
+          status: "APPROVED",
+        });
+        message.success("✅ Đã duyệt yêu cầu booking!");
+        return res.data;
+      } catch (error) {
+        console.error("❌ Lỗi approve:", error);
+        message.error("Không thể duyệt yêu cầu. Vui lòng thử lại!");
+        throw error;
+      }
+    },
+    [instance]
+  );
+
+  // 🔹 4. Từ chối booking (Reject)
+  const rejectRentalOrder = useCallback(
+    async (orderId, orderData) => {
+      try {
+        const res = await instance.put(`/RentalOrders/${orderId}`, {
+          ...orderData,
+          status: "REJECTED",
+        });
+        message.success("✅ Đã từ chối yêu cầu booking!");
+        return res.data;
+      } catch (error) {
+        console.error("❌ Lỗi reject:", error);
+        message.error("Không thể từ chối yêu cầu. Vui lòng thử lại!");
+        throw error;
+      }
+    },
+    [instance]
+  );
+
+  // 🔹 5. Cập nhật trạng thái booking
+  const updateRentalOrderStatus = useCallback(
+    async (orderId, status, orderData) => {
+      try {
+        const res = await instance.put(`/RentalOrders/${orderId}`, {
+          ...orderData,
+          status,
+        });
+        return res.data;
+      } catch (error) {
+        console.error("❌ Lỗi cập nhật trạng thái:", error);
+        throw error;
+      }
+    },
+    [instance]
+  );
+
+  return {
+    getRentalOrdersByRenterId,
+    createRentalOrder,
+    approveRentalOrder,
+    rejectRentalOrder,
+    updateRentalOrderStatus,
+  };
+};

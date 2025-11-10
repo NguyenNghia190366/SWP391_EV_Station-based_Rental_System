@@ -9,7 +9,7 @@ import {
   RocketOutlined,
 } from "@ant-design/icons";
 import { Link, useNavigate } from "react-router-dom";
-import { userAPI } from "@/api/api";
+import { useUsers } from "@/hooks/useUsers";
 
 const { Title, Text } = Typography;
 
@@ -17,6 +17,7 @@ const RegisterPage = () => {
   const [form] = Form.useForm();
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+  const { registerUser } = useUsers();
 
   const handleRegister = async (values) => {
     setLoading(true);
@@ -35,7 +36,7 @@ const RegisterPage = () => {
       };
 
       console.log("📝 Sending new user:", newUser);
-      const result = await userAPI.registerUser(newUser);
+      const result = await registerUser(newUser);
 
       if (result) {
         message.success("✅ Đăng ký thành công! Hãy đăng nhập để tiếp tục.");
