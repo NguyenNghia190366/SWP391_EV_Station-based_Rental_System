@@ -7,10 +7,7 @@ using BusinessLogicLayer.DTOs.Contract;
 using BusinessLogicLayer.DTOs.Staff;
 using BusinessLogicLayer.DTOs.Renter;
 using BusinessLogicLayer.DTOs.Vehicle;
-using BusinessLogicLayer.DTOs.FeeType;
-using BusinessLogicLayer.DTOs.ExtraFee;
 using BusinessLogicLayer.DTOs.Payment;
-// using BusinessLogicLayer.DTOs.Contract;
 
 namespace BusinessLogicLayer.Helpers
 {
@@ -19,7 +16,7 @@ namespace BusinessLogicLayer.Helpers
         public AutoMapperProfile()
         {
             // ========== VehicleModel ==========
-
+#region 
             // Map Create DTO -> Entity
             CreateMap<VehicleModelCreateDto, Vehicle_Model>()
                 .ForMember(dest => dest.brand_name, opt => opt.MapFrom(src => src.BrandName))
@@ -46,10 +43,10 @@ namespace BusinessLogicLayer.Helpers
                 .ForMember(dest => dest.Mileage, opt => opt.MapFrom(src => src.mileage))
                 // Rule 1.2: Lấy VehiclesCount
                 .ForMember(dest => dest.VehiclesCount, opt => opt.MapFrom(src => src.Vehicles.Count));
-
+#endregion
 
             // ==========  VEHICLE ==========
-
+#region 
             // Map cho các DTO lồng nhau
             CreateMap<Vehicle_Model, VehicleModelNestedDto>()
                 .ForMember(dest => dest.VehicleModelId, opt => opt.MapFrom(src => src.vehicle_model_id))
@@ -97,130 +94,113 @@ namespace BusinessLogicLayer.Helpers
 
             CreateMap<VehicleLocationUpdateDto, Vehicle>()
                 .ForMember(dest => dest.station_id, opt => opt.MapFrom(src => src.StationId));
-
+#endregion
 
             // ========== RentalOrder ==========
-
-            // Map DTO lồng nhau (Lấy thông tin User gán vào RenterNestedDto)
+#region 
+            // (Sửa DTO lồng nhau)
             CreateMap<Renter, RenterNestedDto>()
                 .ForMember(dest => dest.FullName, opt => opt.MapFrom(src => src.user.full_name))
                 .ForMember(dest => dest.Email, opt => opt.MapFrom(src => src.user.email));
 
-            // Map DTO lồng nhau cho Payment
-            CreateMap<Payment, PaymentNestedDto>();
+            // === SỬA DTO LỒNG NHAU PAYMENT ===
+            CreateMap<Payment, PaymentNestedDto>()
+                .ForMember(dest => dest.CreatedAt, opt => opt.MapFrom(src => src.created_at))
+                .ForMember(dest => dest.Description, opt => opt.MapFrom(src => src.descrition));
 
-            // 1. Map Create DTO -> Entity RentalOrder
+            // === TẠO DTO LỒNG NHAU STAFF ===
+            CreateMap<Staff, StaffNestedDto>()
+                .ForMember(dest => dest.FullName, opt => opt.MapFrom(src => src.user.full_name));
+
+            // === SỬA MAP CREATE DTO (Xóa DepositAmount) ===
             CreateMap<RentalOrderCreateDto, RentalOrder>()
                 .ForMember(dest => dest.vehicle_id, opt => opt.MapFrom(src => src.VehicleId))
                 .ForMember(dest => dest.pickup_station_id, opt => opt.MapFrom(src => src.PickupStationId))
                 .ForMember(dest => dest.return_station_id, opt => opt.MapFrom(src => src.ReturnStationId))
                 .ForMember(dest => dest.start_time, opt => opt.MapFrom(src => src.StartTime))
-                .ForMember(dest => dest.end_time, opt => opt.MapFrom(src => src.EndTime))
-                .ForMember(dest => dest.deposit_amount, opt => opt.MapFrom(src => src.DepositAmount));
+                .ForMember(dest => dest.end_time, opt => opt.MapFrom(src => src.EndTime));
+            // (Đã xóa deposit_amount)
 
-            // 2. Map Entity RentalOrder -> View DTO
+            // === SỬA MAP VIEW DTO (Thêm ảnh, staff; xóa trường cũ) ===
             CreateMap<RentalOrder, RentalOrderViewDto>()
                 .ForMember(dest => dest.OrderId, opt => opt.MapFrom(src => src.order_id))
                 .ForMember(dest => dest.Status, opt => opt.MapFrom(src => src.status))
                 .ForMember(dest => dest.PickupStation, opt => opt.MapFrom(src => src.pickup_station))
                 .ForMember(dest => dest.ReturnStation, opt => opt.MapFrom(src => src.return_station))
-                .ForMember(dest => dest.Payments, opt => opt.MapFrom(src => src.Payments));
-
+                .ForMember(dest => dest.Payments, opt => opt.MapFrom(src => src.Payments))
+                // Map Staff (CSDL Mới)
+                .ForMember(dest => dest.PickupStaff, opt => opt.MapFrom(src => src.pickup_staff))
+                .ForMember(dest => dest.ReturnStaff, opt => opt.MapFrom(src => src.return_staff))
+                // Map Ảnh (CSDL Mới) - Chuyển ICollection<Model> -> List<string>
+                .ForMember(dest => dest.ImgVehicleBefores, opt => opt.MapFrom(src => src.Img_Vehicle_Befores.Select(img => img.img_vehicle_before_URL)))
+                .ForMember(dest => dest.ImgVehicleAfters, opt => opt.MapFrom(src => src.Img_Vehicle_Afters.Select(img => img.img_vehicle_after_URL)));
+#endregion
+            
+            
             // ==========  CONTRACT ==========
-            // --- Mapping cho Contract ---
+#region
+            // (Giữ nguyên map Contract, StaffBrief, RenterBrief, VehicleBrief, RentalOrderBrief)
             CreateMap<Contract, ContractViewDto>()
-                // Map các DTO lồng nhau
+                // === THÊM MAP CHO CSDL MỚI ===
+                .ForMember(dest => dest.ContractRenterSigningimgUrl, opt => opt.MapFrom(src => src.contract_renter_signingimg_url))
+                .ForMember(dest => dest.ContractOwnerSigningimgUrl, opt => opt.MapFrom(src => src.contract_owner_signingimg_url))
+                // (Các map lồng nhau)
                 .ForMember(dest => dest.StaffInfo, opt => opt.MapFrom(src => src.staff))
                 .ForMember(dest => dest.RenterInfo, opt => opt.MapFrom(src => src.order.renter))
                 .ForMember(dest => dest.VehicleInfo, opt => opt.MapFrom(src => src.order.vehicle))
                 .ForMember(dest => dest.OrderInfo, opt => opt.MapFrom(src => src.order));
-
-            // --- Mapping cho các DTO tóm tắt (Brief) ---
-
-            // Staff -> StaffBriefDto
+            
             CreateMap<Staff, StaffBriefDto>()
                 .ForMember(dest => dest.FullName, opt => opt.MapFrom(src => src.user.full_name))
                 .ForMember(dest => dest.Email, opt => opt.MapFrom(src => src.user.email));
-
-            // Renter -> RenterBriefDto
             CreateMap<Renter, RenterBriefDto>()
                 .ForMember(dest => dest.FullName, opt => opt.MapFrom(src => src.user.full_name))
                 .ForMember(dest => dest.Email, opt => opt.MapFrom(src => src.user.email))
                 .ForMember(dest => dest.PhoneNumber, opt => opt.MapFrom(src => src.user.phone_number));
-
-            // Vehicle -> VehicleBriefDto
             CreateMap<Vehicle, VehicleBriefDto>()
                 .ForMember(dest => dest.BrandName, opt => opt.MapFrom(src => src.vehicle_model.brand_name))
                 .ForMember(dest => dest.ModelName, opt => opt.MapFrom(src => src.vehicle_model.model_name));
-
-            // RentalOrder -> RentalOrderBriefDto
-            // Các trường tên giống nhau, AutoMapper tự xử lý
             CreateMap<RentalOrder, RentalOrderBriefDto>();
-
-
-            // ========== FeeType (Admin) ==========
-            
-            // Map Create DTO -> Entity
-            CreateMap<FeeTypeCreateDto, FeeType>()
-                .ForMember(dest => dest.FeeType1, opt => opt.MapFrom(src => src.FeeType))
-                .ForMember(dest => dest.amount, opt => opt.MapFrom(src => src.Amount));
-            
-            // Map Update DTO -> Entity
-            CreateMap<FeeTypeUpdateDto, FeeType>()
-                .ForMember(dest => dest.FeeType1, opt => opt.MapFrom(src => src.FeeType))
-                .ForMember(dest => dest.amount, opt => opt.MapFrom(src => src.Amount));
-
-            // Map Entity -> View DTO
-            CreateMap<FeeType, FeeTypeViewDto>()
-                .ForMember(dest => dest.FeeTypeId, opt => opt.MapFrom(src => src.FeeType_id))
-                .ForMember(dest => dest.FeeType, opt => opt.MapFrom(src => src.FeeType1))
-                .ForMember(dest => dest.Amount, opt => opt.MapFrom(src => src.amount));
-
-            // ========== ExtraFee (Staff) ==========
-
-            // Map Create DTO -> Entity
-            CreateMap<ExtraFeeCreateDto, ExtraFee>()
-                .ForMember(dest => dest.order_id, opt => opt.MapFrom(src => src.OrderId))
-                .ForMember(dest => dest.FeeType_id, opt => opt.MapFrom(src => src.FeeTypeId))
-                .ForMember(dest => dest.description, opt => opt.MapFrom(src => src.Description));
-
-            // Map Entity -> View DTO (Mapping này phức tạp hơn, 
-            // vì cần join, tớ sẽ dùng 'Select' trong Service để rõ ràng)
+#endregion
 
 
             // ========== PAYMENT ==========
+#region 
             CreateMap<Payment, PaymentViewDto>()
                 .ForMember(dest => dest.PaymentId, opt => opt.MapFrom(src => src.payment_id))
                 .ForMember(dest => dest.OrderId, opt => opt.MapFrom(src => src.order_id))
                 .ForMember(dest => dest.Amount, opt => opt.MapFrom(src => src.amount))
                 .ForMember(dest => dest.PaymentMethod, opt => opt.MapFrom(src => src.payment_method))
-                .ForMember(dest => dest.PaymentDate, opt => opt.MapFrom(src => src.payment_date))
-                .ForMember(dest => dest.ExternalRef, opt => opt.MapFrom(src => src.external_ref));
+                .ForMember(dest => dest.CreatedAt, opt => opt.MapFrom(src => src.created_at)) // Sửa tên
+                .ForMember(dest => dest.FeeType, opt => opt.MapFrom(src => src.fee_type))     // Thêm
+                .ForMember(dest => dest.PaymentStatus, opt => opt.MapFrom(src => src.payment_status)) // Thêm
+                .ForMember(dest => dest.Description, opt => opt.MapFrom(src => src.descrition)); // Thêm
 
             // ========== CCCD & Driver License ==========
             // CCCD -> view
             CreateMap<CCCD, RenterDocumentsViewDto>()
-                .ForMember(d => d.IdCardNumber,      m => m.MapFrom(s => s.id_card_number))
-                .ForMember(d => d.IdCardImageUrl,    m => m.MapFrom(s => s.url_cccd_cmnd));
+                .ForMember(d => d.IdCardNumber, m => m.MapFrom(s => s.id_card_number))
+                .ForMember(d => d.UrlCccdCmndFront, m => m.MapFrom(s => s.url_cccd_cmnd_front)) // Sửa
+                .ForMember(d => d.UrlCccdCmndBack, m => m.MapFrom(s => s.url_cccd_cmnd_back));  // Thêm
 
-            // Driver_License -> view (merge ở service)
+            // Driver_License -> view
             CreateMap<Driver_License, RenterDocumentsViewDto>()
                 .ForMember(d => d.DriverLicenseNumber, m => m.MapFrom(s => s.driver_license_number))
-                .ForMember(d => d.DriverLicenseImageUrl, m => m.MapFrom(s => s.url_driver_license));
+                .ForMember(d => d.UrlDriverLicenseFront, m => m.MapFrom(s => s.url_driver_license_front)) // Sửa
+                .ForMember(d => d.UrlDriverLicenseBack, m => m.MapFrom(s => s.url_driver_license_back));  // Thêm
             
-            // 1. Map Upsert DTO -> CCCD (Dùng cho hàm PUT)
+            // 1. Map Upsert DTO -> CCCD
             CreateMap<RenterDocumentsUpsertDto, CCCD>()
-                .ForMember(dest => dest.id_card_number, 
-                           opt => opt.MapFrom(src => src.IdCardNumber))
-                .ForMember(dest => dest.url_cccd_cmnd, 
-                           opt => opt.MapFrom(src => src.IdCardImageUrl));
+                .ForMember(dest => dest.id_card_number, opt => opt.MapFrom(src => src.IdCardNumber))
+                .ForMember(dest => dest.url_cccd_cmnd_front, opt => opt.MapFrom(src => src.UrlCccdCmndFront)) // Sửa
+                .ForMember(dest => dest.url_cccd_cmnd_back, opt => opt.MapFrom(src => src.UrlCccdCmndBack));  // Thêm
 
-            // 2. Map Upsert DTO -> Driver_License (Dùng cho hàm PUT)
+            // 2. Map Upsert DTO -> Driver_License
             CreateMap<RenterDocumentsUpsertDto, Driver_License>()
-                .ForMember(dest => dest.driver_license_number, 
-                           opt => opt.MapFrom(src => src.DriverLicenseNumber))
-                .ForMember(dest => dest.url_driver_license, 
-                           opt => opt.MapFrom(src => src.DriverLicenseImageUrl));
+                .ForMember(dest => dest.driver_license_number, opt => opt.MapFrom(src => src.DriverLicenseNumber))
+                .ForMember(dest => dest.url_driver_license_front, opt => opt.MapFrom(src => src.UrlDriverLicenseFront)) // Sửa
+                .ForMember(dest => dest.url_driver_license_back, opt => opt.MapFrom(src => src.UrlDriverLicenseBack));  // Thêm
+#endregion
         }
     }
 }
