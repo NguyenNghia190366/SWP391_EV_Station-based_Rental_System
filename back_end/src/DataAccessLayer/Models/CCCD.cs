@@ -14,7 +14,9 @@ public partial class CCCD
     public int renter_id { get; set; }
 
     [StringLength(255)]
-    public string? url_cccd_cmnd { get; set; }
+    public string? url_cccd_cmnd_front { get; set; } // <-- Mặt trước 
+
+    public string? url_cccd_cmnd_back { get; set; } // <-- Mặt sau
 
     [StringLength(50)]
     public string id_card_number { get; set; } = null!;
