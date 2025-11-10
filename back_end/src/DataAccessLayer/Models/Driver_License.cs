@@ -14,7 +14,9 @@ public partial class Driver_License
     public int renter_id { get; set; }
 
     [StringLength(255)]
-    public string? url_driver_license { get; set; }
+    public string? url_driver_license_front { get; set; } // <-- Mặt trước
+
+    public string? url_driver_license_back { get; set; } // <-- Mặt sau
 
     [StringLength(50)]
     public string driver_license_number { get; set; } = null!;
