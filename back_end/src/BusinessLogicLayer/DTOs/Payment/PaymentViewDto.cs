@@ -10,8 +10,10 @@ namespace BusinessLogicLayer.DTOs.Payment
         public int PaymentId { get; set; }
         public int OrderId { get; set; }
         public decimal Amount { get; set; }
-        public string PaymentMethod { get; set; } = string.Empty; // "E-Wallet", "Cash" (bỏ "Card"  vì ko dùng)
-        public DateTime PaymentDate { get; set; }
-        public string ExternalRef { get; set; } = string.Empty; // Sẽ lưu TransId
+        public string PaymentMethod { get; set; } = string.Empty;
+        public DateTime CreatedAt { get; set; }
+        public string? FeeType { get; set; }
+        public string PaymentStatus { get; set; } = string.Empty;
+        public string? Description { get; set; }
     }
 }
