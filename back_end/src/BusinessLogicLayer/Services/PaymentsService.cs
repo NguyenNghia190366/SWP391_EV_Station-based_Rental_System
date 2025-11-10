@@ -1,6 +1,5 @@
 using System.Net;
 using System.Net.Http.Json;
-using System.Security.Cryptography;
 using System.Text;
 using AutoMapper;
 using AutoMapper.QueryableExtensions;
@@ -11,7 +10,6 @@ using BusinessLogicLayer.Interfaces;
 using DataAccessLayer;
 using DataAccessLayer.Models;
 using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 
@@ -47,27 +45,36 @@ namespace BusinessLogicLayer.Services
 
         public async Task<PaymentInitResponseDto> CreateMoMoPaymentRequestAsync(PaymentInitiationDto dto, int renterId)
         {
-            // 1. Tìm đơn hàng
             var order = await _context.RentalOrders
                 .FirstOrDefaultAsync(o => o.order_id == dto.OrderId);
 
             if (order == null)
+            {
                 throw new KeyNotFoundException("Không tìm thấy đơn hàng.");
-            
-            // 2. Xác thực chủ đơn hàng
-            if (order.renter_id != renterId)
-                throw new UnauthorizedAccessException("Bạn không có quyền thanh toán cho đơn hàng này.");
+            }
 
-            // 3. Kiểm tra trạng thái thanh toán
-            if (order.payment_status == "PAID")
-                throw new InvalidOperationException("Đơn hàng này đã được thanh toán.");
+            if (order.renter_id != renterId)
+            {
+                throw new UnauthorizedAccessException("Bạn không có quyền thanh toán cho đơn hàng này.");
+            } 
+
+            // Kiểm tra xem ĐÃ CỌC CHƯA (bằng cách check "sổ cái")
+            bool hasPaidDeposit = await _context.Payments.AnyAsync(p => 
+                p.order_id == dto.OrderId && 
+                p.payment_status == "PAID" && 
+                p.fee_type == "PAY");
+            
+            if (hasPaidDeposit)
+            {
+                throw new InvalidOperationException("Đơn hàng này đã được đặt cọc.");
+            }
 
             // 4. Chuẩn bị dữ liệu gửi MoMo
             string amount = order.deposit_amount.ToString("F0"); // MoMo yêu cầu string, không có phần thập phân
             string orderId = order.order_id.ToString() + "_" + Guid.NewGuid().ToString(); // Đảm bảo OrderId là duy nhất
             string requestId = Guid.NewGuid().ToString();
             string extraData = ""; // Có thể encode base64 nếu cần
-            string orderInfo = $"Thanh toan don hang {order.order_id}";
+            string orderInfo = $"Thanh toan coc don hang {order.order_id}";
 
             // 5. *** TẠO CHỮ KÝ (Signature) ***
             // Chuỗi raw (string) để tạo chữ ký
@@ -163,20 +170,23 @@ namespace BusinessLogicLayer.Services
                     .FirstOrDefaultAsync(o => o.order_id == orderId);
 
                 // 3. Kiểm tra tính toàn vẹn (Idempotency)
-                // Đảm bảo chúng ta không xử lý 1 đơn hàng 2 lần (nếu MoMo gọi IPN nhiều lần)
-                if (order != null && order.payment_status == "UNPAID")
-                {
-                    // a. Cập nhật RentalOrder
-                    order.payment_status = "PAID";
+                bool alreadyProcessed = await _context.Payments.AnyAsync(p =>
+                    p.order_id == orderId &&
+                    p.payment_status == "PAID" &&
+                    p.fee_type == "PAY"); // Check đúng loại thanh toán cọc
                     
+                if (order != null && !alreadyProcessed)
+                {
                     // b. TẠO RECORD PAYMENT (để đối soát)
                     var newPayment = new Payment
                     {
                         order_id = orderId,
                         amount = payload.Amount,
-                        payment_method = "E-Wallet", //
-                        payment_date = DateTime.UtcNow,
-                        external_ref = payload.TransId.ToString() // Lưu mã GD của MoMo
+                        payment_method = "E-Wallet",
+                        created_at = DateTime.UtcNow, // <-- SỬA TÊN
+                        fee_type = "PAY", // <-- THÊM MỚI (loại: thanh toán cọc)
+                        payment_status = "PAID", // <-- THÊM MỚI (trạng thái: đã trả)
+                        descrition = $"Thanh toan coc MoMo (TransId: {payload.TransId})" // <-- SỬA (lưu transId ở đây)
                     };
 
                     _context.Payments.Add(newPayment);
@@ -188,56 +198,6 @@ namespace BusinessLogicLayer.Services
                 // Thanh toán thất bại, log lại
                 // (Cậu có thể cập nhật status = "FAILED" nếu muốn)
             }
-        }
-
-        public async Task<IEnumerable<PaymentViewDto>> GetPaymentsForOrderAsync(int orderId)
-        {
-            // --- REFRACTOR 6: Dùng ProjectTo thay vì Select thủ công ---
-            // AutoMapper sẽ tự động dịch LINQ Select hiệu quả
-            return await _context.Payments
-                .AsNoTracking()
-                .Where(p => p.order_id == orderId)
-                .ProjectTo<PaymentViewDto>(_mapper.ConfigurationProvider) // Dùng ProjectTo
-                .ToListAsync();
-        }
-
-        // --- HÀM CHO THANH TOÁN TIỀN MẶT ---
-        public async Task<PaymentViewDto> CreateCashPaymentAsync(CashPaymentCreateDto dto, int staffId)
-        {
-            // 1. Tìm đơn hàng
-            var order = await _context.RentalOrders
-                .FirstOrDefaultAsync(o => o.order_id == dto.OrderId);
-
-            if (order == null)
-            {
-                throw new KeyNotFoundException($"Không tìm thấy đơn hàng ID {dto.OrderId}");
-            }
-
-            // 2. Kiểm tra nghiệp vụ
-            if (order.payment_status == "PAID")
-            {
-                throw new InvalidOperationException("Đơn hàng này đã được thanh toán.");
-            }
-
-            // 3. TẠO RECORD PAYMENT
-            var newPayment = new Payment
-            {
-                order_id = order.order_id,
-                amount = order.total_amount, // Lấy tổng tiền cuối cùng của đơn hàng
-                payment_method = "Cash",     //
-                payment_date = DateTime.UtcNow,
-                external_ref = $"Confirmed by Staff ID: {staffId}" // Dùng để audit
-            };
-
-            // 4. CẬP NHẬT TRẠNG THÁI ĐƠN HÀNG
-            order.payment_status = "PAID";
-
-            // 5. LƯU CẢ HAI THAY ĐỔI
-            _context.Payments.Add(newPayment);
-            await _context.SaveChangesAsync();
-            
-            // 6. Trả về PaymentViewDto (DÙNG AUTOMAPPER)
-            return _mapper.Map<PaymentViewDto>(newPayment);
         }
 
         // --- TRIỂN KHAI HÀM VNPAY 1: TẠO THANH TOÁN ---
@@ -333,7 +293,7 @@ namespace BusinessLogicLayer.Services
                 // Trả về mã lỗi cho VNPay (để họ không gửi lại)
                 return "{\"RspCode\":\"97\", \"Message\":\"Invalid Checksum\"}";
             }
-            
+
             // 3. Chữ ký hợp lệ -> Xử lý nghiệp vụ
             if (ipnDto.vnp_ResponseCode == "00") // 00 = Thành công
             {
@@ -352,31 +312,110 @@ namespace BusinessLogicLayer.Services
                 // 4. Kiểm tra (Idempotency)
                 if (order == null)
                     return "{\"RspCode\":\"01\", \"Message\":\"Order not found\"}";
-                
+
                 if (order.payment_status == "PAID")
                     return "{\"RspCode\":\"02\", \"Message\":\"Order already paid\"}";
-                
+
                 // 5. Cập nhật DB
-                order.payment_status = "PAID";
                 var newPayment = new Payment
                 {
                     order_id = orderId,
                     amount = ipnDto.vnp_Amount / 100, // Nhớ chia 100
                     payment_method = "E-Wallet",
-                    payment_date = DateTime.UtcNow,
-                    external_ref = ipnDto.vnp_TransactionNo.ToString()
+                    created_at = DateTime.UtcNow, // <-- SỬA TÊN
+                    fee_type = "PAY", // <-- THÊM MỚI
+                    payment_status = "PAID", // <-- THÊM MỚI
+                    descrition = $"Thanh toan coc VNPAY (TransId: {ipnDto.vnp_TransactionNo})" // <-- SỬA
                 };
 
                 _context.Payments.Add(newPayment);
                 await _context.SaveChangesAsync();
-                
+
                 // 6. Trả về 00 cho VNPay
                 return "{\"RspCode\":\"00\", \"Message\":\"Confirm Success\"}";
             }
-            
+
             // (Nếu thanh toán thất bại, không cần làm gì DB, 
             // nhưng vẫn báo 00 để VNPay không gửi lại)
             return "{\"RspCode\":\"00\", \"Message\":\"Confirm Success\"}";
+        }
+        
+        
+        
+
+        // --- HÀM CHO THANH TOÁN TIỀN MẶT ---
+
+        public async Task<IEnumerable<PaymentViewDto>> GetPaymentsForOrderAsync(int orderId)
+        {
+            return await _context.Payments
+                .AsNoTracking()
+                .Where(p => p.order_id == orderId)
+                .ProjectTo<PaymentViewDto>(_mapper.ConfigurationProvider) // Dùng ProjectTo
+                .ToListAsync();
+        }
+
+        // 6. HÀM MỚI: Staff "Ghi nợ" (Thêm phí phát sinh)
+        public async Task<PaymentViewDto> AddChargeAsync(StaffAddChargeDto dto, int staffId)
+        {
+            // 1. Kiểm tra đơn hàng
+            var orderExists = await _context.RentalOrders.AnyAsync(o => o.order_id == dto.OrderId);
+            if (!orderExists)
+            {
+                throw new KeyNotFoundException($"Không tìm thấy đơn hàng ID {dto.OrderId}");
+            }
+
+            // 2. Tra cứu loại phí
+            var feeType = await _context.ExtraFeeTypes
+                .AsNoTracking()
+                .FirstOrDefaultAsync(f => f.extra_fee_type_id == dto.ExtraFeeTypeId);
+
+            if (feeType == null)
+            {
+                throw new KeyNotFoundException($"Không tìm thấy loại phí ID {dto.ExtraFeeTypeId}");
+            }
+
+            // 3. Tạo record "Sổ cái" mới (Ghi nợ)
+            var newCharge = new Payment
+            {
+                order_id = dto.OrderId,
+                amount = feeType.amount, // Lấy số tiền từ loại phí
+                payment_method = "Cash", // Mặc định phí phát sinh trả bằng tiền mặt (hoặc E-Wallet)
+                created_at = DateTime.UtcNow,
+                fee_type = "PAY_BONUS_FEE", // Loại: Phí phát sinh
+                payment_status = "UNPAID",  // Trạng thái: CHƯA TRẢ
+                descrition = dto.Description ?? feeType.extra_fee_type_name // Ghi chú của Staff hoặc tên loại phí
+            };
+
+            _context.Payments.Add(newCharge);
+            await _context.SaveChangesAsync();
+
+            return _mapper.Map<PaymentViewDto>(newCharge);
+        }
+        
+        // 7. HÀM REFACTOR: Staff Xác nhận thanh toán tiền mặt (cho các khoản UNPAID)
+        public async Task<bool> ConfirmCashPaymentAsync(int orderId, int staffId)
+        {
+            // 1. Tìm tất cả các khoản CHƯA TRẢ của đơn hàng này
+            var unpaidCharges = await _context.Payments
+                .Where(p => p.order_id == orderId && p.payment_status == "UNPAID")
+                .ToListAsync();
+
+            if (!unpaidCharges.Any())
+            {
+                // Không có gì để thanh toán, hoặc đã thanh toán hết
+                return false; 
+            }
+
+            // 2. Lật trạng thái tất cả sang "PAID"
+            foreach (var charge in unpaidCharges)
+            {
+                charge.payment_status = "PAID";
+                charge.payment_method = "Cash";
+                charge.descrition += $". (Confirmed by StaffID: {staffId})";
+            }
+
+            await _context.SaveChangesAsync();
+            return true;
         }
     }
 }
