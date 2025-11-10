@@ -14,6 +14,9 @@ public partial class Notification
 
     public int user_id { get; set; }
 
+    // THÊM DÒNG MỚI NÀY:
+    public string type_notification { get; set; } = null!;
+
     public string message { get; set; } = null!;
 
     public bool is_read { get; set; }
