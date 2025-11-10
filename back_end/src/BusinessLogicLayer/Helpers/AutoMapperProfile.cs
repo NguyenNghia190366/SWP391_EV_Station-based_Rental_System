@@ -68,7 +68,7 @@ namespace BusinessLogicLayer.Helpers
                 .ForMember(dest => dest.vehicle_model_id, opt => opt.MapFrom(src => src.VehicleModelId))
                 .ForMember(dest => dest.station_id, opt => opt.MapFrom(src => src.StationId))
                 .ForMember(dest => dest.release_year, opt => opt.MapFrom(src => src.ReleaseYear))
-                .ForMember(dest => dest.battery_capacity, opt => opt.MapFrom(src => src.BatteryCapacity))
+                
                 .ForMember(dest => dest.current_mileage, opt => opt.MapFrom(src => src.CurrentMileage))
                 .ForMember(dest => dest.img_car_url, opt => opt.MapFrom(src => src.ImgCarUrl))
                 .ForMember(dest => dest.condition, opt => opt.MapFrom(src => src.Condition));
@@ -79,7 +79,7 @@ namespace BusinessLogicLayer.Helpers
                 .ForMember(dest => dest.LicensePlate, opt => opt.MapFrom(src => src.license_plate))
                 .ForMember(dest => dest.ImgCarUrl, opt => opt.MapFrom(src => src.img_car_url))
                 .ForMember(dest => dest.IsAvailable, opt => opt.MapFrom(src => src.is_available))
-                .ForMember(dest => dest.BatteryCapacity, opt => opt.MapFrom(src => src.battery_capacity))
+                .ForMember(dest => dest.BatteryCapacity, opt => opt.MapFrom(src => src.vehicle_model.battery_capacity))
                 .ForMember(dest => dest.Condition, opt => opt.MapFrom(src => src.condition))
                 .ForMember(dest => dest.CurrentMileage, opt => opt.MapFrom(src => src.current_mileage))
                 .ForMember(dest => dest.ReleaseYear, opt => opt.MapFrom(src => src.release_year))
@@ -92,7 +92,7 @@ namespace BusinessLogicLayer.Helpers
             CreateMap<VehicleStatusUpdateDto, Vehicle>()
                 .ForMember(dest => dest.condition, opt => opt.MapFrom(src => src.Condition))
                 .ForMember(dest => dest.is_available, opt => opt.MapFrom(src => src.IsAvailable))
-                .ForMember(dest => dest.battery_capacity, opt => opt.MapFrom(src => src.BatteryCapacity))
+                
                 .ForMember(dest => dest.current_mileage, opt => opt.MapFrom(src => src.CurrentMileage));
 
             CreateMap<VehicleLocationUpdateDto, Vehicle>()
