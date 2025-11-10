@@ -8,6 +8,7 @@ using BusinessLogicLayer.DTOs.Staff;
 using BusinessLogicLayer.DTOs.Renter;
 using BusinessLogicLayer.DTOs.Vehicle;
 using BusinessLogicLayer.DTOs.Payment;
+using BusinessLogicLayer.DTOs.Report;
 
 namespace BusinessLogicLayer.Helpers
 {
@@ -16,7 +17,7 @@ namespace BusinessLogicLayer.Helpers
         public AutoMapperProfile()
         {
             // ========== VehicleModel ==========
-#region 
+            #region 
             // Map Create DTO -> Entity
             CreateMap<VehicleModelCreateDto, Vehicle_Model>()
                 .ForMember(dest => dest.brand_name, opt => opt.MapFrom(src => src.BrandName))
@@ -43,10 +44,10 @@ namespace BusinessLogicLayer.Helpers
                 .ForMember(dest => dest.Mileage, opt => opt.MapFrom(src => src.mileage))
                 // Rule 1.2: Lấy VehiclesCount
                 .ForMember(dest => dest.VehiclesCount, opt => opt.MapFrom(src => src.Vehicles.Count));
-#endregion
+            #endregion
 
             // ==========  VEHICLE ==========
-#region 
+            #region 
             // Map cho các DTO lồng nhau
             CreateMap<Vehicle_Model, VehicleModelNestedDto>()
                 .ForMember(dest => dest.VehicleModelId, opt => opt.MapFrom(src => src.vehicle_model_id))
@@ -65,7 +66,7 @@ namespace BusinessLogicLayer.Helpers
                 .ForMember(dest => dest.vehicle_model_id, opt => opt.MapFrom(src => src.VehicleModelId))
                 .ForMember(dest => dest.station_id, opt => opt.MapFrom(src => src.StationId))
                 .ForMember(dest => dest.release_year, opt => opt.MapFrom(src => src.ReleaseYear))
-                
+
                 .ForMember(dest => dest.current_mileage, opt => opt.MapFrom(src => src.CurrentMileage))
                 .ForMember(dest => dest.img_car_url, opt => opt.MapFrom(src => src.ImgCarUrl))
                 .ForMember(dest => dest.condition, opt => opt.MapFrom(src => src.Condition));
@@ -89,15 +90,15 @@ namespace BusinessLogicLayer.Helpers
             CreateMap<VehicleStatusUpdateDto, Vehicle>()
                 .ForMember(dest => dest.condition, opt => opt.MapFrom(src => src.Condition))
                 .ForMember(dest => dest.is_available, opt => opt.MapFrom(src => src.IsAvailable))
-                
+
                 .ForMember(dest => dest.current_mileage, opt => opt.MapFrom(src => src.CurrentMileage));
 
             CreateMap<VehicleLocationUpdateDto, Vehicle>()
                 .ForMember(dest => dest.station_id, opt => opt.MapFrom(src => src.StationId));
-#endregion
+            #endregion
 
             // ========== RentalOrder ==========
-#region 
+            #region 
             // (Sửa DTO lồng nhau)
             CreateMap<Renter, RenterNestedDto>()
                 .ForMember(dest => dest.FullName, opt => opt.MapFrom(src => src.user.full_name))
@@ -134,11 +135,11 @@ namespace BusinessLogicLayer.Helpers
                 // Map Ảnh (CSDL Mới) - Chuyển ICollection<Model> -> List<string>
                 .ForMember(dest => dest.ImgVehicleBefores, opt => opt.MapFrom(src => src.Img_Vehicle_Befores.Select(img => img.img_vehicle_before_URL)))
                 .ForMember(dest => dest.ImgVehicleAfters, opt => opt.MapFrom(src => src.Img_Vehicle_Afters.Select(img => img.img_vehicle_after_URL)));
-#endregion
-            
-            
+            #endregion
+
+
             // ==========  CONTRACT ==========
-#region
+            #region
             // (Giữ nguyên map Contract, StaffBrief, RenterBrief, VehicleBrief, RentalOrderBrief)
             CreateMap<Contract, ContractViewDto>()
                 // === THÊM MAP CHO CSDL MỚI ===
@@ -149,7 +150,7 @@ namespace BusinessLogicLayer.Helpers
                 .ForMember(dest => dest.RenterInfo, opt => opt.MapFrom(src => src.order.renter))
                 .ForMember(dest => dest.VehicleInfo, opt => opt.MapFrom(src => src.order.vehicle))
                 .ForMember(dest => dest.OrderInfo, opt => opt.MapFrom(src => src.order));
-            
+
             CreateMap<Staff, StaffBriefDto>()
                 .ForMember(dest => dest.FullName, opt => opt.MapFrom(src => src.user.full_name))
                 .ForMember(dest => dest.Email, opt => opt.MapFrom(src => src.user.email));
@@ -188,7 +189,7 @@ namespace BusinessLogicLayer.Helpers
                 .ForMember(d => d.DriverLicenseNumber, m => m.MapFrom(s => s.driver_license_number))
                 .ForMember(d => d.UrlDriverLicenseFront, m => m.MapFrom(s => s.url_driver_license_front)) // Sửa
                 .ForMember(d => d.UrlDriverLicenseBack, m => m.MapFrom(s => s.url_driver_license_back));  // Thêm
-            
+
             // 1. Map Upsert DTO -> CCCD
             CreateMap<RenterDocumentsUpsertDto, CCCD>()
                 .ForMember(dest => dest.id_card_number, opt => opt.MapFrom(src => src.IdCardNumber))
@@ -201,6 +202,21 @@ namespace BusinessLogicLayer.Helpers
                 .ForMember(dest => dest.url_driver_license_front, opt => opt.MapFrom(src => src.UrlDriverLicenseFront)) // Sửa
                 .ForMember(dest => dest.url_driver_license_back, opt => opt.MapFrom(src => src.UrlDriverLicenseBack));  // Thêm
 #endregion
+
+            // ========== REPORT (CSDL MỚI) ==========
+#region             
+            CreateMap<Report, ReportViewDto>()
+                .ForMember(dest => dest.ReportId, opt => opt.MapFrom(src => src.report_id))
+                .ForMember(dest => dest.OrderId, opt => opt.MapFrom(src => src.order_id))
+                .ForMember(dest => dest.StaffId, opt => opt.MapFrom(src => src.staff_id))
+                .ForMember(dest => dest.Detail, opt => opt.MapFrom(src => src.detail))
+
+                // Map lồng nhau: Lấy tên Staff từ User
+                .ForMember(dest => dest.StaffName, opt => opt.MapFrom(src => src.staff.user.full_name))
+
+                // Map lồng nhau: Lấy danh sách URL ảnh (1-N)
+                .ForMember(dest => dest.ImageUrls, opt => opt.MapFrom(src => src.Report_EV_Imgs.Select(img => img.img_url)));
+ #endregion      
         }
     }
 }
