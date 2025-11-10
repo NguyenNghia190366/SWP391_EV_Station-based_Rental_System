@@ -22,10 +22,12 @@ public partial class Payment
     public string payment_method { get; set; } = null!;
 
     [Precision(3)]
-    public DateTime payment_date { get; set; }
-
-    [StringLength(255)]
-    public string? external_ref { get; set; }
+    public DateTime created_at { get; set; }
+    
+    // 3. THÊM CÁC DÒNG MỚI NÀY:
+    public string? fee_type { get; set; } // (PAY, PAY_BONUS_FEE, REFUND)
+    public string payment_status { get; set; } = null!; // (UNPAID, PAID)
+    public string? descrition { get; set; }
 
     [ForeignKey("order_id")]
     [InverseProperty("Payments")]
