@@ -17,24 +17,34 @@ namespace BusinessLogicLayer.Helpers
         public AutoMapperProfile()
         {
             // ========== VehicleModel ==========
-            #region 
+#region 
             // Map Create DTO -> Entity
             CreateMap<VehicleModelCreateDto, Vehicle_Model>()
                 .ForMember(dest => dest.brand_name, opt => opt.MapFrom(src => src.BrandName))
                 .ForMember(dest => dest.model_name, opt => opt.MapFrom(src => src.ModelName))
                 .ForMember(dest => dest.vehicle_color, opt => opt.MapFrom(src => src.VehicleColor))
                 .ForMember(dest => dest.number_of_seats, opt => opt.MapFrom(src => src.NumberOfSeats))
-                .ForMember(dest => dest.mileage, opt => opt.MapFrom(src => src.Mileage));
+                .ForMember(dest => dest.mileage, opt => opt.MapFrom(src => src.Mileage))
+                // --- THÊM 4 TRƯỜNG MỚI ---
+                .ForMember(dest => dest.type_of_battery, opt => opt.MapFrom(src => src.TypeOfBattery))
+                .ForMember(dest => dest.battery_capacity, opt => opt.MapFrom(src => src.BatteryCapacity))
+                .ForMember(dest => dest.price_per_hour, opt => opt.MapFrom(src => src.PricePerHour))
+                .ForMember(dest => dest.deposit, opt => opt.MapFrom(src => src.Deposit));
 
             // Map Update DTO -> Entity
             CreateMap<VehicleModelUpdateDto, Vehicle_Model>()
-               .ForMember(dest => dest.brand_name, opt => opt.MapFrom(src => src.BrandName))
-               .ForMember(dest => dest.model_name, opt => opt.MapFrom(src => src.ModelName))
-               .ForMember(dest => dest.vehicle_color, opt => opt.MapFrom(src => src.VehicleColor))
-               .ForMember(dest => dest.number_of_seats, opt => opt.MapFrom(src => src.NumberOfSeats))
-               .ForMember(dest => dest.mileage, opt => opt.MapFrom(src => src.Mileage));
+                .ForMember(dest => dest.brand_name, opt => opt.MapFrom(src => src.BrandName))
+                .ForMember(dest => dest.model_name, opt => opt.MapFrom(src => src.ModelName))
+                .ForMember(dest => dest.vehicle_color, opt => opt.MapFrom(src => src.VehicleColor))
+                .ForMember(dest => dest.number_of_seats, opt => opt.MapFrom(src => src.NumberOfSeats))
+                .ForMember(dest => dest.mileage, opt => opt.MapFrom(src => src.Mileage))
+                // --- THÊM 4 TRƯỜNG MỚI ---
+                .ForMember(dest => dest.type_of_battery, opt => opt.MapFrom(src => src.TypeOfBattery))
+                .ForMember(dest => dest.battery_capacity, opt => opt.MapFrom(src => src.BatteryCapacity))
+                .ForMember(dest => dest.price_per_hour, opt => opt.MapFrom(src => src.PricePerHour))
+                .ForMember(dest => dest.deposit, opt => opt.MapFrom(src => src.Deposit));
 
-            // Map Entity -> View DTO (Dùng cho GetByIdAsync và GetPagedAsync)
+            // Map Entity -> View DTO
             CreateMap<Vehicle_Model, VehicleModelViewDto>()
                 .ForMember(dest => dest.VehicleModelId, opt => opt.MapFrom(src => src.vehicle_model_id))
                 .ForMember(dest => dest.BrandName, opt => opt.MapFrom(src => src.brand_name))
@@ -42,9 +52,14 @@ namespace BusinessLogicLayer.Helpers
                 .ForMember(dest => dest.VehicleColor, opt => opt.MapFrom(src => src.vehicle_color))
                 .ForMember(dest => dest.NumberOfSeats, opt => opt.MapFrom(src => src.number_of_seats))
                 .ForMember(dest => dest.Mileage, opt => opt.MapFrom(src => src.mileage))
-                // Rule 1.2: Lấy VehiclesCount
+                // --- THÊM 4 TRƯỜNG MỚI ---
+                .ForMember(dest => dest.TypeOfBattery, opt => opt.MapFrom(src => src.type_of_battery))
+                .ForMember(dest => dest.BatteryCapacity, opt => opt.MapFrom(src => src.battery_capacity))
+                .ForMember(dest => dest.PricePerHour, opt => opt.MapFrom(src => src.price_per_hour))
+                .ForMember(dest => dest.Deposit, opt => opt.MapFrom(src => src.deposit))
+                // --- (VehiclesCount vẫn giữ nguyên) ---
                 .ForMember(dest => dest.VehiclesCount, opt => opt.MapFrom(src => src.Vehicles.Count));
-            #endregion
+#endregion
 
             // ==========  VEHICLE ==========
             #region 
@@ -201,10 +216,10 @@ namespace BusinessLogicLayer.Helpers
                 .ForMember(dest => dest.driver_license_number, opt => opt.MapFrom(src => src.DriverLicenseNumber))
                 .ForMember(dest => dest.url_driver_license_front, opt => opt.MapFrom(src => src.UrlDriverLicenseFront)) // Sửa
                 .ForMember(dest => dest.url_driver_license_back, opt => opt.MapFrom(src => src.UrlDriverLicenseBack));  // Thêm
-#endregion
+            #endregion
 
             // ========== REPORT (CSDL MỚI) ==========
-#region             
+            #region             
             CreateMap<Report, ReportViewDto>()
                 .ForMember(dest => dest.ReportId, opt => opt.MapFrom(src => src.report_id))
                 .ForMember(dest => dest.OrderId, opt => opt.MapFrom(src => src.order_id))
