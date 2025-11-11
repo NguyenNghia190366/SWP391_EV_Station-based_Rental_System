@@ -1,145 +1,130 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Security.Claims;
-using System.Threading.Tasks;
 using BusinessLogicLayer.DTOs.Payment;
 using BusinessLogicLayer.DTOs.Payment.VNPAY;
 using BusinessLogicLayer.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using BusinessLogicLayer.Helpers.CurrentUserAccessor; // <-- (1) Import helper
 
 namespace PresentationLayer.Controllers
 { 
     [Route("api/payments")]
     [ApiController]
-    
+    [Authorize] 
     public class PaymentsController : ControllerBase
     {
         private readonly IPaymentsService _paymentsService;
+        private readonly ICurrentUserAccessor _currentUser; // <-- (2) Thêm field
 
-        public PaymentsController(IPaymentsService paymentsService)
+        public PaymentsController(IPaymentsService paymentsService, ICurrentUserAccessor currentUser) // <-- (3) Inject
         {
             _paymentsService = paymentsService;
+            _currentUser = currentUser; // <-- (4) Gán giá trị
         }
 
-        // 1. Staff tạo thanh toán tiền mặt
-        [HttpPost("create-cash")]
-        [Authorize(Roles = "STAFF")] // Chỉ Staff
-        public async Task<IActionResult> CreateCashPayment([FromBody] CashPaymentCreateDto dto)
+        // === 1. Endpoint "Ghi nợ" ===
+        [HttpPost("add-charge")]
+        [Authorize(Roles = "STAFF")]
+        public async Task<IActionResult> AddCharge([FromBody] StaffAddChargeDto dto)
         {
             try
             {
-                // 1. Lấy Role Claim (để chắc chắn)
-                var roleClaim = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Role);
-                if (roleClaim == null || roleClaim.Value != "Staff")
+                // (5) Sửa logic lấy StaffId
+                var staffId = _currentUser.StaffId;
+                if (staffId == null)
                 {
-                    return Unauthorized("Token không hợp lệ hoặc không có quyền Staff.");
+                    throw new UnauthorizedAccessException("Token không hợp lệ hoặc không phải Staff.");
                 }
 
-                // 2. Lấy StaffId Claim
-                var staffIdClaim = User.Claims.FirstOrDefault(c => c.Type == "StaffId"); 
-                if (staffIdClaim == null)
-                {
-                    return Unauthorized("Token hợp lệ nhưng không tìm thấy StaffId.");
-                }
-                    
-                    int staffId = int.Parse(staffIdClaim.Value);
-
-                    var payment = await _paymentsService.CreateCashPaymentAsync(dto, staffId);
-                    return Ok(payment);
+                var newPaymentRecord = await _paymentsService.AddChargeAsync(dto, staffId.Value); // (Nhớ dùng .Value)
+                
+                return CreatedAtAction(nameof(GetPayments), new { orderId = newPaymentRecord.OrderId }, newPaymentRecord);
             }
-            catch (KeyNotFoundException ex)
-            {
-                return NotFound(new { message = ex.Message });
-            }
-            catch (UnauthorizedAccessException ex)
-            {
-                return Forbid(ex.Message);
-            }
-            catch (InvalidOperationException ex)
-            {
-                return BadRequest(new { message = ex.Message });
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, new { message = "Lỗi hệ thống: " + ex.Message });
-            }
+            catch (KeyNotFoundException ex) { return NotFound(new { message = ex.Message }); }
+            catch (UnauthorizedAccessException ex) { return Forbid(ex.Message); }
+            catch (Exception ex) { return StatusCode(500, new { message = "Lỗi hệ thống: " + ex.Message }); }
         }
 
-        // 2. Renter gọi để lấy link thanh toán
+        // === 2. Endpoint "Xác nhận tiền mặt" ===
+        [HttpPost("confirm-cash/{orderId}")]
+        [Authorize(Roles = "STAFF")]
+        public async Task<IActionResult> ConfirmCashPayment(int orderId)
+        {
+            try
+            {
+                // (5) Sửa logic lấy StaffId
+                var staffId = _currentUser.StaffId;
+                if (staffId == null)
+                {
+                    throw new UnauthorizedAccessException("Token không hợp lệ hoặc không phải Staff.");
+                }
+
+                var success = await _paymentsService.ConfirmCashPaymentAsync(orderId, staffId.Value);
+
+                if (!success)
+                {
+                    return BadRequest(new { message = "Không tìm thấy khoản nào chưa thanh toán cho đơn hàng này." });
+                }
+                
+                return Ok(new { message = "Tất cả các khoản đã được xác nhận thanh toán tiền mặt." });
+            }
+            catch (UnauthorizedAccessException ex) { return Forbid(ex.Message); }
+            catch (Exception ex) { return StatusCode(500, new { message = "Lỗi hệ thống: " + ex.Message }); }
+        }
+
+        // === 3. Renter gọi để lấy link thanh toán MoMo ===
         [HttpPost("create-momo")]
-        [Authorize(Roles = "RENTER")] // Chỉ Renter
+        [Authorize(Roles = "RENTER")] 
         public async Task<IActionResult> CreateMoMoPayment([FromBody] PaymentInitiationDto dto)
         {
             try
             {
-                // Lấy RenterId từ Token (HttpContext.User)
-                // Giả sử cậu lưu RenterId trong Claim "RenterId"
-                var renterIdClaim = User.Claims.FirstOrDefault(c => c.Type == "RenterId"); 
-                if (renterIdClaim == null)
+                // (5) Sửa logic lấy RenterId
+                var renterId = _currentUser.RenterId;
+                if (renterId == null)
                 {
-                    return Unauthorized("Token không hợp lệ hoặc không phải Renter.");
+                    throw new UnauthorizedAccessException("Token không hợp lệ hoặc không phải Renter.");
                 }
-                
-                int renterId = int.Parse(renterIdClaim.Value);
 
-                var response = await _paymentsService.CreateMoMoPaymentRequestAsync(dto, renterId);
+                var response = await _paymentsService.CreateMoMoPaymentRequestAsync(dto, renterId.Value);
                 return Ok(response);
             }
-            catch (KeyNotFoundException ex)
-            {
-                return NotFound(new { message = ex.Message });
-            }
-            catch (UnauthorizedAccessException ex)
-            {
-                return Forbid(ex.Message);
-            }
-            catch (InvalidOperationException ex)
-            {
-                return BadRequest(new { message = ex.Message });
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, new { message = "Lỗi hệ thống: " + ex.Message });
-            }
+            catch (KeyNotFoundException ex) { return NotFound(new { message = ex.Message }); }
+            catch (UnauthorizedAccessException ex) { return Forbid(ex.Message); }
+            catch (InvalidOperationException ex) { return BadRequest(new { message = ex.Message }); }
+            catch (Exception ex) { return StatusCode(500, new { message = "Lỗi hệ thống: " + ex.Message }); }
         }
 
-        // 3. MoMo gọi (Webhook/IPN)
+        // === 4. MoMo gọi (Webhook/IPN) (Giữ nguyên) ===
         [HttpPost("momo/ipn")]
-        [AllowAnonymous] // Phải AllowAnonymous vì đây là server MoMo gọi
+        [AllowAnonymous] 
         public async Task<IActionResult> HandleMomoIpn([FromBody] MomoIpnDto payload)
         {
-            // Đây là endpoint đã khai báo trong appsettings.json
             try
             {
                 await _paymentsService.ProcessMomoIpnAsync(payload);
-
-                // Phải trả về 204 (NoContent) hoặc 200 (Ok)
-                // để MoMo biết là đã nhận thành công và không gửi lại nữa.
-                return NoContent();
+                return NoContent(); 
             }
             catch (Exception ex)
             {
-                // Nếu lỗi, trả về 400/500 để MoMo biết và thử gửi lại IPN
-                return BadRequest(new { message = ex.Message });
+                return BadRequest(new { message = ex.Message }); 
             }
         }
         
-            // 4. --- ENDPOINT MỚI CHO VNPAY (RENTER GỌI) ---
+        // === 5. Renter gọi để lấy link VNPAY ===
         [HttpPost("create-vnpay")]
         [Authorize(Roles = "RENTER")]
         public async Task<IActionResult> CreateVnpayPayment([FromBody] PaymentInitiationDto dto)
         {
             try
             {
-                var renterIdClaim = User.Claims.FirstOrDefault(c => c.Type == "RenterId");
-                if (renterIdClaim == null) return Unauthorized("Token không hợp lệ.");
+                // (5) Sửa logic lấy RenterId
+                var renterId = _currentUser.RenterId;
+                if (renterId == null)
+                {
+                    throw new UnauthorizedAccessException("Token không hợp lệ hoặc không phải Renter.");
+                }
 
-                int renterId = int.Parse(renterIdClaim.Value);
-                
-                // (Phải truyền HttpContext vào Service)
-                var response = await _paymentsService.CreateVnpayPaymentRequestAsync(dto, renterId, HttpContext); 
+                var response = await _paymentsService.CreateVnpayPaymentRequestAsync(dto, renterId.Value, HttpContext); 
                 return Ok(response);
             }
             catch (Exception ex)
@@ -148,25 +133,22 @@ namespace PresentationLayer.Controllers
             }
         }
 
-        // 5. --- ENDPOINT MỚI CHO VNPAY (IPN GỌI) ---
-        [HttpGet("vnpay/ipn")] // VNPay gọi bằng GET (với Query String)
+        // === 6. VNPAY gọi (IPN) (Giữ nguyên) ===
+        [HttpGet("vnpay/ipn")] 
         [AllowAnonymous]
         public async Task<IActionResult> HandleVnpayIpn([FromQuery] VnpayIpnDto ipnDto)
         {
-            // VNPay yêu cầu trả về một chuỗi JSON đặc biệt,
-            // nên chúng ta không trả về Ok() hay NoContent()
-            
             string responseMessage = await _paymentsService.ProcessVnpayIpnAsync(ipnDto);
             return Content(responseMessage, "application/json");
         }
 
-        // 6. Renter/Staff xem lịch sử thanh toán
+        // === 7. Renter/Staff xem lịch sử thanh toán (Giữ nguyên) ===
         [HttpGet("order/{orderId}")]
         [Authorize(Roles = "RENTER, STAFF")]
         public async Task<IActionResult> GetPayments(int orderId)
         {
             var payments = await _paymentsService.GetPaymentsForOrderAsync(orderId);
             return Ok(payments);
-        }
+        }        
     }
 }
