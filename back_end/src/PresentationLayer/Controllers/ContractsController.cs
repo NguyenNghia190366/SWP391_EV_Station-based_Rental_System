@@ -26,20 +26,9 @@ namespace PresentationLayer.Controllers
         {
             try
             {
-                // Lấy staff_id từ token của nhân viên đang đăng nhập
-                var staffIdClaim = User.FindFirst("staffId"); // "staffId" là key cậu lưu trong token
+                // === (2) GỌI HÀM SERVICE MỚI (không cần staffId) ===
+                var newContract = await _contractsService.CreateContractAsync(createDto);
 
-                // Nếu không có staffId (ví dụ: Admin đăng nhập bằng userId), 
-                // ta cần 1 logic khác để tìm staff_id.
-                // Giả định đơn giản là token của Staff CÓ "staffId".
-                if (staffIdClaim == null || !int.TryParse(staffIdClaim.Value, out int staffId))
-                {
-                    return Unauthorized("Không thể xác thực Staff ID từ token.");
-                }
-
-                var newContract = await _contractsService.CreateContractAsync(createDto, staffId);
-
-                // Trả về 201 Created và link đến API GetById
                 return CreatedAtAction(nameof(GetContractById), new { id = newContract.ContractId }, newContract);
             }
             catch (KeyNotFoundException knfEx)
@@ -50,9 +39,12 @@ namespace PresentationLayer.Controllers
             {
                 return BadRequest(new { message = ioEx.Message });
             }
+            catch (UnauthorizedAccessException uaEx) // Bắt lỗi mới từ Service
+            {
+                return Forbid(uaEx.Message); // 403
+            }
             catch (Exception ex)
             {
-                // Lỗi server chung
                 return StatusCode(500, new { message = $"Lỗi máy chủ nội bộ: {ex.Message}" });
             }
         }
