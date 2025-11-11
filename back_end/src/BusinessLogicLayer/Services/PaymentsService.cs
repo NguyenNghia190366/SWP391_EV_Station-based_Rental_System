@@ -26,20 +26,20 @@ namespace BusinessLogicLayer.Services
         private readonly VnpaySettings _vnpaySettings;
 
         // Helpers
-         private readonly IHttpContextAccessor _httpContextAccessor;
+         // private readonly IHttpContextAccessor _httpContextAccessor;
 
         public PaymentsService(ApplicationDbContext context,
                                IOptions<MomoSettings> momoSettings,
                                IOptions<VnpaySettings> vnpaySettings,
                                IHttpClientFactory httpClientFactory,
-                               IMapper mapper,
-                               IHttpContextAccessor httpContextAccessor)
+                               IMapper mapper)
+                            //    IHttpContextAccessor httpContextAccessor)
         {
             _context = context;
             _momoSettings = momoSettings.Value;
             _vnpaySettings = vnpaySettings.Value;
             _httpClientFactory = httpClientFactory;
-            _httpContextAccessor = httpContextAccessor;
+            // _httpContextAccessor = httpContextAccessor;
             _mapper = mapper;
         }
 
@@ -342,7 +342,7 @@ namespace BusinessLogicLayer.Services
         
         
         
-
+        
         // --- HÀM CHO THANH TOÁN TIỀN MẶT ---
 
         public async Task<IEnumerable<PaymentViewDto>> GetPaymentsForOrderAsync(int orderId)
