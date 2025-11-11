@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useMemo, useCallback } from 'react';
 import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
@@ -66,9 +66,14 @@ function FlyTo({ position, zoom }) {
   return null;
 }
 
+// Debug counter for render tracking (optional - comment out after testing)
+let mapRenderCount = 0;
+
 const MapLeaflet = ({ stations = [], highlightedStation = null, height = '420px', zoom = 13, center = null, onFindNearest }) => {
+  mapRenderCount++;
+  console.log(`🔄 MapLeaflet render #${mapRenderCount}`, { stationsLen: stations?.length, highlightedId: highlightedStation?.id ?? highlightedStation?.station_id });
+  
   const [searchQuery, setSearchQuery] = useState('');
-  const [filteredStations, setFilteredStations] = useState(stations);
   const [locationInput, setLocationInput] = useState('');
   const [searchMode, setSearchMode] = useState('name'); // 'name' or 'location'
   const [isSearching, setIsSearching] = useState(false);
@@ -94,28 +99,27 @@ const MapLeaflet = ({ stations = [], highlightedStation = null, height = '420px'
   }, []);
   
   // Debug log
-  console.log('️ MapLeaflet - stations:', stations?.length, stations);
-  console.log('️ MapLeaflet - filteredStations:', filteredStations?.length, filteredStations);
+  // console.log('️ MapLeaflet - stations:', stations?.length, stations);
+  // console.log('️ MapLeaflet - filteredStations:', filteredStations?.length, filteredStations);
   
   const defaultCenter = center || (stations.length > 0 ? [stations[0].latitude || stations[0].lat, stations[0].longitude || stations[0].lng] : [10.762622, 106.660172]);
   const highlightedPos = highlightedStation ? [highlightedStation.latitude ?? highlightedStation.lat, highlightedStation.longitude ?? highlightedStation.lng] : null;
 
-  useEffect(() => {
+  // Memoize filtered stations to avoid recomputing on every render
+  const filteredStations = useMemo(() => {
     if (!searchQuery.trim()) {
-      setFilteredStations(stations);
-    } else {
-      const query = searchQuery.toLowerCase();
-      const filtered = stations.filter(s => {
-        const name = (s.station_name || s.name || s.stationName || '').toLowerCase();
-        const address = (s.address || '').toLowerCase();
-        return name.includes(query) || address.includes(query);
-      });
-      setFilteredStations(filtered);
+      return stations;
     }
+    const query = searchQuery.toLowerCase();
+    return stations.filter(s => {
+      const name = (s.station_name || s.name || s.stationName || '').toLowerCase();
+      const address = (s.address || '').toLowerCase();
+      return name.includes(query) || address.includes(query);
+    });
   }, [searchQuery, stations]);
 
   // Handle finding nearest station by current location
-  const handleUseMyLocation = async () => {
+  const handleUseMyLocation = useCallback(async () => {
     if (!onFindNearest) return;
     setIsSearching(true);
     try {
@@ -144,10 +148,10 @@ const MapLeaflet = ({ stations = [], highlightedStation = null, height = '420px'
       console.error('Location error:', err);
       setIsSearching(false);
     }
-  };
+  }, [onFindNearest]);
 
   // Handle finding by manual coordinates
-  const handleFindByCoords = async () => {
+  const handleFindByCoords = useCallback(async () => {
     if (!locationInput.trim() || !onFindNearest) return;
     
     setIsSearching(true);
@@ -167,7 +171,7 @@ const MapLeaflet = ({ stations = [], highlightedStation = null, height = '420px'
     } finally {
       setIsSearching(false);
     }
-  };
+  }, [locationInput, onFindNearest]);
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
@@ -405,4 +409,50 @@ const MapLeaflet = ({ stations = [], highlightedStation = null, height = '420px'
   );
 };
 
-export default MapLeaflet;
+export default React.memo(MapLeaflet, (prevProps, nextProps) => {
+  // Return true if props are equal (skip re-render)
+  // Return false if props differ (re-render)
+  
+  // Compare stations by id + coordinates (ignore array reference)
+  const prevStations = prevProps.stations || [];
+  const nextStations = nextProps.stations || [];
+  
+  if (prevStations.length !== nextStations.length) return false;
+  for (let i = 0; i < prevStations.length; i++) {
+    const ps = prevStations[i] || {};
+    const ns = nextStations[i] || {};
+    const pid = ps.id ?? ps.station_id ?? null;
+    const nid = ns.id ?? ns.station_id ?? null;
+    if (pid !== nid) return false;
+    const plat = ps.latitude ?? ps.lat ?? null;
+    const plng = ps.longitude ?? ps.lng ?? null;
+    const nlat = ns.latitude ?? ns.lat ?? null;
+    const nlng = ns.longitude ?? ns.lng ?? null;
+    if (plat !== nlat || plng !== nlng) return false;
+  }
+  
+  // Compare highlightedStation by id
+  const prevH = prevProps.highlightedStation;
+  const nextH = nextProps.highlightedStation;
+  if (prevH === nextH) {
+    // same reference
+  } else if (prevH == null && nextH == null) {
+    // both null
+  } else if (prevH == null || nextH == null) {
+    // one is null, one isn't
+    return false;
+  } else {
+    const pid = prevH.id ?? prevH.station_id ?? null;
+    const nid = nextH.id ?? nextH.station_id ?? null;
+    if (pid !== nid) return false;
+  }
+  
+  // Compare other scalar props
+  if (prevProps.height !== nextProps.height) return false;
+  if (prevProps.zoom !== nextProps.zoom) return false;
+  if (prevProps.center !== nextProps.center) return false;
+  
+  // onFindNearest is a function, we'll ignore identity changes
+  
+  return true; // Props are equal, skip re-render
+});

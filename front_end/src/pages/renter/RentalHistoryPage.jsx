@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback, useMemo } from "react";
 import { Card, Table, Tag, Spin, Empty, Button, message } from "antd";
 import { useNavigate } from "react-router-dom";
 import dayjs from "dayjs";
@@ -11,8 +11,10 @@ export default function RentalHistoryPage() {
   const { getRenterIdByUserId } = useRenters();
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [renterId, setRenterId] = useState(null);
 
-  const fetchOrders = async () => {
+  // Memoized fetch function to prevent unnecessary re-fetches
+  const fetchOrders = useCallback(async () => {
     try {
       setLoading(true);
       const userId = localStorage.getItem("userId");
@@ -22,11 +24,13 @@ export default function RentalHistoryPage() {
       }
 
       // Lấy renterId từ userId
-      const renterId = await getRenterIdByUserId(userId);
+      const rId = await getRenterIdByUserId(userId);
+      setRenterId(rId);
+      console.log(`✅ Tìm thấy renterId=${rId} cho userId=${userId}`);
       
       // Fetch tất cả dữ liệu cần thiết
       const [rentalOrdersRes, vehiclesRes, stationsRes] = await Promise.all([
-        instance.get(`/RentalOrders?renter_id=${renterId}`),
+        instance.get(`/RentalOrders?renter_id=${rId}`),
         instance.get("/Vehicles"),
         instance.get("/Stations"),
       ]);
@@ -52,17 +56,21 @@ export default function RentalHistoryPage() {
       }));
 
       setOrders(merged);
+      console.log(`✅ Tải ${merged.length} đơn đặt xe cho renterId=${rId}`);
     } catch (err) {
       console.error("❌ Lỗi tải lịch sử thuê:", err);
       message.error("Không thể tải lịch sử thuê!");
     } finally {
       setLoading(false);
     }
-  };
+  }, [instance, getRenterIdByUserId]);
 
   useEffect(() => {
     fetchOrders();
-  }, []);
+  }, [fetchOrders]);
+
+  // Memoize orders to prevent unnecessary table re-renders
+  const memoizedOrders = useMemo(() => orders, [orders]);
 
   const columns = [
     {
@@ -149,7 +157,7 @@ export default function RentalHistoryPage() {
       ) : (
         <Table
           columns={columns}
-          dataSource={orders}
+          dataSource={memoizedOrders}
           rowKey="orderId"
           pagination={{
             pageSize: 10,

@@ -4,6 +4,7 @@ import { LockOutlined, MailOutlined, LoginOutlined } from "@ant-design/icons";
 import { Link, useNavigate } from "react-router-dom";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import * as yup from 'yup';
 import { useUsers } from "@/hooks/useUsers";
 import { normalizeUserData } from "@/utils/normalizeData";
 import { useAxiosInstance } from "@/hooks/useAxiosInstance";
@@ -26,6 +27,20 @@ const LoginPage = () => {
 
   const handleSubmit = async (values) => {
     const { email, password } = values;
+    // Yup validation (extra layer) - map errors to form
+    const schema = yup.object({
+      email: yup.string().required('Vui lòng nhập email!').email('Email không hợp lệ!'),
+      password: yup.string().required('Vui lòng nhập mật khẩu!').min(6, 'Mật khẩu phải có ít nhất 6 ký tự!'),
+    });
+    try {
+      await schema.validate(values, { abortEarly: false });
+    } catch (err) {
+      if (err.name === 'ValidationError') {
+        const fields = err.inner.map(e => ({ name: e.path, errors: [e.message] }));
+        form.setFields(fields);
+        return;
+      }
+    }
     setLoading(true);
     setError("");
 

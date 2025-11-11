@@ -20,11 +20,11 @@ export default function BookingTable({ bookings = [], loading, onRefresh }) {
     setApprovingId(record.orderId);
 
     try {
-      await approveRentalOrder(record);
-      message.success("✅ Đã duyệt yêu cầu booking!");
+      await approveRentalOrder(record.orderId);
+      message.success("Đã duyệt yêu cầu booking!");
       setTimeout(() => onRefresh?.(), 500);
     } catch (error) {
-      console.error("❌ Approve error:", error);
+      console.error("Approve error:", error);
     } finally {
       setApprovingId(null);
     }
@@ -37,7 +37,7 @@ export default function BookingTable({ bookings = [], loading, onRefresh }) {
     setRejectingId(record.orderId);
 
     try {
-      await rejectRentalOrder(record);
+      await rejectRentalOrder(record.orderId);
       message.success("Đã từ chối yêu cầu booking!");
       setTimeout(() => onRefresh?.(), 500);
     } catch (error) {

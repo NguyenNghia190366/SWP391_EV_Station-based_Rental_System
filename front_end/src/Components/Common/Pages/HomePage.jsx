@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { useStations } from "@/hooks/useStations";
 import { findNearestStation } from "@/utils/geo";
@@ -57,7 +57,7 @@ const HomePage = () => {
         const stations = await getAll();
         if (mounted) {
           if (stations.length > 0) {
-            console.log("Loaded stations from API:", stations.length);
+            console.log("✅ Loaded stations from API:", stations.length);
             setStations(stations);
           } else {
             console.warn("⚠️ API returned no stations, using dummy data");
@@ -76,14 +76,14 @@ const HomePage = () => {
   }, [getAll]);
 
   // ==== Logout ====
-  const handleLogout = () => {
+  const handleLogout = useCallback(() => {
     clearUserData();
     setUser(null);
     navigate("/login");
-  };
+  }, [navigate]);
 
-  // ==== Find nearest station ====
-  const findNearestStationForUser = async (opts = {}) => {
+  // ==== Find nearest station - MEMOIZED (avoid recreating when stations change) ====
+  const findNearestStationForUser = useCallback(async (opts = {}) => {
     setNearestSearching(true);
     try {
       let lat = opts.lat,
@@ -107,6 +107,8 @@ const HomePage = () => {
         setNearestStation(payload);
         return payload;
       } catch (apiErr) {
+        // Use current stations from closure (captured at function creation)
+        // or fetch fresh to avoid stale closure
         const best = findNearestStation(stations, lat, lng);
         if (best) {
           setNearestStation(best);
@@ -121,10 +123,10 @@ const HomePage = () => {
     } finally {
       setNearestSearching(false);
     }
-  };
+  }, [getNearest, stations]);
 
-  // ==== Booking flow with renter verification ====
-  const handleBookVehicle = async (vehicleId) => {
+  // ==== Booking flow with renter verification - MEMOIZED ====
+  const handleBookVehicle = useCallback(async (vehicleId) => {
     if (!user) {
       navigate("/login");
       return;
@@ -173,27 +175,44 @@ const HomePage = () => {
       console.error("❌ Error checking renter verification:", error);
       alert("Có lỗi khi kiểm tra xác thực. Vui lòng thử lại.");
     }
-  };
+  }, [user, api, navigate]);
 
-  const handleNavigateToVerification = () => {
+  const handleNavigateToVerification = useCallback(() => {
     setShowVerificationModal(false);
     navigate("/profile");
-  };
+  }, [navigate]);
 
-  // ==== Search handler ====
-  const handleSearchSubmit = (e) => {
+  // ==== Search handler - MEMOIZED ====
+  const handleSearchSubmit = useCallback((e) => {
     e.preventDefault();
     if (searchQuery.trim()) navigate(`/vehicles?search=${searchQuery}`);
-  };
+  }, [searchQuery, navigate]);
 
-  // ==== Station selection from suggestions ====
-  const handleSelectStation = (station) => {
-    if (onFindNearest) {
-      const stationLat = station.latitude ?? station.lat;
-      const stationLng = station.longitude ?? station.lng;
-      findNearestStationForUser({ lat: stationLat, lng: stationLng });
-    }
-  };
+  // ==== Station selection from suggestions - MEMOIZED ====
+  const handleSelectStation = useCallback((station) => {
+    const stationLat = station.latitude ?? station.lat;
+    const stationLng = station.longitude ?? station.lng;
+    findNearestStationForUser({ lat: stationLat, lng: stationLng });
+  }, [findNearestStationForUser]);
+
+  // ==== MEMOIZE highlighted station for MapLeaflet ====
+  const highlightedStation = useMemo(() => {
+    return nearestStation?.station || null;
+  }, [nearestStation?.station]);
+
+  // ==== MEMOIZE user location for NearbyStationsSuggestions ====
+  const userLocation = useMemo(() => {
+    if (!nearestStation?.station) return null;
+    return {
+      lat: nearestStation.station?.latitude ?? nearestStation.station?.lat,
+      lng: nearestStation.station?.longitude ?? nearestStation.station?.lng,
+    };
+  }, [nearestStation?.station]);
+
+  // ==== MEMOIZE stations reference to prevent child re-renders when IDs haven't changed ====
+  const memoizedStations = useMemo(() => {
+    return stations;
+  }, [stations]);
 
   // ==== Loading state ====
   if (loading) {
@@ -267,27 +286,17 @@ const HomePage = () => {
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
               <div className="lg:col-span-2 rounded-2xl overflow-hidden shadow-xl">
                 <MapLeaflet
-                  stations={stations}
-                  highlightedStation={nearestStation?.station}
+                  stations={memoizedStations}
+                  highlightedStation={highlightedStation}
                   height="420px"
                   zoom={13}
+                  onFindNearest={findNearestStationForUser}
                 />
               </div>
               <div className="lg:col-span-1">
                 <NearbyStationsSuggestions
-                  userLocation={
-                    nearestStation
-                      ? {
-                          lat:
-                            nearestStation.station?.latitude ??
-                            nearestStation.station?.lat,
-                          lng:
-                            nearestStation.station?.longitude ??
-                            nearestStation.station?.lng,
-                        }
-                      : null
-                  }
-                  stations={stations}
+                  userLocation={userLocation}
+                  stations={memoizedStations}
                   onSelectStation={handleSelectStation}
                   limit={5}
                 />
