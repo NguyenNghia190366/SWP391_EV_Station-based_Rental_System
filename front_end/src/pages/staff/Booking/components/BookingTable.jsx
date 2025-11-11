@@ -17,21 +17,14 @@ export default function BookingTable({ bookings = [], loading, onRefresh }) {
   const handleApprove = async (record) => {
     if (approvingId) return;
 
-    // ✅ THÊM DEBUG
-    console.log("🔍 Full record:", record);
-    console.log("🔍 record.orderId:", record.orderId);
-    console.log("🔍 Type of orderId:", typeof record.orderId);
-
     setApprovingId(record.orderId);
 
     try {
-      await approveRentalOrder(record.orderId);
+      await approveRentalOrder(record);
       message.success("✅ Đã duyệt yêu cầu booking!");
       setTimeout(() => onRefresh?.(), 500);
     } catch (error) {
       console.error("❌ Approve error:", error);
-      console.error("❌ Error response:", error.response?.data);
-      message.error("Không thể duyệt yêu cầu!");
     } finally {
       setApprovingId(null);
     }
@@ -41,21 +34,14 @@ export default function BookingTable({ bookings = [], loading, onRefresh }) {
   const handleReject = async (record) => {
     if (rejectingId) return;
 
-    // ✅ THÊM DEBUG
-    console.log("🔍 Full record:", record);
-    console.log("🔍 record.orderId:", record.orderId);
-    console.log("🔍 Type of orderId:", typeof record.orderId);
-
     setRejectingId(record.orderId);
 
     try {
-      await rejectRentalOrder(record.orderId);
-      message.success("🚫 Đã từ chối yêu cầu booking!");
+      await rejectRentalOrder(record);
+      message.success("Đã từ chối yêu cầu booking!");
       setTimeout(() => onRefresh?.(), 500);
     } catch (error) {
-      console.error("❌ Reject error:", error);
-      console.error("❌ Error response:", error.response?.data);
-      message.error("Không thể từ chối yêu cầu!");
+      console.error("Reject error:", error);
     } finally {
       setRejectingId(null);
     }
