@@ -1,8 +1,7 @@
-using System;
-using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace DataAccessLayer.Models;
-
+[Table("Report")]
 public partial class Report
 {
     public Report()

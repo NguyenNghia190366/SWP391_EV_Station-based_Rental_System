@@ -1,5 +1,8 @@
+using System.ComponentModel.DataAnnotations.Schema;
+
 namespace DataAccessLayer.Models;
 
+[Table("ExtraFeeType")]
 public partial class ExtraFeeType
 {
     public int extra_fee_type_id { get; set; }

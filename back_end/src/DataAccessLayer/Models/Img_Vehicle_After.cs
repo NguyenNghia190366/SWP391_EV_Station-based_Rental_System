@@ -1,5 +1,8 @@
+using System.ComponentModel.DataAnnotations.Schema;
+
 namespace DataAccessLayer.Models;
 
+[Table("Img_Vehicle_After")]
 public partial class Img_Vehicle_After
 {
     public int img_after_ID { get; set; }

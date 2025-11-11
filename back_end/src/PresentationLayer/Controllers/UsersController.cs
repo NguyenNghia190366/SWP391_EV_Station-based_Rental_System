@@ -112,32 +112,15 @@ namespace PresentationLayer.Controllers
         /// <summary>
         /// Lấy thông tin profile của người dùng đang đăng nhập.
         /// </summary>
-        /// <returns>Thông tin chi tiết profile</returns>
-        [HttpGet("profile")] // Tạo endpoint -> GET /api/users/me
+        [HttpGet("profile")]
         [ProducesResponseType(typeof(UserProfileDto), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        [ProducesResponseType(StatusCodes.Status401Unauthorized)] // Do [Authorize]
         public async Task<ActionResult<UserProfileDto>> GetMyProfile()
         {
-            // Lấy ID của người dùng từ token.
-            // Khi đăng nhập, chúng ta đã lưu ID vào claim "sub" (Subject).
-            // ASP.NET Core tự động map "sub" vào ClaimTypes.NameIdentifier.
-            var userIdString = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            // (1) XÓA BỎ LOGIC LẤY UserId TỪ CLAIM
 
-            if (string.IsNullOrEmpty(userIdString))
-            {
-                // Điều này hiếm khi xảy ra nếu [Authorize] hoạt động đúng,
-                // nhưng vẫn nên kiểm tra.
-                return Unauthorized();
-            }
-
-            if (!int.TryParse(userIdString, out var userId))
-            {
-                return Unauthorized("User ID trong token không hợp lệ.");
-            }
-
-            // Gọi service với ID đã được xác thực
-            var profile = await _svc.GetProfileAsync(userId);
+            // (2) GỌI HÀM SERVICE MỚI (không cần userId)
+            var profile = await _svc.GetProfileAsync();
 
             if (profile == null)
             {
@@ -150,66 +133,42 @@ namespace PresentationLayer.Controllers
         /// <summary>
         /// Cập nhật thông tin profile của người dùng đang đăng nhập.
         /// </summary>
-        /// <param name="dto">Dữ liệu profile mới.</param>
-        /// <returns>Thông tin profile đã được cập nhật.</returns>
-        [HttpPut("profile")] // Endpoint: PUT /api/users/profile
+        [HttpPut("profile")]
         [ProducesResponseType(typeof(UserProfileDto), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-        [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest)]
         public async Task<ActionResult<UserProfileDto>> UpdateMyProfile([FromBody] UserProfileUpdateDto dto)
         {
-            // Lấy userId từ token (giống hệt hàm GET)
-            var userIdString = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            if (string.IsNullOrEmpty(userIdString) || !int.TryParse(userIdString, out var userId))
-            {
-                return Unauthorized("User ID trong token không hợp lệ.");
-            }
+            // (1) XÓA BỎ LOGIC LẤY UserId TỪ CLAIM
 
-            // Gọi service để cập nhật
-            // DTO sẽ được tự động validate bởi [ApiController]
-            var updatedProfile = await _svc.UpdateProfileAsync(userId, dto);
+            // (2) GỌI HÀM SERVICE MỚI (không cần userId)
+            var updatedProfile = await _svc.UpdateProfileAsync(dto);
 
             if (updatedProfile == null)
             {
-                // Lỗi này có nghĩa là user_id trong token không tìm thấy trong DB
                 return NotFound(new { message = "Không tìm thấy người dùng để cập nhật." });
             }
 
-            // Trả về 200 OK cùng profile mới
             return Ok(updatedProfile);
         }
         
-        // --- HÀM MỚI ---
         /// <summary>
         /// Thay đổi mật khẩu của người dùng đang đăng nhập.
         /// </summary>
-        /// <param name="dto">Thông tin mật khẩu cũ và mới.</param>
         [HttpPost("change-password")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         public async Task<IActionResult> ChangePassword([FromBody] ChangePasswordRequestDto dto)
         {
-            // 1. Lấy userId từ token
-            var userIdString = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            if (string.IsNullOrEmpty(userIdString) || !int.TryParse(userIdString, out var userId))
-            {
-                return Unauthorized("User ID trong token không hợp lệ.");
-            }
+            // (1) XÓA BỎ LOGIC LẤY UserId TỪ CLAIM
 
-            // 2. Gọi service
-            var (isSuccess, errorMessage) = await _svc.ChangePasswordAsync(userId, dto);
+            // (2) GỌI HÀM SERVICE MỚI (không cần userId)
+            var (isSuccess, errorMessage) = await _svc.ChangePasswordAsync(dto);
 
-            // 3. Xử lý kết quả
             if (!isSuccess)
             {
-                // Trả về 400 Bad Request với thông báo lỗi cụ thể từ service
-                // (ví dụ: "Mật khẩu hiện tại không chính xác.")
                 return BadRequest(new { message = errorMessage });
             }
 
-            // Trả về 200 OK
             return Ok(new { message = "Đổi mật khẩu thành công." });
         }
     }
