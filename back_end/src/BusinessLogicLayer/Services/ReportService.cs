@@ -76,7 +76,7 @@ namespace BusinessLogicLayer.Services
                 // Dùng ProjectTo (cần AutoMapper) để nạp DTO
                 .ProjectTo<ReportViewDto>(_mapper.ConfigurationProvider)
                 .FirstOrDefaultAsync();
-            
+
             return report;
         }
 
@@ -93,7 +93,7 @@ namespace BusinessLogicLayer.Services
             {
                 queryable = queryable.Where(r => r.order_id == query.OrderId.Value);
             }
-            
+
             // Đếm tổng
             var totalItems = await queryable.CountAsync();
 
