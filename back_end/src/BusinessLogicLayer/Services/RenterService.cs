@@ -37,61 +37,50 @@ namespace BusinessLogicLayer.Services
             return (renter, renter.CCCD, renter.Driver_License); 
         }
 
-        public async Task<RenterDocumentsViewDto> GetMyDocumentsAsync(int userId)
+        public async Task<RenterDocumentsViewDto> GetMyDocumentsAsync()
         {
-            if (_currentUser.UserId != userId)
-            {
-               throw new UnauthorizedAccessException("You can only view your own documents.");
-            }
+            int userId = _currentUser.UserId; // Lấy ID từ helper
+            if (userId == 0) throw new UnauthorizedAccessException("Người dùng không hợp lệ.");
 
             var (renter, cccd, dl) = await LoadDocumentsAsync(userId);
             
-            // (Giả định AutoMapper Profile của cậu đã được cập nhật
-            // để map 'UrlCccdCmndFront' (DTO) sang 'url_cccd_cmnd_front' (Model))
             var dto = new RenterDocumentsViewDto();
-            if (cccd != null) _mapper.Map(cccd, dto);
-            if (dl != null) _mapper.Map(dl, dto);
+            if (cccd != null) _mapper.Map(cccd, dto); // Giả định AutoMapper đã được refactor
+            if (dl != null) _mapper.Map(dl, dto);   // Giả định AutoMapper đã được refactor
             
             dto.IsVerified = renter.is_verified;
 
             return dto;
         }
         
-        public async Task<RenterDocumentsViewDto> UpsertMyDocumentsAsync(int userId, RenterDocumentsUpsertDto dto)
+        public async Task<RenterDocumentsViewDto> UpsertMyDocumentsAsync(RenterDocumentsUpsertDto dto)
         {
-            // (Nếu cậu dùng CurrentUserAccessor, hãy thêm bước xác thực này)
-            if (_currentUser.UserId != userId)
-            {
-                
-               throw new UnauthorizedAccessException("You can only update your own documents.");
-            }
+            int userId = _currentUser.UserId; // Lấy ID từ helper
+            if (userId == 0) throw new UnauthorizedAccessException("Người dùng không hợp lệ.");
 
             var (renter, cccd, dl) = await LoadDocumentsAsync(userId);
             var renterId = renter.renter_id;
 
-            // Logic tạo/cập nhật CCCD (AutoMapper sẽ map 4 trường: front, back, number)
+            // (Logic map và set is_verified = false vẫn giữ nguyên)
             if (cccd == null)
             {
                 cccd = new CCCD { renter_id = renterId };
                 _db.CCCDs.Add(cccd);
             }
-            _mapper.Map(dto, cccd); // Map từ DTO -> CCCD
+            _mapper.Map(dto, cccd); // Map DTO -> CCCD
 
-            // Logic tạo/cập nhật Driver_License (AutoMapper sẽ map 4 trường)
             if (dl == null)
             {
                 dl = new Driver_License { renter_id = renterId };
                 _db.Driver_Licenses.Add(dl);
             }
-            _mapper.Map(dto, dl); // Map từ DTO -> Driver_License
-
-            // Logic này vẫn đúng: Bất cứ khi nào upload, reset về chưa xác thực
+            _mapper.Map(dto, dl); // Map DTO -> Driver_License
+            
             renter.is_verified = false;
-
             await _db.SaveChangesAsync();
             
-            // Tối ưu: Gọi lại hàm Get để lấy DTO, thay vì map thủ công
-            return await GetMyDocumentsAsync(userId);
+            // Gọi lại hàm Get (không cần tham số)
+            return await GetMyDocumentsAsync();
         }
 
         public async Task<bool> HasVerifiedDocumentsAsync(int userId)
