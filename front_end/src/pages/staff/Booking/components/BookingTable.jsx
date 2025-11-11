@@ -34,7 +34,7 @@ export default function BookingTable({ bookings = [], loading, onRefresh }) {
   const handleReject = async (record) => {
     if (rejectingId) return;
 
-    setRejectingId(record.orderId);
+      setRejectingId(record.orderId);
 
     try {
       await rejectRentalOrder(record.orderId);
@@ -100,10 +100,9 @@ export default function BookingTable({ bookings = [], loading, onRefresh }) {
         const statusMap = {
           BOOKED: { color: "blue", text: "Chờ duyệt" },
           APPROVED: { color: "green", text: "Đã duyệt" },
-          REJECTED: { color: "red", text: "Từ chối" },
+          CANCELED: { color: "red", text: "Từ chối" },
           IN_PROGRESS: { color: "orange", text: "Đang thuê" },
           COMPLETED: { color: "cyan", text: "Hoàn tất" },
-          CANCELLED: { color: "default", text: "Huỷ" },
         };
         const info = statusMap[status] || {
           color: "default",
