@@ -1,7 +1,4 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+using BusinessLogicLayer.Helpers.CurrentUserAccessor;
 using AutoMapper;
 using BusinessLogicLayer.DTOs.Contract;
 using BusinessLogicLayer.Interfaces;
@@ -15,16 +12,26 @@ namespace BusinessLogicLayer.Services
     {
         private readonly ApplicationDbContext _context;
         private readonly IMapper _mapper;
-        public ContractsService(ApplicationDbContext context, IMapper mapper)
+        private readonly ICurrentUserAccessor _currentUser;
+
+        public ContractsService(ApplicationDbContext context, IMapper mapper, ICurrentUserAccessor currentUser)
         {
             _context = context;
             _mapper = mapper;
+            _currentUser = currentUser;
         }
         // Implement các phương thức của IContractsService ở đây
 
         // --- Nghiệp vụ chính: Tạo Hợp đồng ---
-        public async Task<ContractViewDto> CreateContractAsync(ContractCreateDto createDto, int staffId)
+        public async Task<ContractViewDto> CreateContractAsync(ContractCreateDto createDto)
         {
+            // === LOGIC MỚI: LẤY STAFF ID TỪ HELPER ===
+            var staffId = _currentUser.StaffId;
+            if (staffId == null)
+            {
+                throw new UnauthorizedAccessException("Bạn phải là nhân viên mới được tạo hợp đồng.");
+            }
+
             // 1. Validation: Kiểm tra RentalOrder
             var order = await _context.RentalOrders
                 .Include(o => o.vehicle)
@@ -32,7 +39,6 @@ namespace BusinessLogicLayer.Services
 
             if (order == null)
             {
-                // Thay thế bằng Exception tùy chỉnh (custom exception)
                 throw new KeyNotFoundException("RentalOrder không tồn tại.");
             }
 
@@ -64,7 +70,7 @@ namespace BusinessLogicLayer.Services
             var newContract = new Contract
             {
                 order_id = createDto.OrderId,
-                staff_id = staffId
+                staff_id = staffId.Value
                 // signed_date sẽ được SQL tự động gán giá trị default [cite: 31]
             };
 
@@ -76,7 +82,7 @@ namespace BusinessLogicLayer.Services
             order.status = "IN_USE";
 
             // === THÊM DÒNG NÀY (LOGIC MỚI TỪ CSDL) ===
-            order.pickup_staff_id = staffId; // Ghi nhận Staff đã giao xe
+            order.pickup_staff_id = staffId.Value; // Ghi nhận Staff đã giao xe
             if (order.vehicle != null)
             {
                 order.vehicle.is_available = false; // Khóa xe lại

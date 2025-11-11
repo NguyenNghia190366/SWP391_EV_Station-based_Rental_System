@@ -10,7 +10,7 @@ namespace BusinessLogicLayer.Interfaces
     {
         // Nghiệp vụ chính: Staff tạo hợp đồng khi check-in cho khách
         // Cần truyền vào staffId (lấy từ User.Claims context) và DTO
-        Task<ContractViewDto> CreateContractAsync(ContractCreateDto createDto, int staffId);
+        Task<ContractViewDto> CreateContractAsync(ContractCreateDto createDto);
 
         // Lấy chi tiết 1 hợp đồng
         Task<ContractViewDto?> GetContractByIdAsync(int contractId);
