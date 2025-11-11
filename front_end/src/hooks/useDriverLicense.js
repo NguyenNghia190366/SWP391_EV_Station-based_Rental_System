@@ -1,10 +1,10 @@
 import { useAxiosInstance } from "./useAxiosInstance";
 import { useCallback } from "react";
-import { useRenter } from "./useRenter";
+import { useRenters } from "./useRenters";
 
 export const useDriverLicense = () => {
   const instance = useAxiosInstance();
-  const { getRenterId } = useRenter();
+  const { getRenterId } = useRenters();
 
   //Upload Giấy phép lái xe (URLs từ Cloudinary)
   const uploadDriverLicense = useCallback(

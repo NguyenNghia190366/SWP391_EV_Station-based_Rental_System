@@ -3,10 +3,10 @@ import { useNavigate } from "react-router-dom";
 import * as yup from "yup";
 import {
   UserOutlined, SafetyOutlined, ClockCircleOutlined, DashboardOutlined,
-  EditOutlined, SaveOutlined, CloseOutlined, CarOutlined, LoadingOutlined
+  EditOutlined, SaveOutlined, CloseOutlined, CarOutlined, LoadingOutlined, DeleteOutlined
 } from "@ant-design/icons";
 import {
-  Button, Input, Card, Tag, Avatar, message, Modal, Spin, Menu, Table
+  Button, Input, Card, Tag, Avatar, message, Modal, Spin, Menu, Table, Space, Popconfirm, Tooltip
 } from "antd";
 import dayjs from "dayjs";
 import { useUsers } from "@/hooks/useUsers";
@@ -14,8 +14,10 @@ import { useDriverLicense } from "@/hooks/useDriverLicense";
 import { useCccd } from "@/hooks/useCccd";
 import { useAxiosInstance } from "@/hooks/useAxiosInstance";
 import { useRenters } from "@/hooks/useRenters";
+import { useRentalOrders } from "@/hooks/useRentalOrders";
 import VerifyPage from "@/pages/renter/VerifyPage";
 import OverviewPage from "@/pages/renter/OverviewPage";
+import RentalHistoryPage from "@/pages/renter/RentalHistoryPage";
 
 const ProfilePage = () => {
   const navigate = useNavigate();
@@ -33,10 +35,12 @@ const ProfilePage = () => {
   const [idCardImages, setIdCardImages] = useState([]);
   const [myBookings, setMyBookings] = useState([]);
   const [bookingsLoading, setBookingsLoading] = useState(false);
+  const [cancellingId, setCancellingId] = useState(null);
 
   const { updateProfile, uploadAvatar } = useUsers();
   const { updateStatus: updateLicenseStatus } = useDriverLicense();
   const { updateStatus: updateCcqdStatus } = useCccd();
+  const { updateRentalOrderStatus } = useRentalOrders();
 
   // ===== Load user =====
   useEffect(() => {
@@ -94,6 +98,31 @@ const ProfilePage = () => {
       message.error("Không thể tải lịch sử thuê!");
     } finally {
       setBookingsLoading(false);
+    }
+  };
+
+  // ===== Cancel order (renter) =====
+  const handleCancelOrder = async (record) => {
+    if (!record) return;
+    // If already approved - don't allow cancellation by renter
+    if (record.status === "APPROVED") {
+      message.warning("Đơn đã được duyệt, không thể hủy từ phía renter.");
+      return;
+    }
+
+    if (cancellingId) return;
+    setCancellingId(record.orderId);
+    try {
+      // Pass full record as orderData so backend receives existing fields
+      await updateRentalOrderStatus(record.orderId, "CANCELED", record);
+      message.success("Đã hủy đơn thuê!");
+      // refresh history
+      setTimeout(() => fetchRentalHistory(), 400);
+    } catch (err) {
+      console.error("❌ Lỗi hủy đơn:", err);
+      message.error("Hủy đơn thất bại. Vui lòng thử lại.");
+    } finally {
+      setCancellingId(null);
     }
   };
 
@@ -232,73 +261,110 @@ const ProfilePage = () => {
     </Card>
   );
 
-  const renderHistory = () => (
-    <Card className="shadow-lg">
-      <h2 className="text-2xl font-bold mb-4 flex items-center gap-2"><ClockCircleOutlined />Lịch sử đặt xe</h2>
-      {bookingsLoading ? (
-        <Spin tip="Đang tải lịch sử..." />
-      ) : myBookings.length > 0 ? (
-        <Table
-          columns={[
-            {
-              title: "Mã đơn",
-              dataIndex: "orderId",
-              key: "orderId",
-              render: (id) => <span className="font-semibold text-blue-600">#{id}</span>,
-            },
-            {
-              title: "Xe",
-              dataIndex: "vehicleName",
-              key: "vehicleName",
-            },
-            {
-              title: "Trạm (nhận → trả)",
-              key: "stations",
-              render: (_, record) => (
-                <span>{record.pickupStationName} → {record.returnStationName}</span>
-              ),
-            },
-            {
-              title: "Thời gian thuê",
-              key: "rentalTime",
-              render: (_, record) => (
-                <span>
-                  {dayjs(record.startTime).format("DD/MM HH:mm")} →{" "}
-                  {dayjs(record.endTime).format("DD/MM HH:mm")}
-                </span>
-              ),
-            },
-            {
-              title: "Trạng thái",
-              dataIndex: "status",
-              key: "status",
-              render: (status) => {
-                const statusMap = {
-                  BOOKED: { color: "blue", text: "Chờ duyệt" },
-                  APPROVED: { color: "green", text: "Đã duyệt" },
-                  CANCELED: { color: "red", text: "Từ chối" },
-                  IN_USE: { color: "orange", text: "Đang sử dụng" },
-                  COMPLETED: { color: "cyan", text: "Hoàn tất" },
-                };
-                const statusInfo = statusMap[status] || { color: "default", text: status };
-                return <Tag color={statusInfo.color}>{statusInfo.text}</Tag>;
-              },
-            },
-          ]}
-          dataSource={myBookings}
-          rowKey="orderId"
-          pagination={{ pageSize: 10 }}
-          size="small"
-        />
-      ) : (
-        <div className="text-center py-6">
-          <CarOutlined style={{ fontSize: 40, color: "#bbb" }} />
-          <p>Chưa có lịch sử đặt xe</p>
-          <Button type="primary" onClick={() => navigate("/vehicles")}>Thuê xe ngay</Button>
-        </div>
-      )}
-    </Card>
-  );
+  const renderHistory = () => {
+    const historyColumns = [
+      {
+        title: "Mã đơn",
+        dataIndex: "orderId",
+        key: "orderId",
+        render: (id) => <span className="font-semibold text-blue-600">#{id}</span>,
+      },
+      {
+        title: "Xe",
+        dataIndex: "vehicleName",
+        key: "vehicleName",
+      },
+      {
+        title: "Trạm (nhận → trả)",
+        key: "stations",
+        render: (_, record) => (
+          <span>{record.pickupStationName} → {record.returnStationName}</span>
+        ),
+      },
+      {
+        title: "Thời gian thuê",
+        key: "rentalTime",
+        render: (_, record) => (
+          <span>
+            {dayjs(record.startTime).format("DD/MM HH:mm")} →{" "}
+            {dayjs(record.endTime).format("DD/MM HH:mm")}
+          </span>
+        ),
+      },
+      {
+        title: "Trạng thái",
+        dataIndex: "status",
+        key: "status",
+        render: (status) => {
+          const statusMap = {
+            BOOKED: { color: "blue", text: "Chờ duyệt" },
+            APPROVED: { color: "green", text: "Đã duyệt" },
+            CANCELED: { color: "red", text: "Từ chối" },
+            IN_USE: { color: "orange", text: "Đang sử dụng" },
+            COMPLETED: { color: "cyan", text: "Hoàn tất" },
+          };
+          const statusInfo = statusMap[status] || { color: "default", text: status };
+          return <Tag color={statusInfo.color}>{statusInfo.text}</Tag>;
+        },
+      },
+      {
+        title: "Hành động",
+        key: "actions",
+        render: (_, record) => {
+          // show cancel for BOOKED and APPROVED (disabled when APPROVED)
+          const showCancel = record.status === "BOOKED" || record.status === "APPROVED";
+          const disabled = record.status === "APPROVED";
+          if (!showCancel) return null;
+
+          return (
+            <Space>
+              <Popconfirm
+                title={disabled ? "Đơn đã được duyệt, không thể hủy." : "Xác nhận hủy đơn?"}
+                onConfirm={() => handleCancelOrder(record)}
+                okText="Có"
+                cancelText="Không"
+                disabled={disabled}
+              >
+                <Tooltip title={disabled ? "Đã duyệt — không thể hủy" : "Hủy đơn"}>
+                  <Button
+                    type="primary"
+                    danger
+                    icon={<DeleteOutlined />}
+                    size="small"
+                    loading={cancellingId === record.orderId}
+                    disabled={disabled || cancellingId === record.orderId}
+                  />
+                </Tooltip>
+              </Popconfirm>
+            </Space>
+          );
+        },
+      },
+    ];
+
+    return (
+      <Card className="shadow-lg">
+        <h2 className="text-2xl font-bold mb-4 flex items-center gap-2"><ClockCircleOutlined />Lịch sử đặt xe</h2>
+        {bookingsLoading ? (
+          <Spin tip="Đang tải lịch sử..." />
+        ) : myBookings.length > 0 ? (
+          <Table
+            columns={historyColumns}
+            dataSource={myBookings}
+            rowKey="orderId"
+            pagination={{ pageSize: 10 }}
+            size="small"
+          />
+        ) : (
+          <div className="text-center py-6">
+            <CarOutlined style={{ fontSize: 40, color: "#bbb" }} />
+            <p>Chưa có lịch sử đặt xe</p>
+            <Button type="primary" onClick={() => navigate("/vehicles")}>Thuê xe ngay</Button>
+          </div>
+        )}
+      </Card>
+    );
+  };
 
   if (loading)
     return <div className="flex justify-center items-center h-screen"><Spin indicator={<LoadingOutlined spin />} /></div>;
@@ -339,10 +405,10 @@ const ProfilePage = () => {
 
       {/* Main Content */}
       <div className="flex-1 p-6">
-        {selectedMenu === "overview" && <OverviewPage />}
-        {selectedMenu === "info" && renderInfo()}
-        {selectedMenu === "verify" && renderVerify()}
-        {selectedMenu === "history" && renderHistory()}
+  {selectedMenu === "overview" && <OverviewPage />}
+  {selectedMenu === "info" && renderInfo()}
+  {selectedMenu === "verify" && renderVerify()}
+  {selectedMenu === "history" && <RentalHistoryPage />}
       </div>
 
       {/* Avatar Modal */}
