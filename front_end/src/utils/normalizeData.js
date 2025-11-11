@@ -67,7 +67,18 @@ export const normalizeVehicleData = (vehicle) => {
     vehicleId: vehicle.vehicleId || vehicle.id,
 
     // Basic Info
-    name: vehicle.name || vehicle.licensePlate || `Xe ${vehicle.vehicleId}`,
+    // Prefer explicit name if provided; otherwise build from brand + model (if available),
+    // otherwise fall back to license plate or id.
+    // Note: VehiclesPage attaches `brandName` from VehicleModels before normalizing.
+    name: (() => {
+      const brandFromVehicle = vehicle.brandName || vehicle.brand || vehicle.brand_name || "";
+      const modelFromVehicle = vehicle.model || vehicle.modelName || vehicle.model_name || "";
+      if (vehicle.name) return vehicle.name;
+      if (brandFromVehicle || modelFromVehicle) {
+        return `${(brandFromVehicle || "").trim()} ${(modelFromVehicle || "").trim()}`.trim();
+      }
+      return vehicle.licensePlate || `Xe ${vehicle.vehicleId}`;
+    })(),
     licensePlate: vehicle.licensePlate || "",
     type: vehicle.type || vehicle.vehicleType || "Xe điện",
 
@@ -103,6 +114,10 @@ export const normalizeVehicleData = (vehicle) => {
         ? vehicle.isAvailable
         : vehicle.status === "available",
     condition: vehicle.condition || "GOOD",
+
+    // Brand & Model (pass through if backend provides them)
+    brandName: vehicle.brandName || vehicle.brand || null,
+    model: vehicle.model || vehicle.modelName || vehicle.model_name || null,
 
     // Location & Model
     location: vehicle.location || vehicle.stationId || "",

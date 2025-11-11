@@ -11,6 +11,7 @@ import {
 } from "@ant-design/icons";
 import VerifyRenterPage from "./VerifyRenterPage";
 import StationRegistrationPage from "./StationRegistrationPage";
+import VehicleStatus from "../shared/VehicleStatus";
 
 const AdminDashboard = () => {
   const [selectedMenu, setSelectedMenu] = useState("overview");
@@ -33,6 +34,11 @@ const AdminDashboard = () => {
       key: "register-station",
       icon: <EnvironmentOutlined />,
       label: "Đăng ký trạm",
+    },
+    {
+      key: "vehicle-status",
+      icon: <CarOutlined />,
+      label: "Trạng thái xe",
     },
     {
       key: "vehicles",
@@ -192,6 +198,13 @@ const AdminDashboard = () => {
             </div>
             <StationRegistrationPage />
           </Card>
+        );
+
+      case "vehicle-status":
+        return (
+          <div>
+            <VehicleStatus />
+          </div>
         );
 
       case "vehicles":

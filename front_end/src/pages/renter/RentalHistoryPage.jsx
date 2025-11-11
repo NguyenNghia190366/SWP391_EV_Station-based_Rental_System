@@ -27,32 +27,66 @@ export default function RentalHistoryPage() {
       // Lấy renterId từ userId
       const renterId = await getRenterIdByUserId(userId);
       
-      // Fetch tất cả dữ liệu cần thiết
-      const [rentalOrdersRes, vehiclesRes, stationsRes] = await Promise.all([
+      // Fetch tất cả dữ liệu cần thiết (including vehicle models to compose names)
+      const [rentalOrdersRes, vehiclesRes, stationsRes, vehicleModelsRes] = await Promise.all([
         instance.get(`/RentalOrders?renter_id=${renterId}`),
         instance.get("/Vehicles"),
         instance.get("/Stations"),
+        instance.get("/VehicleModels"),
       ]);
 
       const rentalOrders = Array.isArray(rentalOrdersRes.data) 
         ? rentalOrdersRes.data 
         : rentalOrdersRes.data?.data || [];
       
-      const vehicles = Array.isArray(vehiclesRes.data) 
-        ? vehiclesRes.data 
+      const vehicles = Array.isArray(vehiclesRes.data)
+        ? vehiclesRes.data
         : vehiclesRes.data?.data || [];
+
+      const vehicleModels = Array.isArray(vehicleModelsRes.data)
+        ? vehicleModelsRes.data
+        : vehicleModelsRes.data?.data || [];
       
       const stations = Array.isArray(stationsRes.data) 
         ? stationsRes.data 
         : stationsRes.data?.data || [];
 
-      // Merge dữ liệu - thêm tên xe và trạm
-      const merged = rentalOrders.map((order) => ({
-        ...order,
-        vehicleName: vehicles.find((v) => v.vehicleId === order.vehicleId)?.vehicleName || `#${order.vehicleId}`,
-        pickupStationName: stations.find((s) => s.stationId === order.pickupStationId)?.stationName || `#${order.pickupStationId}`,
-        returnStationName: stations.find((s) => s.stationId === order.returnStationId)?.stationName || `#${order.returnStationId}`,
-      }));
+      // Build a map of modelId -> brandName (normalize keys)
+      const modelMap = {};
+      vehicleModels.forEach((m) => {
+        const mid = m.id ?? m.vehicleModelId ?? m.vehicle_model_id;
+        if (mid != null) modelMap[mid] = m.brandName ?? m.brand_name ?? m.brand ?? "";
+      });
+
+      // Normalize vehicles into a map by id and compose a name using brand + model when possible
+      const vehiclesMap = {};
+      vehicles.forEach((v) => {
+        const vid = v.vehicleId ?? v.id ?? v.vehicle_id;
+        const vmid = v.vehicleModelId ?? v.vehicle_model_id ?? v.modelId ?? v.model_id;
+        const brandName = modelMap[vmid] || v.brandName || v.brand || "";
+        const modelText = v.model ?? v.model_text ?? "";
+        const composed = `${brandName} ${modelText}`.trim();
+        const name = v.vehicleName || composed || v.licensePlate || (vid != null ? `#${vid}` : "");
+        if (vid != null) vehiclesMap[vid] = { ...v, vehicleName: name };
+      });
+
+      // Merge dữ liệu - thêm tên xe và trạm (use normalized keys and maps)
+      const merged = rentalOrders.map((order) => {
+        const orderVehicleId = order.vehicleId ?? order.vehicle_id ?? order.vehicle;
+        const pickupId = order.pickupStationId ?? order.pickup_station_id ?? order.pickupStation;
+        const returnId = order.returnStationId ?? order.return_station_id ?? order.returnStation;
+        const vehicleObj = vehiclesMap[orderVehicleId] || {};
+        const pickupStation = stations.find((s) => (s.stationId ?? s.id ?? s.station_id) === pickupId) || {};
+        const returnStation = stations.find((s) => (s.stationId ?? s.id ?? s.station_id) === returnId) || {};
+
+        return {
+          ...order,
+          vehicleId: orderVehicleId,
+          vehicleName: vehicleObj.vehicleName || (orderVehicleId ? `#${orderVehicleId}` : ""),
+          pickupStationName: pickupStation.stationName || pickupStation.name || pickupStation.station_name || `#${pickupId}`,
+          returnStationName: returnStation.stationName || returnStation.name || returnStation.station_name || `#${returnId}`,
+        };
+      });
 
       setOrders(merged);
     } catch (err) {
@@ -79,7 +113,17 @@ export default function RentalHistoryPage() {
       title: "Xe",
       dataIndex: "vehicleName",
       key: "vehicleName",
-      width: 180,
+      width: 220,
+      render: (name, record) => (
+        <div>
+          {/* primary: vehicle name when available, otherwise show id */}
+          <div className="font-semibold">{name && name !== `#${record.vehicleId}` ? name : `#${record.vehicleId}`}</div>
+          {/* secondary: show id when name is present to keep the id visible */}
+          {name && name !== `#${record.vehicleId}` ? (
+            <div style={{ fontSize: 12, color: '#6b7280' }}>{`#${record.vehicleId}`}</div>
+          ) : null}
+        </div>
+      ),
     },
     {
       title: "Trạm (nhận → trả)",
@@ -89,15 +133,13 @@ export default function RentalHistoryPage() {
           {record.pickupStationName} → {record.returnStationName}
         </span>
       ),
-      width: 220,
     },
     {
       title: "Thời gian thuê",
       key: "rentalTime",
       render: (_, record) => (
         <span>
-          {dayjs(record.startTime).format("DD/MM/YYYY HH:mm")} →{" "}
-          {dayjs(record.endTime).format("DD/MM/YYYY HH:mm")}
+          {dayjs(record.startTime).format("DD/MM/YYYY HH:mm")} → {dayjs(record.endTime).format("DD/MM/YYYY HH:mm")}
         </span>
       ),
       width: 240,

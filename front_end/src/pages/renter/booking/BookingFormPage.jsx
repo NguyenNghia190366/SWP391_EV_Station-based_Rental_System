@@ -27,11 +27,25 @@ export default function BookingFormPage() {
       try {
         setLoading(true);
         const vehicleData = await getById(vehicleId);
+        // Attach the raw vehicle data first
         setVehicle(vehicleData);
 
+        // If the vehicle references a vehicle model, fetch it to obtain brand and price
         if (vehicleData.vehicleModelId) {
           const modelData = await getModelById(vehicleData.vehicleModelId);
           setPrice(modelData.price_per_hour);
+
+          // Prefer brand name from the vehicle model, and build a display name using brand + vehicle.model
+          const brandName = modelData?.brandName || vehicleData?.brand || "";
+          const modelText = vehicleData?.model || "";
+          const composedName = `${brandName} ${modelText}`.trim();
+
+          // Update the vehicle object so the UI can use vehicle.vehicleName and vehicle.brandName
+          setVehicle((prev) => ({
+            ...prev,
+            brandName: brandName || prev?.brandName || prev?.brand,
+            vehicleName: composedName || prev?.vehicleName || prev?.licensePlate || "",
+          }));
         } else {
           setPrice("N/A");
         }
