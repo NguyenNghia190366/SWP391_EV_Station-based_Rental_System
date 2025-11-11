@@ -21,5 +21,21 @@ namespace BusinessLogicLayer.DTOs.VehicleModels
 
         [Range(1, 1000)]
         public int? Mileage { get; set; }
+
+        // --- THÊM 4 TRƯỜNG MỚI TỪ CSDL ---
+        [StringLength(50)]
+        public string? TypeOfBattery { get; set; }
+
+        [Range(0, 200)]
+        public decimal? BatteryCapacity { get; set; } // (kWh)
+
+        [Required]
+        [Range(0, (double)decimal.MaxValue)]
+        public decimal PricePerHour { get; set; }
+
+        [Required]
+        [Range(0, (double)decimal.MaxValue)]
+        public decimal Deposit { get; set; }
+        // ------------------------------------
     }
 }

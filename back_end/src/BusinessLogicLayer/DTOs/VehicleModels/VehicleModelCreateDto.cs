@@ -16,10 +16,25 @@ namespace BusinessLogicLayer.DTOs.VehicleModels
         public string? VehicleColor { get; set; }
 
         [Required(ErrorMessage = "Number of seats is required.")]
-        [Range(1, 50, ErrorMessage = "Number of seats must be > 0.")] // Rule 1.5
+        [Range(1, 50, ErrorMessage = "Number of seats must be > 0.")]
         public int NumberOfSeats { get; set; }
 
-        [Range(1, 1000, ErrorMessage = "Mileage (range) must be > 0.")] // Rule 1.5
+        [Range(1, 1000, ErrorMessage = "Mileage (range) must be > 0.")]
         public int? Mileage { get; set; } // Giả định 'mileage' là 'RangeKm'
+        
+        // --- THÊM 4 TRƯỜNG MỚI TỪ CSDL ---
+        [StringLength(50)]
+        public string? TypeOfBattery { get; set; }
+
+        [Range(0, 200)]
+        public decimal? BatteryCapacity { get; set; } // (kWh)
+
+        [Required]
+        [Range(0, (double)decimal.MaxValue)]
+        public decimal PricePerHour { get; set; }
+
+        [Required]
+        [Range(0, (double)decimal.MaxValue)]
+        public decimal Deposit { get; set; }
     }
 }

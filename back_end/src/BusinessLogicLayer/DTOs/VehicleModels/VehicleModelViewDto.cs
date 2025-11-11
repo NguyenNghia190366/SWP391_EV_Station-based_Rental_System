@@ -9,6 +9,13 @@ namespace BusinessLogicLayer.DTOs.VehicleModels
         public int NumberOfSeats { get; set; }
         public int? Mileage { get; set; }
         
+        // --- THÊM 4 TRƯỜNG MỚI TỪ CSDL ---
+        public string? TypeOfBattery { get; set; }
+        public decimal? BatteryCapacity { get; set; }
+        public decimal PricePerHour { get; set; }
+        public decimal Deposit { get; set; }
+        // ------------------------------------
+
         public int VehiclesCount { get; set; } // 
     }
 }
