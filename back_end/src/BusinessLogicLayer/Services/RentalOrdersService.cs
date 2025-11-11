@@ -17,33 +17,12 @@ namespace BusinessLogicLayer.Services
         private readonly IMapper _mapper;
         private readonly ICurrentUserAccessor _currentUser;
         
-        // // GIẢ ĐỊNH RULE 3: 200.000 / giờ
-        // private const decimal HOURLY_RATE = 200000; 
-
         public RentalOrdersService(ApplicationDbContext context, IMapper mapper, ICurrentUserAccessor currentUser)
         {
             _context = context;
             _mapper = mapper;
             _currentUser = currentUser;
         }
-
-        // // Lấy User ID của người đang gọi API (từ Token)
-        // private int GetCurrentUserId()
-        // {
-        //     var userIdClaim = _httpContextAccessor.HttpContext?.User?.FindFirst(ClaimTypes.NameIdentifier);
-        //     return int.TryParse(userIdClaim?.Value, out var id) ? id : 0;
-        // }
-
-        // // Lấy Renter ID (bảng Renter) từ User ID (bảng Users)
-        // private async Task<int> GetCurrentRenterId()
-        // {
-        //     var userId = GetCurrentUserId();
-        //     var renter = await _context.Renters.AsNoTracking()
-        //                     .FirstOrDefaultAsync(r => r.user_id == userId);
-        //     if (renter == null) 
-        //         throw new UnauthorizedAccessException("User is not a valid renter.");
-        //     return renter.renter_id;
-        // }
 
         // 1. CREATE (Rule 1, 2, 3)
         public async Task<RentalOrderViewDto> CreateOrderAsync(RentalOrderCreateDto dto)
