@@ -4,7 +4,7 @@ import { useAxiosInstance } from "./useAxiosInstance";
 import { message } from "antd";
 
 export const useStationStaff = () => {
-  const instance = useAxiosInstance();
+  const instance = useAxiosInstance(true);
 
   const approveRentalOrder = useCallback(async (orderId) => {
     try {

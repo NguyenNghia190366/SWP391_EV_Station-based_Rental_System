@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback, useMemo } from "react";
+import React, { useEffect, useState } from "react";
 import { Card, Table, Tag, Spin, Empty, Button, message } from "antd";
 import { useNavigate } from "react-router-dom";
 import dayjs from "dayjs";
@@ -11,10 +11,8 @@ export default function RentalHistoryPage() {
   const { getRenterIdByUserId } = useRenters();
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [renterId, setRenterId] = useState(null);
 
-  // Memoized fetch function to prevent unnecessary re-fetches
-  const fetchOrders = useCallback(async () => {
+  const fetchOrders = async () => {
     try {
       setLoading(true);
       const userId = localStorage.getItem("userId");
@@ -24,13 +22,11 @@ export default function RentalHistoryPage() {
       }
 
       // Lấy renterId từ userId
-      const rId = await getRenterIdByUserId(userId);
-      setRenterId(rId);
-      console.log(`✅ Tìm thấy renterId=${rId} cho userId=${userId}`);
+      const renterId = await getRenterIdByUserId(userId);
       
       // Fetch tất cả dữ liệu cần thiết
       const [rentalOrdersRes, vehiclesRes, stationsRes] = await Promise.all([
-        instance.get(`/RentalOrders?renter_id=${rId}`),
+        instance.get(`/RentalOrders?renter_id=${renterId}`),
         instance.get("/Vehicles"),
         instance.get("/Stations"),
       ]);
@@ -56,21 +52,17 @@ export default function RentalHistoryPage() {
       }));
 
       setOrders(merged);
-      console.log(`✅ Tải ${merged.length} đơn đặt xe cho renterId=${rId}`);
     } catch (err) {
       console.error("❌ Lỗi tải lịch sử thuê:", err);
       message.error("Không thể tải lịch sử thuê!");
     } finally {
       setLoading(false);
     }
-  }, [instance, getRenterIdByUserId]);
+  };
 
   useEffect(() => {
     fetchOrders();
-  }, [fetchOrders]);
-
-  // Memoize orders to prevent unnecessary table re-renders
-  const memoizedOrders = useMemo(() => orders, [orders]);
+  }, []);
 
   const columns = [
     {
@@ -115,10 +107,9 @@ export default function RentalHistoryPage() {
         const statusMap = {
           BOOKED: { color: "blue", text: "Chờ duyệt" },
           APPROVED: { color: "green", text: "Đã duyệt" },
-          REJECTED: { color: "red", text: "Từ chối" },
+          CANCELED: { color: "red", text: "Từ chối" },
           IN_USE: { color: "orange", text: "Đang sử dụng" },
           COMPLETED: { color: "cyan", text: "Hoàn tất" },
-          CANCELLED: { color: "default", text: "Huỷ" },
         };
         const statusInfo = statusMap[status] || { color: "default", text: status };
         return <Tag color={statusInfo.color}>{statusInfo.text}</Tag>;
@@ -157,7 +148,7 @@ export default function RentalHistoryPage() {
       ) : (
         <Table
           columns={columns}
-          dataSource={memoizedOrders}
+          dataSource={orders}
           rowKey="orderId"
           pagination={{
             pageSize: 10,

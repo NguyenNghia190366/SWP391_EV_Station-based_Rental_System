@@ -276,10 +276,9 @@ const ProfilePage = () => {
                 const statusMap = {
                   BOOKED: { color: "blue", text: "Chờ duyệt" },
                   APPROVED: { color: "green", text: "Đã duyệt" },
-                  REJECTED: { color: "red", text: "Từ chối" },
+                  CANCELED: { color: "red", text: "Từ chối" },
                   IN_USE: { color: "orange", text: "Đang sử dụng" },
                   COMPLETED: { color: "cyan", text: "Hoàn tất" },
-                  CANCELLED: { color: "default", text: "Huỷ" },
                 };
                 const statusInfo = statusMap[status] || { color: "default", text: status };
                 return <Tag color={statusInfo.color}>{statusInfo.text}</Tag>;
