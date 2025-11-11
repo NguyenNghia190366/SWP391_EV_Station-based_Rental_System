@@ -35,7 +35,6 @@ const VehicleCard = ({
         const model = await getModelById(vehicle.vehicleModelId);
         if (isMounted) {
           setPricePerHour(model.price_per_hour || 0);
-          
         }
       } catch (error) {
         console.error("❌ Lỗi lấy model:", error);
@@ -215,17 +214,15 @@ const VehicleCard = ({
             onClick={() => onBookVehicle && onBookVehicle(vehicle.id)}
             disabled={!isAvailable}
             className={`
-              px-5 py-3.5 rounded-xl font-bold uppercase tracking-wide
-              bg-green-600 text-white
-              shadow-lg shadow-green-500/30
-              transition-all duration-300 ease-in-out
-              text-sm md:text-base
-              ${
-                isAvailable
-                  ? "hover:bg-green-700 hover:-translate-y-0.5 hover:shadow-xl hover:shadow-green-500/50 cursor-pointer"
-                  : "bg-gray-300 cursor-not-allowed shadow-none"
-              }
-            `}
+    px-5 py-3.5 rounded-xl font-bold uppercase tracking-wide
+    text-white shadow-lg transition-all duration-300 ease-in-out
+    text-sm md:text-base
+    ${
+      isAvailable
+        ? "bg-green-600 hover:bg-green-700 hover:-translate-y-0.5 hover:shadow-xl hover:shadow-green-500/50 cursor-pointer"
+        : "bg-red-600 cursor-not-allowed shadow-none"
+    }
+  `}
           >
             {isAvailable ? "Đặt xe" : "Hết xe"}
           </button>

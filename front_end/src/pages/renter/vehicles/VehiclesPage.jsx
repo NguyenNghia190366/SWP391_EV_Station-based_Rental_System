@@ -43,9 +43,37 @@ const VehiclesPage = () => {
 
       setLoading(true);
       try {
-        const data = await getAll();
-        const vehiclesList = Array.isArray(data) ? data : data?.data || [];
-        const normalizedVehicles = vehiclesList.map((v) => normalizeVehicleData(v));
+          const data = await getAll();
+          const vehiclesList = Array.isArray(data) ? data : data?.data || [];
+
+          // Fetch vehicle models to get brandName so we can build display name (brand + model)
+          let models = [];
+          try {
+            const modelsRes = await api.get("/VehicleModels");
+            models = Array.isArray(modelsRes.data) ? modelsRes.data : modelsRes.data?.data || [];
+          } catch (err) {
+            console.warn("Không tải được VehicleModels, sẽ dùng dữ liệu model từ Vehicles:", err);
+            models = [];
+          }
+
+          // Build model map for quick lookup
+          const modelMap = new Map();
+          models.forEach((m) => {
+            const id = m.vehicleModelId ?? m.modelId ?? m.id;
+            if (id !== undefined && id !== null) modelMap.set(Number(id), m);
+          });
+
+          // Attach brandName from model to each vehicle when available
+          const vehiclesWithBrand = vehiclesList.map((v) => {
+            const modelKey = v.vehicleModelId ?? v.modelId ?? v.vehicle_model_id ?? v.model_id;
+            const modelRec = modelMap.get(Number(modelKey));
+            return {
+              ...v,
+              brandName: modelRec?.brandName ?? modelRec?.brand ?? undefined,
+            };
+          });
+
+          const normalizedVehicles = vehiclesWithBrand.map((v) => normalizeVehicleData(v));
 
         console.log("✅ Normalized vehicles:", normalizedVehicles);
         setVehicles(normalizedVehicles);

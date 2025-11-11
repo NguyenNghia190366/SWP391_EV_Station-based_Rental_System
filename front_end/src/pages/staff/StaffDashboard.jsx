@@ -2,9 +2,11 @@ import React, { useState } from "react";
 import { Menu, Card, Statistic } from "antd";
 import { 
   BookOutlined, 
-  DashboardOutlined
+  DashboardOutlined,
+  CarOutlined
 } from "@ant-design/icons";
 import BookingRequestsManagement from "./Booking/BookingRequestsManagement";
+import VehicleStatus from "../shared/VehicleStatus";
 
 const StaffDashboard = () => {
   const [selectedMenu, setSelectedMenu] = useState("overview");
@@ -12,6 +14,7 @@ const StaffDashboard = () => {
   const menuItems = [
     { key: "overview", icon: <DashboardOutlined />, label: "Tổng quan" },
     { key: "bookings", icon: <BookOutlined />, label: "Quản lý Booking" },
+    { key: "vehicle-status", icon: <CarOutlined />, label: "Trạng thái xe" },
   ];
 
   return (
@@ -52,6 +55,8 @@ const StaffDashboard = () => {
         )}
 
         {selectedMenu === "bookings" && <BookingRequestsManagement />}
+
+        {selectedMenu === "vehicle-status" && <VehicleStatus />}
       </div>
     </div>
   );
