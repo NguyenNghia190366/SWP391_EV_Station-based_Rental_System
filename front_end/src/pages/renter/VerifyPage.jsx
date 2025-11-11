@@ -1,8 +1,9 @@
 ﻿import React, { useState, useEffect } from "react";
 import { Form, Input, Upload, Button, Card, message, Spin } from "antd";
 import { InboxOutlined } from "@ant-design/icons";
+import * as yup from "yup";
 import { useCccd } from "../../hooks/useCccd";
-import { useDriverLicense } from "../../hooks/useDriverLicense";
+import { useDriverLicense } from "@/hooks/useDriverLicense";
 import { useCloudinary } from "../../hooks/useCloudinary";
 import { useAxiosInstance } from "../../hooks/useAxiosInstance";
 import VerifiedSuccessPage from "./VerifiedSuccessPage";
@@ -95,6 +96,39 @@ export default function VerifyPage() {
   // ================= CCCD =================
   const handleCccdSubmit = async (values) => {
     try {
+      // Yup validation schema for CCCD
+      const cccdSchema = yup.object({
+        idNumber: yup
+          .string()
+          .required("Vui lòng nhập số CCCD/CMND!")
+          .matches(/^\d{9}$|^\d{12}$/, "Số CCCD/CMND phải có 9 hoặc 12 chữ số!"),
+        front: yup
+          .array()
+          .required("Vui lòng tải ảnh mặt trước!")
+          .min(1, "Vui lòng tải ảnh mặt trước!"),
+        back: yup
+          .array()
+          .required("Vui lòng tải ảnh mặt sau!")
+          .min(1, "Vui lòng tải ảnh mặt sau!"),
+      });
+
+      // Validate before submission
+      try {
+        await cccdSchema.validate(values, { abortEarly: false });
+      } catch (err) {
+        if (err.name === "ValidationError") {
+          const fields = err.inner.map(e => ({
+            name: e.path,
+            errors: [e.message]
+          }));
+          // Find the form instance and set errors
+          // Since we don't have form ref, we'll show message instead
+          const errorMessages = err.inner.map(e => e.message).join("; ");
+          message.error(errorMessages);
+          return;
+        }
+      }
+
       const frontFile = values.front?.[0]?.originFileObj;
       const backFile = values.back?.[0]?.originFileObj;
 
@@ -128,6 +162,33 @@ export default function VerifyPage() {
   // ================= Driver License =================
   const handleLicenseSubmit = async (values) => {
     try {
+      // Yup validation schema for Driver License
+      const licenseSchema = yup.object({
+        licenseNumber: yup
+          .string()
+          .required("Vui lòng nhập số bằng lái!")
+          .matches(/^\d{9,12}$/, "Số bằng lái phải có 9-12 chữ số!"),
+        licenseFront: yup
+          .array()
+          .required("Vui lòng tải ảnh mặt trước!")
+          .min(1, "Vui lòng tải ảnh mặt trước!"),
+        licenseBack: yup
+          .array()
+          .required("Vui lòng tải ảnh mặt sau!")
+          .min(1, "Vui lòng tải ảnh mặt sau!"),
+      });
+
+      // Validate before submission
+      try {
+        await licenseSchema.validate(values, { abortEarly: false });
+      } catch (err) {
+        if (err.name === "ValidationError") {
+          const errorMessages = err.inner.map(e => e.message).join("; ");
+          message.error(errorMessages);
+          return;
+        }
+      }
+
       const frontFile = values.licenseFront?.[0]?.originFileObj;
       const backFile = values.licenseBack?.[0]?.originFileObj;
 

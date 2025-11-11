@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import * as yup from "yup";
 import {
   Form,
   Input,
@@ -86,8 +87,52 @@ const StationRegistrationPage = () => {
 
   // 🧭 Xử lý Submit form
   const handleSubmit = async (values) => {
-    setLoading(true);
     try {
+      // Yup validation schema for station registration
+      const stationSchema = yup.object({
+        station_name: yup
+          .string()
+          .required("Vui lòng nhập tên trạm!")
+          .min(5, "Tên trạm phải có ít nhất 5 ký tự!"),
+        address: yup
+          .string()
+          .required("Vui lòng nhập địa chỉ!")
+          .min(10, "Địa chỉ phải có ít nhất 10 ký tự!"),
+        latitude: yup
+          .number()
+          .required("Vui lòng chọn vị trí!")
+          .typeError("Vĩ độ phải là số!")
+          .min(-90, "Vĩ độ phải từ -90 đến 90!")
+          .max(90, "Vĩ độ phải từ -90 đến 90!"),
+        longitude: yup
+          .number()
+          .required("Vui lòng chọn vị trí!")
+          .typeError("Kinh độ phải là số!")
+          .min(-180, "Kinh độ phải từ -180 đến 180!")
+          .max(180, "Kinh độ phải từ -180 đến 180!"),
+        capacity: yup
+          .number()
+          .required("Vui lòng nhập sức chứa!")
+          .typeError("Sức chứa phải là số!")
+          .min(1, "Sức chứa phải lớn hơn 0!")
+          .max(1000, "Sức chứa không được vượt quá 1000!"),
+        description: yup
+          .string()
+          .min(0, "Mô tả không hợp lệ"),
+      });
+
+      // Validate before submission
+      try {
+        await stationSchema.validate(values, { abortEarly: false });
+      } catch (err) {
+        if (err.name === "ValidationError") {
+          const errorMessages = err.inner.map(e => e.message).join("; ");
+          message.error(errorMessages);
+          return;
+        }
+      }
+
+      setLoading(true);
       console.log("📤 Submitting station data:", values);
 
       const openingTime = values.opening_time?.format("HH:mm") || "";

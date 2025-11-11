@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Form, Input, Button, Card, DatePicker, message, Spin, Select } from "antd";
+import * as yup from 'yup';
 import { useParams, useNavigate } from "react-router-dom";
 import dayjs from "dayjs";
 import { ToastContainer, toast } from "react-toastify";
@@ -66,24 +67,30 @@ export default function BookingFormPage() {
   const handleSubmit = async (values) => {
     try {
       setLoading(true);
-      
-      // Validation
-      if (!values.startDate || !values.endDate) {
-        toast.error("❌ Vui lòng chọn ngày bắt đầu và kết thúc!", {
-          position: "top-right",
-          autoClose: 3000,
-        });
-        setLoading(false);
-        return;
-      }
 
-      if (!values.pickupStation || !values.returnStation) {
-        toast.error("❌ Vui lòng chọn trạm đặt và trạm trả xe!", {
-          position: "top-right",
-          autoClose: 3000,
-        });
-        setLoading(false);
-        return;
+      // Yup validation schema
+      const schema = yup.object({
+        startDate: yup.mixed().required('Vui lòng chọn ngày bắt đầu').test('is-date', 'Ngày bắt đầu không hợp lệ', value => !!value && (value.isValid ? value.isValid() : !isNaN(new Date(value).getTime()))),
+        endDate: yup.mixed().required('Vui lòng chọn ngày kết thúc').test('is-date', 'Ngày kết thúc không hợp lệ', value => !!value && (value.isValid ? value.isValid() : !isNaN(new Date(value).getTime()))),
+        pickupStation: yup.string().required('Vui lòng chọn trạm đặt xe'),
+        returnStation: yup.string().required('Vui lòng chọn trạm trả xe').notOneOf([yup.ref('pickupStation')], 'Trạm trả phải khác trạm đặt'),
+      }).test('date-order', 'Ngày kết thúc phải sau ngày bắt đầu', function(value) {
+        const { startDate, endDate } = value || {};
+        if (!startDate || !endDate) return true; // handled by required
+        const s = startDate.isValid ? startDate : dayjs(startDate);
+        const e = endDate.isValid ? endDate : dayjs(endDate);
+        return e.isAfter(s);
+      });
+
+      try {
+        await schema.validate(values, { abortEarly: false });
+      } catch (validationErr) {
+        if (validationErr.name === 'ValidationError') {
+          const fields = validationErr.inner.map(e => ({ name: e.path, errors: [e.message] }));
+          form.setFields(fields);
+          setLoading(false);
+          return;
+        }
       }
 
       const renterId =

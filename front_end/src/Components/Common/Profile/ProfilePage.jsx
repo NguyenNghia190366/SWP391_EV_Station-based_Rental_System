@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import * as yup from "yup";
 import {
   UserOutlined, SafetyOutlined, ClockCircleOutlined, DashboardOutlined,
   EditOutlined, SaveOutlined, CloseOutlined, CarOutlined, LoadingOutlined
@@ -98,9 +99,34 @@ const ProfilePage = () => {
 
   // ===== Update user =====
   const handleUpdateUser = async (updated) => {
-    if (!updated.fullName?.trim()) return message.error("Vui lòng nhập họ tên!");
-    if (!updated.email?.includes("@")) return message.error("Email không hợp lệ!");
     try {
+      // Yup validation schema for profile update
+      const profileSchema = yup.object({
+        fullName: yup
+          .string()
+          .required("Vui lòng nhập họ tên!")
+          .min(2, "Họ tên phải có ít nhất 2 ký tự!"),
+        email: yup
+          .string()
+          .required("Vui lòng nhập email!")
+          .email("Email không hợp lệ!"),
+        phone_number: yup
+          .string()
+          .required("Vui lòng nhập số điện thoại!")
+          .matches(/^[0-9]{10}$/, "Số điện thoại phải có 10 chữ số!"),
+      });
+
+      // Validate before submission
+      try {
+        await profileSchema.validate(updated, { abortEarly: false });
+      } catch (err) {
+        if (err.name === "ValidationError") {
+          const errorMessages = err.inner.map(e => e.message).join("; ");
+          message.error(errorMessages);
+          return;
+        }
+      }
+
       const userId = user?.user_id || user?.userId;
       message.loading({ content: "Đang cập nhật...", key: "update" });
       const res = await updateProfile(userId, updated);
@@ -108,6 +134,7 @@ const ProfilePage = () => {
       setUser(res);
       message.success({ content: "Cập nhật thành công!", key: "update" });
     } catch (err) {
+      console.error("❌ Update profile error:", err);
       message.error("Cập nhật thất bại!");
     }
   };

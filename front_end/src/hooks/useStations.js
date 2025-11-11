@@ -1,4 +1,5 @@
 import { BASE_URL, JSON_HEADERS } from "./useAPI";
+import { useCallback } from "react";
 
 /**
  * Get headers with authentication token if available
@@ -43,7 +44,7 @@ const normalizeStation = (station) => {
 
 // ==================== STATION API ====================
 export const useStations = () => {
-  const getAll = async () => {
+  const getAll = useCallback(async () => {
     const res = await fetch(`${BASE_URL}/Stations`, { headers: getAuthHeaders() });
     
     if (!res.ok) {
@@ -60,10 +61,10 @@ export const useStations = () => {
     const normalized = stations.map(normalizeStation);
     
     return normalized;
-  };
+  }, []);
 
   // Try a nearest endpoint; if backend doesn't support it, callers should fallback
-  const getNearest = async (lat, lng) => {
+  const getNearest = useCallback(async (lat, lng) => {
     // Prefer a query-based endpoint
     const url = `${BASE_URL}/Stations/nearest?lat=${encodeURIComponent(lat)}&lng=${encodeURIComponent(lng)}`;
     const res = await fetch(url, { headers: getAuthHeaders() });
@@ -88,9 +89,9 @@ export const useStations = () => {
       result.station = normalizeStation(result.station);
     }
     return result;
-  };
+  }, []);
 
-  const getById = async (id) => {
+  const getById = useCallback(async (id) => {
     const res = await fetch(`${BASE_URL}/Stations/${id}`, { headers: getAuthHeaders() });
     if (!res.ok) {
       const err = await res.json().catch(() => ({}));
@@ -98,34 +99,34 @@ export const useStations = () => {
     }
     const station = await res.json();
     return normalizeStation(station);
-  };
+  }, []);
 
-  const create = async (payload) => {
+  const create = useCallback(async (payload) => {
     const res = await fetch(`${BASE_URL}/Stations`, { method: 'POST', headers: getAuthHeaders(), body: JSON.stringify(payload) });
     if (!res.ok) {
       const err = await res.json().catch(() => ({}));
       throw new Error(err.message || `Create station failed: HTTP ${res.status}`);
     }
     return res.json();
-  };
+  }, []);
 
-  const update = async (id, payload) => {
+  const update = useCallback(async (id, payload) => {
     const res = await fetch(`${BASE_URL}/Stations/${id}`, { method: 'PUT', headers: getAuthHeaders(), body: JSON.stringify(payload) });
     if (!res.ok) {
       const err = await res.json().catch(() => ({}));
       throw new Error(err.message || `Update station failed: HTTP ${res.status}`);
     }
     return res.json();
-  };
+  }, []);
 
-  const remove = async (id) => {
+  const remove = useCallback(async (id) => {
     const res = await fetch(`${BASE_URL}/Stations/${id}`, { method: 'DELETE', headers: getAuthHeaders() });
     if (!res.ok) {
       const err = await res.json().catch(() => ({}));
       throw new Error(err.message || `Delete station failed: HTTP ${res.status}`);
     }
     return res.json();
-  };
+  }, []);
 
   return { getAll, getNearest, getById, create, update, remove };
 };

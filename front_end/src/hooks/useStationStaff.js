@@ -6,41 +6,21 @@ import { message } from "antd";
 export const useStationStaff = () => {
   const instance = useAxiosInstance();
 
-  const approveRentalOrder = useCallback(async (record) => {
+  const approveRentalOrder = useCallback(async (orderId) => {
     try {
-      const payload = {
-        id: Number(record.orderId),
-        renterId: record.renterId,
-        vehicleId: record.vehicleId,
-        pickupStationId: record.pickupStationId,
-        returnStationId: record.returnStationId,
-        startTime: record.startTime,
-        endTime: record.endTime,
-        status: "APPROVED"
-      };
+      const cleanId = Number(orderId);
+      console.log("Approving order ID:", cleanId);
 
-      console.log("📤 Sending approve payload:", payload);
+      const res = await instance.put(`/Approve`, {}, {
+        params: { id: cleanId }
+      });
 
-      const res = await instance.put(
-        `/RentalOrders/Approve`,
-        payload,
-        {
-          headers: {
-            "Content-Type": "application/json",
-            "Accept": "application/json",
-          },
-        }
-      );
-
-      message.success("✅ Duyệt đơn thuê thành công!");
+      message.success("Duyệt đơn thuê thành công!");
       return res.data;
     } catch (error) {
-      console.error("❌ Approve error:", error);
       
-      // Hiển thị chi tiết lỗi
       const errorMsg = error.response?.data?.title || 
                        error.response?.data?.message || 
-                       JSON.stringify(error.response?.data?.errors) ||
                        "Không thể duyệt đơn thuê!";
       
       message.error(errorMsg);
@@ -48,40 +28,21 @@ export const useStationStaff = () => {
     }
   }, [instance]);
 
-  const rejectRentalOrder = useCallback(async (record) => {
+  const rejectRentalOrder = useCallback(async (orderId) => {
     try {
-      const payload = {
-        id: Number(record.orderId),
-        renterId: record.renterId,
-        vehicleId: record.vehicleId,
-        pickupStationId: record.pickupStationId,
-        returnStationId: record.returnStationId,
-        startTime: record.startTime,
-        endTime: record.endTime,
-        status: "REJECTED"
-      };
+      const cleanId = Number(orderId);
+      console.log("Rejecting order ID:", cleanId);
 
-      console.log("📤 Sending reject payload:", payload);
+      const res = await instance.put(`/Reject`, {}, {
+        params: { id: cleanId }
+      });
 
-      const res = await instance.put(
-        `/RentalOrders/Reject`,
-        payload,
-        {
-          headers: {
-            "Content-Type": "application/json",
-            "Accept": "application/json",
-          },
-        }
-      );
-
-      message.success("🚫 Đã từ chối đơn thuê!");
+      message.success("Đã từ chối đơn thuê!");
       return res.data;
     } catch (error) {
-      console.error("❌ Reject error:", error);
       
       const errorMsg = error.response?.data?.title || 
                        error.response?.data?.message || 
-                       JSON.stringify(error.response?.data?.errors) ||
                        "Không thể từ chối đơn thuê!";
       
       message.error(errorMsg);

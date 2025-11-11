@@ -1,5 +1,8 @@
 import React, { useState } from "react";
 import { Form, Input, Button, Card, Typography, DatePicker, message } from "antd";
+import * as yup from 'yup';
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 import {
   HomeOutlined,
   LockOutlined,
@@ -21,8 +24,28 @@ const RegisterPage = () => {
 
   const handleRegister = async (values) => {
     setLoading(true);
+    // Validate with Yup schema before submitting
+    const schema = yup.object({
+      name: yup.string().required('Vui lòng nhập họ tên!').min(2, 'Họ tên phải có ít nhất 2 ký tự!'),
+      email: yup.string().required('Vui lòng nhập email!').email('Email không hợp lệ!'),
+      phone: yup.string().required('Vui lòng nhập số điện thoại!').matches(/^[0-9]{10}$/, 'Số điện thoại phải có 10 chữ số!'),
+      dateOfBirth: yup.mixed().required('Vui lòng chọn ngày sinh!').test('age', 'Bạn phải đủ 18 tuổi!', value => {
+        if (!value) return false;
+        // value is a moment object from DatePicker
+        const year = value.year ? value.year() : (new Date(value)).getFullYear();
+        return new Date().getFullYear() - year >= 18;
+      }),
+      address: yup.string().required('Vui lòng nhập địa chỉ!').min(10, 'Địa chỉ phải có ít nhất 10 ký tự!'),
+      password: yup.string().required('Vui lòng nhập mật khẩu!').min(6, 'Mật khẩu phải có ít nhất 6 ký tự!'),
+      confirm: yup.string().required('Vui lòng xác nhận mật khẩu!').oneOf([yup.ref('password')], 'Mật khẩu không khớp!'),
+    });
 
     try {
+      // prepare values for validation (dateOfBirth is moment)
+      const toValidate = { ...values };
+      // run validation
+      await schema.validate(toValidate, { abortEarly: false });
+
       const newUser = {
         fullName: values.name,
         email: values.email,
@@ -30,23 +53,35 @@ const RegisterPage = () => {
         password: values.password,
         confirmPassword: values.confirm,
         dateOfBirth: values.dateOfBirth
-          ? values.dateOfBirth.format("YYYY-MM-DD")
-          : "2000-01-01",
-        address: values.address || "chưa cập nhật",
+          ? values.dateOfBirth.format('YYYY-MM-DD')
+          : '2000-01-01',
+        address: values.address || 'chưa cập nhật',
       };
 
-      console.log("📝 Sending new user:", newUser);
+      console.log('📝 Sending new user:', newUser);
       const result = await registerUser(newUser);
 
       if (result) {
-        message.success("✅ Đăng ký thành công! Hãy đăng nhập để tiếp tục.");
-        navigate("/login");
+        // Show react-toastify toast and redirect to login after short delay
+        toast.success('Đã đăng ký thành công, bây giờ hãy đăng nhập', {
+          position: 'top-right',
+          autoClose: 2000,
+        });
+        // Also show antd message for accessibility/consistency
+        message.success('✅ Đăng ký thành công! Hãy đăng nhập để tiếp tục.');
+        setTimeout(() => navigate('/login'), 1800);
       } else {
-        message.error("Không thể tạo tài khoản, vui lòng thử lại!");
+        message.error('Không thể tạo tài khoản, vui lòng thử lại!');
       }
-    } catch (error) {
-      console.error("❌ Register error:", error);
-      message.error(error.message || "Lỗi khi đăng ký. Vui lòng thử lại!");
+    } catch (err) {
+      if (err.name === 'ValidationError') {
+        // map yup errors to form fields
+        const fields = err.inner.map(e => ({ name: e.path, errors: [e.message] }));
+        form.setFields(fields);
+      } else {
+        console.error('❌ Register error:', err);
+        message.error(err.message || 'Lỗi khi đăng ký. Vui lòng thử lại!');
+      }
     } finally {
       setLoading(false);
     }
@@ -235,6 +270,7 @@ const RegisterPage = () => {
           </div>
         </Form>
       </Card>
+      <ToastContainer />
     </div>
   );
 };

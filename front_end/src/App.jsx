@@ -13,6 +13,7 @@ import ContractPage from "./pages/renter/ContractPage.jsx";
 import PaymentPage from "./pages/renter/payment/PaymentPage.jsx";
 import VehiclePreviewNotification from "./pages/renter/VehiclePreviewNotification";
 import VerifyPage from "./pages/renter/VerifyPage.jsx";
+import RentalHistoryPage from "./pages/renter/RentalHistoryPage.jsx";
 // Admin
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import AdminVerificationDashboard from "./pages/admin/VerifyRenterPage.jsx";
@@ -54,6 +55,7 @@ function App() {
 
         {/* User Account Routes */}
         <Route path="/notifications" element={<NotificationsPage />} />
+        <Route path="/my-bookings" element={<RentalHistoryPage />} />
 
         {/* Vehicle Preview & Handover Routes */}
         <Route
