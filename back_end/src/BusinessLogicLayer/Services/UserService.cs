@@ -4,13 +4,20 @@ using BusinessLogicLayer.DTOs.User;
 using DataAccessLayer;
 using DataAccessLayer.Models;
 using Microsoft.EntityFrameworkCore;
+using BusinessLogicLayer.Helpers.CurrentUserAccessor;
 
 namespace BusinessLogicLayer.Services
 {
     public class UserService : IUserService
     {
         private readonly ApplicationDbContext _db;
-        public UserService(ApplicationDbContext db) => _db = db;
+        private readonly ICurrentUserAccessor _currentUserAccessor;
+
+        public UserService(ApplicationDbContext db, ICurrentUserAccessor currentUserAccessor)
+        {
+            _db = db;
+            _currentUserAccessor = currentUserAccessor;
+        }
 
         /// <summary>
         /// Lấy danh sách người dùng có phân trang và bộ lọc.
@@ -88,29 +95,64 @@ namespace BusinessLogicLayer.Services
         }
 
         /// <summary>
-        /// Tạo một người dùng mới.
+        /// (Admin) Tạo một người dùng mới (ĐÃ REFACTOR)
         /// </summary>
-        /// <param name="dto">DTO chứa thông tin để tạo người dùng.</param>
-        /// <returns>ID của người dùng vừa tạo.</returns>
         public async Task<int> CreateAsync(UserCreateDto dto)
         {
-            // TODO: Kiểm tra xem email đã tồn tại chưa
-            // TODO: Hash mật khẩu trước khi lưu vào DB
+            // 1. Kiểm tra Email tồn tại
+            var normalizedEmail = dto.Email.Trim().ToLower();
+            if (await _db.Users.AnyAsync(u => u.email.ToLower() == normalizedEmail))
+            {
+                throw new InvalidOperationException("Email này đã được sử dụng.");
+            }
 
+            // 2. Hash mật khẩu (Dùng BCrypt, đừng lưu plain text!)
+            var hashedPassword = BCrypt.Net.BCrypt.HashPassword(dto.Password);
+
+            // 3. Tạo Entity User
             var entity = new User
             {
-                full_name = dto.FullName,
-                email = dto.Email, // Sửa lại: Dùng Email thay cho Username
+                full_name = dto.FullName.Trim(),
+                email = normalizedEmail,
                 phone_number = dto.PhoneNumber,
                 date_of_birth = dto.DateOfBirth,
-                password_hash = dto.Password,
-                role = dto.Role,     // "ADMIN" | "STAFF" | "RENTER"
-                status = dto.Status  // "Active" | "Inactive"
+                password_hash = hashedPassword, // <-- Dùng mật khẩu đã hash
+                role = dto.Role,     
+                status = dto.Status  
             };
 
-            _db.Users.Add(entity);
-            await _db.SaveChangesAsync();
-            return entity.user_id;
+            // 4. Dùng Transaction để đảm bảo tính toàn vẹn
+            await using var transaction = await _db.Database.BeginTransactionAsync();
+            try
+            {
+                // Thêm User vào DB trước để lấy UserId
+                _db.Users.Add(entity);
+                await _db.SaveChangesAsync(); // (Lúc này entity.user_id đã có)
+
+                // 5. Logic MỚI: Dựa vào Role để tạo record liên kết
+                if (entity.role == "STAFF")
+                {
+                    // (Chúng ta có thể gán station_id cho Staff sau)
+                    var newStaff = new Staff { user = entity, station_id = null };
+                    _db.Staff.Add(newStaff);
+                }
+                else if (entity.role == "RENTER")
+                {
+                    var newRenter = new Renter { user = entity, is_verified = true }; // Admin tạo thì cho verified luôn
+                    _db.Renters.Add(newRenter);
+                }
+                // (Nếu là ADMIN thì không cần làm gì thêm)
+
+                await _db.SaveChangesAsync(); // Lưu Staff/Renter
+                await transaction.CommitAsync(); // Chốt giao dịch
+
+                return entity.user_id;
+            }
+            catch (Exception)
+            {
+                await transaction.RollbackAsync(); // Hoàn tác nếu lỗi
+                throw; // Ném lỗi ra ngoài
+            }
         }
 
         /// <summary>
@@ -152,8 +194,10 @@ namespace BusinessLogicLayer.Services
             return true;
         }
 
-        public async Task<UserProfileDto?> GetProfileAsync(int userId)
+        public async Task<UserProfileDto?> GetProfileAsync()
         {
+            int userId = _currentUserAccessor.UserId; // Lấy ID từ helper
+            if (userId == 0) throw new UnauthorizedAccessException("Người dùng không hợp lệ.");
             // Tối ưu truy vấn bằng cách sử dụng:
             // 1. AsNoTracking(): Vì đây là thao tác chỉ đọc.
             // 2. Select(): Chỉ chọn các cột cần thiết (Projection) thay vì kéo
@@ -179,8 +223,10 @@ namespace BusinessLogicLayer.Services
             return userProfile;
         }
 
-        public async Task<UserProfileDto?> UpdateProfileAsync(int userId, UserProfileUpdateDto dto)
+        public async Task<UserProfileDto?> UpdateProfileAsync(UserProfileUpdateDto dto)
         {
+            int userId = _currentUserAccessor.UserId; // Lấy ID từ helper
+            if (userId == 0) throw new UnauthorizedAccessException("Người dùng không hợp lệ.");
             var user = await _db.Users
                 .Include(u => u.Renter)
                 .FirstOrDefaultAsync(u => u.user_id == userId);
@@ -220,11 +266,17 @@ namespace BusinessLogicLayer.Services
             await _db.SaveChangesAsync();
 
             // Trả về profile mới nhất
-            return await GetProfileAsync(userId);
+            return await GetProfileAsync();
         }
 
-        public async Task<(bool Success, string ErrorMessage)> ChangePasswordAsync(int userId, ChangePasswordRequestDto dto)
+        public async Task<(bool Success, string ErrorMessage)> ChangePasswordAsync(ChangePasswordRequestDto dto)
         {
+            int userId = _currentUserAccessor.UserId; // Lấy ID từ helper
+            if (userId == 0)
+            {
+                return (false, "Người dùng không hợp lệ.");
+            }
+
             var user = await _db.Users.FindAsync(userId);
             if (user == null)
             {

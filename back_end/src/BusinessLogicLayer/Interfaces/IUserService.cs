@@ -35,10 +35,10 @@ namespace BusinessLogicLayer.Interfaces
         Task<bool> SetStatusAsync(int id, string status);
 
         // Lấy thông tin profile của một người dùng
-        Task<UserProfileDto?> GetProfileAsync(int userId);
+        Task<UserProfileDto?> GetProfileAsync();
         // Cập nhật thông tin profile của một người dùng
-        Task<UserProfileDto?> UpdateProfileAsync(int userId, UserProfileUpdateDto dto);
+        Task<UserProfileDto?> UpdateProfileAsync(UserProfileUpdateDto dto);
         // Thay đổi mật khẩu cho người Dùng
-        Task<(bool Success, string ErrorMessage)> ChangePasswordAsync(int userId, ChangePasswordRequestDto dto);
+        Task<(bool Success, string ErrorMessage)> ChangePasswordAsync(ChangePasswordRequestDto dto);
     }
 }
