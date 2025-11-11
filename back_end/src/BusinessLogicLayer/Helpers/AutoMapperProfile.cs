@@ -9,6 +9,7 @@ using BusinessLogicLayer.DTOs.Renter;
 using BusinessLogicLayer.DTOs.Vehicle;
 using BusinessLogicLayer.DTOs.Payment;
 using BusinessLogicLayer.DTOs.Report;
+using BusinessLogicLayer.DTOs.ExtraFeeType;
 
 namespace BusinessLogicLayer.Helpers
 {
@@ -232,6 +233,24 @@ namespace BusinessLogicLayer.Helpers
                 // Map lồng nhau: Lấy danh sách URL ảnh (1-N)
                 .ForMember(dest => dest.ImageUrls, opt => opt.MapFrom(src => src.Report_EV_Imgs.Select(img => img.img_url)));
  #endregion      
+        
+            // ========== EXTRAFEETYPE (CSDL MỚI) ==========
+                // Map Create DTO -> Entity
+                CreateMap<ExtraFeeTypeCreateDto, ExtraFeeType>()
+                    .ForMember(dest => dest.extra_fee_type_name, opt => opt.MapFrom(src => src.ExtraFeeTypeName))
+                    .ForMember(dest => dest.amount, opt => opt.MapFrom(src => src.Amount));
+
+                // Map Update DTO -> Entity
+                CreateMap<ExtraFeeTypeUpdateDto, ExtraFeeType>()
+                    .ForMember(dest => dest.extra_fee_type_name, opt => opt.MapFrom(src => src.ExtraFeeTypeName))
+                    .ForMember(dest => dest.amount, opt => opt.MapFrom(src => src.Amount));
+
+                // Map Entity -> View DTO
+                CreateMap<ExtraFeeType, ExtraFeeTypeViewDto>()
+                    .ForMember(dest => dest.ExtraFeeTypeId, opt => opt.MapFrom(src => src.extra_fee_type_id))
+                    .ForMember(dest => dest.ExtraFeeTypeName, opt => opt.MapFrom(src => src.extra_fee_type_name))
+                    .ForMember(dest => dest.Amount, opt => opt.MapFrom(src => src.amount));
+        
         }
     }
 }
