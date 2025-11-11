@@ -1,10 +1,10 @@
 import { useAxiosInstance } from "./useAxiosInstance";
 import { useCallback } from "react";
-import { useRenter } from "./useRenter";
+import { useRenters } from "./useRenters";
 
 export const useCccd = () => {
   const instance = useAxiosInstance();
-  const { getRenterId } = useRenter();
+  const { getRenterId } = useRenters();
 
   // 🔹 1. Upload CCCD (URLs từ Cloudinary)
   const uploadCccd = useCallback(

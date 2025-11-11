@@ -1,16 +1,19 @@
 import React, { useEffect, useState } from "react";
-import { Card, Table, Tag, Spin, Empty, Button, message } from "antd";
+import { Card, Table, Tag, Spin, Empty, Button, message, Space, Popconfirm, Tooltip } from "antd";
 import { useNavigate } from "react-router-dom";
 import dayjs from "dayjs";
 import { useAxiosInstance } from "@/hooks/useAxiosInstance";
 import { useRenters } from "@/hooks/useRenters";
+import { useRentalOrders } from "@/hooks/useRentalOrders";
+import { DeleteOutlined } from "@ant-design/icons";
 
 export default function RentalHistoryPage() {
   const instance = useAxiosInstance();
   const navigate = useNavigate();
-  const { getRenterIdByUserId } = useRenters();
+  const { getRenterIdByUserId, rejectRentalOrder } = useRenters();
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [cancellingId, setCancellingId] = useState(null);
 
   const fetchOrders = async () => {
     try {
@@ -122,6 +125,56 @@ export default function RentalHistoryPage() {
       key: "createdAt",
       render: (date) => dayjs(date).format("DD/MM/YYYY HH:mm"),
       width: 160,
+    },
+    {
+      title: "Hành động",
+      key: "actions",
+      render: (_, record) => {
+        // show cancel for BOOKED and APPROVED (disabled when APPROVED)
+        const showCancel = record.status === "BOOKED" || record.status === "APPROVED";
+        const disabled = record.status === "APPROVED";
+        if (!showCancel) return null;
+
+        return (
+          <Space>
+            <Popconfirm
+              title={disabled ? "Đơn đã được duyệt, không thể hủy." : "Xác nhận hủy đơn?"}
+              onConfirm={async () => {
+                if (disabled) return message.warning("Đơn đã được duyệt, không thể hủy từ phía renter.");
+                if (cancellingId) return;
+                setCancellingId(record.orderId);
+                try {
+                  // Use rejectRentalOrder from useRenters (same as staff)
+                  // This calls /Reject endpoint which updates status to CANCELED
+                  await rejectRentalOrder(record.orderId);
+                  message.success("Đã hủy đơn thuê!");
+                  setTimeout(() => fetchOrders(), 400);
+                } catch (err) {
+                  console.error("❌ Lỗi hủy đơn:", err);
+                  message.error("Hủy đơn thất bại. Vui lòng thử lại.");
+                } finally {
+                  setCancellingId(null);
+                }
+              }}
+              okText="Có"
+              cancelText="Không"
+              disabled={disabled}
+            >
+              <Tooltip title={disabled ? "Đã duyệt — không thể hủy" : "Hủy đơn"}>
+                <Button
+                  type="primary"
+                  danger
+                  icon={<DeleteOutlined />}
+                  size="small"
+                  loading={cancellingId === record.orderId}
+                  disabled={disabled || cancellingId === record.orderId}
+                />
+              </Tooltip>
+            </Popconfirm>
+          </Space>
+        );
+      },
+      width: 120,
     },
   ];
 
