@@ -2,7 +2,6 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
 using BusinessLogicLayer.Interfaces;
 using BusinessLogicLayer.DTOs.Renter;
-using System.Security.Claims;
 
 namespace PresentationLayer.Controllers
 {
@@ -23,14 +22,17 @@ namespace PresentationLayer.Controllers
         {
             try
             {
-                // 3. Lấy userId từ hàm helper
-                int userId = GetCurrentUserId(); 
-                var data = await _renterService.GetMyDocumentsAsync(userId);
+                // === SỬA: Bỏ logic GetCurrentUserId() ===
+                var data = await _renterService.GetMyDocumentsAsync(); // <-- Không cần userId
                 return Ok(data);
             }
             catch (UnauthorizedAccessException ex)
             {
                 return Unauthorized(ex.Message);
+            }
+            catch (KeyNotFoundException) // Bắt lỗi mới từ Service
+            {
+                return NotFound(new { message = "Không tìm thấy thông tin Renter." });
             }
         }
 
@@ -39,37 +41,18 @@ namespace PresentationLayer.Controllers
         {
             try
             {
-                // 3. Lấy userId từ hàm helper
-                int userId = GetCurrentUserId();
-                var data = await _renterService.UpsertMyDocumentsAsync(userId, dto);
+                // === SỬA: Bỏ logic GetCurrentUserId() ===
+                var data = await _renterService.UpsertMyDocumentsAsync(dto); // <-- Không cần userId
                 return Ok(data);
             }
             catch (UnauthorizedAccessException ex)
             {
                 return Unauthorized(ex.Message);
             }
-        }
-
-        // Hàm helper để lấy UserId từ Claims
-        private int GetCurrentUserId()
-        {
-            // Thông thường, ID của user được lưu trong 'NameIdentifier'
-            var userIdClaim = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier);
-
-            if (userIdClaim == null)
+            catch (KeyNotFoundException) // Bắt lỗi mới từ Service
             {
-                // Nếu [Authorize] đã chạy, về lý thuyết không thể vào đây,
-                // nhưng kiểm tra cẩn thận vẫn tốt hơn.
-                throw new UnauthorizedAccessException("Token không hợp lệ, không tìm thấy User ID.");
+                return NotFound(new { message = "Không tìm thấy thông tin Renter." });
             }
-
-            if (int.TryParse(userIdClaim.Value, out int userId))
-            {
-                return userId;
-            }
-
-            // Lỗi nghiêm trọng: Claim tồn tại nhưng giá trị không phải là số
-            throw new UnauthorizedAccessException("User ID trong token không phải là một số hợp lệ.");
         }
     }
 }
