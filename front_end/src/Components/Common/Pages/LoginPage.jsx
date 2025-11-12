@@ -8,6 +8,7 @@ import * as yup from 'yup';
 import { useUsers } from "@/hooks/useUsers";
 import { normalizeUserData } from "@/utils/normalizeData";
 import { useAxiosInstance } from "@/hooks/useAxiosInstance";
+import GoogleSignIn from './GoogleSignIn';
 
 const { Title, Text } = Typography;
 
@@ -18,6 +19,7 @@ const LoginPage = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const { loginUser } = useUsers();
+  const api = useAxiosInstance();
 
   message.config({
     top: 80,
@@ -72,7 +74,7 @@ const LoginPage = () => {
         token = result.token || "dummy-token";
       } else throw new Error("Format dữ liệu không đúng từ server");
 
-      const normalizedUser = normalizeUserData(user);
+  const normalizedUser = normalizeUserData(user);
       console.log("📋 Normalized User:", normalizedUser);
 
       if (!normalizedUser || !normalizedUser.role) throw new Error("Thiếu role user");
@@ -173,6 +175,114 @@ const LoginPage = () => {
     }
   };
 
+  // Helper to process login result object (used by both normal login and Google login)
+  const processLoginResult = async (result) => {
+    // This duplicates the successful-login handling above; keep in sync
+    let token, user;
+    if (result.token && result.user) {
+      token = result.token;
+      user = result.user;
+    } else if (result.accessToken && result.user) {
+      token = result.accessToken;
+      user = result.user;
+    } else if (result.data) {
+      token = result.data.token || result.data.accessToken;
+      user = result.data.user || result.data;
+    } else if (result.email && result.role && result.token) {
+      token = result.token;
+      user = result;
+    } else if (result.email || result.user_id) {
+      user = result;
+      token = result.token || "dummy-token";
+    } else throw new Error("Format dữ liệu không đúng từ server");
+
+    const normalizedUser = normalizeUserData(user);
+    if (!normalizedUser || !normalizedUser.role) throw new Error("Thiếu role user");
+
+    if (token) localStorage.setItem("token", token);
+    localStorage.setItem("currentUser", JSON.stringify(normalizedUser));
+    localStorage.setItem("isLoggedIn", "true");
+    localStorage.setItem("role", normalizedUser.role);
+
+    const userId = normalizedUser.userId || normalizedUser.user_id;
+    localStorage.setItem("userId", userId);
+    localStorage.setItem("user_id", userId);
+
+    let renterId = normalizedUser.renterId || normalizedUser.renter_id;
+    if (!renterId && userId) {
+      try {
+        const rentersRes = await api.get("/Renters", { headers: { "ngrok-skip-browser-warning": "true" } });
+        const renters = Array.isArray(rentersRes.data) ? rentersRes.data : rentersRes.data?.data || [];
+        const renter = renters.find(
+          (r) => String(r.user_id || r.userId) === String(userId) || Number(r.user_id) === Number(userId)
+        );
+        if (renter) renterId = renter.renter_id || renter.renterId;
+      } catch (err) {
+        console.warn("⚠️ Lỗi khi query Renters:", err);
+      }
+    }
+    if (renterId) {
+      localStorage.setItem("renterId", renterId);
+      localStorage.setItem("renter_id", renterId);
+      localStorage.setItem("renter_Id", renterId);
+    }
+    if (normalizedUser.staffId || normalizedUser.staff_id) {
+      localStorage.setItem("staffId", normalizedUser.staffId || normalizedUser.staff_id);
+      localStorage.setItem("staff_id", normalizedUser.staff_id || normalizedUser.staffId);
+    }
+
+    const currentHour = new Date().getHours();
+    let greeting = currentHour < 12 ? "Chào buổi sáng" : currentHour < 18 ? "Chào buổi chiều" : "Chào buổi tối";
+    toast.success(`${greeting}, ${normalizedUser.userName || normalizedUser.fullName}!`, { position: "top-right", autoClose: 2000 });
+
+    setTimeout(() => {
+      const role = (normalizedUser?.role || "").toUpperCase();
+      if (role === "ADMIN") navigate("/admin/dashboard");
+      else if (role === "STAFF") navigate("/staff/dashboard");
+      else navigate("/home");
+    }, 1500);
+  };
+
+  // Handler for credential from GoogleSignIn
+  const handleGoogleCredential = async (idToken) => {
+    try {
+      setLoading(true);
+      if (!idToken) throw new Error('Không nhận được token từ Google');
+      const res = await api.post('/UserAccount/google-login', { idToken });
+      const data = res.data || res;
+      await processLoginResult(data);
+    } catch (err) {
+      console.error('❌ Google login error:', err);
+      // Provide actionable errors for common problems
+      const status = err.response?.status;
+      const responseBody = err.response?.data;
+
+      if (status === 404) {
+        toast.error('API endpoint /UserAccount/google-login không tồn tại (404). Kiểm tra backend hoặc VITE_API_BASE_URL.', { position: 'top-right', autoClose: 5000 });
+      } else if (status === 403) {
+        // Common when Google rejects origin or credentials
+        const serverMsg = responseBody?.message || JSON.stringify(responseBody) || '';
+        if ((serverMsg || '').toLowerCase().includes('origin') || (serverMsg || '').toLowerCase().includes('not allowed')) {
+          toast.error('Google trả lỗi 403: origin không được phép cho client id này. Thêm origin (ví dụ: http://localhost:5173) vào OAuth client trong Google Cloud Console.', { position: 'top-right', autoClose: 8000 });
+        } else {
+          toast.error('Đăng nhập bằng Google bị từ chối (403). Kiểm tra cấu hình OAuth trên Google Cloud và đường dẫn API.', { position: 'top-right', autoClose: 6000 });
+        }
+      } else if (err.message && err.message.includes('Request failed with status code')) {
+        toast.error('Đăng nhập bằng Google thất bại: ' + err.message, { position: 'top-right', autoClose: 4000 });
+      } else {
+        let msg = 'Đăng nhập bằng Google thất bại.';
+        if (responseBody?.message) msg = responseBody.message;
+        else if (err.message) msg = err.message;
+        toast.error(msg, { position: 'top-right', autoClose: 3000 });
+      }
+
+      // Helpful console output for debugging
+      console.debug('Google login debug: status=', status, 'body=', responseBody, 'err=', err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-100 p-4">
       <ToastContainer
@@ -265,6 +375,10 @@ const LoginPage = () => {
               {loading ? "Đang đăng nhập..." : "Đăng nhập"}
             </Button>
           </Form.Item>
+
+          <div className="text-center mb-4">
+            <GoogleSignIn onCredential={handleGoogleCredential} />
+          </div>
 
           <div className="text-center">
             <Text className="text-gray-600">

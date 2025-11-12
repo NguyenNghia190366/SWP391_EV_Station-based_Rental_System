@@ -94,39 +94,34 @@ export default function VerifyPage() {
   }
 
   // ================= CCCD =================
+  // ================= CCCD =================
   const handleCccdSubmit = async (values) => {
     try {
-      // Yup validation schema for CCCD
-      const cccdSchema = yup.object({
-        idNumber: yup
-          .string()
-          .required("Vui lòng nhập số CCCD/CMND!")
-          .matches(/^\d{9}$|^\d{12}$/, "Số CCCD/CMND phải có 9 hoặc 12 chữ số!"),
-        front: yup
-          .array()
-          .required("Vui lòng tải ảnh mặt trước!")
-          .min(1, "Vui lòng tải ảnh mặt trước!"),
-        back: yup
-          .array()
-          .required("Vui lòng tải ảnh mặt sau!")
-          .min(1, "Vui lòng tải ảnh mặt sau!"),
-      });
+      console.log("📝 Form values (CCCD):", values);
+      console.log("📝 Front files:", values.front);
+      console.log("📝 Back files:", values.back);
 
-      // Validate before submission
-      try {
-        await cccdSchema.validate(values, { abortEarly: false });
-      } catch (err) {
-        if (err.name === "ValidationError") {
-          const fields = err.inner.map(e => ({
-            name: e.path,
-            errors: [e.message]
-          }));
-          // Find the form instance and set errors
-          // Since we don't have form ref, we'll show message instead
-          const errorMessages = err.inner.map(e => e.message).join("; ");
-          message.error(errorMessages);
-          return;
-        }
+      // Simple validation without Yup - just check if data exists
+      if (!values.idNumber || !values.idNumber.trim()) {
+        message.error("Vui lòng nhập số CCCD/CMND!");
+        return;
+      }
+
+      if (!values.front || values.front.length === 0) {
+        message.error("Vui lòng tải ảnh mặt trước!");
+        return;
+      }
+
+      if (!values.back || values.back.length === 0) {
+        message.error("Vui lòng tải ảnh mặt sau!");
+        return;
+      }
+
+      // Validate ID number format
+      const idNum = values.idNumber.trim();
+      if (!/^\d{9}$|^\d{12}$/.test(idNum)) {
+        message.error("Số CCCD/CMND phải có 9 hoặc 12 chữ số!");
+        return;
       }
 
       const frontFile = values.front?.[0]?.originFileObj;
@@ -162,31 +157,29 @@ export default function VerifyPage() {
   // ================= Driver License =================
   const handleLicenseSubmit = async (values) => {
     try {
-      // Yup validation schema for Driver License
-      const licenseSchema = yup.object({
-        licenseNumber: yup
-          .string()
-          .required("Vui lòng nhập số bằng lái!")
-          .matches(/^\d{9,12}$/, "Số bằng lái phải có 9-12 chữ số!"),
-        licenseFront: yup
-          .array()
-          .required("Vui lòng tải ảnh mặt trước!")
-          .min(1, "Vui lòng tải ảnh mặt trước!"),
-        licenseBack: yup
-          .array()
-          .required("Vui lòng tải ảnh mặt sau!")
-          .min(1, "Vui lòng tải ảnh mặt sau!"),
-      });
+      console.log("📝 Form values (License):", values);
 
-      // Validate before submission
-      try {
-        await licenseSchema.validate(values, { abortEarly: false });
-      } catch (err) {
-        if (err.name === "ValidationError") {
-          const errorMessages = err.inner.map(e => e.message).join("; ");
-          message.error(errorMessages);
-          return;
-        }
+      // Simple validation without Yup
+      if (!values.licenseNumber || !values.licenseNumber.trim()) {
+        message.error("Vui lòng nhập số bằng lái!");
+        return;
+      }
+
+      if (!values.licenseFront || values.licenseFront.length === 0) {
+        message.error("Vui lòng tải ảnh mặt trước!");
+        return;
+      }
+
+      if (!values.licenseBack || values.licenseBack.length === 0) {
+        message.error("Vui lòng tải ảnh mặt sau!");
+        return;
+      }
+
+      // Validate license number format
+      const licNum = values.licenseNumber.trim();
+      if (!/^\d{9,12}$/.test(licNum)) {
+        message.error("Số bằng lái phải có 9-12 chữ số!");
+        return;
       }
 
       const frontFile = values.licenseFront?.[0]?.originFileObj;
@@ -242,7 +235,6 @@ export default function VerifyPage() {
               name="front"
               valuePropName="fileList"
               getValueFromEvent={(e) => e?.fileList}
-              rules={[{ required: true, message: "Vui lòng tải ảnh mặt trước!" }]}
             >
               <Dragger beforeUpload={() => false} multiple={false} maxCount={1}>
                 <p className="ant-upload-drag-icon">
@@ -257,7 +249,6 @@ export default function VerifyPage() {
               name="back"
               valuePropName="fileList"
               getValueFromEvent={(e) => e?.fileList}
-              rules={[{ required: true, message: "Vui lòng tải ảnh mặt sau!" }]}
             >
               <Dragger beforeUpload={() => false} multiple={false} maxCount={1}>
                 <p className="ant-upload-drag-icon">
@@ -300,7 +291,6 @@ export default function VerifyPage() {
               name="licenseFront"
               valuePropName="fileList"
               getValueFromEvent={(e) => e?.fileList}
-              rules={[{ required: true, message: "Vui lòng tải ảnh mặt trước!" }]}
             >
               <Dragger beforeUpload={() => false} multiple={false} maxCount={1}>
                 <p className="ant-upload-drag-icon">
@@ -315,7 +305,6 @@ export default function VerifyPage() {
               name="licenseBack"
               valuePropName="fileList"
               getValueFromEvent={(e) => e?.fileList}
-              rules={[{ required: true, message: "Vui lòng tải ảnh mặt sau!" }]}
             >
               <Dragger beforeUpload={() => false} multiple={false} maxCount={1}>
                 <p className="ant-upload-drag-icon">
