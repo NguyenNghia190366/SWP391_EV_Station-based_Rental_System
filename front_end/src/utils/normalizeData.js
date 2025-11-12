@@ -120,8 +120,8 @@ export const normalizeVehicleData = (vehicle) => {
     model: vehicle.model || vehicle.modelName || vehicle.model_name || null,
 
     // Location & Model
-    location: vehicle.location || vehicle.stationId || "",
-    stationId: vehicle.stationId || vehicle.location || null,
+    location: vehicle.location || vehicle.stationId || vehicle.station_id || "",
+    stationId: vehicle.stationId || vehicle.station_id || vehicle.location || null,
     vehicleModelId: vehicle.vehicleModelId || null,
     releaseYear: vehicle.releaseYear || new Date().getFullYear(),
 
