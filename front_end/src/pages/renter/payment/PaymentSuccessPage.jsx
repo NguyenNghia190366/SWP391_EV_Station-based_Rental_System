@@ -31,8 +31,6 @@ export default function PaymentSuccessPage() {
             <p style={{ color: "#374151", marginBottom: 18 }}>Cảm ơn bạn đã thanh toán. Thông tin chi tiết phía dưới.</p>
 
             <div style={{ textAlign: "left", maxWidth: 680, margin: "0 auto" }}>
-              <p><strong>Mã đơn:</strong> #{orderId}</p>
-              <p><strong>Người thanh toán:</strong> {fullName}</p>
               {amount !== null && <p><strong>Số tiền:</strong> {formatCurrency(amount)}</p>}
               {description && <p><strong>Mô tả:</strong> {description}</p>}
             </div>

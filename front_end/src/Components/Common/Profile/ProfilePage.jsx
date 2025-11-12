@@ -8,6 +8,7 @@ import {
 import {
   Button, Input, Card, Tag, Avatar, message, Modal, Spin, Menu, Table, Space, Popconfirm, Tooltip
 } from "antd";
+import PaymentHistory from "@/pages/renter/payment/PaymentHistory";
 import dayjs from "dayjs";
 import { useUsers } from "@/hooks/useUsers";
 import { useDriverLicense } from "@/hooks/useDriverLicense";
@@ -395,11 +396,12 @@ const ProfilePage = () => {
           selectedKeys={[selectedMenu]}
           onClick={({ key }) => setSelectedMenu(key)}
           items={[
-            { key: "overview", icon: <DashboardOutlined />, label: "Tổng quan" },
-            { key: "info", icon: <UserOutlined />, label: "Thông tin cá nhân" },
-            { key: "verify", icon: <SafetyOutlined />, label: "Xác minh giấy tờ" },
-            { key: "history", icon: <ClockCircleOutlined />, label: "Lịch sử đặt xe" },
-          ]}
+              { key: "overview", icon: <DashboardOutlined />, label: "Tổng quan" },
+              { key: "info", icon: <UserOutlined />, label: "Thông tin cá nhân" },
+              { key: "verify", icon: <SafetyOutlined />, label: "Xác minh giấy tờ" },
+              { key: "history", icon: <ClockCircleOutlined />, label: "Lịch sử đặt xe" },
+              { key: "payments", icon: <DashboardOutlined />, label: "Lịch sử giao dịch" },
+            ]}
         />
       </div>
 
@@ -409,6 +411,7 @@ const ProfilePage = () => {
   {selectedMenu === "info" && renderInfo()}
   {selectedMenu === "verify" && renderVerify()}
   {selectedMenu === "history" && <RentalHistoryPage />}
+  {selectedMenu === "payments" && <PaymentHistory />}
       </div>
 
       {/* Avatar Modal */}
