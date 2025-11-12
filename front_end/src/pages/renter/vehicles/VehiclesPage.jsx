@@ -22,6 +22,8 @@ const VehiclesPage = () => {
   const [hasLoadedVehicles, setHasLoadedVehicles] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedType, setSelectedType] = useState("all");
+  const [stations, setStations] = useState([]);
+  const [selectedStation, setSelectedStation] = useState("all");
 
   // ===== Load user info =====
   useEffect(() => {
@@ -35,6 +37,21 @@ const VehiclesPage = () => {
       console.error("Error reading user from localStorage", e);
     }
   }, []);
+
+  // ===== Fetch stations =====
+  useEffect(() => {
+    const fetchStations = async () => {
+      try {
+        const res = await api.get("/Stations");
+        const stationsList = Array.isArray(res.data) ? res.data : res.data?.data || [];
+        setStations(stationsList);
+      } catch (err) {
+        console.warn("Failed to fetch stations:", err);
+        setStations([]);
+      }
+    };
+    fetchStations();
+  }, [api]);
 
   // ===== Fetch vehicles once =====
   useEffect(() => {
@@ -124,40 +141,69 @@ const VehiclesPage = () => {
   const handleSearch = useCallback(
     (query) => {
       if (!query?.trim()) {
-        setFilteredVehicles(vehicles);
+        applyFilters(vehicles, selectedType, selectedStation);
         return;
       }
       const lowerQuery = query.toLowerCase();
-      setFilteredVehicles(
-        vehicles.filter((v) =>
-          [v.name, v.type, v.licensePlate]
-            .filter(Boolean)
-            .some((field) => field.toLowerCase().includes(lowerQuery))
-        )
+      const searched = vehicles.filter((v) =>
+        [v.name, v.type, v.licensePlate]
+          .filter(Boolean)
+          .some((field) => field.toLowerCase().includes(lowerQuery))
       );
+      applyFilters(searched, selectedType, selectedStation);
     },
-    [vehicles]
+    [vehicles, selectedType, selectedStation]
   );
+
+  // ===== Apply all filters (type, station, search) =====
+  const applyFilters = useCallback((baseVehicles, type, station) => {
+    let result = baseVehicles;
+
+    // Filter by type
+    if (type !== "all") {
+      result = result.filter((v) => v.type === type);
+    }
+
+    // Filter by station
+    if (station !== "all") {
+      const stationId = Number(station);
+      result = result.filter((v) => {
+        const vStationId = v.stationId || v.station_id || v.station?.stationId;
+        return Number(vStationId) === stationId;
+      });
+    }
+
+    setFilteredVehicles(result);
+  }, []);
 
   const handleSearchSubmit = (e) => {
     e.preventDefault();
     handleSearch(searchQuery);
   };
 
-  // ===== Handle URL ?search= =====
+  // ===== Handle URL ?search= and ?station= =====
   useEffect(() => {
     const searchQuery = searchParams.get("search");
+    const stationParam = searchParams.get("station");
+    
+    if (stationParam) {
+      setSelectedStation(stationParam);
+      applyFilters(vehicles, selectedType, stationParam);
+    }
+    
     if (searchQuery) handleSearch(searchQuery);
-  }, [searchParams, handleSearch]);
+  }, [searchParams, handleSearch, vehicles, selectedType, applyFilters]);
 
   // ===== Filter by type =====
   const handleFilterByType = (type) => {
     setSelectedType(type);
-    if (type === "all") {
-      setFilteredVehicles(vehicles);
-    } else {
-      setFilteredVehicles(vehicles.filter((v) => v.type === type));
-    }
+    applyFilters(vehicles, type, selectedStation);
+  };
+
+  // ===== Filter by station =====
+  const handleFilterByStation = (stationId) => {
+    setSelectedStation(stationId);
+    applyFilters(vehicles, selectedType, stationId);
   };
 
   // ===== View details =====
@@ -275,7 +321,7 @@ const VehiclesPage = () => {
           </form>
 
           {/* Type Filter */}
-          <div className="flex flex-wrap gap-3 justify-center">
+          <div className="flex flex-wrap gap-3 justify-center mb-4">
             {vehicleTypes.map((type) => (
               <button
                 key={type.value}
@@ -290,6 +336,38 @@ const VehiclesPage = () => {
               </button>
             ))}
           </div>
+
+          {/* Station Filter */}
+          {stations.length > 0 && (
+            <div className="border-t border-gray-200 pt-4">
+              <p className="text-sm font-semibold text-gray-700 mb-3">Chọn trạm:</p>
+              <div className="flex flex-wrap gap-3 justify-center">
+                <button
+                  onClick={() => handleFilterByStation("all")}
+                  className={`px-6 py-3 rounded-xl font-semibold transition-all duration-300 
+                    ${selectedStation === "all"
+                      ? "bg-green-600 text-white shadow-lg scale-105"
+                      : "bg-white text-gray-700 border-2 border-gray-200 hover:border-green-300 hover:shadow-md"
+                    }`}
+                >
+                  Tất cả trạm
+                </button>
+                {stations.map((station) => (
+                  <button
+                    key={station.stationId || station.id}
+                    onClick={() => handleFilterByStation(String(station.stationId || station.id))}
+                    className={`px-6 py-3 rounded-xl font-semibold transition-all duration-300 whitespace-nowrap
+                      ${selectedStation === String(station.stationId || station.id)
+                        ? "bg-green-600 text-white shadow-lg scale-105"
+                        : "bg-white text-gray-700 border-2 border-gray-200 hover:border-green-300 hover:shadow-md"
+                      }`}
+                  >
+                    {station.stationName || "Trạm"}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
       </section>
 

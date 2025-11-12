@@ -7,6 +7,7 @@ import BookingVerificationModal from "@/pages/renter/booking/BookingVerification
 import { useAxiosInstance } from "@/hooks/useAxiosInstance";
 import MapLeaflet from "@/components/common/Map/MapLeaflet";
 import NearbyStationsSuggestions from "@/components/common/Map/NearbyStationsSuggestions";
+import VehiclesByStation from "@/pages/renter/vehicles/VehiclesByStation";
 
 const HomePage = () => {
   const navigate = useNavigate();
@@ -20,6 +21,7 @@ const HomePage = () => {
   const [featuredVehicles, setFeaturedVehicles] = useState([]);
   const [stations, setStations] = useState([]);
   const [nearestStation, setNearestStation] = useState(null);
+  const [selectedStation, setSelectedStation] = useState(null);
   const [nearestSearching, setNearestSearching] = useState(false);
   const [showVerificationModal, setShowVerificationModal] = useState(false);
   const [verificationType, setVerificationType] = useState("license");
@@ -192,6 +194,7 @@ const HomePage = () => {
   const handleSelectStation = useCallback((station) => {
     const stationLat = station.latitude ?? station.lat;
     const stationLng = station.longitude ?? station.lng;
+    setSelectedStation(station);
     findNearestStationForUser({ lat: stationLat, lng: stationLng });
   }, [findNearestStationForUser]);
 
@@ -304,6 +307,15 @@ const HomePage = () => {
             </div>
           </div>
         </section>
+
+        {/* VEHICLES BY STATION SECTION */}
+        {selectedStation && (
+          <section className="py-16 bg-gradient-to-br from-gray-50 to-gray-100">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+              <VehiclesByStation station={selectedStation} />
+            </div>
+          </section>
+        )}
       </div>
 
       {/* VERIFICATION MODAL */}
