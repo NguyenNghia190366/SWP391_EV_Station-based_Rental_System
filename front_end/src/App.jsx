@@ -54,11 +54,19 @@ function App() {
         />
         <Route path="/contract/:vehicleId" element={<ContractOfflinePage />} />
         <Route path="/payment/:vehicleId" element={<PaymentPage />} />
+        <Route path="/payment/:orderId" element={<PaymentPage />} />
 
         {/* User Account Routes */}
         <Route path="/notifications" element={<NotificationsPage />} />
         <Route path="/my-bookings" element={<RentalHistoryPage />} />
-        <Route path="/renter/contract-online/:orderId" element={<ContractOnlinePage />} />
+        <Route
+          path="/renter/contract-online/:orderId"
+          element={
+            <RequireAuth allowRole={[roles.RENTER]}>
+              <ContractOnlinePage />
+            </RequireAuth>
+          }
+        />
 
         {/* Vehicle Preview & Handover Routes */}
         <Route
