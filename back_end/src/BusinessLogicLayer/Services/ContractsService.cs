@@ -43,14 +43,14 @@ namespace BusinessLogicLayer.Services
             }
 
             // 2. Validation: Kiểm tra trạng thái Order
-            // Chỉ tạo hợp đồng khi đơn ở trạng thái "BOOKED"
-            if (order.status != "BOOKED") 
+            // Chỉ tạo hợp đồng khi đơn ở trạng thái "APPROVED"
+            if (order.status != "APPROVED") 
             {
                 throw new InvalidOperationException($"Không thể tạo hợp đồng cho đơn hàng ở trạng thái {order.status}.");
             }
 
             // 3. Validation: Kiểm tra Hợp đồng trùng lặp
-            // Bảng Contract có ràng buộc UNIQUE 1-1 với order_id [cite: 31]
+            // Bảng Contract có ràng buộc UNIQUE 1-1 với order_id 
             var contractExists = await _context.Contracts
                 .AnyAsync(c => c.order_id == createDto.OrderId);
 
