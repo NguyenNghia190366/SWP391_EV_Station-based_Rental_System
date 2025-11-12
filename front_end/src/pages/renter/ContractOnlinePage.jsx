@@ -1,8 +1,9 @@
 import React, { useEffect, useState, useRef } from "react";
-import { Card, Button, Space, message, Spin, Modal, Tag } from "antd";
-import { useParams } from "react-router-dom";
+import { Card, Button, Space, message, Spin, Modal, Tag, Input } from "antd";
+import { useParams, useLocation } from "react-router-dom";
 import dayjs from "dayjs";
 import { useAxiosInstance } from "@/hooks/useAxiosInstance";
+import { usePayment } from "@/hooks/usePayment";
 import SignaturePad from "react-signature-canvas";
 
 export default function ContractOnlinePage() {
@@ -13,9 +14,18 @@ export default function ContractOnlinePage() {
   const [signatureModal, setSignatureModal] = useState(false);
   const [isSigning, setIsSigning] = useState(false);
   const [isSigned, setIsSigned] = useState(false);
+  const [paymentModal, setPaymentModal] = useState(false);
+  const [paymentDescription, setPaymentDescription] = useState("");
+  const [isPaymentProcessing, setIsPaymentProcessing] = useState(false);
+  const [paymentSuccessHtml, setPaymentSuccessHtml] = useState(null);
   const sigPadRef = useRef(null);
   const contractRef = useRef();
   const axiosInstance = useAxiosInstance();
+  const { createPayment } = usePayment();
+  const { handlePaymentReturn } = usePayment();
+  const location = useLocation();
+  const [returnProcessing, setReturnProcessing] = useState(false);
+  const [returnResultMessage, setReturnResultMessage] = useState(null);
 
   useEffect(() => {
     const fetchOrderData = async () => {
@@ -49,10 +59,20 @@ export default function ContractOnlinePage() {
 
         // find renter info
         const renter = Array.isArray(renters) ? renters.find(r => r.renterId === orderData.renterId) : null;
+        // Prefer authoritative full name from Users table when available
+        let userInfo = null;
+        if (renter?.userId) {
+          try {
+            const uRes = await axiosInstance.get(`/Users/${renter.userId}`);
+            userInfo = uRes.data;
+          } catch (err) {
+            userInfo = null;
+          }
+        }
 
         const mergedOrder = {
           ...orderData,
-          renterName: renter?.fullName || orderData.renterName || "(Không có)",
+          renterName: userInfo?.fullName || renter?.fullName || orderData.renterName || "(Không có)",
           renterPhone: renter?.phoneNumber || orderData.renterPhone || "(Không có)",
           renterEmail: renter?.email || orderData.renterEmail || "(Không có)",
           renterIdNumber: renter?.cccd || "(Không có)",
@@ -90,6 +110,41 @@ export default function ContractOnlinePage() {
     if (orderId) fetchOrderData();
   }, [orderId, axiosInstance]);
 
+  // If we are redirected back from VNPay, the URL may contain vnp_... query params.
+  useEffect(() => {
+    const qs = new URLSearchParams(location.search);
+    if (!qs) return;
+    // check for VNPay params
+    const hasVnp = Array.from(qs.keys()).some(k => k.startsWith('vnp_'));
+    if (!hasVnp) return;
+
+    const paramsObj = {};
+    qs.forEach((v, k) => (paramsObj[k] = v));
+
+    (async () => {
+      try {
+        setReturnProcessing(true);
+        // call backend to verify payment result
+        const result = await handlePaymentReturn(paramsObj);
+        console.debug('handlePaymentReturn result:', result);
+        // if backend sent HTML, show it; otherwise show friendly message
+        if (typeof result === 'string' && result.trim().startsWith('<')) {
+          setPaymentSuccessHtml(result);
+        } else if (result?.status === 'PAID' || result?.isPaid || result?.success) {
+          setPaymentSuccessHtml(`<div style="padding:20px;font-family:Arial"><h2 style="color:#52c41a">Thanh toán thành công</h2><p>Mã đơn: #${orderId}</p></div>`);
+        } else {
+          setReturnResultMessage(JSON.stringify(result));
+          message.info('Kết quả trả về: ' + (result?.message || 'Xem chi tiết trong modal.'));
+        }
+      } catch (err) {
+        console.error('Error verifying VNPay return:', err);
+        message.error('Không thể xác minh kết quả thanh toán.');
+      } finally {
+        setReturnProcessing(false);
+      }
+    })();
+  }, [location.search]);
+
   const openSignature = () => setSignatureModal(true);
   const clearSignature = () => sigPadRef.current && sigPadRef.current.clear();
 
@@ -114,6 +169,117 @@ export default function ContractOnlinePage() {
       setIsSigning(false);
     }
   };
+
+  // Payment handlers (renter)
+  const handleSubmitPayment = async () => {
+    if (!order) return;
+
+    setIsPaymentProcessing(true);
+    try {
+      const startTime = order.startTime ? dayjs(order.startTime) : null;
+      const endTime = order.endTime ? dayjs(order.endTime) : null;
+      const rentalHours = startTime && endTime ? endTime.diff(startTime, 'hour', true) : 0;
+      const pricePerHour = order.pricePerHour || 0;
+      const rentalPrice = rentalHours * pricePerHour;
+      const depositPrice = rentalPrice * 0.3;
+      const totalPrice = rentalPrice + depositPrice;
+
+      // use full name from order (from DB) and the description entered by renter
+      const fullName = order.renterName || "(Không có)";
+
+      const response = await createPayment(orderId, totalPrice, "rental", fullName, paymentDescription);
+
+      // Normalize response: server may return JSON object or string (text). The API returns { url: string, orderId }
+      console.debug("createPayment returned:", response);
+      let resp = response;
+      if (typeof resp === 'string') {
+        const t = resp.trim();
+        // If it's HTML, show it
+        if (t.startsWith('<')) {
+          setPaymentSuccessHtml(resp);
+          setPaymentModal(false);
+          return;
+        }
+        // Try parse JSON
+        try {
+          resp = JSON.parse(resp);
+        } catch (e) {
+          // not JSON - show raw
+          setPaymentSuccessHtml(resp);
+          setPaymentModal(false);
+          return;
+        }
+      }
+
+      // If backend returns 'url' field (as your API does), redirect to it
+      if (resp && (resp.url || resp.paymentUrl)) {
+        const redirectTo = resp.url || resp.paymentUrl;
+        window.location.href = redirectTo;
+        return;
+      }
+
+      // If backend returns HTML content, display it
+      const html = response?.html || response?.paymentHtml || response?.successHtml || null;
+      if (html) {
+        setPaymentSuccessHtml(html);
+        setPaymentModal(false);
+        return;
+      }
+
+      // If backend returned JSON without HTML, render a simple success HTML on the client
+      const paymentId = response?.paymentId || response?.id || response?.orderId || null;
+      const amount = response?.amount || totalPrice;
+      const createdAt = response?.createdAt || new Date().toISOString();
+      const generatedHtml = `
+        <div style="font-family: Arial, sans-serif; padding: 20px;">
+          <h2 style="color: #52c41a;">Thanh toán thành công</h2>
+          <p><strong>Mã đơn:</strong> ${orderId}</p>
+          <p><strong>Tên khách hàng:</strong> ${fullName}</p>
+          <p><strong>Số tiền:</strong> ${formatCurrency(amount)}</p>
+          ${paymentId ? `<p><strong>Mã thanh toán:</strong> ${paymentId}</p>` : ''}
+          <p><strong>Thời gian:</strong> ${new Date(createdAt).toLocaleString('vi-VN')}</p>
+          <hr />
+          <p>Nếu bạn cần biên lai chi tiết, vui lòng kiểm tra trang lịch sử thanh toán hoặc liên hệ hỗ trợ.</p>
+        </div>
+      `;
+
+      setPaymentSuccessHtml(generatedHtml);
+      setPaymentModal(false);
+      message.success("Thanh toán thành công.");
+    } catch (err) {
+      console.error("Error creating payment:", err);
+      // If backend returned HTML or a message in response.data, show it directly
+      const respData = err?.response?.data;
+      const status = err?.response?.status;
+      if (respData) {
+        // If it's a string that looks like HTML, show it in the success modal for debugging
+        if (typeof respData === 'string' && respData.trim().startsWith('<')) {
+          setPaymentSuccessHtml(respData);
+          setPaymentModal(false);
+          return;
+        }
+        // Otherwise show details
+        message.error(`Lỗi server (${status}): ${typeof respData === 'string' ? respData : JSON.stringify(respData)}`);
+      } else {
+        message.error(`Không thể thực hiện thanh toán. Lỗi: ${err.message}`);
+      }
+    } finally {
+      setIsPaymentProcessing(false);
+    }
+  };
+
+  const getTotalPrice = (o) => {
+    if (!o) return 0;
+    const startTime = o.startTime ? dayjs(o.startTime) : null;
+    const endTime = o.endTime ? dayjs(o.endTime) : null;
+    const rentalHours = startTime && endTime ? endTime.diff(startTime, 'hour', true) : 0;
+    const pricePerHour = o.pricePerHour || 0;
+    const rentalPrice = rentalHours * pricePerHour;
+    const depositPrice = rentalPrice * 0.3;
+    return rentalPrice + depositPrice;
+  };
+
+  const formatCurrency = (v) => new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(v);
 
   const renderContract = () => {
     if (error) return <div style={{ color: "red", padding: 20 }}>{error}</div>;
@@ -180,6 +346,16 @@ export default function ContractOnlinePage() {
             <li>Phải trả xe đúng thời gian, nếu trễ sẽ chịu phí phạt.</li>
           </ol>
         </div>
+        <div style={{ marginTop: 28, textAlign: "center" }}>
+          <Button
+            type="primary"
+            size="large"
+            onClick={() => setPaymentModal(true)}
+            style={{ backgroundColor: "#52c41a", borderColor: "#52c41a", minWidth: 220 }}
+          >
+            Thanh toán {new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(totalPrice)}
+          </Button>
+        </div>
       </div>
     );
   };
@@ -221,6 +397,41 @@ export default function ContractOnlinePage() {
           <Button onClick={clearSignature}>Xóa</Button>
           <div style={{ color: '#888', fontSize: 12 }}>Ký bằng chữ ký tay của bạn, sau đó bấm Lưu.</div>
         </div>
+      </Modal>
+      {/* Payment modal for renter */}
+      <Modal
+        title="Xác nhận thanh toán"
+        open={paymentModal}
+        onOk={handleSubmitPayment}
+        onCancel={() => { setPaymentModal(false); setPaymentDescription(""); }}
+        okText="Xác nhận và thanh toán"
+        cancelText="Hủy"
+        confirmLoading={isPaymentProcessing}
+        width={700}
+      >
+        {order && (
+          <div>
+            <p><b>Mã đơn:</b> #{orderId}</p>
+            <p><b>Tên khách hàng:</b> {order.renterName || "(Không có)"}</p>
+            <p><b>Số tiền:</b> {formatCurrency(getTotalPrice(order))}</p>
+            <div style={{ marginTop: 12 }}>
+              <label style={{ fontWeight: 600 }}>Mô tả (thêm thông tin thanh toán, không bắt buộc)</label>
+              <Input.TextArea rows={4} value={paymentDescription} onChange={(e) => setPaymentDescription(e.target.value)} placeholder="Nhập mô tả..." />
+            </div>
+          </div>
+        )}
+      </Modal>
+
+      {/* If backend returned success HTML to display */}
+      <Modal
+        title="Kết quả thanh toán"
+        open={!!paymentSuccessHtml}
+        onOk={() => setPaymentSuccessHtml(null)}
+        onCancel={() => setPaymentSuccessHtml(null)}
+        footer={null}
+        width={800}
+      >
+        <div dangerouslySetInnerHTML={{ __html: paymentSuccessHtml || "<p>Thanh toán thành công.</p>" }} />
       </Modal>
     </>
   );

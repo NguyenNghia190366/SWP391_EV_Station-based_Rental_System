@@ -4,7 +4,7 @@ import { useParams } from "react-router-dom";
 import dayjs from "dayjs";
 import { useAxiosInstance } from "@/hooks/useAxiosInstance";
 
-export default function ContractOfflinePage() {
+export default function StaffContractOfflinePage() {
   const { orderId } = useParams();
   const [loading, setLoading] = useState(true);
   const [order, setOrder] = useState(null);

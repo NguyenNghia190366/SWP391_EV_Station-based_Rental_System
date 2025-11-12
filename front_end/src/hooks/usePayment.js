@@ -5,13 +5,21 @@ export const usePayment = () => {
   const axiosInstance = useAxiosInstance();
 
   const createPayment = useCallback(
-    async (orderId, amount, orderType = "rental") => {
+    async (orderId, amount, orderType = "rental", fullName, description) => {
       try {
-        const response = await axiosInstance.post("/api/vnpay/create-payment", {
+        const payload = {
           orderId,
           amount: Math.round(amount),
           orderType,
-        });
+          fullName,
+          description,
+        };
+        // Debugging info: show baseURL and payload so developer can inspect console when 404 occurs
+        console.debug("createPayment -> baseURL:", axiosInstance.defaults?.baseURL, "payload:", payload);
+
+        // Use relative path without duplicating 'api' in case baseURL already contains it
+        const response = await axiosInstance.post("vnpay/create-payment", payload);
+        console.debug("createPayment response:", response);
         return response.data;
       } catch (error) {
         console.error("Error creating payment:", error);
@@ -22,11 +30,11 @@ export const usePayment = () => {
   );
 
   const handlePaymentReturn = useCallback(
-    async (paymentCode) => {
+    async (params = {}) => {
       try {
-        const response = await axiosInstance.get("/api/vnpay/vnpay_return", {
-          params: { code: paymentCode },
-        });
+        // params: object of query params returned from VNPay (e.g., vnp_TxnRef, vnp_ResponseCode)
+        console.debug("handlePaymentReturn -> baseURL:", axiosInstance.defaults?.baseURL, "params:", params);
+        const response = await axiosInstance.get("vnpay/vnpay_return", { params });
         return response.data;
       } catch (error) {
         console.error("Error handling payment return:", error);
@@ -39,11 +47,10 @@ export const usePayment = () => {
   const createRefund = useCallback(
     async (orderId, amount, reason = "Customer request") => {
       try {
-        const response = await axiosInstance.post("/api/vnpay/create-refund", {
-          orderId,
-          amount: Math.round(amount),
-          reason,
-        });
+        const payload = { orderId, amount: Math.round(amount), reason };
+        console.debug("createRefund -> baseURL:", axiosInstance.defaults?.baseURL, "payload:", payload);
+        const response = await axiosInstance.post("vnpay/create-refund", payload);
+        console.debug("createRefund response:", response);
         return response.data;
       } catch (error) {
         console.error("Error creating refund:", error);

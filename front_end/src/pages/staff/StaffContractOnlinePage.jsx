@@ -1,11 +1,13 @@
 import React, { useEffect, useState, useRef } from "react";
-import { Card, Button, Space, message, Spin, Modal, Input, Tag } from "antd";
-import { EditOutlined, CheckOutlined } from "@ant-design/icons";
-import { useParams } from "react-router-dom";
+import { Card, Button, Space, message, Spin, Modal, Input, Tag, Divider, Form } from "antd";
+import { EditOutlined, CheckOutlined, DollarOutlined } from "@ant-design/icons";
+import { useParams, useNavigate } from "react-router-dom";
 import dayjs from "dayjs";
 import { useAxiosInstance } from "@/hooks/useAxiosInstance";
+import { usePayment } from "@/hooks/usePayment";
+import FormItem from "antd/es/form/FormItem";
 
-export default function ContractOnlinePage() {
+export default function StaffContractOnlinePage() {
   const { orderId } = useParams();
   const [loading, setLoading] = useState(true);
   const [order, setOrder] = useState(null);
@@ -19,6 +21,10 @@ export default function ContractOnlinePage() {
   const contractRef = useRef();
   const axiosInstance = useAxiosInstance();
   const navigate = useNavigate();
+  const [isPaymentProcessing, setIsPaymentProcessing] = useState(false);
+  const [paymentModal, setPaymentModal] = useState(false);
+  const [paymentForm, setPaymentForm] = useState({ fullName: "", description: "" });
+  const [form] = Form.useForm();
 
   useEffect(() => {
     const fetchOrderData = async () => {
@@ -173,6 +179,58 @@ export default function ContractOnlinePage() {
     }
   };
 
+  const handlePayment = async () => {
+    if (!order) return;
+    
+    // Open payment modal instead of processing directly
+    setPaymentModal(true);
+  };
+
+  const { createPayment } = usePayment();
+
+  const handlePaymentWithDetails = async () => {
+    if (!paymentForm.fullName.trim()) {
+      message.error("Vui lòng nhập tên khách hàng!");
+      return;
+    }
+
+    setIsPaymentProcessing(true);
+    try {
+      // Calculate total amount
+      const startTime = order.startTime ? dayjs(order.startTime) : null;
+      const endTime = order.endTime ? dayjs(order.endTime) : null;
+      const rentalHours = startTime && endTime ? endTime.diff(startTime, 'hour', true) : 0;
+      const pricePerHour = order.pricePerHour || 0;
+      const rentalPrice = rentalHours * pricePerHour;
+      const depositPrice = rentalPrice * 0.3;
+      const totalPrice = rentalPrice + depositPrice;
+
+      // Call createPayment with fullName and description
+      const paymentResponse = await createPayment(
+        orderId,
+        totalPrice,
+        "rental",
+        paymentForm.fullName,
+        paymentForm.description
+      );
+
+      if (paymentResponse?.paymentUrl) {
+        // Redirect to VNPay
+        window.location.href = paymentResponse.paymentUrl;
+      } else {
+        message.error("Không thể khởi tạo thanh toán VNPay");
+      }
+
+      setPaymentModal(false);
+      setPaymentForm({ fullName: "", description: "" });
+    } catch (err) {
+      console.error("Payment error:", err);
+      message.error("Lỗi khi xử lý thanh toán");
+    } finally {
+      setIsPaymentProcessing(false);
+    }
+  };
+
   const renderContract = () => {
     if (error) return <div style={{ color: "red", padding: 20 }}>{error}</div>;
     if (!order) return <div style={{ padding: 20 }}>Không có dữ liệu hợp đồng.</div>;
@@ -295,6 +353,19 @@ export default function ContractOnlinePage() {
           <p style={{ marginTop: 16, fontSize: 12, color: "#666", fontStyle: "italic" }}>
             Ghi chú: Tiền cọc (30%) sẽ được trừ vào khoản thanh toán cuối cùng khi khách hàng hoàn trả xe.
           </p>
+          <Divider />
+          <div style={{ textAlign: "center", marginTop: 20 }}>
+            <Button
+              type="primary"
+              size="large"
+              icon={<DollarOutlined />}
+              onClick={handlePayment}
+              loading={isPaymentProcessing}
+              style={{ backgroundColor: "#52c41a", borderColor: "#52c41a", minWidth: 200 }}
+            >
+              Xử lý thanh toán
+            </Button>
+          </div>
         </div>
 
         <div style={{ marginTop: 40, borderTop: "1px solid #ccc", paddingTop: 20 }}>
@@ -398,6 +469,37 @@ export default function ContractOnlinePage() {
         <p style={{ marginTop: 12, fontSize: 12, color: "#888" }}>
           Chữ ký của bạn sẽ được lưu vào hợp đồng với thời gian hiện tại.
         </p>
+      </Modal>
+
+      <Modal
+        title="Thông tin thanh toán"
+        open={paymentModal}
+        onOk={handlePaymentWithDetails}
+        onCancel={() => {
+          setPaymentModal(false);
+          setPaymentForm({ fullName: "", description: "" });
+        }}
+        okText="Thanh toán"
+        cancelText="Hủy"
+        confirmLoading={isPaymentProcessing}
+      >
+        <Form form={form} layout="vertical">
+          <FormItem label="Tên khách hàng" required>
+            <Input
+              placeholder="Nhập tên khách hàng"
+              value={paymentForm.fullName}
+              onChange={(e) => setPaymentForm({ ...paymentForm, fullName: e.target.value })}
+            />
+          </FormItem>
+          <FormItem label="Mô tả">
+            <Input.TextArea
+              placeholder="Nhập mô tả (không bắt buộc)"
+              value={paymentForm.description}
+              onChange={(e) => setPaymentForm({ ...paymentForm, description: e.target.value })}
+              rows={4}
+            />
+          </FormItem>
+        </Form>
       </Modal>
     </>
   );

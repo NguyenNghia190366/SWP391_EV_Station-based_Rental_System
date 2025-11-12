@@ -9,11 +9,13 @@ import ProfilePage from "./Components/Common/Profile/ProfilePage.jsx";
 import VehiclesPage from "./pages/renter/vehicles/VehiclesPage.jsx";
 import BookingRequestPage from "./pages/renter/booking/BookingRequestPage.jsx";
 import BookingFormPage from "./pages/renter/booking/BookingFormPage.jsx";
-import ContractPage from "./pages/renter/ContractPage.jsx";
 import PaymentPage from "./pages/renter/payment/PaymentPage.jsx";
 import VehiclePreviewNotification from "./pages/renter/VehiclePreviewNotification";
 import VerifyPage from "./pages/renter/VerifyPage.jsx";
 import RentalHistoryPage from "./pages/renter/RentalHistoryPage.jsx";
+import ContractOnlinePage from "./pages/renter/ContractOnlinePage.jsx";
+import ContractOfflinePage from "./pages/renter/ContractOfflinePage.jsx";
+import PaymentSuccessPage from "./pages/renter/payment/PaymentSuccessPage.jsx";
 // Admin
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import AdminVerificationDashboard from "./pages/admin/VerifyRenterPage.jsx";
@@ -21,8 +23,8 @@ import StationRegistrationPage from "./pages/admin/StationRegistrationPage";
 // Staff
 import StaffDashboard from "./pages/staff/StaffDashboard.jsx";
 import SendVehiclePreview from "./pages/staff/SendVehiclePreview.jsx";
-import ContractOfflinePage from "./pages/staff/ContractOfflinePage.jsx";
-import ContractOnlinePage from "./pages/staff/ContractOnlinePage.jsx";
+import StaffContractOfflinePage from "./pages/staff/StaffContractOfflinePage.jsx";
+import StaffContractOnlinePage from "./pages/staff/StaffContractOnlinePage.jsx";
 // Common
 import { roles } from "./Constant/Role";
 import { RequireAuth } from "./Router/RequireAuth.jsx";
@@ -44,21 +46,19 @@ function App() {
         <Route path="/verify" element={<VerifyPage />} />
 
         {/* Booking Flow Routes */}
-        <Route
-          path="/booking/:vehicleId"
-          element={<BookingFormPage />}
-        />
+        <Route path="/booking/:vehicleId" element={<BookingFormPage />} />
         <Route
           path="/booking-request/:vehicleId"
           element={<BookingRequestPage />}
         />
         <Route path="/contract/:vehicleId" element={<ContractOfflinePage />} />
-        <Route path="/payment/:vehicleId" element={<PaymentPage />} />
         <Route path="/payment/:orderId" element={<PaymentPage />} />
+        <Route path="/payment/success" element={<PaymentSuccessPage />} />
 
         {/* User Account Routes */}
         <Route path="/notifications" element={<NotificationsPage />} />
         <Route path="/my-bookings" element={<RentalHistoryPage />} />
+
         <Route
           path="/renter/contract-online/:orderId"
           element={
@@ -114,7 +114,7 @@ function App() {
           path="/staff/contract-offline/:orderId"
           element={
             <RequireAuth allowRole={[roles.STAFF]}>
-              <ContractOfflinePage />
+              <StaffContractOfflinePage />
             </RequireAuth>
           }
         />
