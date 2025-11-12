@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useRef } from "react";
 import { Card, Button, Space, message, Spin, Tag } from "antd";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import dayjs from "dayjs";
 import { useAxiosInstance } from "@/hooks/useAxiosInstance";
 
@@ -9,11 +9,8 @@ export default function ContractOfflinePage() {
   const [loading, setLoading] = useState(true);
   const [order, setOrder] = useState(null);
   const [error, setError] = useState(null);
-  const [isSending, setIsSending] = useState(false);
-  const [isContractSent, setIsContractSent] = useState(false);
   const contractRef = useRef();
   const axiosInstance = useAxiosInstance();
-  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchOrderData = async () => {
@@ -124,21 +121,8 @@ export default function ContractOfflinePage() {
     }
   }, [orderId, axiosInstance]);
 
-  const handleSendToRenter = async () => {
-    setIsSending(true);
-    try {
-      // Update order status to notify renter
-      await axiosInstance.put(`/RentalOrders/${orderId}`, {
-        status: "CONTRACT_SENT"
-      });
-      setIsContractSent(true);
-      message.success("Hợp đồng đã được gửi cho khách hàng!");
-    } catch (err) {
-      console.error("Error sending contract:", err);
-      message.error("Không thể gửi hợp đồng. Vui lòng thử lại.");
-    } finally {
-      setIsSending(false);
-    }
+  const handlePrint = () => {
+    window.print();
   };
 
   const renderContract = () => {
@@ -286,24 +270,6 @@ export default function ContractOfflinePage() {
             </tbody>
           </table>
         </div>
-
-        {isContractSent && (
-          <div style={{ marginTop: 40, borderTop: "1px solid #ccc", paddingTop: 20 }}>
-            <p><b>Trạng thái hợp đồng:</b></p>
-            <div style={{ 
-              padding: 20, 
-              border: "2px dashed #52c41a", 
-              borderRadius: 8,
-              backgroundColor: "#f6ffed",
-              marginTop: 10
-            }}>
-              <p style={{ fontSize: 14, color: "#52c41a" }}>✓ Hợp đồng đã được gửi cho khách hàng</p>
-              <p style={{ fontSize: 12, color: "#888", marginTop: 10 }}>
-                Thời gian gửi: {dayjs().format("DD/MM/YYYY HH:mm:ss")}
-              </p>
-            </div>
-          </div>
-        )}
       </div>
     );
   };
@@ -311,24 +277,12 @@ export default function ContractOfflinePage() {
   return (
     <>
       <Card
-        title={`Hợp đồng trực tuyến #${orderId}`}
+        title={`Hợp đồng offline #${orderId}`}
         extra={
           <Space>
-            {!isContractSent && (
-              <Button
-                type="primary"
-                onClick={handleSendToRenter}
-                disabled={loading || isSending}
-                loading={isSending}
-              >
-                Gửi cho renter
-              </Button>
-            )}
-            {isContractSent && (
-              <Button type="primary" disabled>
-                ✓ Đã gửi
-              </Button>
-            )}
+            <Button onClick={handlePrint}>
+              🖨️ In
+            </Button>
           </Space>
         }
       >

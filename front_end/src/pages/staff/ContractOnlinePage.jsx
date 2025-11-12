@@ -14,8 +14,11 @@ export default function ContractOnlinePage() {
   const [signatureModal, setSignatureModal] = useState(false);
   const [signature, setSignature] = useState("");
   const [isSigned, setIsSigned] = useState(false);
+  const [isSending, setIsSending] = useState(false);
+  const [isContractSent, setIsContractSent] = useState(false);
   const contractRef = useRef();
   const axiosInstance = useAxiosInstance();
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchOrderData = async () => {
@@ -151,6 +154,23 @@ export default function ContractOnlinePage() {
       setSignatureModal(false);
       message.success("Đã ký hợp đồng thành công!");
     }, 1000);
+  };
+
+  const handleSendToRenter = async () => {
+    setIsSending(true);
+    try {
+      // Update order status to notify renter
+      await axiosInstance.put(`/RentalOrders/${orderId}`, {
+        status: "CONTRACT_SENT"
+      });
+      setIsContractSent(true);
+      message.success("Hợp đồng đã được gửi cho khách hàng!");
+    } catch (err) {
+      console.error("Error sending contract:", err);
+      message.error("Không thể gửi hợp đồng. Vui lòng thử lại.");
+    } finally {
+      setIsSending(false);
+    }
   };
 
   const renderContract = () => {
@@ -327,6 +347,21 @@ export default function ContractOnlinePage() {
             {isSigned && (
               <Button type="primary" icon={<CheckOutlined />} disabled>
                 Đã ký
+              </Button>
+            )}
+            {!isContractSent && (
+              <Button
+                type="primary"
+                onClick={handleSendToRenter}
+                disabled={loading || isSending}
+                loading={isSending}
+              >
+                Gửi cho renter
+              </Button>
+            )}
+            {isContractSent && (
+              <Button type="primary" disabled>
+                ✓ Đã gửi
               </Button>
             )}
           </Space>
