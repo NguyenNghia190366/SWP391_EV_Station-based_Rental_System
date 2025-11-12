@@ -42,3 +42,4 @@ back_end/src/PresentationLayer/obj/Debug/net9.0/refint/PresentationLayer.dll
 back_end/src/BusinessLogicLayer/obj/Debug/net9.0/BusinessLogicLayer.csproj.CoreCompileInputs.cache
 back_end/src/DataAccessLayer/obj/Debug/net9.0/DataAccessLayer.csproj.CoreCompileInputs.cache
 back_end/src/PresentationLayer/obj/Debug/net9.0/PresentationLayer.csproj.CoreCompileInputs.cache
+**/obj/
