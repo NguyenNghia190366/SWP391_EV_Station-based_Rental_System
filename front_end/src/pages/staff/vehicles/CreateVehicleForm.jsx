@@ -70,7 +70,50 @@ const CreateVehicleForm = ({ onSuccess }) => {
       console.error("Error creating vehicle:", error);
       if (error?.response) {
         console.error("Create vehicle response data:", error.response.data);
-        message.error(error.response.data?.message || JSON.stringify(error.response.data) || "Không thể tạo xe. Vui lòng thử lại.");
+        // If backend returned validation errors, show them on form fields
+        const respData = error.response.data || {};
+        if (respData.errors && typeof respData.errors === "object") {
+          const mapServerField = (key) => {
+            // Handle PascalCase from server (VehicleModelId, LicensePlate, etc.)
+            const cases = {
+              "VehicleModelId": "vehicleModelId",
+              "vehicleModelId": "vehicleModelId",
+              "LicensePlate": "licensePlate",
+              "licensePlate": "licensePlate",
+              "StationId": "stationId",
+              "stationId": "stationId",
+              "ReleaseYear": "releaseYear",
+              "releaseYear": "releaseYear",
+              "BatteryCapacity": "batteryCapacity",
+              "batteryCapacity": "batteryCapacity",
+              "CurrentMileage": "currentMileage",
+              "currentMileage": "currentMileage",
+              "ImgCarUrl": "imgCarUrl",
+              "imgCarUrl": "imgCarUrl",
+              "Condition": "condition",
+              "condition": "condition",
+              "IsAvailable": "isAvailable",
+              "isAvailable": "isAvailable",
+              "Model": "model",
+              "model": "model",
+            };
+            return cases[key] || key;
+          };
+
+          const fields = Object.entries(respData.errors).map(([field, msgs]) => ({
+            name: [mapServerField(field)],
+            errors: Array.isArray(msgs) ? msgs : [String(msgs)],
+          }));
+          try {
+            form.setFields(fields);
+          } catch (e) {
+            console.warn("Failed to set form fields from server errors", e);
+          }
+          // show general message too
+          message.error(respData.message || "Có lỗi xác thực. Vui lòng kiểm tra trường dữ liệu.");
+        } else {
+          message.error(respData.message || JSON.stringify(respData) || "Không thể tạo xe. Vui lòng thử lại.");
+        }
       } else {
         message.error(error.message || "Không thể tạo xe. Vui lòng thử lại.");
       }
