@@ -113,7 +113,7 @@ export default function RentalHistoryPage() {
       title: "Xe",
       dataIndex: "vehicleName",
       key: "vehicleName",
-      width: 220,
+      width: 160,
       render: (name, record) => (
         <div>
           {/* primary: vehicle name when available, otherwise show id */}
@@ -133,6 +133,7 @@ export default function RentalHistoryPage() {
           {record.pickupStationName} → {record.returnStationName}
         </span>
       ),
+      width: 240,
     },
     {
       title: "Thời gian thuê",
@@ -169,54 +170,84 @@ export default function RentalHistoryPage() {
       width: 160,
     },
     {
+      title: "Ghi chú",
+      key: "notes",
+      render: (_, record) => {
+        // Show approval message when status is APPROVED
+        if (record.status === "APPROVED") {
+          const pickupStationName = record.pickupStationName || "trạm";
+          const startDate = record.startTime ? dayjs(record.startTime).format("DD/MM/YYYY") : "";
+          return (
+            <div style={{ fontSize: 12, color: "#16a34a", fontWeight: 500, lineHeight: "1.4" }}>
+              ✅ Staff đã duyệt.<br />
+              Đến <strong>{pickupStationName}</strong> ngày <strong>{startDate}</strong> ký hợp đồng.
+            </div>
+          );
+        }
+        return null;
+      },
+      width: 220,
+    },
+    {
       title: "Hành động",
       key: "actions",
       render: (_, record) => {
-        // show cancel for BOOKED and APPROVED (disabled when APPROVED)
         const showCancel = record.status === "BOOKED" || record.status === "APPROVED";
+        const showContract = record.status === "APPROVED" || record.status === "CONTRACT_SENT";
         const disabled = record.status === "APPROVED";
-        if (!showCancel) return null;
-
+        
         return (
           <Space>
-            <Popconfirm
-              title={disabled ? "Đơn đã được duyệt, không thể hủy." : "Xác nhận hủy đơn?"}
-              onConfirm={async () => {
-                if (disabled) return message.warning("Đơn đã được duyệt, không thể hủy từ phía renter.");
-                if (cancellingId) return;
-                setCancellingId(record.orderId);
-                try {
-                  // Use rejectRentalOrder from useRenters (same as staff)
-                  // This calls /Reject endpoint which updates status to CANCELED
-                  await rejectRentalOrder(record.orderId);
-                  message.success("Đã hủy đơn thuê!");
-                  setTimeout(() => fetchOrders(), 400);
-                } catch (err) {
-                  console.error("❌ Lỗi hủy đơn:", err);
-                  message.error("Hủy đơn thất bại. Vui lòng thử lại.");
-                } finally {
-                  setCancellingId(null);
-                }
-              }}
-              okText="Có"
-              cancelText="Không"
-              disabled={disabled}
-            >
-              <Tooltip title={disabled ? "Đã duyệt — không thể hủy" : "Hủy đơn"}>
-                <Button
-                  type="primary"
-                  danger
-                  icon={<DeleteOutlined />}
-                  size="small"
-                  loading={cancellingId === record.orderId}
-                  disabled={disabled || cancellingId === record.orderId}
-                />
-              </Tooltip>
-            </Popconfirm>
+            {showContract && (
+              <Button
+                type="primary"
+                ghost
+                size="small"
+                onClick={() => navigate(`/renter/contract-online/${record.orderId}`)}
+              >
+                Hợp đồng
+              </Button>
+            )}
+            {showCancel && (
+              <Popconfirm
+                title={disabled ? "Đơn đã được duyệt, không thể hủy." : "Xác nhận hủy đơn?"}
+                onConfirm={async () => {
+                  if (disabled) return message.warning("Đơn đã được duyệt, không thể hủy từ phía renter.");
+                  if (cancellingId) return;
+                  setCancellingId(record.orderId);
+                  try {
+                    // Use rejectRentalOrder from useRenters (same as staff)
+                    // This calls /Reject endpoint which updates status to CANCELED
+                    await rejectRentalOrder(record.orderId);
+                    message.success("Đã hủy đơn thuê!");
+                    setTimeout(() => fetchOrders(), 400);
+                  } catch (err) {
+                    console.error("❌ Lỗi hủy đơn:", err);
+                    message.error("Hủy đơn thất bại. Vui lòng thử lại.");
+                  } finally {
+                    setCancellingId(null);
+                  }
+                }}
+                okText="Có"
+                cancelText="Không"
+                disabled={disabled}
+              >
+                <Tooltip title={disabled ? "Đã duyệt — không thể hủy" : "Hủy đơn"}>
+                  <Button
+                    type="primary"
+                    danger
+                    icon={<DeleteOutlined />}
+                    size="small"
+                    loading={cancellingId === record.orderId}
+                    disabled={disabled || cancellingId === record.orderId}
+                  />
+                </Tooltip>
+              </Popconfirm>
+            )}
           </Space>
         );
       },
-      width: 120,
+      width: 150,
     },
   ];
 

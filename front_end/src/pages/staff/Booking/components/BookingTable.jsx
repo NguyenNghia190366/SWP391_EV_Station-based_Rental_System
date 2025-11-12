@@ -1,6 +1,6 @@
-import React, { useState } from "react";
+import React, { useState, useMemo, useCallback } from "react";
 import { Table, Button, Tag, Space, Tooltip, message, Popconfirm } from "antd";
-import { EyeOutlined, CheckOutlined, CloseOutlined } from "@ant-design/icons";
+import { EyeOutlined, CheckOutlined, CloseOutlined, FileTextOutlined } from "@ant-design/icons";
 import { useNavigate } from "react-router-dom";
 import dayjs from "dayjs";
 import { useStationStaff } from "@/hooks/useStationStaff";
@@ -9,14 +9,12 @@ export default function BookingTable({ bookings = [], loading, onRefresh }) {
   const navigate = useNavigate();
   const { approveRentalOrder, rejectRentalOrder } = useStationStaff();
 
-  // ✅ tách riêng 2 state
   const [approvingId, setApprovingId] = useState(null);
   const [rejectingId, setRejectingId] = useState(null);
 
-  // 🔹 Duyệt yêu cầu
-  const handleApprove = async (record) => {
+  // ✅ Memoize handlers to prevent re-creation
+  const handleApprove = useCallback(async (record) => {
     if (approvingId) return;
-
     setApprovingId(record.orderId);
 
     try {
@@ -28,13 +26,11 @@ export default function BookingTable({ bookings = [], loading, onRefresh }) {
     } finally {
       setApprovingId(null);
     }
-  };
+  }, [approvingId, approveRentalOrder, onRefresh]);
 
-  // 🔹 Từ chối yêu cầu
-  const handleReject = async (record) => {
+  const handleReject = useCallback(async (record) => {
     if (rejectingId) return;
-
-      setRejectingId(record.orderId);
+    setRejectingId(record.orderId);
 
     try {
       await rejectRentalOrder(record.orderId);
@@ -45,9 +41,10 @@ export default function BookingTable({ bookings = [], loading, onRefresh }) {
     } finally {
       setRejectingId(null);
     }
-  };
+  }, [rejectingId, rejectRentalOrder, onRefresh]);
 
-  const columns = [
+  // ✅ Memoize columns definition
+  const columns = useMemo(() => [
     {
       title: "Mã đơn",
       dataIndex: "orderId",
@@ -181,11 +178,59 @@ export default function BookingTable({ bookings = [], loading, onRefresh }) {
               </Popconfirm>
             </>
           )}
+          {record.status === "APPROVED" && (
+            <Popconfirm
+              title="Chọn loại hợp đồng"
+              description={
+                <Space direction="vertical" style={{ width: '100%' }}>
+                  <Button 
+                    type="primary" 
+                    block
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      navigate(`/staff/contract-online/${record.orderId}`);
+                    }}
+                  >
+                    Hợp đồng Online
+                  </Button>
+                  <Button 
+                    block
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      navigate(`/staff/contract-offline/${record.orderId}`);
+                    }}
+                  >
+                    Hợp đồng Offline
+                  </Button>
+                </Space>
+              }
+              icon={null}
+              showCancel={false}
+              okButtonProps={{ style: { display: 'none' } }}
+            >
+              <Tooltip title="Tạo hợp đồng">
+                <Button
+                  type="text"
+                  icon={<FileTextOutlined />}
+                  onClick={(e) => e.stopPropagation()}
+                  disabled={
+                    approvingId === record.orderId || rejectingId === record.orderId
+                  }
+                />
+              </Tooltip>
+            </Popconfirm>
+          )}
         </Space>
       ),
       width: 200,
     },
-  ];
+  ], [navigate, approvingId, rejectingId, handleApprove, handleReject]);
+
+  // ✅ Memoize pagination config
+  const paginationConfig = useMemo(() => ({
+    pageSize: 10,
+    showTotal: (total) => `Tổng ${total} đơn`,
+  }), []);
 
   return (
     <div className="shadow-md rounded-xl bg-white p-4">
@@ -194,10 +239,7 @@ export default function BookingTable({ bookings = [], loading, onRefresh }) {
         columns={columns}
         dataSource={bookings}
         loading={loading}
-        pagination={{
-          pageSize: 10,
-          showTotal: (total) => `Tổng ${total} đơn`,
-        }}
+        pagination={paginationConfig}
         scroll={{ x: 900 }}
       />
     </div>
