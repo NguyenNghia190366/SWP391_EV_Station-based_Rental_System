@@ -92,7 +92,7 @@ namespace PresentationLayer.Controllers
 
             // --- (Nâng cao) Kiểm tra quyền sở hữu ---
             // Nếu là Renter, kiểm tra xem có đúng là hợp đồng của họ không
-            if (User.IsInRole("Renter"))
+            if (User.IsInRole("RENTER"))
             {
                 var renterIdClaim = User.FindFirst("renterId");
                 if (renterIdClaim == null || !int.TryParse(renterIdClaim.Value, out int renterId))
