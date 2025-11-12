@@ -1,3 +1,27 @@
+import React, { useEffect } from "react";
+import { useParams, useNavigate } from "react-router-dom";
+import { Card, Spin } from "antd";
+
+export default function PaymentPage() {
+  const { orderId } = useParams();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    // If an orderId is present, forward the user to the contract-online flow
+    if (orderId) {
+      navigate(`/renter/contract-online/${orderId}`);
+    }
+  }, [orderId, navigate]);
+
+  return (
+    <div className="min-h-screen flex items-center justify-center bg-gray-50">
+      <Card style={{ width: 480, textAlign: "center" }}>
+        <h3>Đang chuyển tới trang thanh toán...</h3>
+        <div style={{ marginTop: 24 }}><Spin /></div>
+      </Card>
+    </div>
+  );
+}
 import React, { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { message, Spin } from "antd";

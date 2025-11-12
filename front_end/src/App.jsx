@@ -9,13 +9,13 @@ import ProfilePage from "./Components/Common/Profile/ProfilePage.jsx";
 import VehiclesPage from "./pages/renter/vehicles/VehiclesPage.jsx";
 import BookingRequestPage from "./pages/renter/booking/BookingRequestPage.jsx";
 import BookingFormPage from "./pages/renter/booking/BookingFormPage.jsx";
-import PaymentPage from "./pages/renter/payment/PaymentPage.jsx";
 import VehiclePreviewNotification from "./pages/renter/VehiclePreviewNotification";
 import VerifyPage from "./pages/renter/VerifyPage.jsx";
 import RentalHistoryPage from "./pages/renter/RentalHistoryPage.jsx";
 import ContractOnlinePage from "./pages/renter/ContractOnlinePage.jsx";
 import ContractOfflinePage from "./pages/renter/ContractOfflinePage.jsx";
 import PaymentSuccessPage from "./pages/renter/payment/PaymentSuccessPage.jsx";
+import PaymentHistory from "./pages/renter/payment/PaymentHistory.jsx";
 // Admin
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import AdminVerificationDashboard from "./pages/admin/VerifyRenterPage.jsx";
@@ -52,8 +52,8 @@ function App() {
           element={<BookingRequestPage />}
         />
         <Route path="/contract/:vehicleId" element={<ContractOfflinePage />} />
-        <Route path="/payment/:orderId" element={<PaymentPage />} />
         <Route path="/payment/success" element={<PaymentSuccessPage />} />
+        <Route path="/payment/history" element={<PaymentHistory />} />
 
         {/* User Account Routes */}
         <Route path="/notifications" element={<NotificationsPage />} />
