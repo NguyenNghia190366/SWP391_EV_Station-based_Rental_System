@@ -3,10 +3,12 @@ import { Menu, Card, Statistic } from "antd";
 import { 
   BookOutlined, 
   DashboardOutlined,
-  CarOutlined
+  CarOutlined,
+  PlusOutlined
 } from "@ant-design/icons";
 import BookingRequestsManagement from "./Booking/BookingRequestsManagement";
 import VehicleStatus from "../shared/VehicleStatus";
+import CreateVehicleForm from "./vehicles/CreateVehicleForm";
 
 const StaffDashboard = () => {
   const [selectedMenu, setSelectedMenu] = useState("overview");
@@ -15,6 +17,7 @@ const StaffDashboard = () => {
     { key: "overview", icon: <DashboardOutlined />, label: "Tổng quan" },
     { key: "bookings", icon: <BookOutlined />, label: "Quản lý Booking" },
     { key: "vehicle-status", icon: <CarOutlined />, label: "Trạng thái xe" },
+    { key: "create-vehicle", icon: <PlusOutlined />, label: "Tạo xe mới" },
   ], []);
 
   return (
@@ -62,7 +65,16 @@ const StaffDashboard = () => {
         <div style={{ display: selectedMenu === "vehicle-status" ? "block" : "none" }}>
           <VehicleStatus />
         </div>
+
+        <div style={{ display: selectedMenu === "create-vehicle" ? "block" : "none" }}>
+          <Card className="shadow-lg p-6 rounded-xl bg-white">
+            <h2 className="text-2xl font-bold text-gray-800 mb-4">Tạo xe mới</h2>
+            <CreateVehicleForm onSuccess={() => setSelectedMenu("vehicle-status")} />
+          </Card>
+        </div>
       </div>
+
+      {/* Create Vehicle is available as a dashboard menu item */}
     </div>
   );
 };

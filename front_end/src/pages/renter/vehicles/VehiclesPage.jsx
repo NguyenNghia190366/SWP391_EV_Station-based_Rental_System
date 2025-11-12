@@ -63,6 +63,11 @@ const VehiclesPage = () => {
           const data = await getAll();
           const vehiclesList = Array.isArray(data) ? data : data?.data || [];
 
+          // Log raw vehicle to see actual structure from backend
+          if (vehiclesList.length > 0) {
+            console.log("Raw vehicle from API:", vehiclesList[0]);
+          }
+
           // Fetch vehicle models to get brandName so we can build display name (brand + model)
           let models = [];
           try {
@@ -92,7 +97,6 @@ const VehiclesPage = () => {
 
           const normalizedVehicles = vehiclesWithBrand.map((v) => normalizeVehicleData(v));
 
-        console.log("✅ Normalized vehicles:", normalizedVehicles);
         setVehicles(normalizedVehicles);
         setFilteredVehicles(normalizedVehicles);
         setHasLoadedVehicles(true);
@@ -168,7 +172,15 @@ const VehiclesPage = () => {
     if (station !== "all") {
       const stationId = Number(station);
       result = result.filter((v) => {
-        const vStationId = v.stationId || v.station_id || v.station?.stationId;
+        // Check multiple possible field names for stationId
+        const vStationId = 
+          v.stationId || 
+          v.station_id || 
+          v.station?.stationId || 
+          v.station?.id ||
+          v._original?.stationId ||
+          v._original?.station_id;
+        
         return Number(vStationId) === stationId;
       });
     }
@@ -337,34 +349,23 @@ const VehiclesPage = () => {
             ))}
           </div>
 
-          {/* Station Filter */}
+          {/* Station Filter (dropdown) */}
           {stations.length > 0 && (
             <div className="border-t border-gray-200 pt-4">
               <p className="text-sm font-semibold text-gray-700 mb-3">Chọn trạm:</p>
-              <div className="flex flex-wrap gap-3 justify-center">
-                <button
-                  onClick={() => handleFilterByStation("all")}
-                  className={`px-6 py-3 rounded-xl font-semibold transition-all duration-300 
-                    ${selectedStation === "all"
-                      ? "bg-green-600 text-white shadow-lg scale-105"
-                      : "bg-white text-gray-700 border-2 border-gray-200 hover:border-green-300 hover:shadow-md"
-                    }`}
+              <div className="flex justify-center">
+                <select
+                  value={selectedStation}
+                  onChange={(e) => handleFilterByStation(e.target.value)}
+                  className="px-4 py-3 rounded-xl border-2 border-gray-200 bg-white text-gray-700 font-semibold outline-none focus:border-green-400 focus:shadow-md"
                 >
-                  Tất cả trạm
-                </button>
-                {stations.map((station) => (
-                  <button
-                    key={station.stationId || station.id}
-                    onClick={() => handleFilterByStation(String(station.stationId || station.id))}
-                    className={`px-6 py-3 rounded-xl font-semibold transition-all duration-300 whitespace-nowrap
-                      ${selectedStation === String(station.stationId || station.id)
-                        ? "bg-green-600 text-white shadow-lg scale-105"
-                        : "bg-white text-gray-700 border-2 border-gray-200 hover:border-green-300 hover:shadow-md"
-                      }`}
-                  >
-                    {station.stationName || "Trạm"}
-                  </button>
-                ))}
+                  <option value="all">Tất cả trạm</option>
+                  {stations.map((station) => (
+                    <option key={station.stationId || station.id} value={String(station.stationId || station.id)}>
+                      {station.stationName || `Trạm ${station.stationId || station.id}`}
+                    </option>
+                  ))}
+                </select>
               </div>
             </div>
           )}
