@@ -29,12 +29,12 @@ namespace BusinessLogicLayer.Services
                 .Include(r => r.Driver_License)
                 .SingleOrDefaultAsync(r => r.user_id == userId);
 
-            if (renter == null) 
+            if (renter == null)
             {
                 throw new KeyNotFoundException($"Renter not found for User ID: {userId}");
             }
 
-            return (renter, renter.CCCD, renter.Driver_License); 
+            return (renter, renter.CCCD, renter.Driver_License);
         }
 
         public async Task<RenterDocumentsViewDto> GetMyDocumentsAsync()
@@ -43,43 +43,63 @@ namespace BusinessLogicLayer.Services
             if (userId == 0) throw new UnauthorizedAccessException("Người dùng không hợp lệ.");
 
             var (renter, cccd, dl) = await LoadDocumentsAsync(userId);
-            
+
             var dto = new RenterDocumentsViewDto();
             if (cccd != null) _mapper.Map(cccd, dto); // Giả định AutoMapper đã được refactor
             if (dl != null) _mapper.Map(dl, dto);   // Giả định AutoMapper đã được refactor
-            
+
             dto.IsVerified = renter.is_verified;
 
             return dto;
         }
-        
-        public async Task<RenterDocumentsViewDto> UpsertMyDocumentsAsync(RenterDocumentsUpsertDto dto)
+
+        public async Task<RenterDocumentsViewDto> UpsertMyCccdAsync(CccdUpsertDto dto)
         {
-            int userId = _currentUser.UserId; // Lấy ID từ helper
+            int userId = _currentUser.UserId;
             if (userId == 0) throw new UnauthorizedAccessException("Người dùng không hợp lệ.");
 
-            var (renter, cccd, dl) = await LoadDocumentsAsync(userId);
+            // Dùng lại hàm LoadDocumentsAsync để lấy Renter, cccd, và renterId
+            var (renter, cccd, _) = await LoadDocumentsAsync(userId);
             var renterId = renter.renter_id;
 
-            // (Logic map và set is_verified = false vẫn giữ nguyên)
+            // 1. Xử lý CCCD
             if (cccd == null)
             {
                 cccd = new CCCD { renter_id = renterId };
                 _db.CCCDs.Add(cccd);
             }
-            _mapper.Map(dto, cccd); // Map DTO -> CCCD
+            _mapper.Map(dto, cccd); // Map DTO (mới) -> CCCD
+            
+            // 2. Set lại trạng thái chờ duyệt
+            renter.is_verified = false;
+            await _db.SaveChangesAsync();
+            
+            // 3. Trả về DTO view tổng hợp
+            return await GetMyDocumentsAsync();
+        }
 
+        public async Task<RenterDocumentsViewDto> UpsertMyDriverLicenseAsync(DriverLicenseUpsertDto dto)
+        {
+            int userId = _currentUser.UserId;
+            if (userId == 0) throw new UnauthorizedAccessException("Người dùng không hợp lệ.");
+
+            // Dùng lại hàm LoadDocumentsAsync để lấy Renter, dl, và renterId
+            var (renter, _, dl) = await LoadDocumentsAsync(userId);
+            var renterId = renter.renter_id;
+
+            // 1. Xử lý Driver License
             if (dl == null)
             {
                 dl = new Driver_License { renter_id = renterId };
                 _db.Driver_Licenses.Add(dl);
             }
-            _mapper.Map(dto, dl); // Map DTO -> Driver_License
+            _mapper.Map(dto, dl); // Map DTO (mới) -> Driver_License
             
+            // 2. Set lại trạng thái chờ duyệt
             renter.is_verified = false;
             await _db.SaveChangesAsync();
             
-            // Gọi lại hàm Get (không cần tham số)
+            // 3. Trả về DTO view tổng hợp
             return await GetMyDocumentsAsync();
         }
 
@@ -87,14 +107,14 @@ namespace BusinessLogicLayer.Services
         {
             var (renter, cccd, dl) = await LoadDocumentsAsync(userId);
 
-            if (renter == null) 
+            if (renter == null)
             {
                 return false;
             }
 
             // === LOGIC MỚI: KIỂM TRA 4 ẢNH ===
             // Kiểm tra CCCD: Phải tồn tại VÀ 3 trường con không được rỗng
-            bool hasValidCccd = cccd != null 
+            bool hasValidCccd = cccd != null
                                 && !string.IsNullOrWhiteSpace(cccd.id_card_number)
                                 && !string.IsNullOrWhiteSpace(cccd.url_cccd_cmnd_front) // <-- SỬA
                                 && !string.IsNullOrWhiteSpace(cccd.url_cccd_cmnd_back);  // <-- SỬA
@@ -107,6 +127,56 @@ namespace BusinessLogicLayer.Services
 
             // 4. Trả về kết quả: Phải có cả 2 VÀ renter phải được 'verified'
             return hasValidCccd && hasValidDl && renter.is_verified;
+        }
+
+        // === CHỨC NĂNG QUẢN LÝ (MỚI) ===
+
+        // Hàm helper để load đầy đủ thông tin Renter
+        private IQueryable<Renter> GetFullRenterQuery()
+        {
+            return _db.Renters
+                .Include(r => r.user)
+                .Include(r => r.CCCD)
+                .Include(r => r.Driver_License);
+        }
+
+        // 1. Cho ADMIN: Lấy danh sách chờ duyệt
+        public async Task<IEnumerable<RenterVerificationViewDto>> GetPendingVerificationsAsync()
+        {
+            var pendingRenters = await GetFullRenterQuery()
+                .Where(r => r.is_verified == false) // Lấy các Renter chưa xác thực [cite: 20]
+                .OrderBy(r => r.registration_date) // Ưu tiên người cũ
+                .ToListAsync();
+
+            return _mapper.Map<IEnumerable<RenterVerificationViewDto>>(pendingRenters);
+        }
+
+        // 2. Cho ADMIN/STAFF: Lấy chi tiết 1 Renter
+        public async Task<RenterVerificationViewDto> GetRenterForVerificationAsync(int renterId)
+        {
+            var renter = await GetFullRenterQuery()
+                .SingleOrDefaultAsync(r => r.renter_id == renterId);
+
+            if (renter == null)
+            {
+                throw new KeyNotFoundException($"Không tìm thấy Renter với ID: {renterId}");
+            }
+
+            return _mapper.Map<RenterVerificationViewDto>(renter);
+        }
+
+        // 3. Cho ADMIN/STAFF: Cập nhật trạng thái
+        public async Task<bool> SetRenterVerificationStatusAsync(int renterId, bool isVerified)
+        {
+            var renter = await _db.Renters.FindAsync(renterId);
+            if (renter == null)
+            {
+                throw new KeyNotFoundException($"Không tìm thấy Renter với ID: {renterId}");
+            }
+
+            renter.is_verified = isVerified;
+            await _db.SaveChangesAsync();
+            return true;
         }
 
     }

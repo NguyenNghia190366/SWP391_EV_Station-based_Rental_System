@@ -1,7 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using BusinessLogicLayer.DTOs.Renter;
 
 namespace BusinessLogicLayer.Interfaces
@@ -11,10 +7,21 @@ namespace BusinessLogicLayer.Interfaces
         // === SỬA: Bỏ (int userId) ===
         Task<RenterDocumentsViewDto> GetMyDocumentsAsync();
 
-        // === SỬA: Bỏ (int userId) ===
-        Task<RenterDocumentsViewDto> UpsertMyDocumentsAsync(RenterDocumentsUpsertDto dto);
+        Task<RenterDocumentsViewDto> UpsertMyCccdAsync(CccdUpsertDto dto);
+        Task<RenterDocumentsViewDto> UpsertMyDriverLicenseAsync(DriverLicenseUpsertDto dto);
 
         // (Hàm này vẫn cần userId vì nó có thể được gọi từ service khác)
         Task<bool> HasVerifiedDocumentsAsync(int userId);
+
+        // === CHỨC NĂNG QUẢN LÝ (MỚI) ===
+
+        // Dùng cho Admin (Get list)
+        Task<IEnumerable<RenterVerificationViewDto>> GetPendingVerificationsAsync();
+
+        // Dùng cho Admin/Staff (Get by Id)
+        Task<RenterVerificationViewDto> GetRenterForVerificationAsync(int renterId);
+        
+        // Dùng cho Admin/Staff (Action)
+        Task<bool> SetRenterVerificationStatusAsync(int renterId, bool isVerified);
     }
 }
