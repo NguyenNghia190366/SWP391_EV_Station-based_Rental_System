@@ -300,10 +300,21 @@ namespace BusinessLogicLayer.Services
                 int orderId;
                 try
                 {
-                    orderId = int.Parse(ipnDto.vnp_TxnRef.Split('_')[0]); // Lấy OrderId
+                    // --- SỬA LOGIC Ở ĐÂY ---
+                    string txnRef = ipnDto.vnp_TxnRef; // (Ví dụ: 720251112132718)
+                    
+                    // Lấy timestamp (14 ký tự cuối)
+                    string timeStamp = txnRef.Substring(txnRef.Length - 14, 14);
+                    
+                    // Lấy OrderId (là phần còn lại ở đầu)
+                    string orderIdStr = txnRef.Substring(0, txnRef.Length - 14);
+                    
+                    orderId = int.Parse(orderIdStr); // (sẽ là int.Parse("7"))
+                    // --- HẾT PHẦN SỬA ---
                 }
                 catch
                 {
+                    // Giờ nếu lỗi ở đây, nó là lỗi thật
                     return "{\"RspCode\":\"01\", \"Message\":\"Order not found\"}";
                 }
 
@@ -343,7 +354,7 @@ namespace BusinessLogicLayer.Services
         
         
         
-        // --- HÀM CHO THANH TOÁN TIỀN MẶT ---
+        
 
         public async Task<IEnumerable<PaymentViewDto>> GetPaymentsForOrderAsync(int orderId)
         {
