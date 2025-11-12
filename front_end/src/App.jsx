@@ -21,6 +21,8 @@ import StationRegistrationPage from "./pages/admin/StationRegistrationPage";
 // Staff
 import StaffDashboard from "./pages/staff/StaffDashboard.jsx";
 import SendVehiclePreview from "./pages/staff/SendVehiclePreview.jsx";
+import ContractOfflinePage from "./pages/staff/ContractOfflinePage.jsx";
+import ContractOnlinePage from "./pages/staff/ContractOnlinePage.jsx";
 // Common
 import { roles } from "./Constant/Role";
 import { RequireAuth } from "./Router/RequireAuth.jsx";
@@ -50,12 +52,13 @@ function App() {
           path="/booking-request/:vehicleId"
           element={<BookingRequestPage />}
         />
-        <Route path="/contract/:vehicleId" element={<ContractPage />} />
+        <Route path="/contract/:vehicleId" element={<ContractOfflinePage />} />
         <Route path="/payment/:vehicleId" element={<PaymentPage />} />
 
         {/* User Account Routes */}
         <Route path="/notifications" element={<NotificationsPage />} />
         <Route path="/my-bookings" element={<RentalHistoryPage />} />
+        <Route path="/renter/contract-online/:orderId" element={<ContractOnlinePage />} />
 
         {/* Vehicle Preview & Handover Routes */}
         <Route
@@ -96,6 +99,22 @@ function App() {
           element={
             <RequireAuth allowRole={[roles.STAFF]}>
               <SendVehiclePreview />
+            </RequireAuth>
+          }
+        />
+        <Route
+          path="/staff/contract-offline/:orderId"
+          element={
+            <RequireAuth allowRole={[roles.STAFF]}>
+              <ContractOfflinePage />
+            </RequireAuth>
+          }
+        />
+        <Route
+          path="/staff/contract-online/:orderId"
+          element={
+            <RequireAuth allowRole={[roles.STAFF]}>
+              <ContractOnlinePage />
             </RequireAuth>
           }
         />

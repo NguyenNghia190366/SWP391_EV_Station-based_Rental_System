@@ -18,8 +18,10 @@ export const useDriverLicense = () => {
         try {
           // Try POST first (create new)
           const res = await instance.post("/DriverLicenses/UploadBang", {
-            renter_Id: Number(renter_Id),
-            ...payload,
+            renter_id: Number(renter_Id),  // Use snake_case to match backend API
+            url_Driver_License_front: payload.url_Driver_License_front,
+            url_Driver_License_back: payload.url_Driver_License_back,
+            driverLicenseNumber: payload.driverLicenseNumber,
           });
           console.log("✅ Driver License uploaded successfully");
           return res.data;

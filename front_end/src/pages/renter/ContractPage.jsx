@@ -1,210 +1,276 @@
-import React, { useState, useEffect } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import React, { useEffect, useState, useRef, useMemo } from "react";
+import { Card, Button, Space, message, Spin } from "antd";
+import { DownloadOutlined, PrinterOutlined } from "@ant-design/icons";
+import { useParams } from "react-router-dom";
+import dayjs from "dayjs";
+import { useAxiosInstance } from "@/hooks/useAxiosInstance";
 
-const ContractPage = () => {
-  const navigate = useNavigate();
-  const { vehicleId } = useParams();
-
-  const [contractData, setContractData] = useState(null);
-  const [signature, setSignature] = useState("");
-  const [signingMethod, setSigningMethod] = useState("electronic");
-  const [isAgreed, setIsAgreed] = useState(false);
+export default function ContractPage() {
+  const { orderId } = useParams();
+  const [loading, setLoading] = useState(true);
+  const [order, setOrder] = useState(null);
+  const [error, setError] = useState(null);
+  const contractRef = useRef();
+  const axiosInstance = useAxiosInstance();
 
   useEffect(() => {
-    const pendingBooking = localStorage.getItem("pendingBooking");
+    const fetchOrderData = async () => {
+      setLoading(true);
+      try {
+        // Step 1: Get order first to know what IDs we need
+        const orderRes = await axiosInstance.get(`/RentalOrders/${orderId}`);
+        const orderData = orderRes.data;
+        console.log("Order:", orderData);
 
-    if (!pendingBooking) {
-      alert("Không tìm thấy thông tin đặt xe!");
-      navigate("/vehicles");
-      return;
-    }
+        // Step 2: Fetch only necessary data in parallel
+        const apiCalls = [
+          axiosInstance.get(`/Vehicles/${orderData.vehicleId}`).catch(() => null),
+          axiosInstance.get(`/Renters`).then(res => res.data).catch(() => []),
+        ];
 
-    const data = JSON.parse(pendingBooking);
-    const start = new Date(data.bookingData.startDate);
-    const end = new Date(data.bookingData.endDate);
-    const days = Math.ceil((end - start) / (1000 * 60 * 60 * 24));
-    const totalPrice = days * data.vehicle.price * 1000;
-    const deposit = totalPrice * 0.3;
+        // Add station calls if IDs exist
+        if (orderData.pickupStationId) {
+          apiCalls.push(
+            axiosInstance.get(`/Stations/${orderData.pickupStationId}`).catch(() => null)
+          );
+        }
+        if (orderData.returnStationId) {
+          apiCalls.push(
+            axiosInstance.get(`/Stations/${orderData.returnStationId}`).catch(() => null)
+          );
+        }
 
-    setContractData({ ...data, totalPrice, deposit, days });
-  }, [navigate]);
+        const [vehicleRes, rentersData, pickupStationRes, returnStationRes] = await Promise.all(apiCalls);
+        
+        const vehicle = vehicleRes?.data;
+        console.log("Vehicle:", vehicle);
 
-  const handleSignatureInput = (value) => {
-    setSignature(value);
-    if (value && !isAgreed) setIsAgreed(true);
-  };
+        // Step 3: Get vehicle model and renter details
+        const additionalCalls = [];
+        
+        if (vehicle?.vehicleModelId) {
+          additionalCalls.push(
+            axiosInstance.get(`/VehicleModels/${vehicle.vehicleModelId}`).catch(() => null)
+          );
+        } else {
+          additionalCalls.push(Promise.resolve(null));
+        }
 
-  const handleAccept = () => {
-    if (!signingMethod) {
-      alert("Vui lòng chọn phương thức ký hợp đồng!");
-      return;
-    }
+        // Find renter
+        const renter = Array.isArray(rentersData) 
+          ? rentersData.find(r => r.renterId === orderData.renterId)
+          : null;
+        console.log("Matched Renter:", renter);
 
-    if (signingMethod === "electronic" && (!signature || signature.trim() === "")) {
-      alert("Vui lòng ký xác nhận hợp đồng điện tử!");
-      return;
-    }
+        if (renter?.userId) {
+          additionalCalls.push(
+            axiosInstance.get(`/Users/${renter.userId}`).catch(() => null)
+          );
+        } else {
+          additionalCalls.push(Promise.resolve(null));
+        }
 
-    const contractWithSignature = {
-      ...contractData,
-      signature: signingMethod === "electronic" ? signature : "PAPER_SIGNING",
-      signingMethod,
-      contractNumber: `EVR-${Date.now()}`,
-      signedAt: new Date().toISOString(),
-      status: signingMethod === "electronic" ? "pending_payment" : "pending_paper_signing",
+        // Get CCCD
+        additionalCalls.push(
+          axiosInstance.get(`/Cccds`)
+            .then(res => {
+              const cccdsData = Array.isArray(res.data) ? res.data : [];
+              return cccdsData.find(c => c.renter_Id === orderData.renterId) || null;
+            })
+            .catch(() => null)
+        );
+
+        const [vehicleModelRes, userRes, cccdInfo] = await Promise.all(additionalCalls);
+        
+        const vehicleModel = vehicleModelRes?.data;
+        const userInfo = userRes?.data || {};
+        
+        console.log("VehicleModel:", vehicleModel);
+        console.log("User Info:", userInfo);
+        console.log("CCCD Info:", cccdInfo);
+
+        // Step 4: Compose vehicle name
+        const vehicleName = vehicleModel?.brandName && vehicle?.model
+          ? `${vehicleModel.brandName} ${vehicle.model}`.trim()
+          : vehicle?.vehicleName || "(Không có)";
+
+        // Step 5: Merge all data
+        const mergedOrder = {
+          ...orderData,
+          // Renter info
+          renterName: userInfo?.fullName || renter?.fullName || "(Không có)",
+          renterPhone: userInfo?.phoneNumber || renter?.phoneNumber || "(Không có)",
+          renterEmail: userInfo?.email || renter?.email || "(Không có)",
+          renterIdNumber: cccdInfo?.id_Card_Number || renter?.cccd || "(Không có)",
+          // Vehicle info
+          vehicleName,
+          vehicleLicensePlate: vehicle?.licensePlate || "(Không có)",
+          vehicleColor: vehicleModel?.vehicleColor || vehicle?.vehicleColor || "(Không có)",
+          // Station info
+          pickupStationName: pickupStationRes?.data?.stationName || "(Không có)",
+          returnStationName: returnStationRes?.data?.stationName || "(Không có)",
+        };
+
+        console.log("Merged Order:", mergedOrder);
+        setOrder(mergedOrder);
+        setError(null);
+      } catch (err) {
+        console.error("Error fetching data:", err);
+        setError("Không thể tải thông tin đơn. Vui lòng thử lại.");
+        message.error("Không thể tải thông tin đơn.");
+      } finally {
+        setLoading(false);
+      }
     };
 
-    localStorage.setItem("pendingContract", JSON.stringify(contractWithSignature));
-    navigate(`/payment/${vehicleId}`);
-  };
-
-  const handleDecline = () => {
-    if (window.confirm("Bạn có chắc muốn hủy hợp đồng này?")) {
-      localStorage.removeItem("pendingBooking");
-      navigate("/vehicles");
+    if (orderId) {
+      fetchOrderData();
     }
+  }, [orderId, axiosInstance]);
+
+  // Xuất DOC
+  const handleExportDoc = () => {
+    const content = contractRef.current?.innerText || `Hợp đồng thuê xe #${orderId}`;
+    const blob = new Blob([content], { type: "application/msword" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `contract_${orderId}.doc`;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
+    message.success("Đã tải hợp đồng (DOC)");
   };
 
-  if (!contractData) {
+  // Xuất TXT
+  const handleExportTxt = () => {
+    const content = contractRef.current?.innerText || `Hợp đồng thuê xe #${orderId}`;
+    const blob = new Blob([content], { type: "text/plain;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `contract_${orderId}.txt`;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
+    message.success("Đã tải hợp đồng (TXT)");
+  };
+
+  // In hợp đồng
+  const handlePrint = () => {
+    if (!contractRef.current) return window.print();
+    const printWindow = window.open("", "_blank", "width=800,height=600");
+    if (!printWindow) return message.error("Không thể mở cửa sổ in. Vui lòng cho phép popup.");
+    printWindow.document.write(`
+      <html>
+        <head>
+          <title>Hợp đồng #${orderId}</title>
+          <style>
+            body { font-family: Inter, Arial, Helvetica, sans-serif; padding: 20px; }
+            .title { font-size: 20px; font-weight: 700; margin-bottom: 12px; }
+          </style>
+        </head>
+        <body>${contractRef.current.innerHTML}</body>
+      </html>
+    `);
+    printWindow.document.close();
+    setTimeout(() => printWindow.print(), 300);
+  };
+
+  const renderContract = () => {
+    if (error) return <div style={{ color: "red", padding: 20 }}>{error}</div>;
+    if (!order) return <div style={{ padding: 20 }}>Không có dữ liệu hợp đồng.</div>;
+
+    const o = order;
     return (
-      <div className="flex items-center justify-center h-screen">
-        <div>Đang tải hợp đồng...</div>
+      <div ref={contractRef} style={{ padding: 20, fontFamily: "Arial, sans-serif" }}>
+        <div style={{ textAlign: "center", marginBottom: 30 }}>
+          <h2>HỢP ĐỒNG THUÊ XE</h2>
+          <p>Mã đơn: #{orderId}</p>
+        </div>
+
+        <div style={{ marginBottom: 20 }}>
+          <p><b>Khách hàng:</b> {o.renterName}</p>
+          <p><b>Số điện thoại:</b> {o.renterPhone}</p>
+          <p><b>Email:</b> {o.renterEmail}</p>
+          <p><b>CMND/CCCD:</b> {o.renterIdNumber}</p>
+        </div>
+
+        <div style={{ marginBottom: 20 }}>
+          <p><b>Xe:</b> {o.vehicleName}</p>
+          <p><b>Biển số xe:</b> {o.vehicleLicensePlate}</p>
+          <p><b>Màu xe:</b> {o.vehicleColor}</p>
+        </div>
+
+        <div style={{ marginBottom: 20 }}>
+          <p><b>Thời gian thuê:</b></p>
+          <p style={{ marginLeft: 20 }}>
+            Từ: {o.startTime ? dayjs(o.startTime).format("DD/MM/YYYY HH:mm") : "(Không có)"}
+          </p>
+          <p style={{ marginLeft: 20 }}>
+            Đến: {o.endTime ? dayjs(o.endTime).format("DD/MM/YYYY HH:mm") : "(Không có)"}
+          </p>
+        </div>
+
+        <div style={{ marginBottom: 20 }}>
+          <p><b>Trạm nhận:</b> {o.pickupStationName}</p>
+          <p><b>Trạm trả:</b> {o.returnStationName}</p>
+          <p><b>Ngày tạo đơn:</b> {o.createdAt ? dayjs(o.createdAt).format("DD/MM/YYYY HH:mm") : "(Không có)"}</p>
+          <p><b>Trạng thái:</b> {o.status === "APPROVED" ? "Đã duyệt" : o.status || "(Không có)"}</p>
+        </div>
+
+        <div style={{ marginTop: 20, borderTop: "1px solid #ccc", paddingTop: 20 }}>
+          <p><b>Điều khoản cơ bản:</b></p>
+          <ol style={{ marginLeft: 20 }}>
+            <li>Bên thuê cam kết nhận xe đúng thời gian và địa điểm quy định.</li>
+            <li>Phí thuê và các điều khoản thanh toán theo hợp đồng riêng.</li>
+            <li>Bên thuê chịu trách nhiệm về mọi hư hỏng và tai nạn trong thời gian sử dụng.</li>
+            <li>Mọi sửa đổi phải được hai bên xác nhận bằng văn bản.</li>
+            <li>Phải trả xe đúng thời gian, nếu trễ sẽ chịu phí phạt.</li>
+          </ol>
+        </div>
+
+        <div style={{ marginTop: 40 }}>
+          <p><em>Bên cho thuê và bên thuê đồng ý với các điều khoản trên:</em></p>
+          <table style={{ width: "100%" }}>
+            <tbody>
+              <tr>
+                <td style={{ width: "50%", paddingRight: 20 }}>
+                  <p>Bên cho thuê:</p>
+                  <p style={{ marginTop: 50, borderTop: "1px solid black" }}>Ký tên</p>
+                </td>
+                <td style={{ width: "50%", paddingLeft: 20 }}>
+                  <p>Bên thuê:</p>
+                  <p style={{ marginTop: 50, borderTop: "1px solid black" }}>Ký tên</p>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
       </div>
     );
-  }
-
-  const { vehicle, bookingData, user, totalPrice, deposit } = contractData;
-
-  const calculateDays = () => {
-    const start = new Date(bookingData.startDate);
-    const end = new Date(bookingData.endDate);
-    return Math.ceil((end - start) / (1000 * 60 * 60 * 24));
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 py-8 px-4">
-      {/* ==== HEADER ==== */}
-      <div className="max-w-4xl mx-auto bg-white rounded-2xl shadow-2xl overflow-hidden">
-        <div className="bg-gradient-to-r from-indigo-600 to-purple-600 text-white text-center py-8 px-4">
-          <h1 className="text-3xl md:text-4xl font-bold mb-2">📄 HỢP ĐỒNG THUÊ XE ĐIỆN</h1>
-          <p className="text-indigo-100 text-sm md:text-base">Số hợp đồng: EVR-{Date.now()}</p>
+    <Card
+      title={`Hợp đồng #${orderId}`}
+      extra={
+        <Space>
+          <Button icon={<DownloadOutlined />} onClick={handleExportDoc} disabled={loading}>Tải DOC</Button>
+          <Button onClick={handleExportTxt} disabled={loading}>Tải TXT</Button>
+          <Button icon={<PrinterOutlined />} type="primary" onClick={handlePrint} disabled={loading}>In / Xuất</Button>
+        </Space>
+      }
+    >
+      {loading ? (
+        <div style={{ textAlign: "center", padding: 40 }}>
+          <Spin tip="Đang tải thông tin đơn..." />
         </div>
-
-        <div className="p-6 md:p-8 space-y-8">
-          {/* === BÊN THUÊ === */}
-          <section className="border-b border-gray-200 pb-6">
-            <h2 className="text-2xl font-bold text-gray-800 mb-4 flex items-center">
-              <span className="bg-indigo-100 text-indigo-600 w-8 h-8 rounded-full flex items-center justify-center mr-3 text-sm">I</span>
-              CÁC BÊN THAM GIA HỢP ĐỒNG
-            </h2>
-            <div className="bg-gradient-to-r from-blue-50 to-cyan-50 rounded-lg p-6 border border-blue-100">
-              <h3 className="text-lg font-semibold text-blue-900 mb-3 flex items-center">
-                👤 BÊN THUÊ (Bên B):
-              </h3>
-              <div className="space-y-2 text-gray-700">
-                <p><strong>Họ tên:</strong> {user.fullName}</p>
-                <p><strong>Email:</strong> {user.email}</p>
-                <p><strong>Số điện thoại:</strong> {bookingData.phone}</p>
-                <p><strong>Mã khách hàng:</strong> {user.userId}</p>
-              </div>
-            </div>
-          </section>
-
-          {/* === PHƯƠNG THỨC KÝ === */}
-          <section className="border-b border-gray-200 pb-6">
-            <h2 className="text-2xl font-bold text-gray-800 mb-4 flex items-center">
-              <span className="bg-indigo-100 text-indigo-600 w-8 h-8 rounded-full flex items-center justify-center mr-3 text-sm">VI</span>
-              PHƯƠNG THỨC KÝ HỢP ĐỒNG
-            </h2>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-              {["electronic", "paper"].map((method) => (
-                <label
-                  key={method}
-                  className={`cursor-pointer rounded-xl border-2 p-6 transition-all duration-300 ${
-                    signingMethod === method
-                      ? "ring-4 ring-indigo-500 bg-gradient-to-br from-indigo-50 to-purple-50 border-indigo-500"
-                      : "bg-white border-gray-200 hover:bg-gray-50"
-                  }`}
-                  onClick={() => setSigningMethod(method)}
-                >
-                  <div className="text-center">
-                    <span className="text-5xl mb-3 block">
-                      {method === "electronic" ? "📱" : "📄"}
-                    </span>
-                    <h3 className="text-xl font-bold text-gray-900 mb-2">
-                      {method === "electronic" ? "Ký điện tử" : "Ký trực tiếp"}
-                    </h3>
-                    <p className="text-gray-600 text-sm">
-                      {method === "electronic"
-                        ? "Ký trực tuyến, tiện lợi"
-                        : "Ký tại trạm cùng nhân viên"}
-                    </p>
-                  </div>
-                </label>
-              ))}
-            </div>
-
-            {/* === CHỮ KÝ === */}
-            {signingMethod === "electronic" ? (
-              <div className="bg-gradient-to-br from-blue-50 to-cyan-50 rounded-xl p-6 border-2 border-blue-200">
-                <input
-                  type="text"
-                  placeholder="Nhập họ tên để ký điện tử"
-                  className="w-full text-center text-lg font-semibold text-gray-700 bg-transparent border-b-2 border-blue-300 focus:border-indigo-500 outline-none pb-2 mb-2"
-                  value={signature}
-                  onChange={(e) => handleSignatureInput(e.target.value)}
-                />
-                <p className="text-center text-xs text-gray-500 mt-2">
-                  ✍️ Gõ tên của bạn để ký điện tử
-                </p>
-              </div>
-            ) : (
-              <div className="bg-gradient-to-br from-amber-50 to-orange-50 rounded-xl p-6 border-2 border-amber-200">
-                <p>Hợp đồng sẽ được ký tại trạm {bookingData.pickupLocation}</p>
-              </div>
-            )}
-          </section>
-
-          {/* === CHECKBOX ĐỒNG Ý === */}
-          <div className="bg-gradient-to-r from-purple-50 to-pink-50 rounded-xl p-6 border-2 border-purple-200">
-            <label className="flex items-start gap-4 cursor-pointer">
-              <input
-                type="checkbox"
-                checked={isAgreed}
-                onChange={(e) => setIsAgreed(e.target.checked)}
-                className="mt-1 w-5 h-5 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500 cursor-pointer"
-              />
-              <span className="text-gray-700 leading-relaxed">
-                Tôi đồng ý với tất cả các điều khoản hợp đồng.
-              </span>
-            </label>
-          </div>
-
-          {/* === NÚT HÀNH ĐỘNG === */}
-          <div className="flex flex-col sm:flex-row gap-4 pt-4">
-            <button
-              className="flex-1 bg-gradient-to-r from-red-500 to-pink-500 text-white font-bold py-4 px-6 rounded-xl shadow-lg hover:shadow-xl hover:scale-105 transition duration-300"
-              onClick={handleDecline}
-            >
-              ✕ Từ chối
-            </button>
-            <button
-              className={`flex-1 font-bold py-4 px-6 rounded-xl shadow-lg transition duration-300 ${
-                !isAgreed || (signingMethod === "electronic" && !signature)
-                  ? "bg-gray-300 text-gray-500 cursor-not-allowed"
-                  : "bg-gradient-to-r from-indigo-500 to-purple-600 text-white hover:shadow-xl hover:scale-105"
-              }`}
-              onClick={handleAccept}
-              disabled={!isAgreed || (signingMethod === "electronic" && !signature)}
-            >
-              {signingMethod === "electronic" ? "Đồng ý & Thanh toán" : "Xác nhận đặt lịch"}
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
+      ) : (
+        renderContract()
+      )}
+    </Card>
   );
-};
-
-export default ContractPage;
+}

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useMemo } from "react";
 import { Menu, Card, Statistic } from "antd";
 import { 
   BookOutlined, 
@@ -11,11 +11,11 @@ import VehicleStatus from "../shared/VehicleStatus";
 const StaffDashboard = () => {
   const [selectedMenu, setSelectedMenu] = useState("overview");
 
-  const menuItems = [
+  const menuItems = useMemo(() => [
     { key: "overview", icon: <DashboardOutlined />, label: "Tổng quan" },
     { key: "bookings", icon: <BookOutlined />, label: "Quản lý Booking" },
     { key: "vehicle-status", icon: <CarOutlined />, label: "Trạng thái xe" },
-  ];
+  ], []);
 
   return (
     <div className="flex min-h-screen bg-gradient-to-br from-green-50 to-emerald-50">
@@ -40,7 +40,8 @@ const StaffDashboard = () => {
 
       {/* Main Content */}
       <div className="flex-1 p-8 overflow-y-auto">
-        {selectedMenu === "overview" && (
+        {/* Keep all components mounted but hide with CSS */}
+        <div style={{ display: selectedMenu === "overview" ? "block" : "none" }}>
           <Card className="shadow-lg p-6 rounded-xl bg-white">
             <h2 className="text-2xl font-bold text-gray-800 mb-4">Tổng quan hệ thống</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -52,11 +53,15 @@ const StaffDashboard = () => {
               </Card>
             </div>
           </Card>
-        )}
+        </div>
 
-        {selectedMenu === "bookings" && <BookingRequestsManagement />}
+        <div style={{ display: selectedMenu === "bookings" ? "block" : "none" }}>
+          <BookingRequestsManagement />
+        </div>
 
-        {selectedMenu === "vehicle-status" && <VehicleStatus />}
+        <div style={{ display: selectedMenu === "vehicle-status" ? "block" : "none" }}>
+          <VehicleStatus />
+        </div>
       </div>
     </div>
   );

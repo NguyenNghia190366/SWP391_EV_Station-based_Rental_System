@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useMemo } from "react";
 import { Button, message } from "antd";
 import { ReloadOutlined } from "@ant-design/icons";
 import BookingTable from "./components/BookingTable";
@@ -12,26 +12,40 @@ export default function BookingRequestsManagement() {
   const fetchData = async () => {
     try {
       setLoading(true);
-      const { data } = await api.get("/RentalOrders");
-      const { data: renters } = await api.get("/Renters");
-      const { data: vehicles } = await api.get("/Vehicles");
-      const { data: stations } = await api.get("/Stations");
+      
+      // ✅ Fetch all APIs in parallel (not sequential)
+      const [ordersRes, rentersRes, vehiclesRes, stationsRes] = await Promise.all([
+        api.get("/RentalOrders").catch(() => ({ data: [] })),
+        api.get("/Renters").catch(() => ({ data: [] })),
+        api.get("/Vehicles").catch(() => ({ data: [] })),
+        api.get("/Stations").catch(() => ({ data: [] })),
+      ]);
 
-      const merged = data.map((order) => ({
-        ...order,
-        renterName:
-          renters.find((r) => r.renterId === order.renterId)?.fullName ||
-          `#${order.renterId}`,
-        vehicleName:
-          vehicles.find((v) => v.vehicleId === order.vehicleId)?.vehicleName ||
-          `#${order.vehicleId}`,
-        pickupStationName:
-          stations.find((s) => s.stationId === order.pickupStationId)?.stationName ||
-          `#${order.pickupStationId}`,
-        returnStationName:
-          stations.find((s) => s.stationId === order.returnStationId)?.stationName ||
-          `#${order.returnStationId}`,
-      }));
+      const orders = Array.isArray(ordersRes.data) ? ordersRes.data : [];
+      const renters = Array.isArray(rentersRes.data) ? rentersRes.data : [];
+      const vehicles = Array.isArray(vehiclesRes.data) ? vehiclesRes.data : [];
+      const stations = Array.isArray(stationsRes.data) ? stationsRes.data : [];
+
+      // ✅ Create lookup maps (O(1) instead of O(n) for each find)
+      const renterMap = new Map(renters.map(r => [r.renterId, r]));
+      const vehicleMap = new Map(vehicles.map(v => [v.vehicleId, v]));
+      const stationMap = new Map(stations.map(s => [s.stationId, s]));
+
+      // ✅ Merge data using maps
+      const merged = orders.map((order) => {
+        const renter = renterMap.get(order.renterId);
+        const vehicle = vehicleMap.get(order.vehicleId);
+        const pickupStation = stationMap.get(order.pickupStationId);
+        const returnStation = stationMap.get(order.returnStationId);
+
+        return {
+          ...order,
+          renterName: renter?.fullName || `#${order.renterId}`,
+          vehicleName: vehicle?.vehicleName || `#${order.vehicleId}`,
+          pickupStationName: pickupStation?.stationName || `#${order.pickupStationId}`,
+          returnStationName: returnStation?.stationName || `#${order.returnStationId}`,
+        };
+      });
 
       setBookings(merged);
     } catch (err) {
