@@ -32,7 +32,7 @@ import { roles } from "./Constant/Role";
 import { RequireAuth } from "./Router/RequireAuth.jsx";
 import AuthRoute from "./Router/AuthRoute";
 import Layout from "./Components/Common/layout/Layout/Layout.jsx";
-import NotificationsPage from "./components/Common/View/Notifications/pages/NotificationsPage.jsx";
+import NotificationsPage from "./Components/Common/View/Notifications/pages/NotificationsPage.jsx";
 
 function App() {
   console.log(" App component rendered");
