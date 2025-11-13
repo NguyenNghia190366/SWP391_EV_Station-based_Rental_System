@@ -299,6 +299,26 @@ namespace BusinessLogicLayer.Helpers
                 .ForMember(dest => dest.UrlDriverLicenseBack, opt => opt.MapFrom(src => src.Driver_License!.url_driver_license_back));
             #endregion
 
+            // ========== STAFF  ==========
+            #region 
+            CreateMap<Staff, StaffViewDto>()
+                .ForMember(dest => dest.StaffId, opt => opt.MapFrom(src => src.staff_id))
+                .ForMember(dest => dest.UserId, opt => opt.MapFrom(src => src.user_id))
+                // Lấy thông tin từ User liên quan
+                .ForMember(dest => dest.FullName, opt => opt.MapFrom(src => src.user.full_name))
+                .ForMember(dest => dest.Email, opt => opt.MapFrom(src => src.user.email))
+                .ForMember(dest => dest.PhoneNumber, opt => opt.MapFrom(src => src.user.phone_number))
+                // Lấy thông tin từ Station liên quan (nếu có)
+                .ForMember(dest => dest.StationId, opt => opt.MapFrom(src => src.station_id))
+                .ForMember(dest => dest.StationName, opt => opt.MapFrom(src => src.station != null ? src.station.station_name : null));
+            
+            // Map StaffBriefDto cũ (dùng cho Contract) vẫn giữ nguyên
+            CreateMap<Staff, StaffBriefDto>()
+                .ForMember(dest => dest.StaffId, opt => opt.MapFrom(src => src.staff_id))
+                .ForMember(dest => dest.FullName, opt => opt.MapFrom(src => src.user.full_name))
+                .ForMember(dest => dest.Email, opt => opt.MapFrom(src => src.user.email));
+            #endregion
+
             // ========== COMPLAINT  ==========
             #region
             // 1. Map Create DTO -> Entity
