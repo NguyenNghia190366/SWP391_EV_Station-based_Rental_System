@@ -8,7 +8,7 @@ import ProfilePage from "./Components/Common/Profile/ProfilePage.jsx";
 // Renter
 import VehiclesPage from "./pages/renter/vehicles/VehiclesPage.jsx";
 import BookingRequestPage from "./pages/renter/booking/BookingRequestPage.jsx";
-import BookingFormPage from "./pages/renter/bookin  g/BookingFormPage.jsx";
+import BookingFormPage from "./pages/renter/booking/BookingFormPage.jsx";
 import VehiclePreviewNotification from "./pages/renter/VehiclePreviewNotification";
 import VerifyPage from "./pages/renter/VerifyPage.jsx";
 import RentalHistoryPage from "./pages/renter/RentalHistoryPage.jsx";
