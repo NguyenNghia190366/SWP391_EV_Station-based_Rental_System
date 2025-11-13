@@ -20,9 +20,7 @@ export default function ContractOnlinePage() {
   const sigPadRef = useRef(null);
   const contractRef = useRef();
   const axiosInstance = useAxiosInstance();
-  const { createPayment } = usePayment();
-  const { handlePaymentReturn } = usePayment();
-  const { updateOrderStatusToInUse } = usePayment();
+  const { createPayment, handlePaymentReturn } = usePayment();
   const location = useLocation();
   const navigate = useNavigate();
   const [returnProcessing, setReturnProcessing] = useState(false);
@@ -170,12 +168,20 @@ export default function ContractOnlinePage() {
         // if backend sent HTML, show it; otherwise show friendly message
         if (typeof result === 'string' && result.trim().startsWith('<')) {
           setPaymentSuccessHtml(result);
-          // Update order status to IN_USE after successful VNPay return
-          await updateOrderStatusToInUse(orderId);
+          // Mark order as waiting for staff handover approval
+          try {
+            await axiosInstance.put(`/RentalOrders/${orderId}`, { status: "PENDING_HANDOVER" });
+          } catch (err) {
+            console.debug('Could not set PENDING_HANDOVER:', err?.response?.status || err.message);
+          }
         } else if (result?.status === 'PAID' || result?.isPaid || result?.success) {
           setPaymentSuccessHtml(`<div style="padding:20px;font-family:Arial"><h2 style="color:#52c41a">Thanh toán thành công</h2><p>Mã đơn: #${orderId}</p></div>`);
-          // Update order status to IN_USE after successful payment
-          await updateOrderStatusToInUse(orderId);
+          // Mark order as waiting for staff handover approval
+          try {
+            await axiosInstance.put(`/RentalOrders/${orderId}`, { status: "PENDING_HANDOVER" });
+          } catch (err) {
+            console.debug('Could not set PENDING_HANDOVER:', err?.response?.status || err.message);
+          }
         } else {
           setReturnResultMessage(JSON.stringify(result));
           message.info('Kết quả trả về: ' + (result?.message || 'Xem chi tiết trong modal.'));
@@ -289,8 +295,12 @@ export default function ContractOnlinePage() {
       setPaymentModal(false);
       message.success("Thanh toán thành công.");
       
-      // Update order status to IN_USE after successful payment
-      await updateOrderStatusToInUse(orderId);
+      // Mark order as waiting for staff handover approval instead of marking IN_USE
+      try {
+        await axiosInstance.put(`/RentalOrders/${orderId}`, { status: "PENDING_HANDOVER" });
+      } catch (err) {
+        console.debug('Could not set PENDING_HANDOVER after payment:', err?.response?.status || err.message);
+      }
     } catch (err) {
       console.error("Error creating payment:", err);
       // If backend returned HTML or a message in response.data, show it directly
@@ -440,12 +450,22 @@ export default function ContractOnlinePage() {
         title={`Hợp đồng #${orderId}`}
         extra={
           <Space>
-            <Button
-              onClick={() => contractRef.current && contractRef.current.scrollIntoView({ behavior: 'smooth' })}
-              disabled={isOrderPaid(order)}
-            >
-              Hợp đồng
-            </Button>
+            {!isOrderPaid(order) && (
+              <Button
+                onClick={() => contractRef.current && contractRef.current.scrollIntoView({ behavior: 'smooth' })}
+              >
+                Hợp đồng
+              </Button>
+            )}
+            {isOrderPaid(order) && (
+              <Button
+                type="primary"
+                style={{ backgroundColor: '#52c41a', borderColor: '#52c41a' }}
+                onClick={() => navigate(`/renter/pickup/${orderId}`)}
+              >
+                Nhận xe
+              </Button>
+            )}
             <Button onClick={() => window.print()}>🖨️ In</Button>
           </Space>
         }

@@ -2,8 +2,8 @@ import { useCallback } from "react";
 import { useAxiosInstance } from "./useAxiosInstance";
 import { message, notification } from "antd";
 
-export const useRentalOrders = () => {
-  const instance = useAxiosInstance();
+export const useRentalOrders = (withApi = false) => {
+  const instance = useAxiosInstance(withApi);
 
   // 🔹 1. Lấy danh sách đơn thuê theo renterId
   const getRentalOrdersByRenterId = useCallback(
@@ -71,6 +71,21 @@ export const useRentalOrders = () => {
     [instance]
   );
 
+  const handOverOrder = useCallback(
+    async (orderId) => {
+      try {
+        const res = await instance.put(`/Inuse?id=${orderId}`);
+        message.success("✅ Đã bàn giao xe thành công!");
+        return res.data;
+      } catch (error) {
+        console.error("❌ Lỗi approve:", error);
+        message.error("Không thể duyệt yêu cầu. Vui lòng thử lại!");
+        throw error;
+      }
+    },
+    [instance]
+  );
+
   // 🔹 4. Từ chối booking (Reject)
   const rejectRentalOrder = useCallback(
     async (orderId, orderData) => {
@@ -111,6 +126,7 @@ export const useRentalOrders = () => {
     getRentalOrdersByRenterId,
     createRentalOrder,
     approveRentalOrder,
+    handOverOrder,
     rejectRentalOrder,
     updateRentalOrderStatus,
   };
