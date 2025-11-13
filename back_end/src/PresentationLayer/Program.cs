@@ -50,6 +50,7 @@ builder.Services.AddScoped<IReportService, ReportService>();
 builder.Services.AddScoped<IExtraFeeTypeService, ExtraFeeTypeService>();
 builder.Services.AddScoped<IDashboardService, DashboardService>();
 builder.Services.AddScoped<IComplaintService, ComplaintService>();
+builder.Services.AddScoped<INotificationService, NotificationService>();
 builder.Services.AddScoped<ICurrentUserAccessor, CurrentUserAccessor>(); // Đăng ký CurrentUserAccessor
 
 
