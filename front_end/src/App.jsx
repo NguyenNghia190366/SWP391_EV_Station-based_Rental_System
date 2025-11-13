@@ -1,14 +1,14 @@
 import { Routes, Route, Navigate } from "react-router-dom";
 // Auth
-import LoginPage from "./components/Common/Pages/LoginPage.jsx";
-import HomePage from "./components/Common/Pages/HomePage.jsx";
-import RegisterPage from "./components/Common/Pages/RegisterPage.jsx";
+import LoginPage from "./Components/Common/Pages/LoginPage.jsx";
+import HomePage from "./Components/Common/Pages/HomePage.jsx";
+import RegisterPage from "./Components/Common/Pages/RegisterPage.jsx";
 // Shared
 import ProfilePage from "./Components/Common/Profile/ProfilePage.jsx";
 // Renter
 import VehiclesPage from "./pages/renter/vehicles/VehiclesPage.jsx";
 import BookingRequestPage from "./pages/renter/booking/BookingRequestPage.jsx";
-import BookingFormPage from "./pages/renter/booking/BookingFormPage.jsx";
+import BookingFormPage from "./pages/renter/bookin  g/BookingFormPage.jsx";
 import VehiclePreviewNotification from "./pages/renter/VehiclePreviewNotification";
 import VerifyPage from "./pages/renter/VerifyPage.jsx";
 import RentalHistoryPage from "./pages/renter/RentalHistoryPage.jsx";
