@@ -10,6 +10,7 @@ using BusinessLogicLayer.DTOs.Vehicle;
 using BusinessLogicLayer.DTOs.Payment;
 using BusinessLogicLayer.DTOs.Report;
 using BusinessLogicLayer.DTOs.ExtraFeeType;
+using BusinessLogicLayer.DTOs.Complaint;
 
 namespace BusinessLogicLayer.Helpers
 {
@@ -297,6 +298,32 @@ namespace BusinessLogicLayer.Helpers
                 .ForMember(dest => dest.UrlDriverLicenseFront, opt => opt.MapFrom(src => src.Driver_License!.url_driver_license_front))
                 .ForMember(dest => dest.UrlDriverLicenseBack, opt => opt.MapFrom(src => src.Driver_License!.url_driver_license_back));
             #endregion
+
+            // ========== COMPLAINT  ==========
+            #region
+            // 1. Map Create DTO -> Entity
+            CreateMap<ComplaintCreateDto, Complaint>()
+                .ForMember(dest => dest.order_id, opt => opt.MapFrom(src => src.OrderId))
+                .ForMember(dest => dest.description, opt => opt.MapFrom(src => src.Description))
+                // Các trường (renter_id, status, created_date) sẽ được Service xử lý thủ công
+                .ForMember(dest => dest.renter_id, opt => opt.Ignore())
+                .ForMember(dest => dest.status, opt => opt.Ignore())
+                .ForMember(dest => dest.created_date, opt => opt.Ignore());
+
+            // 2. Map Entity -> View DTO
+            CreateMap<Complaint, ComplaintViewDto>()
+                .ForMember(dest => dest.ComplaintId, opt => opt.MapFrom(src => src.complaint_id))
+                .ForMember(dest => dest.RenterId, opt => opt.MapFrom(src => src.renter_id))
+                // Lấy tên Renter từ quan hệ lồng nhau (Cần Include khi truy vấn)
+                .ForMember(dest => dest.RenterName, opt => opt.MapFrom(src => src.renter.user.full_name))
+                .ForMember(dest => dest.OrderId, opt => opt.MapFrom(src => src.order_id))
+                .ForMember(dest => dest.Description, opt => opt.MapFrom(src => src.description))
+                .ForMember(dest => dest.Status, opt => opt.MapFrom(src => src.status))
+                .ForMember(dest => dest.CreatedDate, opt => opt.MapFrom(src => src.created_date))
+                .ForMember(dest => dest.ResolveDate, opt => opt.MapFrom(src => src.resolve_date));
+            #endregion
+
+
 
 
         }
