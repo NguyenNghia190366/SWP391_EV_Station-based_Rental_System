@@ -1,4 +1,3 @@
-// Dùng để hiển thị cho người dùng ở 'chuông thông báo'
 public class NotificationViewDto
 {
     public int NotificationId { get; set; }
