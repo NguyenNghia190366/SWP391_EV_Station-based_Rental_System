@@ -276,10 +276,7 @@ const VehiclesPage = () => {
   // ===== VEHICLE TYPES =====
   const vehicleTypes = [
     { value: "all", label: "Tất cả" },
-    { value: "scooter", label: "Xe máy điện" },
-    { value: "bike", label: "Xe đạp điện" },
-    { value: "car", label: "Ô tô điện" },
-    { value: "motorcycle", label: "Mô tô điện" },
+
   ];
 
   // ===== RENDER =====
@@ -310,65 +307,64 @@ const VehiclesPage = () => {
         </div>
       </section>
 
-      {/* Filter & Search */}
-      <section className="sticky top-16 z-40 bg-white shadow-lg border-b border-gray-200">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-          {/* Search Bar */}
-          <form onSubmit={handleSearchSubmit} className="mb-6">
-            <div className="flex gap-3">
-              <input
-                type="text"
-                placeholder="Tìm kiếm xe theo tên, model..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="flex-1 px-6 py-4 rounded-xl border-2 border-gray-200 focus:border-indigo-500 focus:ring-4 focus:ring-indigo-100 outline-none transition-all text-gray-800 text-lg placeholder-gray-400"
-              />
-              <button
-                type="submit"
-                className="px-8 py-4 bg-indigo-600 text-white font-bold rounded-xl hover:bg-indigo-700 hover:shadow-xl transition-all duration-200"
-              >
-                Tìm kiếm
-              </button>
-            </div>
-          </form>
+      {/* Filter & Search (compact) */}
+      <section className="sticky top-16 z-40 bg-white shadow-sm border-b border-gray-200">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+          <div className="flex items-center gap-3">
+            {/* Search Bar (compact) */}
+            <form onSubmit={handleSearchSubmit} className="flex-1">
+              <div className="flex items-center gap-3">
+                <input
+                  type="text"
+                  placeholder="Tìm kiếm xe theo tên, model..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="flex-1 px-4 py-2 rounded-lg border-2 border-gray-200 focus:border-indigo-500 focus:ring-0 outline-none transition-all text-gray-800 text-base placeholder-gray-400"
+                />
+                <button
+                  type="submit"
+                  className="px-4 py-2 bg-indigo-600 text-white font-semibold rounded-lg hover:bg-indigo-700 transition-colors text-sm"
+                >
+                  Tìm
+                </button>
+              </div>
+            </form>
 
-          {/* Type Filter */}
-          <div className="flex flex-wrap gap-3 justify-center mb-4">
-            {vehicleTypes.map((type) => (
-              <button
-                key={type.value}
-                onClick={() => handleFilterByType(type.value)}
-                className={`px-6 py-3 rounded-xl font-semibold transition-all duration-300 
-                  ${selectedType === type.value
-                    ? "bg-indigo-600 text-white shadow-lg scale-105"
-                    : "bg-white text-gray-700 border-2 border-gray-200 hover:border-indigo-300 hover:shadow-md"
-                  }`}
+            {/* Station Filter inline (compact) */}
+            {stations.length > 0 && (
+              <select
+                value={selectedStation}
+                onChange={(e) => handleFilterByStation(e.target.value)}
+                className="ml-2 px-3 py-2 rounded-lg border-2 border-gray-200 bg-white text-sm text-gray-700 font-medium outline-none"
               >
-                {type.label}
-              </button>
-            ))}
+                <option value="all">Tất cả trạm</option>
+                {stations.map((station) => (
+                  <option key={station.stationId || station.id} value={String(station.stationId || station.id)}>
+                    {station.stationName || `Trạm ${station.stationId || station.id}`}
+                  </option>
+                ))}
+              </select>
+            )}
           </div>
 
-          {/* Station Filter (dropdown) */}
-          {stations.length > 0 && (
-            <div className="border-t border-gray-200 pt-4">
-              <p className="text-sm font-semibold text-gray-700 mb-3">Chọn trạm:</p>
-              <div className="flex justify-center">
-                <select
-                  value={selectedStation}
-                  onChange={(e) => handleFilterByStation(e.target.value)}
-                  className="px-4 py-3 rounded-xl border-2 border-gray-200 bg-white text-gray-700 font-semibold outline-none focus:border-green-400 focus:shadow-md"
+          {/* Type Filter (compact chips, horizontally scrollable on small screens) */}
+          <div className="mt-3 overflow-x-auto">
+            <div className="flex gap-2 items-center">
+              {vehicleTypes.map((type) => (
+                <button
+                  key={type.value}
+                  onClick={() => handleFilterByType(type.value)}
+                  className={`px-4 py-2 rounded-full text-sm font-semibold transition-all duration-200 whitespace-nowrap
+                    ${selectedType === type.value
+                      ? "bg-indigo-600 text-white shadow"
+                      : "bg-white text-gray-700 border border-gray-200 hover:bg-gray-50"
+                    }`}
                 >
-                  <option value="all">Tất cả trạm</option>
-                  {stations.map((station) => (
-                    <option key={station.stationId || station.id} value={String(station.stationId || station.id)}>
-                      {station.stationName || `Trạm ${station.stationId || station.id}`}
-                    </option>
-                  ))}
-                </select>
-              </div>
+                  {type.label}
+                </button>
+              ))}
             </div>
-          )}
+          </div>
         </div>
       </section>
 
