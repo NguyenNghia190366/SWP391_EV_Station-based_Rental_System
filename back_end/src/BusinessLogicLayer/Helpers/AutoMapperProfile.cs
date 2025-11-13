@@ -323,7 +323,16 @@ namespace BusinessLogicLayer.Helpers
                 .ForMember(dest => dest.ResolveDate, opt => opt.MapFrom(src => src.resolve_date));
             #endregion
 
-
+            // ========== NOTIFICATION ==========
+            #region
+            CreateMap<Notification, NotificationViewDto>()
+                .ForMember(dest => dest.NotificationId, opt => opt.MapFrom(src => src.notification_id))
+                .ForMember(dest => dest.UserId, opt => opt.MapFrom(src => src.user_id))
+                .ForMember(dest => dest.TypeNotification, opt => opt.MapFrom(src => src.type_notification))
+                .ForMember(dest => dest.Message, opt => opt.MapFrom(src => src.message))
+                .ForMember(dest => dest.IsRead, opt => opt.MapFrom(src => src.is_read))
+                .ForMember(dest => dest.CreatedAt, opt => opt.MapFrom(src => src.created_at));
+            #endregion
 
 
         }
