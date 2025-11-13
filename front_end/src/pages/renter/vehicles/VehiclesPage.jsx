@@ -1,10 +1,11 @@
-import React, { useEffect, useState, useCallback } from "react";
+import React, { useEffect, useState, useCallback, useMemo } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { useVehicleAPI } from "@/hooks/useVehicles";
 import { normalizeVehicleData } from "@/utils/normalizeData";
 import { useAxiosInstance } from "@/hooks/useAxiosInstance";
 import BookingVerificationModal from "@/pages/renter/booking/BookingVerificationModal";
 import VehicleCard from "@/pages/renter/vehicles/VehicleCard";
+import VehiclesByModel from "@/pages/renter/vehicles/VehiclesByModel";
 
 const VehiclesPage = () => {
   const navigate = useNavigate();
@@ -24,6 +25,7 @@ const VehiclesPage = () => {
   const [selectedType, setSelectedType] = useState("all");
   const [stations, setStations] = useState([]);
   const [selectedStation, setSelectedStation] = useState("all");
+  const [viewMode, setViewMode] = useState("grouped"); // "grouped" or "list"
 
   // ===== Load user info =====
   useEffect(() => {
@@ -78,6 +80,16 @@ const VehiclesPage = () => {
             models = [];
           }
 
+          // Fetch rental orders to check which vehicles are currently rented
+          let allRentalOrders = [];
+          try {
+            const ordersRes = await api.get("/RentalOrders");
+            allRentalOrders = Array.isArray(ordersRes.data) ? ordersRes.data : ordersRes.data?.data || [];
+          } catch (err) {
+            console.warn("Không tải được RentalOrders:", err);
+            allRentalOrders = [];
+          }
+
           // Build model map for quick lookup
           const modelMap = new Map();
           models.forEach((m) => {
@@ -85,13 +97,27 @@ const VehiclesPage = () => {
             if (id !== undefined && id !== null) modelMap.set(Number(id), m);
           });
 
-          // Attach brandName from model to each vehicle when available
+          // Build rental orders map by vehicleId
+          const ordersMapByVehicle = new Map();
+          allRentalOrders.forEach((order) => {
+            const vId = order.vehicleId;
+            if (vId !== undefined && vId !== null) {
+              if (!ordersMapByVehicle.has(vId)) {
+                ordersMapByVehicle.set(vId, []);
+              }
+              ordersMapByVehicle.get(vId).push(order);
+            }
+          });
+
+          // Attach brandName from model to each vehicle when available, and attach rental orders
           const vehiclesWithBrand = vehiclesList.map((v) => {
             const modelKey = v.vehicleModelId ?? v.modelId ?? v.vehicle_model_id ?? v.model_id;
             const modelRec = modelMap.get(Number(modelKey));
+            const vId = v.vehicleId ?? v.id;
             return {
               ...v,
               brandName: modelRec?.brandName ?? modelRec?.brand ?? undefined,
+              rentalOrders: ordersMapByVehicle.get(vId) || [],
             };
           });
 
@@ -371,12 +397,20 @@ const VehiclesPage = () => {
       {/* Vehicle Grid */}
       <section className="py-12">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="mb-8">
+          <div className="mb-8 flex justify-between items-center">
             <h2 className="text-2xl md:text-3xl font-bold text-gray-800">
-              {filteredVehicles.length > 0
+              {viewMode === "grouped"
+                ? "Danh sách xe theo model"
+                : filteredVehicles.length > 0
                 ? `Tìm thấy ${filteredVehicles.length} xe phù hợp`
                 : "Không tìm thấy xe nào"}
             </h2>
+            <button
+              onClick={() => setViewMode(viewMode === "grouped" ? "list" : "grouped")}
+              className="px-4 py-2 rounded-lg border-2 border-indigo-600 text-indigo-600 font-semibold hover:bg-indigo-50 transition-colors"
+            >
+              {viewMode === "grouped" ? "Xem danh sách" : "Xem theo model"}
+            </button>
           </div>
 
           {filteredVehicles.length === 0 ? (
@@ -388,6 +422,14 @@ const VehiclesPage = () => {
                 Vui lòng thử lại với bộ lọc khác hoặc quay lại sau.
               </p>
             </div>
+          ) : viewMode === "grouped" ? (
+            <VehiclesByModel 
+              vehicles={filteredVehicles}
+              onSelectModel={(modelId, modelName) => {
+                // Optional: filter by model
+                console.log("Selected model:", modelId, modelName);
+              }}
+            />
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
               {filteredVehicles.map((vehicle) => (

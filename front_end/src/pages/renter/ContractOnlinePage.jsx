@@ -22,6 +22,7 @@ export default function ContractOnlinePage() {
   const axiosInstance = useAxiosInstance();
   const { createPayment } = usePayment();
   const { handlePaymentReturn } = usePayment();
+  const { updateOrderStatusToInUse } = usePayment();
   const location = useLocation();
   const navigate = useNavigate();
   const [returnProcessing, setReturnProcessing] = useState(false);
@@ -169,8 +170,12 @@ export default function ContractOnlinePage() {
         // if backend sent HTML, show it; otherwise show friendly message
         if (typeof result === 'string' && result.trim().startsWith('<')) {
           setPaymentSuccessHtml(result);
+          // Update order status to IN_USE after successful VNPay return
+          await updateOrderStatusToInUse(orderId);
         } else if (result?.status === 'PAID' || result?.isPaid || result?.success) {
           setPaymentSuccessHtml(`<div style="padding:20px;font-family:Arial"><h2 style="color:#52c41a">Thanh toán thành công</h2><p>Mã đơn: #${orderId}</p></div>`);
+          // Update order status to IN_USE after successful payment
+          await updateOrderStatusToInUse(orderId);
         } else {
           setReturnResultMessage(JSON.stringify(result));
           message.info('Kết quả trả về: ' + (result?.message || 'Xem chi tiết trong modal.'));
@@ -283,6 +288,9 @@ export default function ContractOnlinePage() {
       setPaymentSuccessHtml(generatedHtml);
       setPaymentModal(false);
       message.success("Thanh toán thành công.");
+      
+      // Update order status to IN_USE after successful payment
+      await updateOrderStatusToInUse(orderId);
     } catch (err) {
       console.error("Error creating payment:", err);
       // If backend returned HTML or a message in response.data, show it directly

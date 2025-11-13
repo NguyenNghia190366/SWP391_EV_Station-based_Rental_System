@@ -195,7 +195,13 @@ const HomePage = () => {
     const stationLat = station.latitude ?? station.lat;
     const stationLng = station.longitude ?? station.lng;
     setSelectedStation(station);
-    findNearestStationForUser({ lat: stationLat, lng: stationLng });
+    // navigate to vehicles page with station query so VehiclesPage can filter by station
+    const stationId = station.stationId ?? station.id ?? station.station_id;
+    if (stationId) {
+      navigate(`/vehicles?station=${stationId}`);
+    } else {
+      findNearestStationForUser({ lat: stationLat, lng: stationLng });
+    }
   }, [findNearestStationForUser]);
 
   // ==== MEMOIZE highlighted station for MapLeaflet ====
