@@ -17,7 +17,6 @@ import { useAxiosInstance } from "@/hooks/useAxiosInstance";
 import { useRenters } from "@/hooks/useRenters";
 import { useRentalOrders } from "@/hooks/useRentalOrders";
 import VerifyPage from "@/pages/renter/VerifyPage";
-import OverviewPage from "@/pages/renter/OverviewPage";
 import RentalHistoryPage from "@/pages/renter/RentalHistoryPage";
 
 const ProfilePage = () => {
@@ -26,7 +25,6 @@ const ProfilePage = () => {
   const { getRenterIdByUserId } = useRenters();
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [selectedMenu, setSelectedMenu] = useState("overview");
   const [isEditing, setIsEditing] = useState(false);
   const [form, setForm] = useState({});
   const [avatarPreview, setAvatarPreview] = useState(null);
@@ -42,6 +40,8 @@ const ProfilePage = () => {
   const { updateStatus: updateLicenseStatus } = useDriverLicense();
   const { updateStatus: updateCcqdStatus } = useCccd();
   const { updateRentalOrderStatus } = useRentalOrders();
+
+  const [selectedMenu, setSelectedMenu] = useState('info');
 
   // ===== Load user =====
   useEffect(() => {
@@ -396,7 +396,6 @@ const ProfilePage = () => {
           selectedKeys={[selectedMenu]}
           onClick={({ key }) => setSelectedMenu(key)}
           items={[
-              { key: "overview", icon: <DashboardOutlined />, label: "Tổng quan" },
               { key: "info", icon: <UserOutlined />, label: "Thông tin cá nhân" },
               { key: "verify", icon: <SafetyOutlined />, label: "Xác minh giấy tờ" },
               { key: "history", icon: <ClockCircleOutlined />, label: "Lịch sử đặt xe" },
@@ -407,7 +406,6 @@ const ProfilePage = () => {
 
       {/* Main Content */}
       <div className="flex-1 p-6">
-  {selectedMenu === "overview" && <OverviewPage />}
   {selectedMenu === "info" && renderInfo()}
   {selectedMenu === "verify" && renderVerify()}
   {selectedMenu === "history" && <RentalHistoryPage />}

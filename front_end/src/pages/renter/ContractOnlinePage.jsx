@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useRef } from "react";
 import { Card, Button, Space, message, Spin, Modal, Tag, Input } from "antd";
-import { useParams, useLocation } from "react-router-dom";
+import { useParams, useLocation, useNavigate } from "react-router-dom";
 import dayjs from "dayjs";
 import { useAxiosInstance } from "@/hooks/useAxiosInstance";
 import { usePayment } from "@/hooks/usePayment";
@@ -11,7 +11,6 @@ export default function ContractOnlinePage() {
   const [loading, setLoading] = useState(true);
   const [order, setOrder] = useState(null);
   const [error, setError] = useState(null);
-  const [signatureModal, setSignatureModal] = useState(false);
   const [isSigning, setIsSigning] = useState(false);
   const [isSigned, setIsSigned] = useState(false);
   const [paymentModal, setPaymentModal] = useState(false);
@@ -24,6 +23,7 @@ export default function ContractOnlinePage() {
   const { createPayment } = usePayment();
   const { handlePaymentReturn } = usePayment();
   const location = useLocation();
+  const navigate = useNavigate();
   const [returnProcessing, setReturnProcessing] = useState(false);
   const [returnResultMessage, setReturnResultMessage] = useState(null);
 
@@ -98,6 +98,45 @@ export default function ContractOnlinePage() {
         }
 
         setOrder(mergedOrder);
+        // Try to fetch payments for this order (match DB column name: payment_status, order_id)
+        try {
+          const payRes = await axiosInstance.get(`/Payments?order_id=${orderId}`);
+          const payData = Array.isArray(payRes.data) ? payRes.data : payRes.data?.data || [];
+          const hasPaid = payData.some(p => {
+            const t = (p.type_payment || p.typePayment || p.typePayment || '').toString().toUpperCase();
+            const s = (p.payment_status || p.paymentStatus || p.PaymentStatus || '').toString().toUpperCase();
+            // consider only PAY records (not REFUND) marked as PAID
+            return (t === 'PAY' || t === 'PAY') && s === 'PAID';
+          });
+          mergedOrder.isPaid = hasPaid;
+        } catch (err) {
+          // ignore if payments endpoint isn't available
+          mergedOrder.isPaid = mergedOrder.isPaid || false;
+        }
+        // If the order indicates the vehicle is currently being used, mark vehicle as unavailable
+        try {
+          const now = new Date();
+          const start = mergedOrder.startTime ? new Date(mergedOrder.startTime) : null;
+          const end = mergedOrder.endTime ? new Date(mergedOrder.endTime) : null;
+          const isCurrentlyRented = (mergedOrder.status === 'IN_USE') ||
+            (mergedOrder.status === 'APPROVED' && start && end && start <= now && now <= end);
+
+          if (isCurrentlyRented && vehicle) {
+            // prepare a vehicle payload - keep existing fields but set isAvailable to false
+            const vid = vehicle.vehicleId || mergedOrder.vehicleId;
+            const updatedVehicle = { ...vehicle, isAvailable: false, is_available: false };
+            try {
+              await axiosInstance.put(`/Vehicles/${vid}`, updatedVehicle);
+              // reflect locally
+              mergedOrder.vehicleIsAvailable = false;
+            } catch (err) {
+              // non-fatal - backend might not allow update from this user
+              console.debug('Could not update vehicle availability:', err?.response?.status || err.message);
+            }
+          }
+        } catch (err) {
+          // ignore
+        }
         setError(null);
       } catch (err) {
         console.error("Error fetching order for renter contract:", err);
@@ -145,8 +184,6 @@ export default function ContractOnlinePage() {
     })();
   }, [location.search]);
 
-  const openSignature = () => setSignatureModal(true);
-  const clearSignature = () => sigPadRef.current && sigPadRef.current.clear();
 
   const handleSaveSignature = async () => {
     if (!sigPadRef.current) return;
@@ -281,6 +318,24 @@ export default function ContractOnlinePage() {
 
   const formatCurrency = (v) => new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(v);
 
+  const isOrderPaid = (o) => {
+    if (!o) return false;
+    // Check order status flags
+    const st = (o.status || '').toString().toLowerCase();
+    if (st === 'payment_completed' || st === 'paid' || st.includes('paid')) return true;
+
+    // Check payments array (different backends may return Payments or payments)
+    const pays = Array.isArray(o.Payments) ? o.Payments : Array.isArray(o.payments) ? o.payments : [];
+    if (pays && pays.length) {
+      return pays.some(p => {
+        const ps = (p.paymentStatus || p.PaymentStatus || '').toString().toUpperCase();
+        return ps === 'PAID' || ps === 'PAID';
+      });
+    }
+
+    return false;
+  };
+
   const renderContract = () => {
     if (error) return <div style={{ color: "red", padding: 20 }}>{error}</div>;
     if (!order) return <div style={{ padding: 20 }}>Đang tải dữ liệu...</div>;
@@ -347,14 +402,25 @@ export default function ContractOnlinePage() {
           </ol>
         </div>
         <div style={{ marginTop: 28, textAlign: "center" }}>
-          <Button
-            type="primary"
-            size="large"
-            onClick={() => setPaymentModal(true)}
-            style={{ backgroundColor: "#52c41a", borderColor: "#52c41a", minWidth: 220 }}
-          >
-            Thanh toán {new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(totalPrice)}
-          </Button>
+          {
+            isOrderPaid(o) ? (
+              <div>
+                <Tag color="green">Đã thanh toán</Tag>
+                <div style={{ marginTop: 8 }}>
+                  <Button type="primary" style={{ backgroundColor: '#52c41a', borderColor: '#52c41a' }} onClick={() => navigate(`/renter/pickup/${orderId}`)}>Nhận xe</Button>
+                </div>
+              </div>
+            ) : (
+              <Button
+                type="primary"
+                size="large"
+                onClick={() => setPaymentModal(true)}
+                style={{ backgroundColor: "#52c41a", borderColor: "#52c41a", minWidth: 220 }}
+              >
+                Thanh toán {new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(totalPrice)}
+              </Button>
+            )
+          }
         </div>
       </div>
     );
@@ -366,9 +432,12 @@ export default function ContractOnlinePage() {
         title={`Hợp đồng #${orderId}`}
         extra={
           <Space>
-            {!isSigned && (
-              <Button type="primary" onClick={openSignature}>Ký điện tử</Button>
-            )}
+            <Button
+              onClick={() => contractRef.current && contractRef.current.scrollIntoView({ behavior: 'smooth' })}
+              disabled={isOrderPaid(order)}
+            >
+              Hợp đồng
+            </Button>
             <Button onClick={() => window.print()}>🖨️ In</Button>
           </Space>
         }
@@ -379,26 +448,6 @@ export default function ContractOnlinePage() {
           renderContract()
         )}
       </Card>
-
-      <Modal
-        title="Ký hợp đồng"
-        open={signatureModal}
-        onOk={handleSaveSignature}
-        onCancel={() => setSignatureModal(false)}
-        okText="Lưu"
-        cancelText="Hủy"
-        confirmLoading={isSigning}
-        width={700}
-      >
-        <div style={{ border: '1px solid #ddd', height: 300 }}>
-          <SignaturePad penColor="black" ref={sigPadRef} canvasProps={{width: 660, height: 300, className: 'sigCanvas'}} />
-        </div>
-        <div style={{ marginTop: 12, display: 'flex', justifyContent: 'space-between' }}>
-          <Button onClick={clearSignature}>Xóa</Button>
-          <div style={{ color: '#888', fontSize: 12 }}>Ký bằng chữ ký tay của bạn, sau đó bấm Lưu.</div>
-        </div>
-      </Modal>
-      {/* Payment modal for renter */}
       <Modal
         title="Xác nhận thanh toán"
         open={paymentModal}

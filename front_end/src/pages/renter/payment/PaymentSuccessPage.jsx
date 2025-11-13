@@ -10,11 +10,24 @@ export default function PaymentSuccessPage() {
   const state = location.state || {};
   const search = new URLSearchParams(location.search);
 
-  const orderId = state.orderId || search.get("orderId") || "(Không có)";
+  // Accept various query param names (orderId, order_id) and Fullname casing
+  const orderId =
+    state.orderId ||
+    search.get("orderId") ||
+    search.get("order_id") ||
+    "(Không có)";
   const amount = state.amount || search.get("amount") || null;
-  const fullName = state.fullName || search.get("fullName") || "(Khách hàng)";
+  const fullName =
+    state.fullName ||
+    search.get("fullName") ||
+    search.get("Fullname") ||
+    search.get("fullname") ||
+    "(Khách hàng)";
   const description = state.description || search.get("description") || null;
   const rawHtml = state.html || search.get("html") || null;
+
+  // If URL has `order_id` and the backend returned `response.order_id`, allow that too
+  // Also treat `Fullname` (capital F) as requested in the URL structure
 
   const formatCurrency = (v) => {
     const n = Number(v);

@@ -122,7 +122,7 @@ function App() {
           path="/staff/contract-online/:orderId"
           element={
             <RequireAuth allowRole={[roles.STAFF]}>
-              <ContractOnlinePage />
+              <StaffContractOnlinePage />
             </RequireAuth>
           }
         />
