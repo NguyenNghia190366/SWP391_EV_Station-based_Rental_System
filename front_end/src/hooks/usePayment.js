@@ -60,9 +60,29 @@ export const usePayment = () => {
     [axiosInstance]
   );
 
+  // Update rental order status to IN_USE after successful payment
+  const updateOrderStatusToInUse = useCallback(
+    async (orderId) => {
+      try {
+        console.debug("updateOrderStatusToInUse -> orderId:", orderId);
+        const response = await axiosInstance.put(`/RentalOrders/${orderId}`, {
+          status: "IN_USE"
+        });
+        console.debug("updateOrderStatusToInUse response:", response);
+        return response.data;
+      } catch (error) {
+        console.error("Error updating order status to IN_USE:", error);
+        // Non-fatal error - log but don't throw
+        return null;
+      }
+    },
+    [axiosInstance]
+  );
+
   return {
     createPayment,
     handlePaymentReturn,
     createRefund,
+    updateOrderStatusToInUse,
   };
 };

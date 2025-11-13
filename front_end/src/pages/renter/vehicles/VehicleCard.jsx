@@ -13,6 +13,18 @@ const VehicleCard = ({
   const { getById } = useVehicleAPI();
 
   const [pricePerHour, setPricePerHour] = useState(0);
+  
+  // Determine rental status: check if vehicle has active rental (APPROVED or IN_USE)
+  const isRented = vehicle.rentalOrders?.some(order => 
+    order?.status === 'APPROVED' || 
+    order?.status === 'IN_USE'
+  ) || false;
+
+  // Determine the button state:
+  // 1. If rented → show "Đang cho thuê" (even if isAvailable=0)
+  // 2. If available → show "Đặt xe"
+  // 3. If not available and not rented → show "Hết xe"
+  const buttonDisabled = !isAvailable && !isRented;
 
   // Lấy thông tin model và giá tiền - chỉ chạy 1 lần khi vehicleModelId thay đổi
   useEffect(() => {
@@ -30,7 +42,7 @@ const VehicleCard = ({
         if (!token) {
           // Không có token, không gọi API model, giữ giá 0
           return;
-        }
+        }``
 
         const model = await getModelById(vehicle.vehicleModelId);
         if (isMounted) {
@@ -80,7 +92,18 @@ const VehicleCard = ({
           className="w-full h-full object-cover transition-transform duration-400 hover:scale-110"
         />
         {/* Badge */}
-        {isAvailable ? (
+        {isRented ? (
+          <span
+            className="
+            absolute top-4 right-4 px-4 py-2 rounded-full
+            bg-amber-500/95 text-white
+            text-sm font-bold uppercase tracking-wide
+            backdrop-blur-md shadow-lg
+          "
+          >
+            Đang cho thuê
+          </span>
+        ) : isAvailable ? (
           <span
             className="
             absolute top-4 right-4 px-4 py-2 rounded-full
@@ -212,19 +235,21 @@ const VehicleCard = ({
           </button>
           <button
             onClick={() => onBookVehicle && onBookVehicle(vehicle.id)}
-            disabled={!isAvailable}
+            disabled={buttonDisabled}
             className={`
     px-5 py-3.5 rounded-xl font-bold uppercase tracking-wide
     text-white shadow-lg transition-all duration-300 ease-in-out
     text-sm md:text-base
     ${
-      isAvailable
+      isRented
+        ? "bg-amber-500 cursor-not-allowed shadow-none"
+        : isAvailable
         ? "bg-green-600 hover:bg-green-700 hover:-translate-y-0.5 hover:shadow-xl hover:shadow-green-500/50 cursor-pointer"
         : "bg-red-600 cursor-not-allowed shadow-none"
     }
   `}
           >
-            {isAvailable ? "Đặt xe" : "Hết xe"}
+            {isRented ? "Đang cho thuê" : isAvailable ? "Đặt xe" : "Hết xe"}
           </button>
         </div>
       </div>
