@@ -16,6 +16,7 @@ import ContractOnlinePage from "./pages/renter/ContractOnlinePage.jsx";
 import ContractOfflinePage from "./pages/renter/ContractOfflinePage.jsx";
 import PaymentSuccessPage from "./pages/renter/payment/PaymentSuccessPage.jsx";
 import PaymentHistory from "./pages/renter/payment/PaymentHistory.jsx";
+import PickupPage from "./pages/renter/PickupPage.jsx";
 // Admin
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import AdminVerificationDashboard from "./pages/admin/VerifyRenterPage.jsx";
@@ -25,6 +26,7 @@ import StaffDashboard from "./pages/staff/StaffDashboard.jsx";
 import SendVehiclePreview from "./pages/staff/SendVehiclePreview.jsx";
 import StaffContractOfflinePage from "./pages/staff/StaffContractOfflinePage.jsx";
 import StaffContractOnlinePage from "./pages/staff/StaffContractOnlinePage.jsx";
+import StaffConfirmHandover from "./pages/staff/handover/StaffConfirmHandover.jsx";
 // Common
 import { roles } from "./Constant/Role";
 import { RequireAuth } from "./Router/RequireAuth.jsx";
@@ -67,6 +69,14 @@ function App() {
             </RequireAuth>
           }
         />
+        <Route
+          path="/renter/pickup/:orderId"
+          element={
+            <RequireAuth allowRole={[roles.RENTER]}>
+              <PickupPage />
+            </RequireAuth>
+          }
+        />
 
         {/* Vehicle Preview & Handover Routes */}
         <Route
@@ -91,6 +101,14 @@ function App() {
           element={
             <RequireAuth allowRole={[roles.STAFF]}>
               <StaffDashboard />
+            </RequireAuth>
+          }
+        />
+        <Route
+          path="/staff/confirm-handover"
+          element={
+            <RequireAuth allowRole={[roles.STAFF]}>
+              <StaffConfirmHandover />
             </RequireAuth>
           }
         />

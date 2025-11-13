@@ -14,6 +14,7 @@ export default function RentalHistoryPage() {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(false);
   const [cancellingId, setCancellingId] = useState(null);
+  const [paidOrderIds, setPaidOrderIds] = useState(new Set());
 
   const fetchOrders = async () => {
     try {
@@ -97,9 +98,53 @@ export default function RentalHistoryPage() {
     }
   };
 
+  // Fetch payment status for all orders
+  const fetchPaymentStatuses = async (orderIds) => {
+    try {
+      const paid = new Set();
+      for (const orderId of orderIds) {
+        const payRes = await instance.get(`/Payments?order_id=${orderId}`);
+        const payData = Array.isArray(payRes.data) ? payRes.data : payRes.data?.data || [];
+        const hasPaid = payData.some(p => {
+          const t = (p.type_payment || p.typePayment || '').toString().toUpperCase();
+          const s = (p.payment_status || p.paymentStatus || p.PaymentStatus || '').toString().toUpperCase();
+          return (t === 'PAY' || t === 'PAY') && s === 'PAID';
+        });
+        if (hasPaid) paid.add(orderId);
+      }
+      setPaidOrderIds(paid);
+    } catch (err) {
+      console.error("Error fetching payment statuses:", err);
+    }
+  };
+
   useEffect(() => {
     fetchOrders();
   }, []);
+
+  // Fetch payment statuses when orders change
+  useEffect(() => {
+    if (orders.length > 0) {
+      const orderIds = orders.map(o => o.orderId);
+      fetchPaymentStatuses(orderIds);
+    }
+  }, [orders]);
+
+
+  // Check if order is paid (has PAID payment record)
+  const isOrderPaid = async (orderId) => {
+    try {
+      const payRes = await instance.get(`/Payments?order_id=${orderId}`);
+      const payData = Array.isArray(payRes.data) ? payRes.data : payRes.data?.data || [];
+      return payData.some(p => {
+        const t = (p.type_payment || p.typePayment || '').toString().toUpperCase();
+        const s = (p.payment_status || p.paymentStatus || p.PaymentStatus || '').toString().toUpperCase();
+        return (t === 'PAY' || t === 'PAY') && s === 'PAID';
+      });
+    } catch (err) {
+      return false;
+    }
+  };
 
   const columns = [
     {
@@ -195,10 +240,11 @@ export default function RentalHistoryPage() {
         const showCancel = record.status === "BOOKED" || record.status === "APPROVED";
         const showContract = record.status === "APPROVED" || record.status === "CONTRACT_SENT";
         const disabled = record.status === "APPROVED";
+        const isPaid = paidOrderIds.has(record.orderId);
         
         return (
           <Space>
-            {showContract && (
+            {showContract && !isPaid && (
               <Button
                 type="primary"
                 ghost
@@ -208,6 +254,7 @@ export default function RentalHistoryPage() {
                 Hợp đồng
               </Button>
             )}
+            
             {showCancel && (
               <Popconfirm
                 title={disabled ? "Đơn đã được duyệt, không thể hủy." : "Xác nhận hủy đơn?"}
