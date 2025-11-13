@@ -24,15 +24,18 @@ public partial class Vehicle_Model
     public string? vehicle_color { get; set; }
 
     public int number_of_seats { get; set; }
-
+    
+    [Column(TypeName = "decimal(4, 1)")]
     public decimal? battery_capacity { get; set; } // 
 
     public string type_of_battery { get; set; } = null!;
     
     public int? mileage { get; set; }
-    
+
+    [Column(TypeName = "decimal(12, 2)")]
     public decimal price_per_hour { get; set; } // 
-    
+
+    [Column(TypeName = "decimal(12, 2)")]
     public decimal deposit { get; set; }
 
     [InverseProperty("vehicle_model")]
