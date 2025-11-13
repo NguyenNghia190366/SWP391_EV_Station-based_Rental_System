@@ -29,5 +29,7 @@ namespace BusinessLogicLayer.Interfaces
 
         // --- HÀM XEM "SỔ CÁI" ---
         Task<IEnumerable<PaymentViewDto>> GetPaymentsForOrderAsync(int orderId);
+        // HÀM HOÀN CỌC
+        Task CreateRefundRequestAsync(int orderId);
     }
 }

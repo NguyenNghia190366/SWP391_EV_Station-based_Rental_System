@@ -354,7 +354,7 @@ namespace BusinessLogicLayer.Services
 
                 _context.Payments.Add(newPayment);
                 await _context.SaveChangesAsync();
-                
+
                 // === GỌI NOTIFICATION SERVICE ===
                 if (order.renter != null)
                 {
@@ -451,5 +451,78 @@ namespace BusinessLogicLayer.Services
             await _context.SaveChangesAsync();
             return true;
         }
+
+        // 8. HÀM MỚI: Renter hủy đơn, tạo yêu cầu hoàn cọc
+        public async Task CreateRefundRequestAsync(int orderId)
+        {
+            // 1. Tìm đơn hàng
+            var order = await _context.RentalOrders
+                .AsNoTracking() // Không cần theo dõi vì chỉ đọc
+                .FirstOrDefaultAsync(o => o.order_id == orderId);
+
+            if (order == null)
+            {
+                // Nếu order không tìm thấy (hiếm khi xảy ra nếu logic gọi đúng)
+                // Chúng ta không ném Exception để tránh làm hỏng luồng hủy đơn
+                // Cậu có thể log lỗi này lại
+                return; 
+            }
+
+            // 2. Kiểm tra xem ĐÃ TRẢ CỌC CHƯA?
+            bool hasPaidDeposit = await _context.Payments.AnyAsync(p =>
+                p.order_id == orderId &&
+                p.fee_type == "PAY" &&
+                p.payment_status == "PAID");
+
+            // 3. Kiểm tra xem ĐÃ YÊU CẦU HOÀN TRẢ CHƯA? (Idempotency)
+            bool alreadyRefunded = await _context.Payments.AnyAsync(p =>
+                p.order_id == orderId &&
+                p.fee_type == "REFUND");
+
+            // 4. Nếu đã trả cọc VÀ chưa có yêu cầu hoàn trả
+            if (hasPaidDeposit && !alreadyRefunded)
+            {
+                var newRefundRequest = new Payment
+                {
+                    order_id = orderId,
+                    amount = order.deposit_amount, // [cite: 18] Lấy đúng số tiền cọc của đơn
+                    payment_method = "E-Wallet", // Mặc định, vì lúc trả cọc là E-Wallet
+                    created_at = DateTime.UtcNow,
+                    fee_type = "REFUND", //  Loại: Hoàn trả
+                    payment_status = "UNPAID", //  Trạng thái: Chờ admin duyệt chi
+                    descrition = $"Yêu cầu hoàn cọc cho đơn hàng #{orderId} (do khách hủy)."
+                };
+
+                _context.Payments.Add(newRefundRequest);
+                await _context.SaveChangesAsync();
+                
+                // TODO (Optional): Cậu có thể bắn notification cho ADMIN/STAFF ở đây
+                // === BẮT ĐẦU IMPLEMENT TODO (GỬI NOTI CHO ADMIN) ===
+                
+                // 1. Tìm tất cả User ID của Admin
+                var adminUserIds = await _context.Users
+                    .Where(u => u.role == "ADMIN")
+                    .Select(u => u.user_id)
+                    .ToListAsync();
+
+                // 2. Chuẩn bị nội dung thông báo
+                // (Định dạng :N0 để hiển thị 5,000,000)
+                string message = $"Có yêu cầu hoàn cọc mới cho đơn hàng #{orderId} (đơn cọc: {order.deposit_amount:N0} VND) cần được duyệt.";
+                string type = "REFUND_REQUEST"; // Loại thông báo
+
+                // 3. Gửi thông báo cho từng Admin
+                foreach (var adminId in adminUserIds)
+                {
+                    // Gọi service đã tiêm
+                    await _notificationService.CreateNotificationAsync(adminId, message, type);
+                }
+                
+            }
+            
+            // Nếu "chưa trả cọc" (hasPaidDeposit = false)
+            // thì chúng ta không làm gì cả, vì không có gì để hoàn.
+        }
+
+
     }
 }
