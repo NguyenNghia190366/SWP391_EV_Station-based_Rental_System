@@ -288,14 +288,14 @@ namespace BusinessLogicLayer.Helpers
                 .ForMember(dest => dest.RegistrationDate, opt => opt.MapFrom(src => src.registration_date))
 
                 // Map từ CCCD (nếu có)
-                .ForMember(dest => dest.IdCardNumber, opt => opt.MapFrom(src => src.CCCD.id_card_number)) 
-                .ForMember(dest => dest.UrlCccdCmndFront, opt => opt.MapFrom(src => src.CCCD.url_cccd_cmnd_front))
-                .ForMember(dest => dest.UrlCccdCmndBack, opt => opt.MapFrom(src => src.CCCD.url_cccd_cmnd_back))
+                .ForMember(dest => dest.IdCardNumber, opt => opt.MapFrom(src => src.CCCD!.id_card_number)) 
+                .ForMember(dest => dest.UrlCccdCmndFront, opt => opt.MapFrom(src => src.CCCD!.url_cccd_cmnd_front))
+                .ForMember(dest => dest.UrlCccdCmndBack, opt => opt.MapFrom(src => src.CCCD!.url_cccd_cmnd_back))
 
                 // Map từ Driver_License (nếu có)
-                .ForMember(dest => dest.DriverLicenseNumber, opt => opt.MapFrom(src => src.Driver_License.driver_license_number))
-                .ForMember(dest => dest.UrlDriverLicenseFront, opt => opt.MapFrom(src => src.Driver_License.url_driver_license_front))
-                .ForMember(dest => dest.UrlDriverLicenseBack, opt => opt.MapFrom(src => src.Driver_License.url_driver_license_back));
+                .ForMember(dest => dest.DriverLicenseNumber, opt => opt.MapFrom(src => src.Driver_License!.driver_license_number))
+                .ForMember(dest => dest.UrlDriverLicenseFront, opt => opt.MapFrom(src => src.Driver_License!.url_driver_license_front))
+                .ForMember(dest => dest.UrlDriverLicenseBack, opt => opt.MapFrom(src => src.Driver_License!.url_driver_license_back));
             #endregion
 
 
