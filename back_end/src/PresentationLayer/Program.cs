@@ -11,6 +11,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using BusinessLogicLayer.Helpers.CurrentUserAccessor;
+using BusinessLogicLayer.Services.Interfaces;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -47,7 +48,7 @@ builder.Services.AddScoped<IPaymentsService, PaymentsService>();
 builder.Services.AddScoped<IRenterService, RenterService>();
 builder.Services.AddScoped<IReportService, ReportService>();
 builder.Services.AddScoped<IExtraFeeTypeService, ExtraFeeTypeService>();
-
+builder.Services.AddScoped<IDashboardService, DashboardService>();
 builder.Services.AddScoped<ICurrentUserAccessor, CurrentUserAccessor>(); // Đăng ký CurrentUserAccessor
 
 
