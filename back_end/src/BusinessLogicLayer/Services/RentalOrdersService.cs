@@ -17,13 +17,19 @@ namespace BusinessLogicLayer.Services
         private readonly IMapper _mapper;
         private readonly ICurrentUserAccessor _currentUser;
         private readonly INotificationService _notificationService;
+        private readonly IPaymentsService _paymentsService;
         
-        public RentalOrdersService(ApplicationDbContext context, IMapper mapper, ICurrentUserAccessor currentUser, INotificationService notificationService)
+        public RentalOrdersService(ApplicationDbContext context, 
+                                   IMapper mapper,  
+                                   ICurrentUserAccessor currentUser, 
+                                   INotificationService notificationService, 
+                                   IPaymentsService paymentsService)
         {
             _context = context;
             _mapper = mapper;
             _currentUser = currentUser;
             _notificationService = notificationService;
+            _paymentsService = paymentsService;
         }
 
         // 1. CREATE (Rule 1, 2, 3)
@@ -197,6 +203,7 @@ namespace BusinessLogicLayer.Services
                     {
                         order.status = "CANCELED"; //
                         // TODO: Xử lý hoàn cọc (nếu có - Sẽ làm ở PaymentsService
+                        await _paymentsService.CreateRefundRequestAsync(order.order_id);
                     }
                     else
                     {
