@@ -13,12 +13,14 @@ namespace BusinessLogicLayer.Services
         private readonly ApplicationDbContext _context;
         private readonly IMapper _mapper;
         private readonly ICurrentUserAccessor _currentUser;
+        private readonly INotificationService _notificationService;
 
-        public ContractsService(ApplicationDbContext context, IMapper mapper, ICurrentUserAccessor currentUser)
+        public ContractsService(ApplicationDbContext context, IMapper mapper, ICurrentUserAccessor currentUser, INotificationService notificationService)
         {
             _context = context;
             _mapper = mapper;
             _currentUser = currentUser;
+            _notificationService = notificationService;
         }
         // Implement các phương thức của IContractsService ở đây
 
@@ -35,6 +37,7 @@ namespace BusinessLogicLayer.Services
             // 1. Validation: Kiểm tra RentalOrder
             var order = await _context.RentalOrders
                 .Include(o => o.vehicle)
+                .Include(o => o.renter) // <-- THÊM INCLUDE
                 .FirstOrDefaultAsync(o => o.order_id == createDto.OrderId);
 
             if (order == null)
@@ -95,6 +98,16 @@ namespace BusinessLogicLayer.Services
 
             // 7. Lưu thay đổi
             await _context.SaveChangesAsync();
+            // === GỌI NOTIFICATION SERVICE ===
+            if (order.renter != null)
+            {
+                await _notificationService.CreateNotificationAsync(
+                    order.renter.user_id,
+                    $"Hợp đồng cho đơn hàng #{order.order_id} đã được tạo. Bạn có thể đến trạm để nhận xe.",
+                    "CONTRACT_CREATED"
+                );
+            }
+            // ==============================
 
             // 8. Lấy dữ liệu đầy đủ và trả về DTO
             // Gọi hàm GetByIdAsync để tái sử dụng logic query

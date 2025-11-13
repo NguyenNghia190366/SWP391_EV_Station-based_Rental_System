@@ -14,12 +14,14 @@ namespace BusinessLogicLayer.Services
         private readonly ApplicationDbContext _context;
         private readonly IMapper _mapper;
         private readonly ICurrentUserAccessor _currentUserAccessor;
+        private readonly INotificationService _notificationService;
 
-        public ComplaintService(ApplicationDbContext context, IMapper mapper, ICurrentUserAccessor currentUserAccessor)
+        public ComplaintService(ApplicationDbContext context, IMapper mapper, ICurrentUserAccessor currentUserAccessor, INotificationService notificationService)
         {
             _context = context;
             _mapper = mapper;
             _currentUserAccessor = currentUserAccessor;
+            _notificationService = notificationService;
         }
 
         // 1. Renter tạo khiếu nại (Giữ nguyên)
@@ -115,7 +117,9 @@ namespace BusinessLogicLayer.Services
                 throw new UnauthorizedAccessException("Chỉ Admin hoặc Staff mới có quyền giải quyết.");
             }
 
-            var complaint = await _context.Complaints.FindAsync(complaintId); //
+            var complaint = await _context.Complaints
+                .Include(c => c.renter) // <-- THÊM INCLUDE
+                .FirstOrDefaultAsync(c => c.complaint_id == complaintId);
 
             if (complaint == null)
             {
@@ -131,7 +135,20 @@ namespace BusinessLogicLayer.Services
             complaint.resolve_date = DateTime.UtcNow;
 
             _context.Complaints.Update(complaint);
-            return await _context.SaveChangesAsync() > 0;
+            bool saved = await _context.SaveChangesAsync() > 0;
+            
+            // === GỌI NOTIFICATION SERVICE (Sau khi đã lưu thành công) ===
+            if (saved && complaint.renter != null)
+            {
+                await _notificationService.CreateNotificationAsync(
+                    complaint.renter.user_id, // Lấy user_id từ Renter
+                    $"Khiếu nại #{complaintId} của bạn đã được giải quyết.",
+                    "COMPLAINT_RESOLVED"
+                );
+            }
+            // ==============================
+
+            return saved;
         }
     }
 }

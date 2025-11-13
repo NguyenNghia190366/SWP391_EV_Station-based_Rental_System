@@ -12,13 +12,16 @@ namespace BusinessLogicLayer.Services
     {
         private readonly ApplicationDbContext _db;
         private readonly IMapper _mapper;
-        private readonly ICurrentUserAccessor _currentUser;
 
-        public RenterService(ApplicationDbContext db, IMapper mapper, ICurrentUserAccessor currentUser)
+        private readonly ICurrentUserAccessor _currentUser;
+        private readonly INotificationService _notificationService;
+            
+        public RenterService(ApplicationDbContext db, IMapper mapper, ICurrentUserAccessor currentUser, INotificationService notificationService)
         {
             _db = db;
             _mapper = mapper;
             _currentUser = currentUser;
+            _notificationService = notificationService;
         }
 
         // Implement các phương thức của IRenterService ở đây
@@ -174,8 +177,37 @@ namespace BusinessLogicLayer.Services
                 throw new KeyNotFoundException($"Không tìm thấy Renter với ID: {renterId}");
             }
 
+            if (renter.is_verified == isVerified)
+            {
+                return false; 
+            }
             renter.is_verified = isVerified;
             await _db.SaveChangesAsync();
+
+            // === GỌI NOTIFICATION SERVICE ===
+            // 1. Chuẩn bị message và type
+            string message;
+            string type;
+
+            if (isVerified)
+            {
+                message = "Chúc mừng! Hồ sơ và giấy tờ của bạn đã được xác thực thành công.";
+                type = "RENTER_VERIFIED_APPROVED";
+            }
+            else
+            {
+                message = "Rất tiếc, hồ sơ của bạn chưa được duyệt. Vui lòng kiểm tra lại giấy tờ và cập nhật.";
+                type = "RENTER_VERIFIED_REJECTED";
+            }
+
+            // 2. Gửi thông báo
+            await _notificationService.CreateNotificationAsync(
+                renter.user_id, // Lấy user_id ngay từ Renter object 
+                message,
+                type
+            );
+
+
             return true;
         }
 

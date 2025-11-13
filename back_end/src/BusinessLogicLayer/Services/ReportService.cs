@@ -15,12 +15,14 @@ namespace BusinessLogicLayer.Services
         private readonly ApplicationDbContext _context;
         private readonly IMapper _mapper;
         private readonly ICurrentUserAccessor _currentUser; // Dùng để lấy StaffId
+        private readonly INotificationService _notificationService;
 
-        public ReportService(ApplicationDbContext context, IMapper mapper, ICurrentUserAccessor currentUser)
+        public ReportService(ApplicationDbContext context, IMapper mapper, ICurrentUserAccessor currentUser, INotificationService notificationService)
         {
             _context = context;
             _mapper = mapper;
             _currentUser = currentUser;
+            _notificationService = notificationService;
         }
 
         public async Task<ReportViewDto> CreateReportAsync(ReportCreateDto dto)
@@ -31,6 +33,22 @@ namespace BusinessLogicLayer.Services
             {
                 throw new UnauthorizedAccessException("Bạn phải là nhân viên mới được tạo báo cáo.");
             }
+
+            // === TÌM TÊN STAFF VÀ DANH SÁCH ADMIN (MỚI) ===
+            // Lấy tên Staff (để đưa vào nội dung thông báo)
+            var staffUser = await _context.Staff
+                .AsNoTracking()
+                .Include(s => s.user)
+                .FirstOrDefaultAsync(s => s.staff_id == staffId.Value);
+            var staffName = staffUser?.user?.full_name ?? "Một nhân viên";
+
+            // Lấy danh sách User ID của tất cả Admin
+            var adminUserIds = await _context.Users
+                .AsNoTracking()
+                .Where(u => u.role == "ADMIN")
+                .Select(u => u.user_id)
+                .ToListAsync();
+            // ===============================================
 
             // 2. Kiểm tra Order có tồn tại không
             var orderExists = await _context.RentalOrders.AnyAsync(o => o.order_id == dto.OrderId);
@@ -63,6 +81,18 @@ namespace BusinessLogicLayer.Services
             // 5. Lưu vào DB
             _context.Reports.Add(newReport);
             await _context.SaveChangesAsync();
+
+            // === GỌI NOTIFICATION SERVICE (MỚI) ===
+            if (adminUserIds.Any())
+            {
+                string message = $"Nhân viên {staffName} vừa tạo báo cáo sự cố #{newReport.report_id} cho đơn hàng #{dto.OrderId}.";
+                string type = "NEW_REPORT_FILED";
+
+                foreach (var adminId in adminUserIds)
+                {
+                    await _notificationService.CreateNotificationAsync(adminId, message, type);
+                }
+            }
 
             // 6. Trả về DTO (phải gọi GetById để nạp StaffName)
             return (await GetReportByIdAsync(newReport.report_id))!;

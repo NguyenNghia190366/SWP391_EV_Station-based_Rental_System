@@ -16,12 +16,14 @@ namespace BusinessLogicLayer.Services
         private readonly ApplicationDbContext _context;
         private readonly IMapper _mapper;
         private readonly ICurrentUserAccessor _currentUser;
+        private readonly INotificationService _notificationService;
         
-        public RentalOrdersService(ApplicationDbContext context, IMapper mapper, ICurrentUserAccessor currentUser)
+        public RentalOrdersService(ApplicationDbContext context, IMapper mapper, ICurrentUserAccessor currentUser, INotificationService notificationService)
         {
             _context = context;
             _mapper = mapper;
             _currentUser = currentUser;
+            _notificationService = notificationService;
         }
 
         // 1. CREATE (Rule 1, 2, 3)
@@ -177,6 +179,7 @@ namespace BusinessLogicLayer.Services
             // Phải Include cả Vehicle để cập nhật trạng thái
             var order = await _context.RentalOrders
                 .Include(o => o.vehicle)
+                .Include(o => o.renter) // <-- THÊM DÒNG NÀY
                 .FirstOrDefaultAsync(o => o.order_id == id);
                 
             if (order == null) return false;
@@ -210,10 +213,20 @@ namespace BusinessLogicLayer.Services
                         throw new InvalidOperationException("Only BOOKED orders can be approved.");
 
                     order.status = "APPROVED";
-                    // (Không set pickup_staff_id ở đây, chỉ set khi tạo hợp đồng)
                     
-                    // TODO: Tạo thông báo cho Renter (sẽ làm ở NotificationService)
-                    break;
+                    await _context.SaveChangesAsync(); // <-- LƯU TRẠNG THÁI TRƯỚC
+
+                    // === GỌI NOTIFICATION SERVICE (Giải quyết TODO) ===
+                    if (order.renter != null)
+                    {
+                        await _notificationService.CreateNotificationAsync(
+                            order.renter.user_id, // Lấy UserId từ Renter
+                            $"Đơn hàng #{order.order_id} (Xe: {order.vehicle.license_plate}) đã được duyệt.",
+                            "ORDER_APPROVED" // Loại thông báo
+                        );
+                    }
+
+                    break; 
                 // ==============================
 
 

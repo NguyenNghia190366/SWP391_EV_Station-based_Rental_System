@@ -20,27 +20,27 @@ namespace BusinessLogicLayer.Services
         private readonly ApplicationDbContext _context;
         private readonly IMapper _mapper;
         private readonly IHttpClientFactory _httpClientFactory;
+        private readonly INotificationService _notificationService;
         
         // CONFIG SETTINGS
         private readonly MomoSettings _momoSettings;
         private readonly VnpaySettings _vnpaySettings;
 
-        // Helpers
-         // private readonly IHttpContextAccessor _httpContextAccessor;
 
         public PaymentsService(ApplicationDbContext context,
                                IOptions<MomoSettings> momoSettings,
                                IOptions<VnpaySettings> vnpaySettings,
                                IHttpClientFactory httpClientFactory,
-                               IMapper mapper)
-                            //    IHttpContextAccessor httpContextAccessor)
+                               IMapper mapper,
+                               INotificationService notificationService)
+                            
         {
             _context = context;
             _momoSettings = momoSettings.Value;
             _vnpaySettings = vnpaySettings.Value;
             _httpClientFactory = httpClientFactory;
-            // _httpContextAccessor = httpContextAccessor;
             _mapper = mapper;
+            _notificationService = notificationService;
         }
 
         public async Task<PaymentInitResponseDto> CreateMoMoPaymentRequestAsync(PaymentInitiationDto dto, int renterId)
@@ -167,6 +167,7 @@ namespace BusinessLogicLayer.Services
                 }
 
                 var order = await _context.RentalOrders
+                    .Include(o => o.renter) // <-- THÊM INCLUDE
                     .FirstOrDefaultAsync(o => o.order_id == orderId);
 
                 // 3. Kiểm tra tính toàn vẹn (Idempotency)
@@ -191,6 +192,16 @@ namespace BusinessLogicLayer.Services
 
                     _context.Payments.Add(newPayment);
                     await _context.SaveChangesAsync();
+
+                    // === GỌI NOTIFICATION SERVICE ===
+                    if (order.renter != null)
+                    {
+                        await _notificationService.CreateNotificationAsync(
+                            order.renter.user_id,
+                            $"Thanh toán cọc (MoMo) cho đơn hàng #{orderId} đã thành công!",
+                            "PAYMENT_SUCCESS"
+                        );
+                    }
                 }
             }
             else
@@ -318,7 +329,9 @@ namespace BusinessLogicLayer.Services
                     return "{\"RspCode\":\"01\", \"Message\":\"Order not found\"}";
                 }
 
-                var order = await _context.RentalOrders.FirstOrDefaultAsync(o => o.order_id == orderId);
+                var order = await _context.RentalOrders
+                    .Include(o => o.renter) // <-- THÊM INCLUDE
+                    .FirstOrDefaultAsync(o => o.order_id == orderId);
 
                 // 4. Kiểm tra (Idempotency)
                 if (order == null)
@@ -341,6 +354,16 @@ namespace BusinessLogicLayer.Services
 
                 _context.Payments.Add(newPayment);
                 await _context.SaveChangesAsync();
+                
+                // === GỌI NOTIFICATION SERVICE ===
+                if (order.renter != null)
+                {
+                    await _notificationService.CreateNotificationAsync(
+                        order.renter.user_id,
+                        $"Thanh toán cọc (VNPAY) cho đơn hàng #{orderId} đã thành công!",
+                        "PAYMENT_SUCCESS"
+                    );
+                }
 
                 // 6. Trả về 00 cho VNPay
                 return "{\"RspCode\":\"00\", \"Message\":\"Confirm Success\"}";
