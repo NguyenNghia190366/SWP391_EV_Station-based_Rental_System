@@ -36,9 +36,15 @@ export default function RentalHistoryPage() {
         instance.get("/VehicleModels"),
       ]);
 
-      const rentalOrders = Array.isArray(rentalOrdersRes.data) 
-        ? rentalOrdersRes.data 
+      const rentalOrdersRaw = Array.isArray(rentalOrdersRes.data)
+        ? rentalOrdersRes.data
         : rentalOrdersRes.data?.data || [];
+
+      // Ensure frontend-only filtering by renterId so a user can't see others' orders
+      const rentalOrders = rentalOrdersRaw.filter((o) => {
+        const ownerId = o.renterId ?? o.renter_id ?? o.RenterId ?? o.Renter_Id ?? o.renter;
+        return String(ownerId) === String(renterId);
+      });
       
       const vehicles = Array.isArray(vehiclesRes.data)
         ? vehiclesRes.data

@@ -98,7 +98,7 @@ export default function BookingTable({ bookings = [], loading, onRefresh }) {
           BOOKED: { color: "blue", text: "Chờ duyệt" },
           APPROVED: { color: "green", text: "Đã duyệt" },
           CANCELED: { color: "red", text: "Từ chối" },
-          IN_PROGRESS: { color: "orange", text: "Đang thuê" },
+          IN_USE: { color: "orange", text: "Đang thuê" },
           COMPLETED: { color: "cyan", text: "Hoàn tất" },
         };
         const info = statusMap[status] || {

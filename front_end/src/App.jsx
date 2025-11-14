@@ -16,7 +16,6 @@ import ContractOnlinePage from "./pages/renter/ContractOnlinePage.jsx";
 import ContractOfflinePage from "./pages/renter/ContractOfflinePage.jsx";
 import PaymentSuccessPage from "./pages/renter/payment/PaymentSuccessPage.jsx";
 import PaymentHistory from "./pages/renter/payment/PaymentHistory.jsx";
-import PickupPage from "./pages/renter/PickupPage.jsx";
 // Admin
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import AdminVerificationDashboard from "./pages/admin/VerifyRenterPage.jsx";
@@ -27,8 +26,11 @@ import SendVehiclePreview from "./pages/staff/SendVehiclePreview.jsx";
 import StaffContractOfflinePage from "./pages/staff/StaffContractOfflinePage.jsx";
 import StaffContractOnlinePage from "./pages/staff/StaffContractOnlinePage.jsx";
 import StaffConfirmHandover from "./pages/staff/handover/StaffConfirmHandover.jsx";
+import StaffReturnRequestPage from "./pages/staff/return/StaffReturnRequestPage.jsx";
+import StaffReturnCheckPage from "./pages/staff/return/StaffReturnCheckPage.jsx";
+import StaffReturnSummaryPage from "./pages/staff/return/StaffReturnSummaryPage.jsx";
 // Common
-import { roles } from "./Constant/Role";
+import { roles } from "./Constant/Role";  
 import { RequireAuth } from "./Router/RequireAuth.jsx";
 import AuthRoute from "./Router/AuthRoute";
 import Layout from "./Components/Common/layout/Layout/Layout.jsx";
@@ -66,14 +68,6 @@ function App() {
           element={
             <RequireAuth allowRole={[roles.RENTER]}>
               <ContractOnlinePage />
-            </RequireAuth>
-          }
-        />
-        <Route
-          path="/renter/pickup/:orderId"
-          element={
-            <RequireAuth allowRole={[roles.RENTER]}>
-              <PickupPage />
             </RequireAuth>
           }
         />
@@ -141,6 +135,32 @@ function App() {
           element={
             <RequireAuth allowRole={[roles.STAFF]}>
               <StaffContractOnlinePage />
+            </RequireAuth>
+          }
+        />
+        <Route
+          path="/staff/return-requests"
+          element={
+            <RequireAuth allowRole={[roles.STAFF]}>
+              <StaffReturnRequestPage />
+            </RequireAuth>
+          }
+        />
+
+        <Route
+          path="/staff/return-check/:orderId"
+          element={
+            <RequireAuth allowRole={[roles.STAFF]}>
+              <StaffReturnCheckPage />
+            </RequireAuth>
+          }
+        />
+
+        <Route
+          path="/staff/return-summary/:orderId"
+          element={
+            <RequireAuth allowRole={[roles.STAFF]}>
+              <StaffReturnSummaryPage />
             </RequireAuth>
           }
         />

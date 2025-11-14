@@ -10,6 +10,7 @@ import BookingRequestsManagement from "./Booking/BookingRequestsManagement";
 import VehicleStatus from "../shared/VehicleStatus";
 import CreateVehicleForm from "./vehicles/CreateVehicleForm";
 import StaffConfirmHandover from "./handover/StaffConfirmHandover";
+import StaffReturnRequestPage from "./return/StaffReturnRequestPage";
 
 const StaffDashboard = () => {
   const [selectedMenu, setSelectedMenu] = useState("overview");
@@ -19,6 +20,7 @@ const StaffDashboard = () => {
     { key: "bookings", icon: <BookOutlined />, label: "Quản lý Booking" },
     { key: "confirm-handover", icon: <BookOutlined />, label: "Xác nhận nhận xe" },
     { key: "vehicle-status", icon: <CarOutlined />, label: "Trạng thái xe" },
+    { key: "return-requests", icon: <CarOutlined />, label: "Yêu cầu trả xe" },
     { key: "create-vehicle", icon: <PlusOutlined />, label: "Tạo xe mới" },
   ], []);
 
@@ -70,6 +72,10 @@ const StaffDashboard = () => {
 
         <div style={{ display: selectedMenu === "vehicle-status" ? "block" : "none" }}>
           <VehicleStatus />
+        </div>
+
+        <div style={{ display: selectedMenu === "return-requests" ? "block" : "none" }}>
+          <StaffReturnRequestPage />
         </div>
 
         <div style={{ display: selectedMenu === "create-vehicle" ? "block" : "none" }}>
