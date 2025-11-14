@@ -74,9 +74,15 @@ const ProfilePage = () => {
         instance.get("/Stations"),
       ]);
 
-      const rentalOrders = Array.isArray(rentalOrdersRes.data)
+      const rentalOrdersRaw = Array.isArray(rentalOrdersRes.data)
         ? rentalOrdersRes.data
         : rentalOrdersRes.data?.data || [];
+
+      // Filter on frontend by renterId to make sure user only sees their own orders
+      const rentalOrders = rentalOrdersRaw.filter((o) => {
+        const ownerId = o.renterId ?? o.renter_id ?? o.RenterId ?? o.Renter_Id ?? o.renter;
+        return String(ownerId) === String(renterId);
+      });
 
       const vehicles = Array.isArray(vehiclesRes.data)
         ? vehiclesRes.data

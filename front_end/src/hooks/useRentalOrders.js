@@ -71,11 +71,28 @@ export const useRentalOrders = (withApi = false) => {
     [instance]
   );
 
+  // Giao xe
   const handOverOrder = useCallback(
     async (orderId) => {
       try {
         const res = await instance.put(`/Inuse?id=${orderId}`);
         message.success("✅ Đã bàn giao xe thành công!");
+        return res.data;
+      } catch (error) {
+        console.error("❌ Lỗi approve:", error);
+        message.error("Không thể duyệt yêu cầu. Vui lòng thử lại!");
+        throw error;
+      }
+    },
+    [instance]
+  );
+
+  // Trả xe
+  const handOverReturnOrder = useCallback(
+    async (orderId) => {
+      try {
+        const res = await instance.put(`/Completed?id=${orderId}`);
+        message.success("✅ Đã tiếp nhận xe thành công!");
         return res.data;
       } catch (error) {
         console.error("❌ Lỗi approve:", error);

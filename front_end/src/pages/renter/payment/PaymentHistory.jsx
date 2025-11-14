@@ -14,10 +14,58 @@ export default function PaymentHistory() {
     const fetchPayments = async () => {
       setLoading(true);
       try {
-        const res = await axios.get('/Payments');
-        // API might return array or object with data
+        // Get userId from localStorage (same approach as RentalHistoryPage)
+        const userId = localStorage.getItem('userId');
+        if (!userId) {
+          console.warn('Không tìm thấy userId!');
+          return;
+        }
+        
+        // Fetch payments and rental orders so we can filter payments to only those belonging to current renter
+        const [res, ordersRes] = await Promise.all([
+          axios.get('/Payments'),
+          axios.get('/RentalOrders').catch(() => ({ data: [] })),
+        ]);
+
         const data = Array.isArray(res.data) ? res.data : res.data?.data || [];
-        setPayments(data);
+        const orders = Array.isArray(ordersRes.data) ? ordersRes.data : ordersRes.data?.data || [];
+
+        // Build set of orderIds that belong to this renter (extract renterId from orders matching current userId)
+        let renterId = null;
+        const renterOrderIds = new Set();
+        const userIdNum = Number(userId);
+        
+        // First pass: find renterId by matching userId in orders
+        orders.forEach((o) => {
+          const orderUserId = o.userId ?? o.user_id;
+          if (orderUserId && Number(orderUserId) === userIdNum && !renterId) {
+            renterId = o.renterId ?? o.renter_id;
+          }
+        });
+
+        // Fallback: if renterId not found in orders, try localStorage (same as RentalHistoryPage)
+        if (!renterId) {
+          renterId = localStorage.getItem('renter_Id') || localStorage.getItem('renterId') || localStorage.getItem('renter_id');
+        }
+
+        // Second pass: if we found renterId, collect all orders belonging to that renter
+        if (renterId != null) {
+          orders.forEach((o) => {
+            const ownerId = o.renterId ?? o.renter_id ?? o.RenterId ?? o.Renter_Id ?? o.renter;
+            const oid = o.orderId ?? o.id ?? o.order_id;
+            if (String(ownerId) === String(renterId) && oid != null) renterOrderIds.add(Number(oid));
+          });
+        }
+
+        // Filter payments: if we have renterOrderIds, keep only payments whose orderId is in that set
+        const filtered = renterOrderIds.size > 0
+          ? data.filter(p => {
+              const pid = p.orderId ?? p.order_id ?? p.OrderId;
+              return pid != null && renterOrderIds.has(Number(pid));
+            })
+          : [];
+
+        setPayments(filtered);
         setApiMissing(false);
       } catch (err) {
         console.error('Error fetching payments', err);
