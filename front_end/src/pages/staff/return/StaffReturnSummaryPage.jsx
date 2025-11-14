@@ -3,12 +3,14 @@ import React, { useState, useEffect } from "react";
 import { Card, Descriptions, Button, message } from "antd";
 import { useParams, useLocation, useNavigate } from "react-router-dom";
 import { useAxiosInstance } from "@/hooks/useAxiosInstance";
+import { usePayment } from "@/hooks/usePayment";
 
 export default function StaffReturnSummaryPage() {
   const { orderId } = useParams();
   const { state } = useLocation();
   const axios = useAxiosInstance();
   const navigate = useNavigate();
+  const { createRefund } = usePayment();
 
   const [order, setOrder] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -28,21 +30,75 @@ export default function StaffReturnSummaryPage() {
 
   if (!state || !order) return null;
 
-  const finalAmount = order.deposit - state.totalFee;
+  const toNumber = (v) => {
+    const n = Number(v);
+    return Number.isFinite(n) ? n : 0;
+  };
+
+  // compute rental price (hours * pricePerHour) to use as fallback for deposit
+  const getOrderRentalPrice = () => {
+    try {
+      const pricePerHour =
+        toNumber(order.pricePerHour || order.price_per_hour || state?.vehicle?.vehicleModel?.price_per_hour || state?.vehicle?.pricePerHour || state?.vehicle?.price_per_hour);
+
+      if (!order.startTime || !order.endTime) return 0;
+      const start = new Date(order.startTime);
+      const end = new Date(order.endTime);
+      const hours = Math.max(0, (end - start) / (1000 * 60 * 60));
+      return hours * pricePerHour;
+    } catch (err) {
+      console.error('Error computing rental price for deposit fallback', err);
+      return 0;
+    }
+  };
+
+  const rentalPrice = getOrderRentalPrice();
+
+  const depositFromOrder = toNumber(order.deposit || order.depositAmount || order.deposit_amount);
+  // use deposit from order when present (>0), otherwise default to 30% of rental price
+  const depositNum = depositFromOrder > 0 ? depositFromOrder : +(rentalPrice * 0.3).toFixed(0);
+
+  const totalFeeNum = toNumber(state.totalFee);
+
+  const finalAmount = depositNum - totalFeeNum;
+
+  const formatCurrency = (v) =>
+    new Intl.NumberFormat("vi-VN", { style: "currency", currency: "VND" }).format(v || 0);
 
   const handleConfirmReturn = async () => {
     setLoading(true);
     try {
-      // 💥 GỌI API BACKEND ĐÚNG ĐỊNH DẠNG /Complete?id=xxx
-      await axios.put(`/RentalOrders/Complete`, null, {
-        params: { id: orderId }
-      });
+      // If renter is to receive money (finalAmount > 0), process refund payment
+      if (finalAmount > 0) {
+        try {
+          console.log("Processing refund for amount:", finalAmount);
+          const refundResult = await createRefund(
+            orderId,
+            finalAmount,
+            `Refund for order #${orderId} after deducting fees`
+          );
+          console.log("Refund result:", refundResult);
+          
+          // If refund returns a redirect URL, redirect to it (similar to payment flow)
+          if (refundResult?.url || refundResult?.refundUrl) {
+            window.location.href = refundResult.url || refundResult.refundUrl;
+            return;
+          }
+          
+          message.success("Đã khởi tạo hoàn tiền cho renter!");
+        } catch (refundErr) {
+          console.error("Refund error:", refundErr);
+          message.warning("Không thể khởi tạo hoàn tiền. Vui lòng thử lại.");
+          setLoading(false);
+          return;
+        }
+      }
 
-      message.success("Đã hoàn tất trả xe!");
+      // Navigate back to dashboard (order completion will happen from there)
       navigate("/staff/dashboard");
     } catch (err) {
       console.error(err);
-      message.error("Không thể hoàn tất trả xe.");
+      message.error("Có lỗi xảy ra.");
     }
     setLoading(false);
   };
@@ -52,21 +108,21 @@ export default function StaffReturnSummaryPage() {
       <Card title={`Tổng kết trả xe #${order.orderId}`}>
         <Descriptions bordered column={1}>
           <Descriptions.Item label="Tiền cọc">
-            {order.deposit?.toLocaleString()} VND
+            {formatCurrency(depositNum)}
           </Descriptions.Item>
 
           <Descriptions.Item label="Tổng phí phát sinh">
-            {state.totalFee?.toLocaleString()} VND
+            {formatCurrency(totalFeeNum)}
           </Descriptions.Item>
 
           <Descriptions.Item label="Số tiền cuối cùng">
             {finalAmount >= 0 ? (
               <span style={{ color: "green" }}>
-                Hoàn lại cho renter: {finalAmount.toLocaleString()} VND
+                Hoàn lại cho renter: {formatCurrency(finalAmount)}
               </span>
             ) : (
               <span style={{ color: "red" }}>
-                Renter phải trả thêm: {Math.abs(finalAmount).toLocaleString()} VND
+                Renter phải trả thêm: {formatCurrency(Math.abs(finalAmount))}
               </span>
             )}
           </Descriptions.Item>
@@ -79,7 +135,7 @@ export default function StaffReturnSummaryPage() {
           style={{ marginTop: 20 }}
           onClick={handleConfirmReturn}
         >
-          Xác nhận hoàn tất trả xe
+          Xác nhận thanh toán cọc
         </Button>
       </Card>
     </div>
