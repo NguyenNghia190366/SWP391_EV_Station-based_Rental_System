@@ -314,6 +314,9 @@ export default function StaffReturnCheckPage() {
               <Select
                 placeholder="Chọn loại phí tổn hại"
                 allowClear
+                style={{ width: '10 %' }}
+                dropdownMatchSelectWidth={false}
+                dropdownStyle={{ minWidth: 420, whiteSpace: 'nowrap' }}
                 options={feeTypes
                   .filter(
                     (f) =>

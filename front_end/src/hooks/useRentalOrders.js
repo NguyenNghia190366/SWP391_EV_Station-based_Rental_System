@@ -4,6 +4,7 @@ import { message, notification } from "antd";
 
 export const useRentalOrders = (withApi = false) => {
   const instance = useAxiosInstance(withApi);
+  const axiosInstance = useAxiosInstance();
 
   // 🔹 1. Lấy danh sách đơn thuê theo renterId
   const getRentalOrdersByRenterId = useCallback(
@@ -139,6 +140,35 @@ export const useRentalOrders = (withApi = false) => {
     [instance]
   );
 
+  // Complete rental order (set status to COMPLETED and restore vehicle availability)
+  const completeRentalOrder = useCallback(
+    async (orderId, vehicleId) => {
+      try {
+        console.debug("completeRentalOrder -> orderId:", orderId, "vehicleId:", vehicleId);
+        
+        // Update order status to COMPLETED
+        const orderResponse = await axiosInstance.put(`/RentalOrders/${orderId}`, {
+          status: "COMPLETED"
+        });
+        console.debug("completeRentalOrder order update response:", orderResponse);
+
+        // Update vehicle availability - increment quantityAvailable by 1
+        if (vehicleId) {
+          const vehicleResponse = await axiosInstance.put(`/Vehicles/${vehicleId}`, {
+            quantityAvailable: { $inc: 1 }
+          });
+          console.debug("completeRentalOrder vehicle update response:", vehicleResponse);
+        }
+
+        return orderResponse.data;
+      } catch (error) {
+        console.error("Error completing rental order:", error);
+        throw error;
+      }
+    },
+    [axiosInstance]
+  );
+
   return {
     getRentalOrdersByRenterId,
     createRentalOrder,
@@ -146,5 +176,7 @@ export const useRentalOrders = (withApi = false) => {
     handOverOrder,
     rejectRentalOrder,
     updateRentalOrderStatus,
+    handOverReturnOrder,
+    completeRentalOrder,
   };
 };

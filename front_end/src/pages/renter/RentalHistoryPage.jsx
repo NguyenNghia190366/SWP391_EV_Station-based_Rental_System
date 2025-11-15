@@ -206,7 +206,7 @@ export default function RentalHistoryPage() {
           APPROVED: { color: "green", text: "Đã duyệt" },
           CANCELED: { color: "red", text: "Từ chối" },
           IN_USE: { color: "orange", text: "Đang sử dụng" },
-          COMPLETED: { color: "cyan", text: "Hoàn tất" },
+          COMPLETED: { color: "cyan", text: "Hoàn tất trả xe" },
         };
         const statusInfo = statusMap[status] || { color: "default", text: status };
         return <Tag color={statusInfo.color}>{statusInfo.text}</Tag>;

@@ -3,14 +3,14 @@ import React, { useState, useEffect } from "react";
 import { Card, Descriptions, Button, message } from "antd";
 import { useParams, useLocation, useNavigate } from "react-router-dom";
 import { useAxiosInstance } from "@/hooks/useAxiosInstance";
-import { usePayment } from "@/hooks/usePayment";
+import { useRentalOrders } from "@/hooks/useRentalOrders";
 
 export default function StaffReturnSummaryPage() {
   const { orderId } = useParams();
   const { state } = useLocation();
   const axios = useAxiosInstance();
   const navigate = useNavigate();
-  const { createRefund } = usePayment();
+  const { createRefund, completeRentalOrder } = useRentalOrders();
 
   const [order, setOrder] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -75,17 +75,37 @@ export default function StaffReturnSummaryPage() {
           const refundResult = await createRefund(
             orderId,
             finalAmount,
+            "rental",
+            order.renterName || state?.order?.renterName || "Renter",
             `Refund for order #${orderId} after deducting fees`
           );
           console.log("Refund result:", refundResult);
           
           // If refund returns a redirect URL, redirect to it (similar to payment flow)
           if (refundResult?.url || refundResult?.refundUrl) {
+            // Before redirecting, complete the rental order (status + vehicle availability)
+            const vehicleId = order.vehicleId || order.vehicle_id || state?.vehicle?.vehicleId || state?.vehicle?.id;
+            await completeRentalOrder(orderId, vehicleId);
             window.location.href = refundResult.url || refundResult.refundUrl;
             return;
           }
+
+          // If backend returned HTML or details, navigate to a success page to show them
+          const successState = {
+            orderId,
+            amount: finalAmount,
+            fullName: order.renter?.fullName || order.renterName || state?.order?.renterName || "Renter",
+            description: refundResult?.description || `Hoàn tiền cho đơn #${orderId}`,
+            html: refundResult?.html || refundResult?.paymentHtml || refundResult?.successHtml || null,
+          };
+          
+          // Complete the rental order before navigating to success page
+          const vehicleId = order.vehicleId || order.vehicle_id || state?.vehicle?.vehicleId || state?.vehicle?.id;
+          await completeRentalOrder(orderId, vehicleId);
           
           message.success("Đã khởi tạo hoàn tiền cho renter!");
+          navigate(`/staff/return-refund-success/${orderId}`, { state: successState });
+          return;
         } catch (refundErr) {
           console.error("Refund error:", refundErr);
           message.warning("Không thể khởi tạo hoàn tiền. Vui lòng thử lại.");
@@ -94,11 +114,16 @@ export default function StaffReturnSummaryPage() {
         }
       }
 
-      // Navigate back to dashboard (order completion will happen from there)
+      // No refund needed (finalAmount <= 0), just complete the order
+      const vehicleId = order.vehicleId || order.vehicle_id || state?.vehicle?.vehicleId || state?.vehicle?.id;
+      await completeRentalOrder(orderId, vehicleId);
+      message.success("Đã hoàn tất trả xe!");
+      
+      // Navigate back to dashboard
       navigate("/staff/dashboard");
     } catch (err) {
       console.error(err);
-      message.error("Có lỗi xảy ra.");
+      message.error("Có lỗi xảy ra khi hoàn tất trả xe.");
     }
     setLoading(false);
   };
