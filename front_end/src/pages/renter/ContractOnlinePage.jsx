@@ -170,7 +170,7 @@ export default function ContractOnlinePage() {
           setPaymentSuccessHtml(result);
           // Mark order as waiting for staff handover approval
           try {
-            await axiosInstance.put(`/RentalOrders/${orderId}`, { status: "PENDING_HANDOVER" });
+            await axiosInstance.put(`/api/RentalOrders/${orderId}`, { status: "PENDING_HANDOVER" });
           } catch (err) {
             console.debug('Could not set PENDING_HANDOVER:', err?.response?.status || err.message);
           }
@@ -178,7 +178,7 @@ export default function ContractOnlinePage() {
           setPaymentSuccessHtml(`<div style="padding:20px;font-family:Arial"><h2 style="color:#52c41a">Thanh toán thành công</h2><p>Mã đơn: #${orderId}</p></div>`);
           // Mark order as waiting for staff handover approval
           try {
-            await axiosInstance.put(`/RentalOrders/${orderId}`, { status: "PENDING_HANDOVER" });
+            await axiosInstance.put(`/api/RentalOrders/${orderId}`, { status: "PENDING_HANDOVER" });
           } catch (err) {
             console.debug('Could not set PENDING_HANDOVER:', err?.response?.status || err.message);
           }
@@ -235,7 +235,9 @@ export default function ContractOnlinePage() {
       // use full name from order (from DB) and the description entered by renter
       const fullName = order.renterName || "(Không có)";
 
+      console.log("🔵 Starting payment creation with:", { orderId, totalPrice, fullName, paymentDescription });
       const response = await createPayment(orderId, totalPrice, "rental", fullName, paymentDescription);
+      console.log("🟢 Payment response received:", response);
 
       // Normalize response: server may return JSON object or string (text). The API returns { url: string, orderId }
       console.debug("createPayment returned:", response);
@@ -244,6 +246,7 @@ export default function ContractOnlinePage() {
         const t = resp.trim();
         // If it's HTML, show it
         if (t.startsWith('<')) {
+          console.log("🟡 Backend returned HTML (likely error page)");
           setPaymentSuccessHtml(resp);
           setPaymentModal(false);
           return;
@@ -253,15 +256,18 @@ export default function ContractOnlinePage() {
           resp = JSON.parse(resp);
         } catch (e) {
           // not JSON - show raw
+          console.log("🟡 Backend returned non-JSON string");
           setPaymentSuccessHtml(resp);
           setPaymentModal(false);
           return;
         }
       }
 
-      // If backend returns 'url' field (as your API does), redirect to it
+      // If backend returns 'url' field (as your API does), redirect to it IMMEDIATELY
       if (resp && (resp.url || resp.paymentUrl)) {
         const redirectTo = resp.url || resp.paymentUrl;
+        console.log("🔴 Redirecting to VNPay:", redirectTo);
+        // Use immediate redirect - do NOT wait for anything
         window.location.href = redirectTo;
         return;
       }
@@ -450,13 +456,11 @@ export default function ContractOnlinePage() {
         title={`Hợp đồng #${orderId}`}
         extra={
           <Space>
-            {!isOrderPaid(order) && (
-              <Button
-                onClick={() => contractRef.current && contractRef.current.scrollIntoView({ behavior: 'smooth' })}
-              >
-                Hợp đồng
-              </Button>
-            )}
+            <Button
+              onClick={() => contractRef.current && contractRef.current.scrollIntoView({ behavior: 'smooth' })}
+            >
+              Hợp đồng
+            </Button>
             {isOrderPaid(order) && (
               <Button
                 type="primary"

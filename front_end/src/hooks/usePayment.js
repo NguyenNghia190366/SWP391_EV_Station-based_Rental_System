@@ -15,14 +15,16 @@ export const usePayment = () => {
           description,
         };
         // Debugging info: show baseURL and payload so developer can inspect console when 404 occurs
-        console.debug("createPayment -> baseURL:", axiosInstance.defaults?.baseURL, "payload:", payload);
+        console.log("🔵 createPayment -> baseURL:", axiosInstance.defaults?.baseURL, "payload:", payload);
 
         // Use relative path without duplicating 'api' in case baseURL already contains it
         const response = await axiosInstance.post("vnpay/create-payment", payload);
-        console.debug("createPayment response:", response);
+        console.log("🟢 createPayment response:", response);
         return response.data;
       } catch (error) {
-        console.error("Error creating payment:", error);
+        console.error("❌ Error creating payment:", error);
+        console.error("Response status:", error?.response?.status);
+        console.error("Response data:", error?.response?.data);
         throw error;
       }
     },
