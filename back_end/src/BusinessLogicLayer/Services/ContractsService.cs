@@ -74,25 +74,48 @@ namespace BusinessLogicLayer.Services
             {
                 order_id = createDto.OrderId,
                 staff_id = staffId.Value
-                // signed_date sẽ được SQL tự động gán giá trị default [cite: 31]
+                // signed_date sẽ được SQL tự động gán giá trị default 
             };
 
             _context.Contracts.Add(newContract);
 
             // 6. Cập nhật trạng thái RentalOrder
             
-            // Khi ký hợp đồng, đơn hàng chuyển sang "IN_USE" [cite: 29]
+            // Khi ký hợp đồng, đơn hàng chuyển sang "IN_USE"
             order.status = "IN_USE";
 
-            // === THÊM DÒNG NÀY (LOGIC MỚI TỪ CSDL) ===
-            order.pickup_staff_id = staffId.Value; // Ghi nhận Staff đã giao xe
+            // Ghi nhận Staff đã giao xe
+            order.pickup_staff_id = staffId.Value; 
+            
+            // === LOGIC MỚI: LƯU ẢNH VÀ CCCD (TỪ YÊU CẦU CỦA CẬU) ===
+
+            // 6a. Lưu CCCD (nếu có)
+            if (!string.IsNullOrWhiteSpace(createDto.PickupStaffCccdNumber))
+            {
+                order.pickup_staff_cccd_number = createDto.PickupStaffCccdNumber; // 
+            }
+
+            // 6b. Lưu danh sách ảnh 'Before' (nếu có)
+            if (createDto.ImgVehicleBeforeUrls != null && createDto.ImgVehicleBeforeUrls.Any())
+            {
+                foreach (var imageUrl in createDto.ImgVehicleBeforeUrls)
+                {
+                    var imgBefore = new Img_Vehicle_Before
+                    {
+                        order_id = order.order_id,
+                        img_vehicle_before_URL = imageUrl // 
+                    };
+                    // Thêm vào DbContext (sử dụng DbSet từ ApplicationDbContext.cs)
+                    _context.Img_Vehicle_Befores.Add(imgBefore); 
+                }
+            }
+            // 6c. Cập nhật trạng thái xe
             if (order.vehicle != null)
             {
                 order.vehicle.is_available = false; // Khóa xe lại
             }
             else
             {
-                // Điều này không nên xảy ra nếu DB toàn vẹn, nhưng nên log lại
                 throw new InvalidDataException($"Không tìm thấy Vehicle liên kết với Order ID {order.order_id}");
             }
 
