@@ -4,6 +4,7 @@ import { message, notification } from "antd";
 
 export const useRentalOrders = (withApi = false) => {
   const instance = useAxiosInstance(withApi);
+  const axiosInstance = useAxiosInstance();
 
   // 🔹 1. Lấy danh sách đơn thuê theo renterId
   const getRentalOrdersByRenterId = useCallback(
@@ -91,7 +92,7 @@ export const useRentalOrders = (withApi = false) => {
   const handOverReturnOrder = useCallback(
     async (orderId) => {
       try {
-        const res = await instance.put(`/Completed?id=${orderId}`);
+        const res = await instance.put(`/Complete?id=${orderId}`);
         message.success("✅ Đã tiếp nhận xe thành công!");
         return res.data;
       } catch (error) {
@@ -107,7 +108,7 @@ export const useRentalOrders = (withApi = false) => {
   const rejectRentalOrder = useCallback(
     async (orderId, orderData) => {
       try {
-        const res = await instance.put(`/RentalOrders/${orderId}`, {
+        const res = await instance.put(`/api/RentalOrders/${orderId}`, {
           ...orderData,
           status: "REJECTED",
         });
@@ -126,13 +127,34 @@ export const useRentalOrders = (withApi = false) => {
   const updateRentalOrderStatus = useCallback(
     async (orderId, status, orderData) => {
       try {
-        const res = await instance.put(`/RentalOrders/${orderId}`, {
+        const res = await instance.put(`/api/RentalOrders/${orderId}`, {
           ...orderData,
           status,
         });
         return res.data;
       } catch (error) {
         console.error("❌ Lỗi cập nhật trạng thái:", error);
+        throw error;
+      }
+    },
+    [instance]
+  );
+
+  // Complete rental order (set status from IN_USE to COMPLETED)
+  const completeRentalOrder = useCallback(
+    async (orderId) => {
+      try {
+        console.debug("completeRentalOrder -> orderId:", orderId);
+        
+        // Update order status to COMPLETED using /Complete endpoint
+        const res = await instance.put(`/api/RentalOrders/Complete?id=${orderId}`);
+        console.debug("completeRentalOrder response:", res)
+
+        message.success("✅ Đã hoàn tất trả xe!");
+        return res.data;
+      } catch (error) {
+        console.error("Error completing rental order:", error);
+        message.error("Không thể hoàn tất trả xe. Vui lòng thử lại!");
         throw error;
       }
     },
@@ -146,5 +168,7 @@ export const useRentalOrders = (withApi = false) => {
     handOverOrder,
     rejectRentalOrder,
     updateRentalOrderStatus,
+    handOverReturnOrder,
+    completeRentalOrder,
   };
 };

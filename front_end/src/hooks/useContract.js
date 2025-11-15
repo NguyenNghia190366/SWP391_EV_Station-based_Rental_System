@@ -155,7 +155,7 @@ export const approveHandoverFn = (axios, orderId) =>
       const instance = useAxiosInstance(true);
 
       try {
-        await instance.put(`/Inuse?id=${orderId}`);
+        await instance.put(`/api/Inuse?id=${orderId}`);
         message.success("Đã phê duyệt yêu cầu.");
         return true;
       } catch {
@@ -208,7 +208,7 @@ export const deliverVehicleFn = (axios, staffId, orderId) => {
           }
 
           // Step 4: Update order status to IN_USE
-          await axios.put(`/RentalOrders/${orderId}`, {
+          await axios.put(`/api/RentalOrders/${orderId}`, {
             status: "IN_USE",
             handoverDeliveredAt: new Date().toISOString(),
           });
