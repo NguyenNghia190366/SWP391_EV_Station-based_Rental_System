@@ -1,5 +1,7 @@
 ﻿import React, { useState, useEffect } from "react";
-import { Form, Input, Upload, Button, Card, message, Spin } from "antd";
+import { Form, Input, Upload, Button, Card, Spin } from "antd";
+import { toast, ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 import { InboxOutlined } from "@ant-design/icons";
 import * as yup from "yup";
 import { useCccd } from "../../hooks/useCccd";
@@ -111,24 +113,24 @@ export default function VerifyPage() {
 
       // Simple validation without Yup - just check if data exists
       if (!values.idNumber || !values.idNumber.trim()) {
-        message.error("Vui lòng nhập số CCCD/CMND!");
+        toast.error("Vui lòng nhập số CCCD/CMND!");
         return;
       }
 
       if (frontFiles.length === 0) {
-        message.error("Vui lòng tải ảnh mặt trước!");
+        toast.error("Vui lòng tải ảnh mặt trước!");
         return;
       }
 
       if (backFiles.length === 0) {
-        message.error("Vui lòng tải ảnh mặt sau!");
+        toast.error("Vui lòng tải ảnh mặt sau!");
         return;
       }
 
       // Validate ID number format
       const idNum = values.idNumber.trim();
-      if (!/^\d{9}$|^\d{12}$/.test(idNum)) {
-        message.error("Số CCCD/CMND phải có 9 hoặc 12 chữ số!");
+      if (!/^\d{12}$/.test(idNum)) {
+        toast.error("Số CCCD/CMND phải đúng 12 chữ số!");
         return;
       }
 
@@ -136,12 +138,12 @@ export default function VerifyPage() {
       const backFile = backFiles[0]?.originFileObj;
 
       if (!frontFile || !backFile) {
-        message.warning("Vui lòng tải lên đủ 2 mặt CCCD!");
+        toast.warn("Vui lòng tải lên đủ 2 mặt CCCD!");
         return;
       }
 
       setLoadingCccd(true);
-      message.loading("Đang upload ảnh CCCD lên Cloudinary...");
+      toast.info("Đang upload ảnh CCCD lên Cloudinary...");
 
       const frontUrl = await uploadToCloudinary(frontFile);
       const backUrl = await uploadToCloudinary(backFile);
@@ -158,13 +160,13 @@ export default function VerifyPage() {
       const response = await uploadCccd(payload);
       console.log("✅ Backend response:", response);
       
-      message.success("✅ Upload CCCD thành công!");
+      toast.success("✅ Upload CCCD thành công!");
     } catch (err) {
       console.error("❌ Upload CCCD error:", err);
       console.error("  Error response:", err?.response?.data);
       console.error("  Error status:", err?.response?.status);
       console.error("  Error message:", err?.message);
-      message.error(`Có lỗi xảy ra: ${err?.response?.data?.message || err?.message || "Lỗi không xác định"}`);
+      toast.error(`Có lỗi xảy ra: ${err?.response?.data?.message || err?.message || "Lỗi không xác định"}`);
     } finally {
       setLoadingCccd(false);
     }
@@ -196,24 +198,24 @@ export default function VerifyPage() {
 
       // Simple validation without Yup
       if (!values.licenseNumber || !values.licenseNumber.trim()) {
-        message.error("Vui lòng nhập số bằng lái!");
+        toast.error("Vui lòng nhập số bằng lái!");
         return;
       }
 
       if (licenseFrontFiles.length === 0) {
-        message.error("Vui lòng tải ảnh mặt trước!");
+        toast.error("Vui lòng tải ảnh mặt trước!");
         return;
       }
 
       if (licenseBackFiles.length === 0) {
-        message.error("Vui lòng tải ảnh mặt sau!");
+        toast.error("Vui lòng tải ảnh mặt sau!");
         return;
       }
 
       // Validate license number format
       const licNum = values.licenseNumber.trim();
-      if (!/^\d{9,12}$/.test(licNum)) {
-        message.error("Số bằng lái phải có 9-12 chữ số!");
+      if (!/^\d{12}$/.test(licNum)) {
+        toast.error("Số bằng lái phải đúng 12 chữ số!");
         return;
       }
 
@@ -221,12 +223,12 @@ export default function VerifyPage() {
       const backFile = licenseBackFiles[0]?.originFileObj;
 
       if (!frontFile || !backFile) {
-        message.warning("Vui lòng tải lên đủ 2 mặt bằng lái xe!");
+        toast.warn("Vui lòng tải lên đủ 2 mặt bằng lái xe!");
         return;
       }
 
       setLoadingLicense(true);
-      message.loading("Đang upload ảnh bằng lái xe lên Cloudinary...");
+      toast.info("Đang upload ảnh bằng lái xe lên Cloudinary...");
 
       const frontUrl = await uploadToCloudinary(frontFile);
       const backUrl = await uploadToCloudinary(backFile);
@@ -243,13 +245,13 @@ export default function VerifyPage() {
       const response = await uploadDriverLicense(payload);
       console.log("✅ Backend response:", response);
       
-      message.success("✅ Upload bằng lái xe thành công!");
+      toast.success("✅ Upload bằng lái xe thành công!");
     } catch (err) {
       console.error("❌ Upload License error:", err);
       console.error("  Error response:", err?.response?.data);
       console.error("  Error status:", err?.response?.status);
       console.error("  Error message:", err?.message);
-      message.error(`Có lỗi xảy ra: ${err?.response?.data?.message || err?.message || "Lỗi không xác định"}`);
+      toast.error(`Có lỗi xảy ra: ${err?.response?.data?.message || err?.message || "Lỗi không xác định"}`);
     } finally {
       setLoadingLicense(false);
     }
@@ -257,6 +259,7 @@ export default function VerifyPage() {
 
   return (
     <div className="flex justify-center items-center min-h-screen bg-gray-50 p-6">
+      <ToastContainer position="top-right" autoClose={4000} />
       {/* Hai Card song song */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8 w-full max-w-6xl">
         {/* --- CCCD --- */}
@@ -270,7 +273,17 @@ export default function VerifyPage() {
               name="idNumber"
               rules={[{ required: true, message: "Vui lòng nhập số CCCD/CMND!" }]}
             >
-              <Input placeholder="Nhập số CCCD hoặc CMND" />
+              <Input
+                placeholder="Nhập số CCCD hoặc CMND"
+                onBlur={(e) => {
+                  const v = (e.target.value || "").toString().trim();
+                  console.log('CCCD onBlur fired, value=', v);
+                  if (v && !/^\d{12}$/.test(v)) {
+                    toast.dismiss();
+                    toast.error("Số CCCD/CMND phải đúng 12 chữ số!");
+                  }
+                }}
+              />
             </Form.Item>
 
             <Form.Item
@@ -334,7 +347,17 @@ export default function VerifyPage() {
               name="licenseNumber"
               rules={[{ required: true, message: "Vui lòng nhập số bằng lái!" }]}
             >
-              <Input placeholder="Nhập số bằng lái xe" />
+              <Input
+                placeholder="Nhập số bằng lái xe"
+                onBlur={(e) => {
+                  const v = (e.target.value || "").toString().trim();
+                  console.log('License onBlur fired, value=', v);
+                  if (v && !/^\d{12}$/.test(v)) {
+                    toast.dismiss();
+                    toast.error("Số bằng lái phải đúng 12 chữ số!");
+                  }
+                }}
+              />
             </Form.Item>
 
             <Form.Item
