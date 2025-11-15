@@ -29,6 +29,7 @@ import StaffConfirmHandover from "./pages/staff/handover/StaffConfirmHandover.js
 import StaffReturnRequestPage from "./pages/staff/return/StaffReturnRequestPage.jsx";
 import StaffReturnCheckPage from "./pages/staff/return/StaffReturnCheckPage.jsx";
 import StaffReturnSummaryPage from "./pages/staff/return/StaffReturnSummaryPage.jsx";
+import ReturnCashSuccessful from "./pages/staff/return/ReturnCashSuccessful.jsx";
 // Common
 import { roles } from "./Constant/Role";  
 import { RequireAuth } from "./Router/RequireAuth.jsx";
@@ -161,6 +162,14 @@ function App() {
           element={
             <RequireAuth allowRole={[roles.STAFF]}>
               <StaffReturnSummaryPage />
+            </RequireAuth>
+          }
+        />
+        <Route
+          path="/staff/return-refund-success/:orderId"
+          element={
+            <RequireAuth allowRole={[roles.STAFF]}>
+              <ReturnCashSuccessful />
             </RequireAuth>
           }
         />

@@ -29,25 +29,10 @@ export const usePayment = () => {
     [axiosInstance]
   );
 
-  const handlePaymentReturn = useCallback(
-    async (params = {}) => {
-      try {
-        // params: object of query params returned from VNPay (e.g., vnp_TxnRef, vnp_ResponseCode)
-        console.debug("handlePaymentReturn -> baseURL:", axiosInstance.defaults?.baseURL, "params:", params);
-        const response = await axiosInstance.get("vnpay/vnpay_return", { params });
-        return response.data;
-      } catch (error) {
-        console.error("Error handling payment return:", error);
-        throw error;
-      }
-    },
-    [axiosInstance]
-  );
-
   const createRefund = useCallback(
-    async (orderId, amount, reason = "Customer request") => {
+    async (orderId, amount, orderType = "rental", fullName = "Refund", description = "Refund deposit") => {
       try {
-        const payload = { orderId, amount: Math.round(amount), reason };
+        const payload = { orderId, amount: Math.round(amount), orderType, fullName, description };
         console.debug("createRefund -> baseURL:", axiosInstance.defaults?.baseURL, "payload:", payload);
         const response = await axiosInstance.post("vnpay/create-refund", payload);
         console.debug("createRefund response:", response);
@@ -81,7 +66,6 @@ export const usePayment = () => {
 
   return {
     createPayment,
-    handlePaymentReturn,
     createRefund,
     updateOrderStatusToInUse,
   };
