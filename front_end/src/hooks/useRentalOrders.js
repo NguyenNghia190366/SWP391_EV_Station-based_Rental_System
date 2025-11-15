@@ -92,7 +92,7 @@ export const useRentalOrders = (withApi = false) => {
   const handOverReturnOrder = useCallback(
     async (orderId) => {
       try {
-        const res = await instance.put(`/Completed?id=${orderId}`);
+        const res = await instance.put(`/Complete?id=${orderId}`);
         message.success("✅ Đã tiếp nhận xe thành công!");
         return res.data;
       } catch (error) {
@@ -108,7 +108,7 @@ export const useRentalOrders = (withApi = false) => {
   const rejectRentalOrder = useCallback(
     async (orderId, orderData) => {
       try {
-        const res = await instance.put(`/RentalOrders/${orderId}`, {
+        const res = await instance.put(`/api/RentalOrders/${orderId}`, {
           ...orderData,
           status: "REJECTED",
         });
@@ -127,7 +127,7 @@ export const useRentalOrders = (withApi = false) => {
   const updateRentalOrderStatus = useCallback(
     async (orderId, status, orderData) => {
       try {
-        const res = await instance.put(`/RentalOrders/${orderId}`, {
+        const res = await instance.put(`/api/RentalOrders/${orderId}`, {
           ...orderData,
           status,
         });
@@ -140,33 +140,25 @@ export const useRentalOrders = (withApi = false) => {
     [instance]
   );
 
-  // Complete rental order (set status to COMPLETED and restore vehicle availability)
+  // Complete rental order (set status from IN_USE to COMPLETED)
   const completeRentalOrder = useCallback(
-    async (orderId, vehicleId) => {
+    async (orderId) => {
       try {
-        console.debug("completeRentalOrder -> orderId:", orderId, "vehicleId:", vehicleId);
+        console.debug("completeRentalOrder -> orderId:", orderId);
         
-        // Update order status to COMPLETED
-        const orderResponse = await axiosInstance.put(`/RentalOrders/${orderId}`, {
-          status: "COMPLETED"
-        });
-        console.debug("completeRentalOrder order update response:", orderResponse);
+        // Update order status to COMPLETED using /Complete endpoint
+        const res = await instance.put(`/api/RentalOrders/Complete?id=${orderId}`);
+        console.debug("completeRentalOrder response:", res)
 
-        // Update vehicle availability - increment quantityAvailable by 1
-        if (vehicleId) {
-          const vehicleResponse = await axiosInstance.put(`/Vehicles/${vehicleId}`, {
-            quantityAvailable: { $inc: 1 }
-          });
-          console.debug("completeRentalOrder vehicle update response:", vehicleResponse);
-        }
-
-        return orderResponse.data;
+        message.success("✅ Đã hoàn tất trả xe!");
+        return res.data;
       } catch (error) {
         console.error("Error completing rental order:", error);
+        message.error("Không thể hoàn tất trả xe. Vui lòng thử lại!");
         throw error;
       }
     },
-    [axiosInstance]
+    [instance]
   );
 
   return {

@@ -166,14 +166,19 @@ export default function StaffContractOnlinePage() {
     setIsSending(true);
     try {
       // Update order status to notify renter
-      await axiosInstance.put(`/RentalOrders/${orderId}`, {
+      const updatePayload = {
         status: "CONTRACT_SENT"
-      });
+      };
+      console.log("📤 Sending contract with payload:", updatePayload);
+      const response = await axiosInstance.put(`/RentalOrders/${orderId}`, updatePayload);
+      console.log("✅ Contract sent successfully:", response.data);
       setIsContractSent(true);
       message.success("Hợp đồng đã được gửi cho khách hàng!");
     } catch (err) {
-      console.error("Error sending contract:", err);
-      message.error("Không thể gửi hợp đồng. Vui lòng thử lại.");
+      console.error("❌ Error sending contract:", err);
+      console.error("Response status:", err?.response?.status);
+      console.error("Response data:", err?.response?.data);
+      message.error(`Không thể gửi hợp đồng: ${err?.response?.data?.message || err.message}`);
     } finally {
       setIsSending(false);
     }

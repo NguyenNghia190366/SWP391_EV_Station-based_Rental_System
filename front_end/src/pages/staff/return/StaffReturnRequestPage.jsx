@@ -2,12 +2,14 @@
 import React, { useEffect, useState } from "react";
 import { Card, Table, Button, message, Space } from "antd";
 import { useAxiosInstance } from "@/hooks/useAxiosInstance";
+import { useRentalOrders } from "@/hooks/useRentalOrders";
 import dayjs from "dayjs";
 import { useNavigate } from "react-router-dom";
 
 export default function StaffReturnRequestPage() {
   const axios = useAxiosInstance();
   const navigate = useNavigate();
+  const { completeRentalOrder } = useRentalOrders();
   const [orders, setOrders] = useState([]);
 
   const load = async () => {
@@ -21,6 +23,7 @@ export default function StaffReturnRequestPage() {
         axios.get("/Stations").catch(() => ({ data: [] })),
       ]);
 
+      
       const ordersRaw = Array.isArray(ordersRes.data) ? ordersRes.data : ordersRes.data?.data || [];
       const renters = Array.isArray(rentersRes.data) ? rentersRes.data : rentersRes.data?.data || [];
       const users = Array.isArray(usersRes.data) ? usersRes.data : usersRes.data?.data || [];
@@ -74,6 +77,16 @@ export default function StaffReturnRequestPage() {
     load();
   }, []);
 
+  const handleCompleteOrder = async (orderId) => {
+    try {
+      await completeRentalOrder(orderId);
+      // Reload the list after completing
+      await load();
+    } catch (err) {
+      console.error("Error completing order:", err);
+    }
+  };
+
   const columns = [
     {
       title: "Mã đơn",
@@ -104,7 +117,12 @@ export default function StaffReturnRequestPage() {
           <Button type="default" onClick={() => navigate(`/staff/return-check/${row.orderId}`)}>
             Xử lý trả xe
           </Button>
-          <Button type="primary" onClick={() => navigate(`/staff/return-summary/${row.orderId}`)}>
+         
+          <Button 
+            type="primary" 
+            danger
+            onClick={() => handleCompleteOrder(row.orderId)}
+          >
             Trả xe
           </Button>
         </Space>

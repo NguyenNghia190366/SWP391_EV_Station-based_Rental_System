@@ -3,22 +3,22 @@ import axios from "axios";
 import { apiUrl } from "../config/env";
 
 export const useAxiosInstance = (backup = false) => {
-    // 🔐 Lấy token từ localStorage
+    //  Lấy token từ localStorage
     const token = localStorage.getItem("token");
     
-    // 📋 Tạo instance axios với interceptor ngay lập tức (không chờ useEffect)
+    // Tạo instance axios với interceptor ngay lập tức (không chờ useEffect)
     const instance = useMemo(() => {
         const newInstance = axios.create({ 
             baseURL: !backup ? apiUrl : 'https://alani-uncorroboratory-sympetaly.ngrok-free.dev',
             headers: {
-                'ngrok-skip-browser-warning': 'true', // ✅ Bypass ngrok warning page
+                'ngrok-skip-browser-warning': 'true', // Bypass ngrok warning page
                 'Content-Type': 'application/json',
-                // 🔑 Gắn token trực tiếp vào header nếu có
+                // Gắn token trực tiếp vào header nếu có
                 ...(token && { Authorization: `Bearer ${token}` })
             }
         });
         
-        // ⚡ Thiết lập interceptor request để đảm bảo token luôn được gắn
+        // Thiết lập interceptor request để đảm bảo token luôn được gắn
         newInstance.interceptors.request.use((config) => {
             const currentToken = localStorage.getItem("token");
             if (currentToken) {
@@ -30,7 +30,7 @@ export const useAxiosInstance = (backup = false) => {
         });
         
         return newInstance;
-    }, [token]); // 🔄 Tạo lại instance khi token thay đổi
+    }, [token]); // Tạo lại instance khi token thay đổi
 
     return instance;
-}
+};

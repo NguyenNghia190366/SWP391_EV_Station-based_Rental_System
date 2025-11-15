@@ -1,5 +1,7 @@
 ﻿import React, { useState, useEffect } from "react";
-import { Form, Input, Upload, Button, Card, message, Spin } from "antd";
+import { Form, Input, Upload, Button, Card, Spin } from "antd";
+import { toast, ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 import { InboxOutlined } from "@ant-design/icons";
 import * as yup from "yup";
 import { useCccd } from "../../hooks/useCccd";
@@ -15,6 +17,7 @@ export default function VerifyPage() {
   const { uploadDriverLicense } = useDriverLicense();
   const { uploadToCloudinary } = useCloudinary();
   const instance = useAxiosInstance();
+  const [form] = Form.useForm(); // Get form instance to manually set field values
   
   const [loadingCccd, setLoadingCccd] = useState(false);
   const [loadingLicense, setLoadingLicense] = useState(false);
@@ -101,42 +104,51 @@ export default function VerifyPage() {
       console.log("📝 Front files:", values.front);
       console.log("📝 Back files:", values.back);
 
+      // Check file arrays directly (Ant Design Upload returns array of objects with { uid, name, originFileObj, etc })
+      const frontFiles = Array.isArray(values.front) ? values.front.filter(f => f) : [];
+      const backFiles = Array.isArray(values.back) ? values.back.filter(f => f) : [];
+
+      console.log("🔍 Filtered front files:", frontFiles);
+      console.log("🔍 Filtered back files:", backFiles);
+
       // Simple validation without Yup - just check if data exists
       if (!values.idNumber || !values.idNumber.trim()) {
-        message.error("Vui lòng nhập số CCCD/CMND!");
+        toast.error("Vui lòng nhập số CCCD/CMND!");
         return;
       }
 
-      if (!values.front || values.front.length === 0) {
-        message.error("Vui lòng tải ảnh mặt trước!");
+      if (frontFiles.length === 0) {
+        toast.error("Vui lòng tải ảnh mặt trước!");
         return;
       }
 
-      if (!values.back || values.back.length === 0) {
-        message.error("Vui lòng tải ảnh mặt sau!");
+      if (backFiles.length === 0) {
+        toast.error("Vui lòng tải ảnh mặt sau!");
         return;
       }
 
       // Validate ID number format
       const idNum = values.idNumber.trim();
-      if (!/^\d{9}$|^\d{12}$/.test(idNum)) {
-        message.error("Số CCCD/CMND phải có 9 hoặc 12 chữ số!");
+      if (!/^\d{12}$/.test(idNum)) {
+        toast.error("Số CCCD/CMND phải đúng 12 chữ số!");
         return;
       }
 
-      const frontFile = values.front?.[0]?.originFileObj;
-      const backFile = values.back?.[0]?.originFileObj;
+      const frontFile = frontFiles[0]?.originFileObj;
+      const backFile = backFiles[0]?.originFileObj;
 
       if (!frontFile || !backFile) {
-        message.warning("Vui lòng tải lên đủ 2 mặt CCCD!");
+        toast.warn("Vui lòng tải lên đủ 2 mặt CCCD!");
         return;
       }
 
       setLoadingCccd(true);
-      message.loading("Đang upload ảnh CCCD lên Cloudinary...");
+      toast.info("Đang upload ảnh CCCD lên Cloudinary...");
 
       const frontUrl = await uploadToCloudinary(frontFile);
       const backUrl = await uploadToCloudinary(backFile);
+
+      console.log("✅ Cloudinary URLs:", { frontUrl, backUrl });
 
       const payload = {
         url_Cccd_Cmnd_front: frontUrl,
@@ -144,11 +156,17 @@ export default function VerifyPage() {
         id_Card_Number: values.idNumber,
       };
 
-      await uploadCccd(payload);
-      message.success("✅ Upload CCCD thành công!");
+      console.log("📤 Sending payload to backend:", payload);
+      const response = await uploadCccd(payload);
+      console.log("✅ Backend response:", response);
+      
+      toast.success("✅ Upload CCCD thành công!");
     } catch (err) {
-      console.error("❌ Upload CCCD error:", err?.response?.data || err);
-      message.error("Có lỗi xảy ra khi upload CCCD!");
+      console.error("❌ Upload CCCD error:", err);
+      console.error("  Error response:", err?.response?.data);
+      console.error("  Error status:", err?.response?.status);
+      console.error("  Error message:", err?.message);
+      toast.error(`Có lỗi xảy ra: ${err?.response?.data?.message || err?.message || "Lỗi không xác định"}`);
     } finally {
       setLoadingCccd(false);
     }
@@ -159,42 +177,63 @@ export default function VerifyPage() {
     try {
       console.log("📝 Form values (License):", values);
 
+      // Check file arrays directly (filter for actual files with originFileObj)
+      const licenseFrontFiles = Array.isArray(values.licenseFront) ? values.licenseFront.filter(f => f) : [];
+      const licenseBackFiles = Array.isArray(values.licenseBack) ? values.licenseBack.filter(f => f) : [];
+
+      console.log("🔍 Filtered licenseFront files:", licenseFrontFiles);
+      console.log("🔍 Filtered licenseBack files:", licenseBackFiles);
+      
+      // DEBUG: Log full file object structure
+      if (licenseFrontFiles.length > 0) {
+        console.log("🔎 licenseFrontFiles[0] full structure:", licenseFrontFiles[0]);
+        console.log("   - originFileObj:", licenseFrontFiles[0]?.originFileObj);
+        console.log("   - All keys:", Object.keys(licenseFrontFiles[0] || {}));
+      }
+      if (licenseBackFiles.length > 0) {
+        console.log("🔎 licenseBackFiles[0] full structure:", licenseBackFiles[0]);
+        console.log("   - originFileObj:", licenseBackFiles[0]?.originFileObj);
+        console.log("   - All keys:", Object.keys(licenseBackFiles[0] || {}));
+      }
+
       // Simple validation without Yup
       if (!values.licenseNumber || !values.licenseNumber.trim()) {
-        message.error("Vui lòng nhập số bằng lái!");
+        toast.error("Vui lòng nhập số bằng lái!");
         return;
       }
 
-      if (!values.licenseFront || values.licenseFront.length === 0) {
-        message.error("Vui lòng tải ảnh mặt trước!");
+      if (licenseFrontFiles.length === 0) {
+        toast.error("Vui lòng tải ảnh mặt trước!");
         return;
       }
 
-      if (!values.licenseBack || values.licenseBack.length === 0) {
-        message.error("Vui lòng tải ảnh mặt sau!");
+      if (licenseBackFiles.length === 0) {
+        toast.error("Vui lòng tải ảnh mặt sau!");
         return;
       }
 
       // Validate license number format
       const licNum = values.licenseNumber.trim();
-      if (!/^\d{9,12}$/.test(licNum)) {
-        message.error("Số bằng lái phải có 9-12 chữ số!");
+      if (!/^\d{12}$/.test(licNum)) {
+        toast.error("Số bằng lái phải đúng 12 chữ số!");
         return;
       }
 
-      const frontFile = values.licenseFront?.[0]?.originFileObj;
-      const backFile = values.licenseBack?.[0]?.originFileObj;
+      const frontFile = licenseFrontFiles[0]?.originFileObj;
+      const backFile = licenseBackFiles[0]?.originFileObj;
 
       if (!frontFile || !backFile) {
-        message.warning("Vui lòng tải lên đủ 2 mặt bằng lái xe!");
+        toast.warn("Vui lòng tải lên đủ 2 mặt bằng lái xe!");
         return;
       }
 
       setLoadingLicense(true);
-      message.loading("Đang upload ảnh bằng lái xe lên Cloudinary...");
+      toast.info("Đang upload ảnh bằng lái xe lên Cloudinary...");
 
       const frontUrl = await uploadToCloudinary(frontFile);
       const backUrl = await uploadToCloudinary(backFile);
+
+      console.log("✅ Cloudinary URLs:", { frontUrl, backUrl });
 
       const payload = {
         url_Driver_License_front: frontUrl,
@@ -202,11 +241,17 @@ export default function VerifyPage() {
         driverLicenseNumber: values.licenseNumber,
       };
 
-      await uploadDriverLicense(payload);
-      message.success("✅ Upload bằng lái xe thành công!");
+      console.log("📤 Sending payload to backend:", payload);
+      const response = await uploadDriverLicense(payload);
+      console.log("✅ Backend response:", response);
+      
+      toast.success("✅ Upload bằng lái xe thành công!");
     } catch (err) {
-      console.error("❌ Upload License error:", err?.response?.data || err);
-      message.error("Có lỗi xảy ra khi upload bằng lái xe!");
+      console.error("❌ Upload License error:", err);
+      console.error("  Error response:", err?.response?.data);
+      console.error("  Error status:", err?.response?.status);
+      console.error("  Error message:", err?.message);
+      toast.error(`Có lỗi xảy ra: ${err?.response?.data?.message || err?.message || "Lỗi không xác định"}`);
     } finally {
       setLoadingLicense(false);
     }
@@ -214,6 +259,7 @@ export default function VerifyPage() {
 
   return (
     <div className="flex justify-center items-center min-h-screen bg-gray-50 p-6">
+      <ToastContainer position="top-right" autoClose={4000} />
       {/* Hai Card song song */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8 w-full max-w-6xl">
         {/* --- CCCD --- */}
@@ -227,16 +273,30 @@ export default function VerifyPage() {
               name="idNumber"
               rules={[{ required: true, message: "Vui lòng nhập số CCCD/CMND!" }]}
             >
-              <Input placeholder="Nhập số CCCD hoặc CMND" />
+              <Input
+                placeholder="Nhập số CCCD hoặc CMND"
+                onBlur={(e) => {
+                  const v = (e.target.value || "").toString().trim();
+                  console.log('CCCD onBlur fired, value=', v);
+                  if (v && !/^\d{12}$/.test(v)) {
+                    toast.dismiss();
+                    toast.error("Số CCCD/CMND phải đúng 12 chữ số!");
+                  }
+                }}
+              />
             </Form.Item>
 
             <Form.Item
               label="Ảnh mặt trước CCCD"
               name="front"
               valuePropName="fileList"
-              getValueFromEvent={(e) => e?.fileList}
+              getValueFromEvent={(e) => Array.isArray(e) ? e : e?.fileList || []}
             >
-              <Dragger beforeUpload={() => false} multiple={false} maxCount={1}>
+              <Dragger 
+                beforeUpload={() => false} 
+                multiple={false} 
+                maxCount={1}
+              >
                 <p className="ant-upload-drag-icon">
                   <InboxOutlined />
                 </p>
@@ -248,9 +308,13 @@ export default function VerifyPage() {
               label="Ảnh mặt sau CCCD"
               name="back"
               valuePropName="fileList"
-              getValueFromEvent={(e) => e?.fileList}
+              getValueFromEvent={(e) => Array.isArray(e) ? e : e?.fileList || []}
             >
-              <Dragger beforeUpload={() => false} multiple={false} maxCount={1}>
+              <Dragger 
+                beforeUpload={() => false} 
+                multiple={false} 
+                maxCount={1}
+              >
                 <p className="ant-upload-drag-icon">
                   <InboxOutlined />
                 </p>
@@ -283,16 +347,30 @@ export default function VerifyPage() {
               name="licenseNumber"
               rules={[{ required: true, message: "Vui lòng nhập số bằng lái!" }]}
             >
-              <Input placeholder="Nhập số bằng lái xe" />
+              <Input
+                placeholder="Nhập số bằng lái xe"
+                onBlur={(e) => {
+                  const v = (e.target.value || "").toString().trim();
+                  console.log('License onBlur fired, value=', v);
+                  if (v && !/^\d{12}$/.test(v)) {
+                    toast.dismiss();
+                    toast.error("Số bằng lái phải đúng 12 chữ số!");
+                  }
+                }}
+              />
             </Form.Item>
 
             <Form.Item
               label="Ảnh mặt trước bằng lái"
               name="licenseFront"
               valuePropName="fileList"
-              getValueFromEvent={(e) => e?.fileList}
+              getValueFromEvent={(e) => Array.isArray(e) ? e : e?.fileList || []}
             >
-              <Dragger beforeUpload={() => false} multiple={false} maxCount={1}>
+              <Dragger 
+                beforeUpload={() => false} 
+                multiple={false} 
+                maxCount={1}
+              >
                 <p className="ant-upload-drag-icon">
                   <InboxOutlined />
                 </p>
@@ -304,9 +382,13 @@ export default function VerifyPage() {
               label="Ảnh mặt sau bằng lái"
               name="licenseBack"
               valuePropName="fileList"
-              getValueFromEvent={(e) => e?.fileList}
+              getValueFromEvent={(e) => Array.isArray(e) ? e : e?.fileList || []}
             >
-              <Dragger beforeUpload={() => false} multiple={false} maxCount={1}>
+              <Dragger 
+                beforeUpload={() => false} 
+                multiple={false} 
+                maxCount={1}
+              >
                 <p className="ant-upload-drag-icon">
                   <InboxOutlined />
                 </p>

@@ -178,7 +178,7 @@ export default function BookingTable({ bookings = [], loading, onRefresh }) {
               </Popconfirm>
             </>
           )}
-          {record.status === "APPROVED" && (
+          {(record.status === "BOOKED" || record.status === "APPROVED") && (
             <Popconfirm
               title="Chọn loại hợp đồng"
               description={
