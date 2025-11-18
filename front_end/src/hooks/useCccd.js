@@ -6,11 +6,11 @@ export const useCccd = () => {
   const instance = useAxiosInstance();
   const { getRenterId } = useRenters();
 
-  // 🔹 1. Upload CCCD (URLs từ Cloudinary)
+  // 🔹 1. Upload ID card (URLs from Cloudinary)
   const uploadCccd = useCallback(
     async (payload) => {
       try {
-        // Lấy renterId từ database
+        // Get renterId from database
         const renter_Id = await getRenterId();
 
         console.log("📤 Uploading CCCD with renter_Id:", renter_Id, "payload:", payload);
@@ -117,7 +117,7 @@ export const useCccd = () => {
     [instance, getRenterId]
   );
 
-  // 🔹 2. Lấy CCCD theo ID
+  // 🔹 2. Get CCCD by ID
   const getCccdById = useCallback(
     async (id) => {
       try {
@@ -131,7 +131,7 @@ export const useCccd = () => {
     [instance]
   );
 
-  // 🔹 3. Lấy toàn bộ CCCD (cho Admin dashboard)
+  // 🔹 3. Fetch all CCCDs (for Admin dashboard)
   const getAllCccds = useCallback(async () => {
     try {
       const res = await instance.get("/Cccds");

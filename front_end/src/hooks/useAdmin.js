@@ -2,12 +2,12 @@ import { useState, useCallback } from "react";
 import { useAxiosInstance } from "./useAxiosInstance";
 
 export const useAdmin = () => {
-  const api = useAxiosInstance(); // Dùng axios instance có baseURL sẵn
+  const api = useAxiosInstance(); // Use axios instance with baseURL configured
   const [frontLicenseUrl, setFrontLicenseUrl] = useState("");
   const [backLicenseUrl, setBackLicenseUrl] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] =   useState(null);
-  const [isVerified, setIsVerified] = useState(false); // trạng thái hiện tại của license
+  const [isVerified, setIsVerified] = useState(false); // current verification status of the license
 
   const verifyRenter = useCallback(
     async (id) => {
@@ -18,13 +18,13 @@ export const useAdmin = () => {
         if (response.data?.isVerified !== undefined) {
           setIsVerified(response.data.isVerified);
         } else {
-          // Nếu API không trả về gì, ta tự set true
+          // If API does not return isVerified, set to true by default
           setIsVerified(true);
         }
         return response.data;
       } catch (err) {
-        console.error("Lỗi khi lấy driver license:", err);
-        setError("Không thể tải hình ảnh.");
+        console.error("Error fetching driver license:", err);
+        setError("Cannot load images.");
       } finally {
         setLoading(false);
       }

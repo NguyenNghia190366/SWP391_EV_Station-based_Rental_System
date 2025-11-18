@@ -92,23 +92,23 @@ export default function ContractPage() {
         // Step 4: Compose vehicle name
         const vehicleName = vehicleModel?.brandName && vehicle?.model
           ? `${vehicleModel.brandName} ${vehicle.model}`.trim()
-          : vehicle?.vehicleName || "(Không có)";
+          : vehicle?.vehicleName || "(N/A)";
 
         // Step 5: Merge all data
         const mergedOrder = {
           ...orderData,
           // Renter info
-          renterName: userInfo?.fullName || renter?.fullName || "(Không có)",
-          renterPhone: userInfo?.phoneNumber || renter?.phoneNumber || "(Không có)",
-          renterEmail: userInfo?.email || renter?.email || "(Không có)",
-          renterIdNumber: cccdInfo?.id_Card_Number || renter?.cccd || "(Không có)",
+          renterName: userInfo?.fullName || renter?.fullName || "(N/A)",
+          renterPhone: userInfo?.phoneNumber || renter?.phoneNumber || "(N/A)",
+          renterEmail: userInfo?.email || renter?.email || "(N/A)",
+          renterIdNumber: cccdInfo?.id_Card_Number || renter?.cccd || "(N/A)",
           // Vehicle info
           vehicleName,
-          vehicleLicensePlate: vehicle?.licensePlate || "(Không có)",
-          vehicleColor: vehicleModel?.vehicleColor || vehicle?.vehicleColor || "(Không có)",
+          vehicleLicensePlate: vehicle?.licensePlate || "(N/A)",
+          vehicleColor: vehicleModel?.vehicleColor || vehicle?.vehicleColor || "(N/A)",
           // Station info
-          pickupStationName: pickupStationRes?.data?.stationName || "(Không có)",
-          returnStationName: returnStationRes?.data?.stationName || "(Không có)",
+          pickupStationName: pickupStationRes?.data?.stationName || "(N/A)",
+          returnStationName: returnStationRes?.data?.stationName || "(N/A)",
         };
 
         console.log("Merged Order:", mergedOrder);
@@ -116,8 +116,8 @@ export default function ContractPage() {
         setError(null);
       } catch (err) {
         console.error("Error fetching data:", err);
-        setError("Không thể tải thông tin đơn. Vui lòng thử lại.");
-        message.error("Không thể tải thông tin đơn.");
+        setError("Cannot load order data. Please try again.");
+        message.error("Cannot load order data.");
       } finally {
         setLoading(false);
       }
@@ -128,9 +128,9 @@ export default function ContractPage() {
     }
   }, [orderId, axiosInstance]);
 
-  // Xuất DOC
+  // Export DOC
   const handleExportDoc = () => {
-    const content = contractRef.current?.innerText || `Hợp đồng thuê xe #${orderId}`;
+    const content = contractRef.current?.innerText || `Rental contract #${orderId}`;
     const blob = new Blob([content], { type: "application/msword" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
@@ -140,12 +140,12 @@ export default function ContractPage() {
     a.click();
     a.remove();
     URL.revokeObjectURL(url);
-    message.success("Đã tải hợp đồng (DOC)");
+    message.success("Contract downloaded (DOC)");
   };
 
-  // Xuất TXT
+  // Export TXT
   const handleExportTxt = () => {
-    const content = contractRef.current?.innerText || `Hợp đồng thuê xe #${orderId}`;
+    const content = contractRef.current?.innerText || `Rental contract #${orderId}`;
     const blob = new Blob([content], { type: "text/plain;charset=utf-8" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
@@ -155,18 +155,18 @@ export default function ContractPage() {
     a.click();
     a.remove();
     URL.revokeObjectURL(url);
-    message.success("Đã tải hợp đồng (TXT)");
+    message.success("Contract downloaded (TXT)");
   };
 
-  // In hợp đồng
+  // Print contract
   const handlePrint = () => {
     if (!contractRef.current) return window.print();
     const printWindow = window.open("", "_blank", "width=800,height=600");
-    if (!printWindow) return message.error("Không thể mở cửa sổ in. Vui lòng cho phép popup.");
+    if (!printWindow) return message.error("Cannot open print window. Please allow popups.");
     printWindow.document.write(`
       <html>
         <head>
-          <title>Hợp đồng #${orderId}</title>
+          <title>Contract #${orderId}</title>
           <style>
             body { font-family: Inter, Arial, Helvetica, sans-serif; padding: 20px; }
             .title { font-size: 20px; font-weight: 700; margin-bottom: 12px; }
@@ -181,69 +181,69 @@ export default function ContractPage() {
 
   const renderContract = () => {
     if (error) return <div style={{ color: "red", padding: 20 }}>{error}</div>;
-    if (!order) return <div style={{ padding: 20 }}>Không có dữ liệu hợp đồng.</div>;
+    if (!order) return <div style={{ padding: 20 }}>No contract data available.</div>;
 
     const o = order;
     return (
       <div ref={contractRef} style={{ padding: 20, fontFamily: "Arial, sans-serif" }}>
         <div style={{ textAlign: "center", marginBottom: 30 }}>
-          <h2>HỢP ĐỒNG THUÊ XE</h2>
-          <p>Mã đơn: #{orderId}</p>
+          <h2>RENTAL CONTRACT</h2>
+          <p>Order ID: #{orderId}</p>
         </div>
 
         <div style={{ marginBottom: 20 }}>
-          <p><b>Khách hàng:</b> {o.renterName}</p>
-          <p><b>Số điện thoại:</b> {o.renterPhone}</p>
+          <p><b>Customer:</b> {o.renterName}</p>
+          <p><b>Phone:</b> {o.renterPhone}</p>
           <p><b>Email:</b> {o.renterEmail}</p>
-          <p><b>CMND/CCCD:</b> {o.renterIdNumber}</p>
+          <p><b>ID Number:</b> {o.renterIdNumber}</p>
         </div>
 
         <div style={{ marginBottom: 20 }}>
-          <p><b>Xe:</b> {o.vehicleName}</p>
-          <p><b>Biển số xe:</b> {o.vehicleLicensePlate}</p>
-          <p><b>Màu xe:</b> {o.vehicleColor}</p>
+          <p><b>Vehicle:</b> {o.vehicleName}</p>
+          <p><b>License plate:</b> {o.vehicleLicensePlate}</p>
+          <p><b>Color:</b> {o.vehicleColor}</p>
         </div>
 
         <div style={{ marginBottom: 20 }}>
-          <p><b>Thời gian thuê:</b></p>
+          <p><b>Rental period:</b></p>
           <p style={{ marginLeft: 20 }}>
-            Từ: {o.startTime ? dayjs(o.startTime).format("DD/MM/YYYY HH:mm") : "(Không có)"}
+            From: {o.startTime ? dayjs(o.startTime).format("DD/MM/YYYY HH:mm") : "(N/A)"}
           </p>
           <p style={{ marginLeft: 20 }}>
-            Đến: {o.endTime ? dayjs(o.endTime).format("DD/MM/YYYY HH:mm") : "(Không có)"}
+            To: {o.endTime ? dayjs(o.endTime).format("DD/MM/YYYY HH:mm") : "(N/A)"}
           </p>
         </div>
 
         <div style={{ marginBottom: 20 }}>
-          <p><b>Trạm nhận:</b> {o.pickupStationName}</p>
-          <p><b>Trạm trả:</b> {o.returnStationName}</p>
-          <p><b>Ngày tạo đơn:</b> {o.createdAt ? dayjs(o.createdAt).format("DD/MM/YYYY HH:mm") : "(Không có)"}</p>
-          <p><b>Trạng thái:</b> {o.status === "APPROVED" ? "Đã duyệt" : o.status || "(Không có)"}</p>
+          <p><b>Pick-up station:</b> {o.pickupStationName}</p>
+          <p><b>Return station:</b> {o.returnStationName}</p>
+          <p><b>Created At:</b> {o.createdAt ? dayjs(o.createdAt).format("DD/MM/YYYY HH:mm") : "(N/A)"}</p>
+          <p><b>Status:</b> {o.status === "APPROVED" ? "Approved" : o.status || "(N/A)"}</p>
         </div>
 
         <div style={{ marginTop: 20, borderTop: "1px solid #ccc", paddingTop: 20 }}>
-          <p><b>Điều khoản cơ bản:</b></p>
+          <p><b>Basic terms:</b></p>
           <ol style={{ marginLeft: 20 }}>
-            <li>Bên thuê cam kết nhận xe đúng thời gian và địa điểm quy định.</li>
-            <li>Phí thuê và các điều khoản thanh toán theo hợp đồng riêng.</li>
-            <li>Bên thuê chịu trách nhiệm về mọi hư hỏng và tai nạn trong thời gian sử dụng.</li>
-            <li>Mọi sửa đổi phải được hai bên xác nhận bằng văn bản.</li>
-            <li>Phải trả xe đúng thời gian, nếu trễ sẽ chịu phí phạt.</li>
+              <li>The renter agrees to pick up the vehicle at the specified time and location.</li>
+              <li>Rental fees and payment terms are according to a separate contract.</li>
+              <li>The renter is responsible for any damages or accidents during the rental period.</li>
+            <li>Any modifications must be confirmed in writing by both parties.</li>
+            <li>The vehicle must be returned on time; late returns will incur penalties.</li>
           </ol>
         </div>
 
         <div style={{ marginTop: 40 }}>
-          <p><em>Bên cho thuê và bên thuê đồng ý với các điều khoản trên:</em></p>
+          <p><em>The owner and the renter agree to the terms above:</em></p>
           <table style={{ width: "100%" }}>
             <tbody>
               <tr>
                 <td style={{ width: "50%", paddingRight: 20 }}>
-                  <p>Bên cho thuê:</p>
-                  <p style={{ marginTop: 50, borderTop: "1px solid black" }}>Ký tên</p>
+                  <p>Owner:</p>
+                  <p style={{ marginTop: 50, borderTop: "1px solid black" }}>Signature</p>
                 </td>
                 <td style={{ width: "50%", paddingLeft: 20 }}>
-                  <p>Bên thuê:</p>
-                  <p style={{ marginTop: 50, borderTop: "1px solid black" }}>Ký tên</p>
+                  <p>Renter:</p>
+                  <p style={{ marginTop: 50, borderTop: "1px solid black" }}>Signature</p>
                 </td>
               </tr>
             </tbody>
@@ -255,18 +255,18 @@ export default function ContractPage() {
 
   return (
     <Card
-      title={`Hợp đồng #${orderId}`}
+      title={`Contract #${orderId}`}
       extra={
-        <Space>
-          <Button icon={<DownloadOutlined />} onClick={handleExportDoc} disabled={loading}>Tải DOC</Button>
-          <Button onClick={handleExportTxt} disabled={loading}>Tải TXT</Button>
-          <Button icon={<PrinterOutlined />} type="primary" onClick={handlePrint} disabled={loading}>In / Xuất</Button>
+          <Space>
+          <Button icon={<DownloadOutlined />} onClick={handleExportDoc} disabled={loading}>Download DOC</Button>
+          <Button onClick={handleExportTxt} disabled={loading}>Download TXT</Button>
+          <Button icon={<PrinterOutlined />} type="primary" onClick={handlePrint} disabled={loading}>Print / Export</Button>
         </Space>
       }
     >
       {loading ? (
         <div style={{ textAlign: "center", padding: 40 }}>
-          <Spin tip="Đang tải thông tin đơn..." />
+          <Spin tip="Loading order details..." />
         </div>
       ) : (
         renderContract()

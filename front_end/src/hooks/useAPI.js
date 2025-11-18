@@ -1,10 +1,10 @@
 import { useState, useCallback } from 'react';
 
 //  Base URLs
-// 🌐 BE của team (uncomment khi team deploy)
+// 🌐 Team BE (uncomment when deploying)
 export const BASE_URL = "https://alani-uncorroboratory-sympetaly.ngrok-free.dev/api";
 
-// 🏠 Local BE (đang sử dụng)
+// 🏠 Local BE (in use)
 // const BASE_URL = "http://localhost:5189/api";
 
 //  Common headers
@@ -68,7 +68,7 @@ export const useUserAPI = () => {
           verifiedAt: new Date().toISOString(),
         }),
       });
-      if (!res.ok) throw new Error("Xác minh người dùng thất bại!");
+      if (!res.ok) throw new Error("User verification failed!");
       return res.json();
     });
   }, [callAPI]);
@@ -84,7 +84,7 @@ export const useUserAPI = () => {
           rejectedReason: reason,
         }),
       });
-      if (!res.ok) throw new Error("Từ chối người dùng thất bại!");
+      if (!res.ok) throw new Error("User rejection failed!");
       return res.json();
     });
   }, [callAPI]);
@@ -112,37 +112,37 @@ export const useUserAPI = () => {
         body: JSON.stringify(credentials),
       });
 
-      // Xử lý lỗi HTTP status
+      // Handle HTTP status errors
       if (!res.ok) {
-        // Xử lý lỗi 401 Unauthorized (sai mật khẩu)
+        // Handle 401 Unauthorized (wrong password)
         if (res.status === 401) {
-          throw new Error("Email hoặc mật khẩu không chính xác!");
+          throw new Error("Incorrect email or password!");
         }
         
-        // Xử lý lỗi 404 Not Found (email không tồn tại)
+        // Handle 404 Not Found (email does not exist)
         if (res.status === 404) {
-          throw new Error("Email không tồn tại trong hệ thống!");
+          throw new Error("Email does not exist in the system!");
         }
 
-        // Thử lấy error message từ response
+        // Try to extract error message from response
         try {
           const errorData = await res.json();
-          throw new Error(errorData.message || errorData.error || `Lỗi ${res.status}: Đăng nhập thất bại`);
+          throw new Error(errorData.message || errorData.error || `Error ${res.status}: Login failed`);
         } catch (jsonError) {
-          // Nếu không parse được JSON, throw error với status code
-          throw new Error(`Lỗi ${res.status}: Đăng nhập thất bại`);
+          // If JSON can't be parsed, throw an error with the status code
+          throw new Error(`Error ${res.status}: Login failed`);
         }
       }
 
-      // Parse response thành công
+      // Parse response successfully
       try {
         const data = await res.json();
         console.log("✅ Login successful:", data);
-        if (!data) throw new Error("Không nhận được dữ liệu từ server");
+        if (!data) throw new Error("No data received from server");
         return data;
       } catch (parseError) {
         console.error("❌ Parse error:", parseError);
-        throw new Error("Lỗi xử lý dữ liệu đăng nhập");
+        throw new Error("Error processing login data");
       }
     });
   }, [callAPI]);
@@ -154,7 +154,7 @@ export const useUserAPI = () => {
         headers: JSON_HEADERS,
         body: JSON.stringify(user),
       });
-      if (!res.ok) throw new Error("Cập nhật người dùng thất bại!");
+      if (!res.ok) throw new Error("Failed to update user!");
       return res.json();
     });
   }, [callAPI]);
@@ -179,7 +179,7 @@ export const useLicenseAPI = () => {
   const getAll = useCallback(async () => {
     return callAPI(async () => {
       const res = await fetch(`${BASE_URL}/licenses`, { headers: JSON_HEADERS });
-      if (!res.ok) throw new Error("Không thể tải danh sách license");
+      if (!res.ok) throw new Error("Cannot load license list");
       return res.json();
     });
   }, [callAPI]);
@@ -189,7 +189,7 @@ export const useLicenseAPI = () => {
       const res = await fetch(`${BASE_URL}/licenses?renter_id=${renterId}`, {
         headers: JSON_HEADERS,
       });
-      if (!res.ok) throw new Error("Không thể tải giấy phép người dùng");
+      if (!res.ok) throw new Error("Cannot load user license");
       const data = await res.json();
       return data[0];
     });
@@ -205,7 +205,7 @@ export const useLicenseAPI = () => {
         body: formData,
       });
 
-      if (!res.ok) throw new Error("Upload ảnh thất bại");
+      if (!res.ok) throw new Error("Image upload failed");
       const data = await res.json();
       return data.filePath;
     });
@@ -218,7 +218,7 @@ export const useLicenseAPI = () => {
         headers: JSON_HEADERS,
         body: JSON.stringify(payload),
       });
-      if (!res.ok) throw new Error("Gửi xác minh thất bại!");
+      if (!res.ok) throw new Error("Verification submission failed!");
       return res.json();
     });
   }, [callAPI]);
@@ -234,7 +234,7 @@ export const useLicenseAPI = () => {
           rejected_reason: reason,
         }),
       });
-      if (!res.ok) throw new Error("Cập nhật trạng thái thất bại!");
+      if (!res.ok) throw new Error("Failed to update status!");
       return res.json();
     });
   }, [callAPI]);
@@ -257,7 +257,7 @@ export const useCCCDAPI = () => {
   const getAll = useCallback(async () => {
     return callAPI(async () => {
       const res = await fetch(`${BASE_URL}/Cccd_Cmnd`, { headers: JSON_HEADERS });
-      if (!res.ok) throw new Error("Không thể tải danh sách CCCD");
+      if (!res.ok) throw new Error("Cannot load CCCD list");
       return res.json();
     });
   }, [callAPI]);
@@ -269,7 +269,7 @@ export const useCCCDAPI = () => {
         headers: JSON_HEADERS,
         body: JSON.stringify(payload),
       });
-      if (!res.ok) throw new Error("Gửi CCCD thất bại!");
+      if (!res.ok) throw new Error("Failed to submit CCCD!");
       return res.json();
     });
   }, [callAPI]);
@@ -285,7 +285,7 @@ export const useCCCDAPI = () => {
           rejected_reason: reason,
         }),
       });
-      if (!res.ok) throw new Error("Cập nhật trạng thái CCCD thất bại!");
+      if (!res.ok) throw new Error("Failed to update CCCD status!");
       return res.json();
     });
   }, [callAPI]);

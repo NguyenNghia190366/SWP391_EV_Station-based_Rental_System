@@ -38,7 +38,7 @@ L.Icon.Default.mergeOptions({
 
 const { TextArea } = Input;
 
-// 📍 Component để chọn vị trí trên bản đồ
+// 📍 Map location selector component
 const LocationMarker = ({ position, setPosition, form }) => {
   useMapEvents({
     click(e) {
@@ -49,7 +49,7 @@ const LocationMarker = ({ position, setPosition, form }) => {
         longitude: e.latlng.lng,
       });
       message.success(
-        `📍 Đã chọn vị trí: ${e.latlng.lat.toFixed(6)}, ${e.latlng.lng.toFixed(6)}`
+        `📍 Location selected: ${e.latlng.lat.toFixed(6)}, ${e.latlng.lng.toFixed(6)}`
       );
     },
   });
@@ -64,10 +64,10 @@ const StationRegistrationPage = () => {
   const navigate = useNavigate();
   const { create } = useStations();
 
-  // 🎯 Lấy vị trí hiện tại từ GPS
+  // 🎯 Get current position via GPS
   const handleGetCurrentLocation = () => {
     if (navigator.geolocation) {
-      message.loading("🌍 Đang lấy vị trí hiện tại...", 0.5);
+      message.loading("🌍 Getting current location...", 0.5);
       navigator.geolocation.getCurrentPosition(
         (position) => {
           const lat = position.coords.latitude;
@@ -75,52 +75,52 @@ const StationRegistrationPage = () => {
           const newPos = [lat, lng];
           setMapPosition(newPos);
           form.setFieldsValue({ latitude: lat, longitude: lng });
-          message.success(`✅ Đã lấy vị trí: ${lat.toFixed(6)}, ${lng.toFixed(6)}`);
+          message.success(`✅ Location obtained: ${lat.toFixed(6)}, ${lng.toFixed(6)}`);
         },
         (error) => {
           console.error("Geolocation error:", error);
-          message.error("❌ Không thể lấy vị trí. Hãy kiểm tra quyền GPS.");
+          message.error("❌ Cannot get location. Check GPS permissions.");
         }
       );
     } else {
-      message.error("❌ Trình duyệt không hỗ trợ Geolocation.");
+      message.error("❌ Browser does not support Geolocation.");
     }
   };
 
-  // 🧭 Xử lý Submit form
+  // 🧭 Handle form submit
   const handleSubmit = async (values) => {
     try {
       // Yup validation schema for station registration
       const stationSchema = yup.object({
         station_name: yup
           .string()
-          .required("Vui lòng nhập tên trạm!")
-          .min(5, "Tên trạm phải có ít nhất 5 ký tự!"),
+          .required("Please enter station name!")
+          .min(5, "Station name must be at least 5 characters!"),
         address: yup
           .string()
-          .required("Vui lòng nhập địa chỉ!")
-          .min(10, "Địa chỉ phải có ít nhất 10 ký tự!"),
+          .required("Please enter address!")
+          .min(10, "Address must be at least 10 characters!"),
         latitude: yup
           .number()
-          .required("Vui lòng chọn vị trí!")
-          .typeError("Vĩ độ phải là số!")
-          .min(-90, "Vĩ độ phải từ -90 đến 90!")
-          .max(90, "Vĩ độ phải từ -90 đến 90!"),
+          .required("Please select location!")
+          .typeError("Latitude must be a number!")
+          .min(-90, "Latitude must be between -90 and 90!")
+          .max(90, "Latitude must be between -90 and 90!"),
         longitude: yup
           .number()
-          .required("Vui lòng chọn vị trí!")
-          .typeError("Kinh độ phải là số!")
-          .min(-180, "Kinh độ phải từ -180 đến 180!")
-          .max(180, "Kinh độ phải từ -180 đến 180!"),
+          .required("Please select location!")
+          .typeError("Longitude must be a number!")
+          .min(-180, "Longitude must be between -180 and 180!")
+          .max(180, "Longitude must be between -180 and 180!"),
         capacity: yup
           .number()
-          .required("Vui lòng nhập sức chứa!")
-          .typeError("Sức chứa phải là số!")
-          .min(1, "Sức chứa phải lớn hơn 0!")
-          .max(1000, "Sức chứa không được vượt quá 1000!"),
+          .required("Please enter capacity!")
+          .typeError("Capacity must be a number!")
+          .min(1, "Capacity must be greater than 0!")
+          .max(1000, "Capacity must not exceed 1000!"),
         description: yup
           .string()
-          .min(0, "Mô tả không hợp lệ"),
+          .min(0, "Invalid description"),
       });
 
       // Validate before submission
@@ -157,40 +157,40 @@ const StationRegistrationPage = () => {
       console.log("✅ Station created:", result);
 
       Modal.success({
-        title: "🎉 Đăng ký trạm thành công!",
+        title: "🎉 Station registered successfully!",
         content: (
           <div>
             <p>
-              Trạm <strong>{values.station_name}</strong> đã được thêm vào hệ thống.
+              Station <strong>{values.station_name}</strong> has been added to the system.
             </p>
             <p className="text-gray-600 text-sm">
-              Dữ liệu đã được gửi tới backend để xử lý.
+              Data has been submitted to the backend for processing.
             </p>
           </div>
         ),
-        okText: "Quay về trang chủ",
+        okText: "Back to home",
         onOk: () => navigate("/"),
       });
 
-      message.success(`✅ Đã tạo trạm: ${values.station_name}`);
+      message.success(`✅ Station created: ${values.station_name}`);
       form.resetFields();
       setMapPosition([10.7756, 106.7004]);
     } catch (error) {
       console.error("❌ Error creating station:", error);
-      let errorMessage = "Không thể tạo trạm. Vui lòng thử lại.";
+      let errorMessage = "Cannot create station. Please try again.";
 
       if (error.message?.includes("Network")) {
-        errorMessage = "Lỗi kết nối mạng. Hãy kiểm tra Internet.";
+        errorMessage = "Network error. Please check your Internet connection.";
       } else if (error.message?.includes("duplicate")) {
-        errorMessage = "Trạm này đã tồn tại trong hệ thống.";
+        errorMessage = "This station already exists in the system.";
       } else if (error.message) {
         errorMessage = error.message;
       }
 
       Modal.error({
-        title: "Đăng ký thất bại",
+        title: "Registration failed",
         content: errorMessage,
-        okText: "Thử lại",
+        okText: "Retry",
       });
 
       message.error(errorMessage);
@@ -205,10 +205,10 @@ const StationRegistrationPage = () => {
         {/* Header */}
         <div className="text-center mb-8">
           <h1 className="text-4xl font-bold bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent mb-2">
-            🏢 Đăng Ký Trạm Sạc Mới
+            🏢 Register New Charging Station
           </h1>
           <p className="text-gray-600 text-lg">
-            Vui lòng điền đầy đủ thông tin trạm sạc
+            Please fill in the charging station information
           </p>
         </div>
 
@@ -221,42 +221,42 @@ const StationRegistrationPage = () => {
             initialValues={{ capacity: 10 }}
             className="space-y-4"
           >
-            {/* Tên trạm */}
+            {/* Station name */}
             <Form.Item
               label={
                 <span className="text-base font-semibold">
-                  <EnvironmentOutlined className="mr-2 text-purple-600" /> Tên Trạm Sạc
+                  <EnvironmentOutlined className="mr-2 text-purple-600" /> Charging Station Name
                 </span>
               }
               name="station_name"
               rules={[
-                { required: true, message: "Vui lòng nhập tên trạm!" },
-                { min: 5, message: "Tên trạm phải có ít nhất 5 ký tự!" },
+                { required: true, message: "Please enter station name!" },
+                { min: 5, message: "Station name must be at least 5 characters!" },
               ]}
             >
               <Input
                 size="large"
-                placeholder="VD: Trạm Sạc Quận 1 - Nguyễn Huệ"
+                placeholder="e.g., District 1 Charging Station - Nguyen Hue"
                 className="rounded-xl"
               />
             </Form.Item>
 
-            {/* Địa chỉ */}
+            {/* Address */}
             <Form.Item
               label={
                 <span className="text-base font-semibold">
-                  <EnvironmentOutlined className="mr-2 text-blue-600" /> Địa Chỉ
+                  <EnvironmentOutlined className="mr-2 text-blue-600" /> Address
                 </span>
               }
               name="address"
               rules={[
-                { required: true, message: "Vui lòng nhập địa chỉ!" },
-                { min: 10, message: "Địa chỉ phải có ít nhất 10 ký tự!" },
+                { required: true, message: "Please enter address!" },
+                { min: 10, message: "Address must be at least 10 characters!" },
               ]}
             >
               <Input
                 size="large"
-                placeholder="VD: 123 Nguyễn Huệ, Q1, TP.HCM"
+                placeholder="e.g., 123 Nguyen Hue, District 1, Ho Chi Minh City"
                 className="rounded-xl"
               />
             </Form.Item>
@@ -266,7 +266,7 @@ const StationRegistrationPage = () => {
               label={
                 <div className="flex items-center justify-between">
                   <span className="text-base font-semibold">
-                    <AimOutlined className="mr-2 text-green-600" /> Chọn Vị Trí Trên Bản Đồ
+                    <AimOutlined className="mr-2 text-green-600" /> Select Location on Map
                   </span>
                   <Button
                     type="primary"
@@ -275,7 +275,7 @@ const StationRegistrationPage = () => {
                     size="small"
                     className="bg-gradient-to-r from-green-500 to-cyan-500"
                   >
-                    Vị trí hiện tại
+                    Current location
                   </Button>
                 </div>
               }
@@ -283,10 +283,10 @@ const StationRegistrationPage = () => {
               <Card className="border-2 border-purple-200 rounded-2xl overflow-hidden">
                 <div className="mb-3 p-3 bg-gradient-to-r from-purple-50 to-blue-50 rounded-xl">
                   <p className="text-sm text-gray-700">
-                    📍 Click vào bản đồ để chọn vị trí hoặc nhấn “Vị trí hiện tại”
+                    📍 Click on the map to choose a location or press 'Current location'
                   </p>
                   <p className="text-xs text-gray-600 mt-1">
-                    Tọa độ hiện tại:{" "}
+                    Current coordinates:{" "}
                     <strong>{mapPosition[0].toFixed(6)}</strong>,{" "}
                     <strong>{mapPosition[1].toFixed(6)}</strong>
                   </p>
@@ -310,9 +310,9 @@ const StationRegistrationPage = () => {
             {/* Latitude & Longitude */}
             <div className="grid grid-cols-2 gap-4">
               <Form.Item
-                label="Vĩ Độ (Latitude)"
+                label="Latitude"
                 name="latitude"
-                rules={[{ required: true, message: "Vui lòng chọn vị trí!" }]}
+                rules={[{ required: true, message: "Please select location!" }]}
               >
                 <InputNumber
                   size="large"
@@ -324,9 +324,9 @@ const StationRegistrationPage = () => {
               </Form.Item>
 
               <Form.Item
-                label="Kinh Độ (Longitude)"
+                label="Longitude"
                 name="longitude"
-                rules={[{ required: true, message: "Vui lòng chọn vị trí!" }]}
+                rules={[{ required: true, message: "Please select location!" }]}
               >
                 <InputNumber
                   size="large"
@@ -338,33 +338,33 @@ const StationRegistrationPage = () => {
               </Form.Item>
             </div>
 
-            {/* Giờ mở/đóng */}
+            {/* Opening/Closing time */}
             <div className="grid grid-cols-2 gap-4">
-              <Form.Item label="Giờ Mở Cửa" name="opening_time">
+              <Form.Item label="Opening Time" name="opening_time">
                 <TimePicker
                   size="large"
                   format="HH:mm"
-                  placeholder="Chọn giờ mở cửa"
+                  placeholder="Select opening time"
                   className="w-full rounded-xl"
                 />
               </Form.Item>
-              <Form.Item label="Giờ Đóng Cửa" name="closing_time">
+              <Form.Item label="Closing Time" name="closing_time">
                 <TimePicker
                   size="large"
                   format="HH:mm"
-                  placeholder="Chọn giờ đóng cửa"
+                  placeholder="Select closing time"
                   className="w-full rounded-xl"
                 />
               </Form.Item>
             </div>
 
-            {/* Sức chứa */}
+            {/* Capacity (number of vehicles) */}
             <Form.Item
-              label="🚗 Sức Chứa (Số xe)"
+              label="🚗 Capacity (Number of vehicles)"
               name="capacity"
               rules={[
-                { required: true, message: "Vui lòng nhập sức chứa!" },
-                { type: "number", min: 1, message: "Phải lớn hơn 0!" },
+                { required: true, message: "Please enter capacity!" },
+                { type: "number", min: 1, message: "Must be greater than 0!" },
               ]}
             >
               <InputNumber
@@ -376,11 +376,11 @@ const StationRegistrationPage = () => {
               />
             </Form.Item>
 
-            {/* Mô tả */}
-            <Form.Item label="📝 Mô Tả (Tùy chọn)" name="description">
+            {/* Description */}
+            <Form.Item label="📝 Description (Optional)" name="description">
               <TextArea
                 rows={4}
-                placeholder="Mô tả chi tiết về trạm sạc, tiện ích, ghi chú..."
+                placeholder="Detailed description of the charging station, amenities, notes..."
                 className="rounded-xl"
               />
             </Form.Item>
@@ -394,7 +394,7 @@ const StationRegistrationPage = () => {
                 loading={loading}
                 className="w-full h-14 text-lg font-semibold rounded-2xl bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 shadow-lg"
               >
-                {loading ? "⏳ Đang xử lý..." : "🚀 Đăng Ký Trạm Sạc"}
+                {loading ? "⏳ Processing..." : "🚀 Register Charging Station"}
               </Button>
             </Form.Item>
           </Form>

@@ -27,15 +27,15 @@ export default function StaffConfirmHandover() {
   return (
     <div style={{ padding: 24 }}>
       <Card
-        title="Xác nhận nhận xe"
-        extra={<span style={{ color: "#666", fontSize: 12 }}>Tổng: {orders.length} yêu cầu</span>}
+        title="Confirm Vehicle Handover"
+        extra={<span style={{ color: "#666", fontSize: 12 }}>Total: {orders.length} requests</span>}
       >
         {loading ? (
           <div style={{ display: "flex", justifyContent: "center", padding: 40 }}>
-            <Spin tip="Đang tải..." />
+            <Spin tip="Loading..." />
           </div>
         ) : orders.length === 0 ? (
-          <Empty description="Không có yêu cầu nhận xe nào" />
+          <Empty description="No vehicle handover requests" />
         ) : (
           <HandoverTable
             orders={orders}

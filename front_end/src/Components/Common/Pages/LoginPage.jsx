@@ -31,8 +31,8 @@ const LoginPage = () => {
     const { email, password } = values;
     // Yup validation (extra layer) - map errors to form
     const schema = yup.object({
-      email: yup.string().required('Vui lòng nhập email!').email('Email không hợp lệ!'),
-      password: yup.string().required('Vui lòng nhập mật khẩu!').min(6, 'Mật khẩu phải có ít nhất 6 ký tự!'),
+      email: yup.string().required('Please enter email!').email('Invalid email!'),
+      password: yup.string().required('Please enter password!').min(6, 'Password must be at least 6 characters!'),
     });
     try {
       await schema.validate(values, { abortEarly: false });
@@ -48,14 +48,14 @@ const LoginPage = () => {
 
     try {
       const normalizedEmail = email.trim().toLowerCase();
-      console.log("📤 Gửi request:", { email: normalizedEmail, password });
+      console.log("📤 Sending request:", { email: normalizedEmail, password });
 
       const requestBody = { email: normalizedEmail, password };
       const result = await loginUser(requestBody);
 
-      console.log("📥 Kết quả API:", result);
+      console.log("📥 API result:", result);
 
-      // ===== Đa định dạng phản hồi từ backend =====
+      // ===== Normalize backend response formats =====
       let token, user;
       if (result.token && result.user) {
         token = result.token;
@@ -72,14 +72,14 @@ const LoginPage = () => {
       } else if (result.email || result.user_id) {
         user = result;
         token = result.token || "dummy-token";
-      } else throw new Error("Format dữ liệu không đúng từ server");
+      } else throw new Error("Invalid server response format");
 
   const normalizedUser = normalizeUserData(user);
       console.log("📋 Normalized User:", normalizedUser);
 
-      if (!normalizedUser || !normalizedUser.role) throw new Error("Thiếu role user");
+      if (!normalizedUser || !normalizedUser.role) throw new Error("Missing user role");
 
-      // ===== Lưu vào localStorage =====
+      // ===== Save to localStorage =====
       if (token) localStorage.setItem("token", token);
       localStorage.setItem("currentUser", JSON.stringify(normalizedUser));
       localStorage.setItem("isLoggedIn", "true");
@@ -108,7 +108,7 @@ const LoginPage = () => {
             renterId = renter.renter_id || renter.renterId;
           }
         } catch (err) {
-          console.warn("⚠️ Lỗi khi query Renters:", err);
+          console.warn("⚠️ Error querying Renters:", err);
         }
       }
       if (renterId) {
@@ -125,10 +125,10 @@ const LoginPage = () => {
       const currentHour = new Date().getHours();
       let greeting =
         currentHour < 12
-          ? "Chào buổi sáng"
+          ? "Good morning"
           : currentHour < 18
-          ? "Chào buổi chiều"
-          : "Chào buổi tối";
+          ? "Good afternoon"
+          : "Good evening";
 
       toast.success(`${greeting}, ${normalizedUser.userName || normalizedUser.fullName}!`, {
         position: "top-right",
@@ -143,24 +143,24 @@ const LoginPage = () => {
       }, 1500);
     } catch (err) {
       console.error("❌ Login error:", err);
-      let errorMessage = "Đăng nhập thất bại. Vui lòng thử lại!";
-      let errorTitle = "Lỗi đăng nhập";
+      let errorMessage = "Login failed. Please try again!";
+      let errorTitle = "Login error";
 
-      if (err.message?.includes("Network")) {
-        errorMessage = "Không thể kết nối đến máy chủ.";
-        errorTitle = "Lỗi kết nối";
+          if (err.message?.includes("Network")) {
+            errorMessage = "Cannot connect to server.";
+            errorTitle = "Connection error";
         toast.error(errorMessage, { position: "top-right", autoClose: 3000 });
       } else if (
         err.message?.toLowerCase().includes("invalid") ||
         err.message?.toLowerCase().includes("password") ||
         err.message?.includes("401")
       ) {
-        errorMessage = "Email hoặc mật khẩu không chính xác.";
-        errorTitle = "Sai thông tin đăng nhập";
+        errorMessage = "Incorrect email or password.";
+        errorTitle = "Invalid credentials";
         toast.error(errorMessage, { position: "top-right", autoClose: 3000 });
       } else if (err.message?.toLowerCase().includes("email")) {
-        errorMessage = "Email không tồn tại trong hệ thống!";
-        errorTitle = "Email không hợp lệ";
+        errorMessage = "Email not registered in the system!";
+        errorTitle = "Invalid email";
         toast.error(errorMessage, { position: "top-right", autoClose: 3000 });
       } else if (err.message) {
         errorMessage = err.message;
@@ -194,10 +194,10 @@ const LoginPage = () => {
     } else if (result.email || result.user_id) {
       user = result;
       token = result.token || "dummy-token";
-    } else throw new Error("Format dữ liệu không đúng từ server");
+    } else throw new Error("Invalid server response format");
 
     const normalizedUser = normalizeUserData(user);
-    if (!normalizedUser || !normalizedUser.role) throw new Error("Thiếu role user");
+    if (!normalizedUser || !normalizedUser.role) throw new Error("Missing user role");
 
     if (token) localStorage.setItem("token", token);
     localStorage.setItem("currentUser", JSON.stringify(normalizedUser));
@@ -218,7 +218,7 @@ const LoginPage = () => {
         );
         if (renter) renterId = renter.renter_id || renter.renterId;
       } catch (err) {
-        console.warn("⚠️ Lỗi khi query Renters:", err);
+        console.warn("⚠️ Error querying Renters:", err);
       }
     }
     if (renterId) {
@@ -232,7 +232,7 @@ const LoginPage = () => {
     }
 
     const currentHour = new Date().getHours();
-    let greeting = currentHour < 12 ? "Chào buổi sáng" : currentHour < 18 ? "Chào buổi chiều" : "Chào buổi tối";
+    let greeting = currentHour < 12 ? "Good morning" : currentHour < 18 ? "Good afternoon" : "Good evening";
     toast.success(`${greeting}, ${normalizedUser.userName || normalizedUser.fullName}!`, { position: "top-right", autoClose: 2000 });
 
     setTimeout(() => {
@@ -247,7 +247,7 @@ const LoginPage = () => {
   const handleGoogleCredential = async (idToken) => {
     try {
       setLoading(true);
-      if (!idToken) throw new Error('Không nhận được token từ Google');
+      if (!idToken) throw new Error('No token received from Google');
       const res = await api.post('/UserAccount/google-login', { idToken });
       const data = res.data || res;
       await processLoginResult(data);
@@ -258,19 +258,19 @@ const LoginPage = () => {
       const responseBody = err.response?.data;
 
       if (status === 404) {
-        toast.error('API endpoint /UserAccount/google-login không tồn tại (404). Kiểm tra backend hoặc VITE_API_BASE_URL.', { position: 'top-right', autoClose: 5000 });
+        toast.error('API endpoint /UserAccount/google-login not found (404). Check backend or VITE_API_BASE_URL.', { position: 'top-right', autoClose: 5000 });
       } else if (status === 403) {
         // Common when Google rejects origin or credentials
         const serverMsg = responseBody?.message || JSON.stringify(responseBody) || '';
         if ((serverMsg || '').toLowerCase().includes('origin') || (serverMsg || '').toLowerCase().includes('not allowed')) {
-          toast.error('Google trả lỗi 403: origin không được phép cho client id này. Thêm origin (ví dụ: http://localhost:5173) vào OAuth client trong Google Cloud Console.', { position: 'top-right', autoClose: 8000 });
+          toast.error('Google returned 403: origin not allowed for this client id. Add your origin (e.g., http://localhost:5173) to the OAuth client in Google Cloud Console.', { position: 'top-right', autoClose: 8000 });
         } else {
-          toast.error('Đăng nhập bằng Google bị từ chối (403). Kiểm tra cấu hình OAuth trên Google Cloud và đường dẫn API.', { position: 'top-right', autoClose: 6000 });
+          toast.error('Google login rejected (403). Check OAuth configuration in Google Cloud Console and API paths.', { position: 'top-right', autoClose: 6000 });
         }
       } else if (err.message && err.message.includes('Request failed with status code')) {
-        toast.error('Đăng nhập bằng Google thất bại: ' + err.message, { position: 'top-right', autoClose: 4000 });
+        toast.error('Google login failed: ' + err.message, { position: 'top-right', autoClose: 4000 });
       } else {
-        let msg = 'Đăng nhập bằng Google thất bại.';
+        let msg = 'Google login failed.';
         if (responseBody?.message) msg = responseBody.message;
         else if (err.message) msg = err.message;
         toast.error(msg, { position: 'top-right', autoClose: 3000 });
@@ -302,22 +302,22 @@ const LoginPage = () => {
             <LoginOutlined className="text-2xl text-white" />
           </div>
           <Title level={2} className="mb-2 text-2xl text-gray-800">
-            Chào mừng trở lại
+            Welcome back
           </Title>
-          <Text className="text-gray-600">Đăng nhập để tiếp tục</Text>
+          <Text className="text-gray-600">Sign in to continue</Text>
         </div>
 
         <Form form={form} layout="vertical" onFinish={handleSubmit} requiredMark={false}>
           <Form.Item
             name="email"
             rules={[
-              { required: true, message: "Vui lòng nhập email!" },
-              { type: "email", message: "Email không hợp lệ!" },
+              { required: true, message: "Please enter email!" },
+              { type: "email", message: "Invalid email!" },
             ]}
           >
             <Input
               prefix={<MailOutlined className="text-indigo-500" />}
-              placeholder="Email của bạn"
+              placeholder="Your email"
               size="large"
               disabled={loading}
               className="rounded-lg"
@@ -327,13 +327,13 @@ const LoginPage = () => {
           <Form.Item
             name="password"
             rules={[
-              { required: true, message: "Vui lòng nhập mật khẩu!" },
-              { min: 6, message: "Mật khẩu phải có ít nhất 6 ký tự!" },
+              { required: true, message: "Please enter password!" },
+              { min: 6, message: "Password must be at least 6 characters!" },
             ]}
           >
             <Input.Password
               prefix={<LockOutlined className="text-indigo-500" />}
-              placeholder="Mật khẩu"
+              placeholder="Password"
               size="large"
               disabled={loading}
               className="rounded-lg"
@@ -341,8 +341,8 @@ const LoginPage = () => {
           </Form.Item>
 
           {error && (
-            <Alert
-              message="Đăng nhập thất bại"
+              <Alert
+              message="Login failed"
               description={error}
               type="error"
               showIcon
@@ -353,13 +353,13 @@ const LoginPage = () => {
 
           <div className="flex items-center justify-between mb-4">
             <Form.Item name="remember" valuePropName="checked" noStyle>
-              <Checkbox className="text-gray-600">Ghi nhớ đăng nhập</Checkbox>
+              <Checkbox className="text-gray-600">Remember me</Checkbox>
             </Form.Item>
-            <Link
+              <Link
               to="/forgot-password"
               className="text-indigo-600 hover:text-indigo-700 transition-colors"
             >
-              Quên mật khẩu?
+              Forgot password?
             </Link>
           </div>
 
@@ -372,7 +372,7 @@ const LoginPage = () => {
               className="w-full h-12 bg-blue-600 hover:bg-blue-700 border-0 rounded text-white font-medium"
               block
             >
-              {loading ? "Đang đăng nhập..." : "Đăng nhập"}
+              {loading ? "Signing in..." : "Sign in"}
             </Button>
           </Form.Item>
 
@@ -382,9 +382,9 @@ const LoginPage = () => {
 
           <div className="text-center">
             <Text className="text-gray-600">
-              Chưa có tài khoản?{" "}
+              Don't have an account?{" "}
               <Link to="/register" className="text-blue-600 hover:text-blue-700 font-medium">
-                Đăng ký
+                Register
               </Link>
             </Text>
           </div>

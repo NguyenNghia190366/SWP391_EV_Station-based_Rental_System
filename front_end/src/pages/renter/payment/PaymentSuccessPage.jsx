@@ -15,14 +15,14 @@ export default function PaymentSuccessPage() {
     state.orderId ||
     search.get("orderId") ||
     search.get("order_id") ||
-    "(Không có)";
+    "(N/A)";
   const amount = state.amount || search.get("amount") || null;
   const fullName =
     state.fullName ||
     search.get("fullName") ||
     search.get("Fullname") ||
     search.get("fullname") ||
-    "(Khách hàng)";
+    "(Customer)";
   const description = state.description || search.get("description") || null;
   const rawHtml = state.html || search.get("html") || null;
 
@@ -40,24 +40,24 @@ export default function PaymentSuccessPage() {
       <div style={{ width: "100%", maxWidth: 900 }}>
         <Card>
           <div style={{ textAlign: "center", padding: 24 }}>
-            <h1 style={{ color: "#22c55e", fontSize: 28, marginBottom: 8 }}>Thanh toán thành công ✅</h1>
-            <p style={{ color: "#374151", marginBottom: 18 }}>Cảm ơn bạn đã thanh toán. Thông tin chi tiết phía dưới.</p>
+            <h1 style={{ color: "#22c55e", fontSize: 28, marginBottom: 8 }}>Payment successful ✅</h1>
+            <p style={{ color: "#374151", marginBottom: 18 }}>Thank you for your payment. Details are below.</p>
 
             <div style={{ textAlign: "left", maxWidth: 680, margin: "0 auto" }}>
-              {amount !== null && <p><strong>Số tiền:</strong> {formatCurrency(amount)}</p>}
-              {description && <p><strong>Mô tả:</strong> {description}</p>}
+              {amount !== null && <p><strong>Amount:</strong> {formatCurrency(amount)}</p>}
+              {description && <p><strong>Description:</strong> {description}</p>}
             </div>
 
             <div style={{ marginTop: 22 }}>
               <Button type="primary" onClick={() => navigate(`/renter/contract-online/${orderId}`)} style={{ marginRight: 12 }}>
-                Quay lại hợp đồng
+                Back to contract
               </Button>
-              <Button onClick={() => navigate('/my-bookings')}>Xem lịch sử</Button>
+              <Button onClick={() => navigate('/my-bookings')}>View history</Button>
             </div>
 
             {rawHtml && (
               <div style={{ marginTop: 24, textAlign: "left" }}>
-                <h3>Nội dung máy chủ trả về</h3>
+                <h3>Server response</h3>
                 <div style={{ border: '1px solid #e5e7eb', padding: 12, borderRadius: 6 }} dangerouslySetInnerHTML={{ __html: rawHtml }} />
               </div>
             )}

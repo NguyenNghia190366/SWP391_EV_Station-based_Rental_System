@@ -76,7 +76,7 @@ const VehiclesPage = () => {
             const modelsRes = await api.get("/VehicleModels");
             models = Array.isArray(modelsRes.data) ? modelsRes.data : modelsRes.data?.data || [];
           } catch (err) {
-            console.warn("Không tải được VehicleModels, sẽ dùng dữ liệu model từ Vehicles:", err);
+            console.warn("Cannot load VehicleModels, will use model data from Vehicles:", err);
             models = [];
           }
 
@@ -86,7 +86,7 @@ const VehiclesPage = () => {
             const ordersRes = await api.get("/RentalOrders");
             allRentalOrders = Array.isArray(ordersRes.data) ? ordersRes.data : ordersRes.data?.data || [];
           } catch (err) {
-            console.warn("Không tải được RentalOrders:", err);
+            console.warn("Cannot load RentalOrders:", err);
             allRentalOrders = [];
           }
 
@@ -140,7 +140,7 @@ const VehiclesPage = () => {
             battery: 95,
             rating: 4.8,
             available: true,
-            station: { name: "Trạm Quận 1" },
+            station: { name: "District 1 Station" },
           },
           {
             id: "2",
@@ -153,7 +153,7 @@ const VehiclesPage = () => {
             battery: 100,
             rating: 4.5,
             available: true,
-            station: { name: "Trạm Quận 3" },
+            station: { name: "District 3 Station" },
           },
         ];
         setVehicles(dummyVehicles);
@@ -256,7 +256,7 @@ const VehiclesPage = () => {
 
     const userRole = (user.role || "").toLowerCase();
     if (userRole !== "renter") {
-      alert("Chỉ khách hàng mới có thể đặt xe!");
+      alert("Only renters can book vehicles!");
       return;
     }
 
@@ -272,7 +272,7 @@ const VehiclesPage = () => {
       );
 
       if (!currentRenter) {
-        alert("Không tìm thấy thông tin người thuê. Vui lòng liên hệ admin.");
+        alert("Renter information not found. Please contact admin.");
         return;
       }
 
@@ -290,7 +290,7 @@ const VehiclesPage = () => {
       navigate(`/booking/${vehicleId}`);
     } catch (error) {
       console.error("❌ Error checking renter verification:", error);
-      alert("Có lỗi khi kiểm tra xác thực. Vui lòng thử lại.");
+      alert("There was an error checking verification. Please try again.");
     }
   };
 
@@ -301,7 +301,7 @@ const VehiclesPage = () => {
 
   // ===== VEHICLE TYPES =====
   const vehicleTypes = [
-    { value: "all", label: "Tất cả" },
+    { value: "all", label: "All" },
 
   ];
 
@@ -312,7 +312,7 @@ const VehiclesPage = () => {
         <div className="text-center">
           <div className="inline-block animate-spin rounded-full h-16 w-16 border-4 border-gray-300 border-t-transparent"></div>
           <p className="mt-4 text-lg text-gray-700 font-semibold">
-            Đang tải danh sách xe...
+            Loading vehicle list...
           </p>
         </div>
       </div>
@@ -325,10 +325,10 @@ const VehiclesPage = () => {
       <section className="bg-white text-gray-900 py-8">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <h1 className="text-4xl md:text-5xl font-extrabold mb-2">
-            Danh sách xe điện
+            Electric vehicle list
           </h1>
           <p className="text-lg md:text-xl text-gray-700">
-            Chọn chiếc xe điện phù hợp với nhu cầu của bạn
+            Choose an electric vehicle that fits your needs
           </p>
         </div>
       </section>
@@ -342,7 +342,7 @@ const VehiclesPage = () => {
               <div className="flex items-center gap-3">
                 <input
                   type="text"
-                  placeholder="Tìm kiếm xe theo tên, model..."
+                  placeholder="Search vehicles by name, model..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   className="flex-1 px-4 py-2 rounded-lg border-2 border-gray-200 focus:border-indigo-500 focus:ring-0 outline-none transition-all text-gray-800 text-base placeholder-gray-400"
@@ -351,7 +351,7 @@ const VehiclesPage = () => {
                   type="submit"
                   className="px-4 py-2 bg-indigo-600 text-white font-semibold rounded-lg hover:bg-indigo-700 transition-colors text-sm"
                 >
-                  Tìm
+                  Search
                 </button>
               </div>
             </form>
@@ -363,10 +363,10 @@ const VehiclesPage = () => {
                 onChange={(e) => handleFilterByStation(e.target.value)}
                 className="ml-2 px-3 py-2 rounded-lg border-2 border-gray-200 bg-white text-sm text-gray-700 font-medium outline-none"
               >
-                <option value="all">Tất cả trạm</option>
+                <option value="all">All stations</option>
                 {stations.map((station) => (
                   <option key={station.stationId || station.id} value={String(station.stationId || station.id)}>
-                    {station.stationName || `Trạm ${station.stationId || station.id}`}
+                    {station.stationName || `Station ${station.stationId || station.id}`}
                   </option>
                 ))}
               </select>
@@ -400,26 +400,26 @@ const VehiclesPage = () => {
           <div className="mb-8 flex justify-between items-center">
             <h2 className="text-2xl md:text-3xl font-bold text-gray-800">
               {viewMode === "grouped"
-                ? "Danh sách xe theo model"
+                ? "Vehicles by model"
                 : filteredVehicles.length > 0
-                ? `Tìm thấy ${filteredVehicles.length} xe phù hợp`
-                : "Không tìm thấy xe nào"}
+                ? `Found ${filteredVehicles.length} vehicles`
+                : "No vehicles found"}
             </h2>
             <button
               onClick={() => setViewMode(viewMode === "grouped" ? "list" : "grouped")}
               className="px-4 py-2 rounded-lg border-2 border-indigo-600 text-indigo-600 font-semibold hover:bg-indigo-50 transition-colors"
             >
-              {viewMode === "grouped" ? "Xem danh sách" : "Xem theo model"}
+              {viewMode === "grouped" ? "View list" : "View by model"}
             </button>
           </div>
 
           {filteredVehicles.length === 0 ? (
             <div className="text-center py-20">
               <h3 className="text-2xl font-bold text-gray-800 mb-3">
-                Không có xe điện nào
+                No vehicles found
               </h3>
               <p className="text-gray-600 text-lg">
-                Vui lòng thử lại với bộ lọc khác hoặc quay lại sau.
+                Please try again with different filters or check back later.
               </p>
             </div>
           ) : viewMode === "grouped" ? (

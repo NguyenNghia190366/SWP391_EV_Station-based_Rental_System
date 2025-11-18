@@ -71,15 +71,15 @@ export default function ContractOnlinePage() {
 
         const mergedOrder = {
           ...orderData,
-          renterName: userInfo?.fullName || renter?.fullName || orderData.renterName || "(Không có)",
-          renterPhone: renter?.phoneNumber || orderData.renterPhone || "(Không có)",
-          renterEmail: renter?.email || orderData.renterEmail || "(Không có)",
-          renterIdNumber: renter?.cccd || "(Không có)",
-          vehicleName: (vehicleModel?.brandName && vehicle?.model) ? `${vehicleModel.brandName} ${vehicle.model}` : vehicle?.vehicleName || "(Không có)",
-          vehicleLicensePlate: vehicle?.licensePlate || "(Không có)",
+          renterName: userInfo?.fullName || renter?.fullName || orderData.renterName || "(N/A)",
+          renterPhone: renter?.phoneNumber || orderData.renterPhone || "(N/A)",
+          renterEmail: renter?.email || orderData.renterEmail || "(N/A)",
+          renterIdNumber: renter?.cccd || "(N/A)",
+          vehicleName: (vehicleModel?.brandName && vehicle?.model) ? `${vehicleModel.brandName} ${vehicle.model}` : vehicle?.vehicleName || "(N/A)",
+          vehicleLicensePlate: vehicle?.licensePlate || "(N/A)",
           pricePerHour: vehicleModel?.price_per_hour || 0,
-          pickupStationName: "(Không có)",
-          returnStationName: "(Không có)",
+          pickupStationName: "(N/A)",
+          returnStationName: "(N/A)",
         };
 
         // stations
@@ -138,8 +138,9 @@ export default function ContractOnlinePage() {
         }
         setError(null);
       } catch (err) {
+        //Can't load contract information
         console.error("Error fetching order for renter contract:", err);
-        setError("Không thể tải thông tin hợp đồng.");
+        setError("Unable to load contract information.");
       } finally {
         setLoading(false);
       }
@@ -175,7 +176,7 @@ export default function ContractOnlinePage() {
             console.debug('Could not set PENDING_HANDOVER:', err?.response?.status || err.message);
           }
         } else if (result?.status === 'PAID' || result?.isPaid || result?.success) {
-          setPaymentSuccessHtml(`<div style="padding:20px;font-family:Arial"><h2 style="color:#52c41a">Thanh toán thành công</h2><p>Mã đơn: #${orderId}</p></div>`);
+          setPaymentSuccessHtml(`<div style="padding:20px;font-family:Arial"><h2 style="color:#52c41a">Payment successful</h2><p>Order ID: #${orderId}</p></div>`);
           // Mark order as waiting for staff handover approval
           try {
             await axiosInstance.put(`/api/RentalOrders/${orderId}`, { status: "PENDING_HANDOVER" });
@@ -184,11 +185,11 @@ export default function ContractOnlinePage() {
           }
         } else {
           setReturnResultMessage(JSON.stringify(result));
-          message.info('Kết quả trả về: ' + (result?.message || 'Xem chi tiết trong modal.'));
+          message.info('Result returned: ' + (result?.message || 'See details in the modal.'));
         }
       } catch (err) {
         console.error('Error verifying VNPay return:', err);
-        message.error('Không thể xác minh kết quả thanh toán.');
+        message.error('Unable to verify payment result.');
       } finally {
         setReturnProcessing(false);
       }
@@ -208,11 +209,11 @@ export default function ContractOnlinePage() {
         renterSignatureDate: new Date().toISOString(),
       });
       setIsSigned(true);
-      message.success("Đã ký hợp đồng thành công!");
+      message.success("Contract signed successfully!");
       setSignatureModal(false);
     } catch (err) {
       console.error("Error saving signature:", err);
-      message.error("Không thể lưu chữ ký. Vui lòng thử lại.");
+      message.error("Unable to save signature. Please try again.");
     } finally {
       setIsSigning(false);
     }
@@ -233,7 +234,7 @@ export default function ContractOnlinePage() {
       const totalPrice = rentalPrice + depositPrice;
 
       // use full name from order (from DB) and the description entered by renter
-      const fullName = order.renterName || "(Không có)";
+      const fullName = order.renterName || "(N/A)";
 
       console.log("🔵 Starting payment creation with:", { orderId, totalPrice, fullName, paymentDescription });
       const response = await createPayment(orderId, totalPrice, "rental", fullName, paymentDescription);
@@ -286,20 +287,20 @@ export default function ContractOnlinePage() {
       const createdAt = response?.createdAt || new Date().toISOString();
       const generatedHtml = `
         <div style="font-family: Arial, sans-serif; padding: 20px;">
-          <h2 style="color: #52c41a;">Thanh toán thành công</h2>
-          <p><strong>Mã đơn:</strong> ${orderId}</p>
-          <p><strong>Tên khách hàng:</strong> ${fullName}</p>
-          <p><strong>Số tiền:</strong> ${formatCurrency(amount)}</p>
-          ${paymentId ? `<p><strong>Mã thanh toán:</strong> ${paymentId}</p>` : ''}
-          <p><strong>Thời gian:</strong> ${new Date(createdAt).toLocaleString('vi-VN')}</p>
+          <h2 style="color: #52c41a;">Payment successful</h2>
+          <p><strong>Order ID:</strong> ${orderId}</p>
+          <p><strong>Customer Name:</strong> ${fullName}</p>
+          <p><strong>Amount:</strong> ${formatCurrency(amount)}</p>
+          ${paymentId ? `<p><strong>Payment ID:</strong> ${paymentId}</p>` : ''}
+          <p><strong>Time:</strong> ${new Date(createdAt).toLocaleString('en-US')}</p>
           <hr />
-          <p>Nếu bạn cần biên lai chi tiết, vui lòng kiểm tra trang lịch sử thanh toán hoặc liên hệ hỗ trợ.</p>
+          <p>If you need a detailed receipt, please check the payment history or contact support.</p>
         </div>
       `;
 
       setPaymentSuccessHtml(generatedHtml);
       setPaymentModal(false);
-      message.success("Thanh toán thành công.");
+      message.success("Payment successful.");
       
       // Mark order as waiting for staff handover approval instead of marking IN_USE
       try {
@@ -320,9 +321,9 @@ export default function ContractOnlinePage() {
           return;
         }
         // Otherwise show details
-        message.error(`Lỗi server (${status}): ${typeof respData === 'string' ? respData : JSON.stringify(respData)}`);
+        message.error(`Server error (${status}): ${typeof respData === 'string' ? respData : JSON.stringify(respData)}`);
       } else {
-        message.error(`Không thể thực hiện thanh toán. Lỗi: ${err.message}`);
+        message.error(`Cannot complete payment. Error: ${err.message}`);
       }
     } finally {
       setIsPaymentProcessing(false);
@@ -362,7 +363,7 @@ export default function ContractOnlinePage() {
 
   const renderContract = () => {
     if (error) return <div style={{ color: "red", padding: 20 }}>{error}</div>;
-    if (!order) return <div style={{ padding: 20 }}>Đang tải dữ liệu...</div>;
+    if (!order) return <div style={{ padding: 20 }}>Loading data...</div>;
 
     const o = order;
     const startTime = o.startTime ? dayjs(o.startTime) : null;
@@ -376,62 +377,62 @@ export default function ContractOnlinePage() {
     return (
       <div ref={contractRef} style={{ padding: 20, fontFamily: "Arial, sans-serif" }}>
         <div style={{ textAlign: "center", marginBottom: 30 }}>
-          <h2>HỢP ĐỒNG THUÊ XE</h2>
-          <p>Mã đơn: #{orderId}</p>
-          {isSigned && <Tag color="green">✓ Đã ký</Tag>}
+          <h2>RENTAL CONTRACT</h2>
+          <p>Order ID: #{orderId}</p>
+          {isSigned && <Tag color="green">✓ Signed</Tag>}
         </div>
 
         <div style={{ marginBottom: 20 }}>
-          <p><b>Khách hàng:</b> {o.renterName}</p>
-          <p><b>Số điện thoại:</b> {o.renterPhone}</p>
+          <p><b>Customer:</b> {o.renterName}</p>
+          <p><b>Phone:</b> {o.renterPhone}</p>
           <p><b>Email:</b> {o.renterEmail}</p>
-          <p><b>CMND/CCCD:</b> {o.renterIdNumber}</p>
+          <p><b>ID Number:</b> {o.renterIdNumber}</p>
         </div>
 
         <div style={{ marginBottom: 20 }}>
-          <p><b>Tên Xe:</b> {o.vehicleName}</p>
-          <p><b>Biển số xe:</b> {o.vehicleLicensePlate}</p>
+          <p><b>Vehicle name:</b> {o.vehicleName}</p>
+          <p><b>License plate:</b> {o.vehicleLicensePlate}</p>
         </div>
 
         <div style={{ marginTop: 30, backgroundColor: "#f5f5f5", padding: 20, borderRadius: 8 }}>
-          <p style={{ fontSize: 16, fontWeight: "bold", marginBottom: 12 }}>BẢNG TÍNH CHI PHÍ</p>
+          <p style={{ fontSize: 16, fontWeight: "bold", marginBottom: 12 }}>PRICE BREAKDOWN</p>
           <div style={{ display: "flex", justifyContent: "space-between" }}>
-            <div>Giá thuê / giờ</div>
+            <div>Price per hour</div>
             <div style={{ fontWeight: 700 }}>{new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(pricePerHour)}</div>
           </div>
           <div style={{ display: "flex", justifyContent: "space-between", marginTop: 8 }}>
-            <div>Số giờ thuê</div>
-            <div style={{ fontWeight: 700 }}>{rentalHours.toFixed(2)} giờ</div>
+            <div>Number of hours</div>
+                <div style={{ fontWeight: 700 }}>{rentalHours.toFixed(2)} hours</div>
           </div>
           <div style={{ display: "flex", justifyContent: "space-between", marginTop: 8 }}>
-            <div>Tiền thuê xe</div>
+            <div>Rental fee</div>
             <div style={{ fontWeight: 700 }}>{new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(rentalPrice)}</div>
           </div>
           <div style={{ display: "flex", justifyContent: "space-between", marginTop: 8 }}>
-            <div>Tiền cọc (30%)</div>
-            <div style={{ fontWeight: 700, color: '#fa8c16' }}>{new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(depositPrice)}</div>
+            <div>Deposit (30%)</div>
+                <div style={{ fontWeight: 700, color: '#fa8c16' }}>{new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(depositPrice)}</div>
           </div>
           <div style={{ display: "flex", justifyContent: "space-between", marginTop: 12, fontSize: 16, fontWeight: 800 }}>
-            <div>Tổng thanh toán</div>
+            <div>Total Payment</div>
             <div style={{ color: '#52c41a' }}>{new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(totalPrice)}</div>
           </div>
         </div>
 
         <div style={{ marginTop: 20 }}>
-          <p><b>Điều khoản cơ bản:</b></p>
-          <ol>
-            <li>Bên thuê cam kết nhận xe đúng thời gian và địa điểm quy định.</li>
-            <li>Bên thuê chịu trách nhiệm về mọi hư hỏng và tai nạn trong thời gian sử dụng.</li>
-            <li>Phải trả xe đúng thời gian, nếu trễ sẽ chịu phí phạt.</li>
-          </ol>
+          <p><b>Basic terms:</b></p>
+              <ol>
+                <li>The renter agrees to pick up the vehicle at the specified time and location.</li>
+                <li>The renter is responsible for any damages or accidents during the rental period.</li>
+                <li>The vehicle must be returned on time; late returns will incur penalties.</li>
+              </ol>
         </div>
         <div style={{ marginTop: 28, textAlign: "center" }}>
           {
             isOrderPaid(o) ? (
               <div>
-                <Tag color="green">Đã thanh toán</Tag>
+                <Tag color="green">Paid</Tag>
                 <div style={{ marginTop: 8 }}>
-                  <Button type="primary" style={{ backgroundColor: '#52c41a', borderColor: '#52c41a' }} onClick={() => navigate(`/renter/pickup/${orderId}`)}>Nhận xe</Button>
+                  <Button type="primary" style={{ backgroundColor: '#52c41a', borderColor: '#52c41a' }} onClick={() => navigate(`/renter/pickup/${orderId}`)}>Pick up</Button>
                 </div>
               </div>
             ) : (
@@ -441,7 +442,7 @@ export default function ContractOnlinePage() {
                 onClick={() => setPaymentModal(true)}
                 style={{ backgroundColor: "#52c41a", borderColor: "#52c41a", minWidth: 220 }}
               >
-                Thanh toán {new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(totalPrice)}
+                Pay {new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(totalPrice)}
               </Button>
             )
           }
@@ -453,13 +454,13 @@ export default function ContractOnlinePage() {
   return (
     <>
       <Card
-        title={`Hợp đồng #${orderId}`}
+        title={`Contract #${orderId}`}
         extra={
           <Space>
             <Button
               onClick={() => contractRef.current && contractRef.current.scrollIntoView({ behavior: 'smooth' })}
             >
-              Hợp đồng
+              Contract
             </Button>
             {isOrderPaid(order) && (
               <Button
@@ -467,37 +468,37 @@ export default function ContractOnlinePage() {
                 style={{ backgroundColor: '#52c41a', borderColor: '#52c41a' }}
                 onClick={() => navigate(`/renter/pickup/${orderId}`)}
               >
-                Nhận xe
+                Pick up
               </Button>
             )}
-            <Button onClick={() => window.print()}>🖨️ In</Button>
+            <Button onClick={() => window.print()}>🖨️ Print</Button>
           </Space>
         }
       >
         {loading ? (
-          <div style={{ textAlign: 'center', padding: 40 }}><Spin tip="Đang tải..." /></div>
+          <div style={{ textAlign: 'center', padding: 40 }}><Spin tip="Loading..." /></div>
         ) : (
           renderContract()
         )}
       </Card>
       <Modal
-        title="Xác nhận thanh toán"
+        title="Confirm Payment"
         open={paymentModal}
         onOk={handleSubmitPayment}
         onCancel={() => { setPaymentModal(false); setPaymentDescription(""); }}
-        okText="Xác nhận và thanh toán"
-        cancelText="Hủy"
+        okText="Confirm & Pay"
+        cancelText="Cancel"
         confirmLoading={isPaymentProcessing}
         width={700}
       >
         {order && (
           <div>
-            <p><b>Mã đơn:</b> #{orderId}</p>
-            <p><b>Tên khách hàng:</b> {order.renterName || "(Không có)"}</p>
-            <p><b>Số tiền:</b> {formatCurrency(getTotalPrice(order))}</p>
+            <p><b>Order ID:</b> #{orderId}</p>
+            <p><b>Customer Name:</b> {order.renterName || "(N/A)"}</p>
+            <p><b>Amount:</b> {formatCurrency(getTotalPrice(order))}</p>
             <div style={{ marginTop: 12 }}>
-              <label style={{ fontWeight: 600 }}>Mô tả (thêm thông tin thanh toán, không bắt buộc)</label>
-              <Input.TextArea rows={4} value={paymentDescription} onChange={(e) => setPaymentDescription(e.target.value)} placeholder="Nhập mô tả..." />
+              <label style={{ fontWeight: 600 }}>Description (optional)</label>
+              <Input.TextArea rows={4} value={paymentDescription} onChange={(e) => setPaymentDescription(e.target.value)} placeholder="Enter description..." />
             </div>
           </div>
         )}
@@ -505,14 +506,14 @@ export default function ContractOnlinePage() {
 
       {/* If backend returned success HTML to display */}
       <Modal
-        title="Kết quả thanh toán"
+        title="Payment Result"
         open={!!paymentSuccessHtml}
         onOk={() => setPaymentSuccessHtml(null)}
         onCancel={() => setPaymentSuccessHtml(null)}
         footer={null}
         width={800}
       >
-        <div dangerouslySetInnerHTML={{ __html: paymentSuccessHtml || "<p>Thanh toán thành công.</p>" }} />
+        <div dangerouslySetInnerHTML={{ __html: paymentSuccessHtml || "<p>Payment successful.</p>" }} />
       </Modal>
     </>
   );

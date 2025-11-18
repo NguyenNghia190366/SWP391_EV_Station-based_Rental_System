@@ -16,7 +16,7 @@ export default function BookingRequestsPage() {
       const allBookings = JSON.parse(localStorage.getItem("allBookings") || "[]");
       setBookings(allBookings);
     } catch (e) {
-      message.error("Không thể tải dữ liệu booking");
+      message.error("Cannot load booking data");
     } finally {
       setLoading(false);
     }

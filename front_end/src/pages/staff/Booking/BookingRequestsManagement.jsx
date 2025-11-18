@@ -49,8 +49,8 @@ export default function BookingRequestsManagement() {
 
       setBookings(merged);
     } catch (err) {
-      console.error("❌ Lỗi tải đơn:", err);
-      message.error("Không thể tải danh sách đơn thuê!");
+      console.error("❌ Error loading orders:", err);
+      message.error("Cannot load rental orders list!");
     } finally {
       setLoading(false);
     }
@@ -65,10 +65,10 @@ export default function BookingRequestsManagement() {
       <div className="flex justify-between items-center border-b pb-3">
         <div>
           <h2 className="text-2xl font-bold text-gray-800">
-            📋 Quản lý Booking Requests
+            📋 Booking Requests Management
           </h2>
           <p className="text-gray-500 text-sm">
-            Xem và xử lý các yêu cầu đặt xe từ khách hàng
+            View and process booking requests from customers
           </p>
         </div>
         <Button
@@ -77,7 +77,7 @@ export default function BookingRequestsManagement() {
           onClick={fetchData}
           className="bg-green-500 hover:bg-green-600"
         >
-          Làm mới
+          Refresh
         </Button>
       </div>
 

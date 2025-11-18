@@ -7,9 +7,9 @@ import dayjs from "dayjs";
 import { useRentalOrders } from "@/hooks/useRentalOrders";
 
 const ORDER_STATUS = {
-  APPROVED: { color: "green", text: "Đã duyệt" },
-  PENDING_HANDOVER: { color: "orange", text: "Chờ nhận" },
-  IN_USE: { color: "blue", text: "Đang sử dụng" },
+  APPROVED: { color: "green", text: "Approved" },
+  PENDING_HANDOVER: { color: "orange", text: "Pending handover" },
+  IN_USE: { color: "blue", text: "In Use" },
 };
 
 const DATE_FORMAT = "DD/MM/YYYY HH:mm";
@@ -21,13 +21,13 @@ export default function HandoverTable({ orders, onRefresh, onShowDetail }) {
 
   const columns = [
     {
-      title: "Mã đơn",
+      title: "Order ID",
       dataIndex: "orderId",
       key: "orderId",
       render: (id) => <b style={{ color: "#1890ff" }}>#{id}</b>,
     },
     {
-      title: "Khách hàng",
+      title: "Customer",
       render: (_, r) => (
         <div>
           <b>{r.renterName}</b>
@@ -36,7 +36,7 @@ export default function HandoverTable({ orders, onRefresh, onShowDetail }) {
       ),
     },
     {
-      title: "Xe",
+      title: "Vehicle",
       render: (_, r) => (
         <div>
           <b>{r.vehicleName}</b>
@@ -45,15 +45,15 @@ export default function HandoverTable({ orders, onRefresh, onShowDetail }) {
       ),
     },
     {
-      title: "Trạm nhận",
+      title: "Pickup station",
       dataIndex: "pickupStationName",
     },
     {
-      title: "Thời gian nhận",
+      title: "Pickup time",
       render: (_, r) => dayjs(r.startTime).format(DATE_FORMAT),
     },
     {
-      title: "Trạng thái",
+      title: "Status",
       dataIndex: "status",
       render: (status) => {
         const info = ORDER_STATUS[status] || { color: "default", text: status };
@@ -61,7 +61,7 @@ export default function HandoverTable({ orders, onRefresh, onShowDetail }) {
       },
     },
     {
-      title: "Hành động",
+      title: "Actions",
       render: (_, r) => {
         const processing = processingId === r.orderId;
 
@@ -80,7 +80,7 @@ export default function HandoverTable({ orders, onRefresh, onShowDetail }) {
                     ok && onRefresh();
                   }}
                 >
-                  Phê duyệt
+                  Approve
                 </Button>
 
                 <Button
@@ -94,7 +94,7 @@ export default function HandoverTable({ orders, onRefresh, onShowDetail }) {
                     ok && onRefresh();
                   }}
                 >
-                  Từ chối
+                  Reject
                 </Button>
               </>
             )}
@@ -110,11 +110,11 @@ export default function HandoverTable({ orders, onRefresh, onShowDetail }) {
                   await onRefresh()
                 }}
               >
-                Giao xe
+                Deliver vehicle
               </Button>
             )}
 
-            <Button onClick={() => onShowDetail(r)}>Chi tiết</Button>
+            <Button onClick={() => onShowDetail(r)}>Details</Button>
           </Space>
         );
       },

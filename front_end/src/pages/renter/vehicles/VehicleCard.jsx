@@ -21,12 +21,12 @@ const VehicleCard = ({
   ) || false;
 
   // Determine the button state:
-  // 1. If rented → show "Đang cho thuê" (even if isAvailable=0)
-  // 2. If available → show "Đặt xe"
-  // 3. If not available and not rented → show "Hết xe"
+  // 1. If rented → show "Rented" (even if isAvailable=0)
+  // 2. If available → show "Book"
+  // 3. If not available and not rented → show "Unavailable"
   const buttonDisabled = !isAvailable && !isRented;
 
-  // Lấy thông tin model và giá tiền - chỉ chạy 1 lần khi vehicleModelId thay đổi
+  // Fetch model info and price - run once when vehicleModelId changes
   useEffect(() => {
     if (!vehicle.vehicleModelId) {
       setPricePerHour(0);
@@ -37,10 +37,10 @@ const VehicleCard = ({
 
     const fetchModelPrice = async () => {
       try {
-        // Nếu không có token (chưa login) thì API /VehicleModels trả 401 -> bỏ qua
+        // If there is no token (not logged in), the /VehicleModels API may return 401 — skip in that case
         const token = localStorage.getItem("token");
         if (!token) {
-          // Không có token, không gọi API model, giữ giá 0
+          // No token - skip calling model API and keep price at 0
           return;
         }``
 
@@ -49,7 +49,7 @@ const VehicleCard = ({
           setPricePerHour(model.price_per_hour || 0);
         }
       } catch (error) {
-        console.error("❌ Lỗi lấy model:", error);
+      console.error("❌ Error fetching model:", error);
         if (isMounted) {
           setPricePerHour(0);
         }
@@ -58,7 +58,7 @@ const VehicleCard = ({
 
     fetchModelPrice();
 
-    // Cleanup: ngừng cập nhật nếu component unmounted
+    // Cleanup: stop updating if the component is unmounted
     return () => {
       isMounted = false;
     };
@@ -101,9 +101,9 @@ const VehicleCard = ({
             backdrop-blur-md shadow-lg
           "
           >
-            Đang cho thuê
+            Rented
           </span>
-        ) : isAvailable ? (
+          ) : isAvailable ? (
           <span
             className="
             absolute top-4 right-4 px-4 py-2 rounded-full
@@ -112,9 +112,9 @@ const VehicleCard = ({
             backdrop-blur-md shadow-lg
           "
           >
-            Có sẵn
+            Available
           </span>
-        ) : (
+          ) : (
           <span
             className="
             absolute top-4 right-4 px-4 py-2 rounded-full
@@ -123,7 +123,7 @@ const VehicleCard = ({
             backdrop-blur-md shadow-lg
           "
           >
-            Hết xe
+            Unavailable
           </span>
         )}
       </div>
@@ -136,20 +136,20 @@ const VehicleCard = ({
       `}
       >
         {/* Title */}
-        <h3
+          <h3
           className={`
           font-extrabold text-gray-900 leading-tight mb-2
           ${compact ? "text-xl" : "text-2xl md:text-xl"}
         `}
         >
-          {vehicle.name ||
+            {vehicle.name ||
             `${vehicle.brandName || ""} ${vehicle.model || ""}`.trim() ||
-            "Xe điện"}
+            "EV"}
         </h3>
 
         {/* Type */}
-        <p className="text-sdz-500 font-semibold uppercase tracking-wider text-sm mb-5">
-          {vehicle.type || vehicle.vehicleColor || "Xe điện"}
+          <p className="text-sdz-500 font-semibold uppercase tracking-wider text-sm mb-5">
+          {vehicle.type || vehicle.vehicleColor || "Electric vehicle"}
         </p>
 
         {/* Specs Grid */}
@@ -180,8 +180,8 @@ const VehicleCard = ({
           </div>
           <div className="flex flex-col items-center gap-1.5 text-gray-700 font-bold">
             <span className={compact ? "text-xl" : "text-2xl"}>�</span>
-            <span className={compact ? "text-xs" : "text-sm"}>
-              {vehicle.NumberOfSeats} chỗ
+              <span className={compact ? "text-xs" : "text-sm"}>
+              {vehicle.NumberOfSeats} seats
             </span>
           </div>
         </div>
@@ -194,19 +194,19 @@ const VehicleCard = ({
     border-t border-b border-gray-200
   "
         >
-          <span className="text-gray-500 text-sm md:text-base font-medium tracking-wide">
-            Giá thuê
+            <span className="text-gray-500 text-sm md:text-base font-medium tracking-wide">
+            Rental price
           </span>
           <span className="text-green-600 text-xl md:text-2xl font-semibold">
             {pricePerHour > 0
               ? `${(pricePerHour / 1000).toLocaleString("vi-VN")}k`
-              : "Đang cập nhật"}
-            <span className="text-gray-500 text-sm ml-1">/giờ</span>
+              : "Updating"}
+            <span className="text-gray-500 text-sm ml-1">/hr</span>
           </span>
         </div>
 
         {/* Location */}
-        {vehicle.station && (
+          {vehicle.station && (
           <div className="flex items-center gap-2 text-gray-600 font-medium text-sm mb-5">
             <span className="text-lg">📍</span>
             <span>{vehicle.station.name || vehicle.station.station_name}</span>
@@ -231,7 +231,7 @@ const VehicleCard = ({
               text-sm md:text-base
             "
           >
-            Chi tiết
+            Details
           </button>
           <button
             onClick={() => onBookVehicle && onBookVehicle(vehicle.id)}
@@ -249,7 +249,7 @@ const VehicleCard = ({
     }
   `}
           >
-            {isRented ? "Đang cho thuê" : isAvailable ? "Đặt xe" : "Hết xe"}
+            {isRented ? "Rented" : isAvailable ? "Book" : "Unavailable"}
           </button>
         </div>
       </div>

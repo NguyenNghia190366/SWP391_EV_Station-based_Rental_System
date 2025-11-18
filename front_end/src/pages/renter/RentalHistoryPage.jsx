@@ -21,14 +21,14 @@ export default function RentalHistoryPage() {
       setLoading(true);
       const userId = localStorage.getItem("userId");
       if (!userId) {
-        message.warning("Không tìm thấy userId!");
+        message.warning("User ID not found!");
         return;
       }
 
-      // Lấy renterId từ userId
+      // Get renterId from userId
       const renterId = await getRenterIdByUserId(userId);
       
-      // Fetch tất cả dữ liệu cần thiết (including vehicle models to compose names)
+      // Fetch all necessary data (including vehicle models to compose names)
       const [rentalOrdersRes, vehiclesRes, stationsRes, vehicleModelsRes] = await Promise.all([
         instance.get(`/RentalOrders?renter_id=${renterId}`),
         instance.get("/Vehicles"),
@@ -77,7 +77,7 @@ export default function RentalHistoryPage() {
         if (vid != null) vehiclesMap[vid] = { ...v, vehicleName: name };
       });
 
-      // Merge dữ liệu - thêm tên xe và trạm (use normalized keys and maps)
+      // Merge data - add vehicle and station names (use normalized keys and maps)
       const merged = rentalOrders.map((order) => {
         const orderVehicleId = order.vehicleId ?? order.vehicle_id ?? order.vehicle;
         const pickupId = order.pickupStationId ?? order.pickup_station_id ?? order.pickupStation;
@@ -97,8 +97,8 @@ export default function RentalHistoryPage() {
 
       setOrders(merged);
     } catch (err) {
-      console.error("❌ Lỗi tải lịch sử thuê:", err);
-      message.error("Không thể tải lịch sử thuê!");
+      console.error("❌ Error loading rental history:", err);
+      message.error("Cannot load rental history!");
     } finally {
       setLoading(false);
     }
@@ -154,14 +154,14 @@ export default function RentalHistoryPage() {
 
   const columns = [
     {
-      title: "Mã đơn",
+      title: "Order ID",
       dataIndex: "orderId",
       key: "orderId",
       render: (id) => <span className="font-semibold text-blue-600">#{id}</span>,
       width: 80,
     },
     {
-      title: "Xe",
+      title: "Vehicle",
       dataIndex: "vehicleName",
       key: "vehicleName",
       width: 160,
@@ -177,7 +177,7 @@ export default function RentalHistoryPage() {
       ),
     },
     {
-      title: "Trạm (nhận → trả)",
+      title: "Station (pickup → return)",
       key: "stations",
       render: (_, record) => (
         <span>
@@ -187,7 +187,7 @@ export default function RentalHistoryPage() {
       width: 240,
     },
     {
-      title: "Thời gian thuê",
+      title: "Rental time",
       key: "rentalTime",
       render: (_, record) => (
         <span>
@@ -197,16 +197,16 @@ export default function RentalHistoryPage() {
       width: 240,
     },
     {
-      title: "Trạng thái",
+      title: "Status",
       dataIndex: "status",
       key: "status",
       render: (status) => {
-        const statusMap = {
-          BOOKED: { color: "blue", text: "Chờ duyệt" },
-          APPROVED: { color: "green", text: "Đã duyệt" },
-          CANCELED: { color: "red", text: "Từ chối" },
-          IN_USE: { color: "orange", text: "Đang sử dụng" },
-          COMPLETED: { color: "cyan", text: "Hoàn tất trả xe" },
+          const statusMap = {
+          BOOKED: { color: "blue", text: "Pending" },
+          APPROVED: { color: "green", text: "Approved" },
+          CANCELED: { color: "red", text: "Canceled" },
+          IN_USE: { color: "orange", text: "In Use" },
+          COMPLETED: { color: "cyan", text: "Completed" },
         };
         const statusInfo = statusMap[status] || { color: "default", text: status };
         return <Tag color={statusInfo.color}>{statusInfo.text}</Tag>;
@@ -214,24 +214,24 @@ export default function RentalHistoryPage() {
       width: 120,
     },
     {
-      title: "Ngày tạo",
+      title: "Created At",
       dataIndex: "createdAt",
       key: "createdAt",
       render: (date) => dayjs(date).format("DD/MM/YYYY HH:mm"),
       width: 160,
     },
     {
-      title: "Ghi chú",
+      title: "Notes",
       key: "notes",
       render: (_, record) => {
         // Show approval message when status is APPROVED
         if (record.status === "APPROVED") {
-          const pickupStationName = record.pickupStationName || "trạm";
+          const pickupStationName = record.pickupStationName || "station";
           const startDate = record.startTime ? dayjs(record.startTime).format("DD/MM/YYYY") : "";
           return (
             <div style={{ fontSize: 12, color: "#16a34a", fontWeight: 500, lineHeight: "1.4" }}>
-              ✅ Staff đã duyệt.<br />
-              Đến <strong>{pickupStationName}</strong> ngày <strong>{startDate}</strong> ký hợp đồng.
+              ✅ Staff approved.<br />
+              Please go to <strong>{pickupStationName}</strong> on <strong>{startDate}</strong> to sign the contract.
             </div>
           );
         }
@@ -240,7 +240,7 @@ export default function RentalHistoryPage() {
       width: 220,
     },
     {
-      title: "Hành động",
+      title: "Actions",
       key: "actions",
       render: (_, record) => {
         const showCancel = record.status === "BOOKED" || record.status === "APPROVED";
@@ -257,35 +257,35 @@ export default function RentalHistoryPage() {
                 size="small"
                 onClick={() => navigate(`/renter/contract-online/${record.orderId}`)}
               >
-                Hợp đồng
+                Contract
               </Button>
             )}
             
             {showCancel && (
               <Popconfirm
-                title={disabled ? "Đơn đã được duyệt, không thể hủy." : "Xác nhận hủy đơn?"}
+                title={disabled ? "Order approved, cannot cancel." : "Confirm cancellation?"}
                 onConfirm={async () => {
-                  if (disabled) return message.warning("Đơn đã được duyệt, không thể hủy từ phía renter.");
+                  if (disabled) return message.warning("Order approved, cannot cancel from renter side.");
                   if (cancellingId) return;
                   setCancellingId(record.orderId);
                   try {
                     // Use rejectRentalOrder from useRenters (same as staff)
                     // This calls /Reject endpoint which updates status to CANCELED
                     await rejectRentalOrder(record.orderId);
-                    message.success("Đã hủy đơn thuê!");
+                    message.success("Order canceled!");
                     setTimeout(() => fetchOrders(), 400);
                   } catch (err) {
-                    console.error("❌ Lỗi hủy đơn:", err);
-                    message.error("Hủy đơn thất bại. Vui lòng thử lại.");
+                    console.error("❌ Error cancelling order:", err);
+                    message.error("Order cancellation failed. Please try again.");
                   } finally {
                     setCancellingId(null);
                   }
                 }}
-                okText="Có"
-                cancelText="Không"
+                okText="Yes"
+                cancelText="No"
                 disabled={disabled}
               >
-                <Tooltip title={disabled ? "Đã duyệt — không thể hủy" : "Hủy đơn"}>
+                <Tooltip title={disabled ? "Approved — cannot cancel" : "Cancel order"}>
                   <Button
                     type="primary"
                     danger
@@ -307,21 +307,21 @@ export default function RentalHistoryPage() {
   return (
     <Card className="shadow-md rounded-xl">
       <div className="mb-6">
-        <h2 className="text-3xl font-bold text-gray-800 mb-2">📜 Lịch sử đặt xe</h2>
-        <p className="text-gray-500">Xem tất cả các đơn thuê xe của bạn</p>
+        <h2 className="text-3xl font-bold text-gray-800 mb-2">📜 Booking History</h2>
+        <p className="text-gray-500">View all your rental orders</p>
       </div>
 
       {loading ? (
         <div className="flex justify-center py-12">
-          <Spin size="large" tip="Đang tải dữ liệu..." />
+          <Spin size="large" tip="Loading data..." />
         </div>
       ) : orders.length === 0 ? (
         <Empty
-          description="Chưa có lịch sử đặt xe"
+          description="No booking history"
           style={{ marginTop: "50px", marginBottom: "50px" }}
         >
-          <Button type="primary" onClick={() => navigate("/vehicles")}>
-            Thuê xe ngay
+            <Button type="primary" onClick={() => navigate("/vehicles")}>
+            Book a vehicle
           </Button>
         </Empty>
       ) : (
@@ -329,9 +329,9 @@ export default function RentalHistoryPage() {
           columns={columns}
           dataSource={orders}
           rowKey="orderId"
-          pagination={{
+            pagination={{
             pageSize: 10,
-            showTotal: (total) => `Tổng ${total} đơn`,
+            showTotal: (total) => `Total ${total} orders`,
           }}
           scroll={{ x: 900 }}
           className="shadow-md rounded-lg"

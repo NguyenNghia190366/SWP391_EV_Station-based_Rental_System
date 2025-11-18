@@ -64,8 +64,8 @@ export default function VehicleStatus() {
 
       setVehicles(merged);
     } catch (err) {
-      console.error("❌ Lỗi tải danh sách xe:", err);
-      message.error("Không thể tải danh sách xe!");
+      console.error("❌ Error loading vehicle list:", err);
+      message.error("Cannot load the vehicle list!");
     } finally {
       setLoading(false);
     }
@@ -82,41 +82,41 @@ export default function VehicleStatus() {
       : vehicles.filter((v) => v.status === statusFilter);
 
   const statusMap = {
-    AVAILABLE: { color: "green", text: "Sẵn sàng", icon: "✅" },
-    IN_USE: { color: "orange", text: "Đang sử dụng", icon: "🚗" },
-    MAINTENANCE: { color: "red", text: "Bảo trì", icon: "🔧" },
-    RESERVED: { color: "blue", text: "Đã đặt", icon: "📌" },
+    AVAILABLE: { color: "green", text: "Available", icon: "✅" },
+    IN_USE: { color: "orange", text: "In Use", icon: "🚗" },
+    MAINTENANCE: { color: "red", text: "Maintenance", icon: "🔧" },
+    RESERVED: { color: "blue", text: "Reserved", icon: "📌" },
   };
 
   const columns = [
     {
-      title: "Mã xe",
+      title: "Vehicle ID",
       dataIndex: "vehicleId",
       key: "vehicleId",
       render: (id) => <span className="font-semibold text-blue-600">#{id}</span>,
       width: 100,
     },
     {
-      title: "Tên xe",
+      title: "Vehicle name",
       dataIndex: "vehicleName",
       key: "vehicleName",
       width: 150,
     },
     {
-      title: "Biển số",
+      title: "License plate",
       dataIndex: "licensePlate",
       key: "licensePlate",
       width: 120,
       render: (text) => <span className="font-mono">{text}</span>,
     },
     {
-      title: "Trạm hiện tại",
+      title: "Current station",
       dataIndex: "stationName",
       key: "stationName",
       width: 150,
     },
     {
-      title: "Trạng thái",
+      title: "Status",
       dataIndex: "status",
       key: "status",
       render: (status) => {
@@ -130,7 +130,7 @@ export default function VehicleStatus() {
       width: 140,
     },
     {
-      title: "Pin (km)",
+      title: "Battery (%)",
       dataIndex: "batteryPercentage",
       key: "batteryPercentage",
       render: (battery) => (
@@ -159,7 +159,7 @@ export default function VehicleStatus() {
       render: (text) => text ? `${text.toLocaleString()}` : "N/A",
     },
     {
-      title: "Ngày cập nhật",
+      title: "Last updated",
       dataIndex: "updatedAt",
       key: "updatedAt",
       render: (date) => dayjs(date).format("DD/MM/YYYY HH:mm"),
@@ -171,10 +171,10 @@ export default function VehicleStatus() {
     <Card className="shadow-md rounded-xl">
       <div className="mb-6">
         <h2 className="text-3xl font-bold text-gray-800 mb-4 flex items-center gap-2">
-          <CarOutlined /> Trạng thái xe trong hệ thống
+          <CarOutlined /> Vehicle status in the system
         </h2>
         <p className="text-gray-500 mb-4">
-          Xem toàn bộ trạng thái xe hiện tại tại các trạm và trong quá trình sử dụng
+          View current vehicle status at stations and while in use
         </p>
 
         {/* Status Summary */}
@@ -197,17 +197,17 @@ export default function VehicleStatus() {
 
         {/* Filter */}
         <div className="flex items-center gap-3">
-          <label className="font-semibold text-gray-700">Lọc theo trạng thái:</label>
+          <label className="font-semibold text-gray-700">Filter by status:</label>
           <Select
             style={{ width: 200 }}
             value={statusFilter}
             onChange={setStatusFilter}
             options={[
-              { label: "Tất cả", value: "all" },
-              { label: "Sẵn sàng", value: "AVAILABLE" },
-              { label: "Đang sử dụng", value: "IN_USE" },
-              { label: "Bảo trì", value: "MAINTENANCE" },
-              { label: "Đã đặt", value: "RESERVED" },
+              { label: "All", value: "all" },
+              { label: "Available", value: "AVAILABLE" },
+              { label: "In Use", value: "IN_USE" },
+              { label: "Maintenance", value: "MAINTENANCE" },
+              { label: "Reserved", value: "RESERVED" },
             ]}
           />
         </div>
@@ -215,18 +215,18 @@ export default function VehicleStatus() {
 
       {loading ? (
         <div className="flex justify-center py-12">
-          <Spin size="large" tip="Đang tải dữ liệu..." />
+          <Spin size="large" tip="Loading data..." />
         </div>
       ) : filteredVehicles.length === 0 ? (
-        <Empty description="Không có xe nào" />
+        <Empty description="No vehicles" />
       ) : (
         <Table
           columns={columns}
           dataSource={filteredVehicles}
           rowKey="vehicleId"
-          pagination={{
+            pagination={{
             pageSize: 10,
-            showTotal: (total) => `Tổng ${total} xe`,
+            showTotal: (total) => `Total ${total} vehicles`,
           }}
           scroll={{ x: 1200 }}
           className="shadow-md rounded-lg"

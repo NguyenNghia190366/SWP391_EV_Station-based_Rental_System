@@ -1,11 +1,11 @@
 import { useCallback } from "react";
 
 export const useCloudinary = () => {
-  // ⚙️ Thay giá trị bằng Cloud Name và Upload Preset của bạn
+  // ⚙️ Replace values with your Cloudinary Cloud Name and Upload Preset
   const CLOUD_NAME = "dnrsaldww";
   const UPLOAD_PRESET = "ev_rental_upload";
 
-  // 🔹 Upload 1 file (image/video) lên Cloudinary
+  // 🔹 Upload a single file (image/video) to Cloudinary
   const uploadToCloudinary = useCallback(async (file) => {
     // Quick validation: ensure we received a File/Blob
     if (!file || !(file instanceof Blob || file instanceof File)) {

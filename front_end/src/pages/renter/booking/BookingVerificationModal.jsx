@@ -10,22 +10,22 @@ const BookingVerificationModal = ({
 }) => {
   
   const getVerificationMessage = () => {
-    if (verificationType === 'both') {
+      if (verificationType === 'both') {
       return {
-        title: '📋 Chưa xác thực giấy tờ',
-        message: 'Bạn chưa xác thực giấy phép lái xe và CCCD/CMND. Vui lòng xác thực để có thể đặt xe.',
+        title: '📋 Documents not verified',
+        message: 'You have not verified your driver\'s license and ID. Please verify to book a vehicle.',
         icon: <ExclamationCircleOutlined className="text-5xl text-yellow-500" />
       };
-    } else if (verificationType === 'license') {
+      } else if (verificationType === 'license') {
       return {
-        title: '🚗 Chưa xác thực giấy phép lái xe',
-        message: 'Bạn chưa xác thực giấy phép lái xe. Vui lòng xác thực để có thể đặt xe điện.',
+        title: '🚗 Driver\'s license not verified',
+        message: 'You have not verified your driver\'s license. Please verify to book a vehicle.',
         icon: <SafetyOutlined className="text-5xl text-yellow-500" />
       };
-    } else {
+      } else {
       return {
-        title: '🆔 Chưa xác thực CCCD/CMND',
-        message: 'Bạn chưa xác thực CCCD/CMND. Vui lòng xác thực để có thể đặt xe.',
+        title: '🆔 ID not verified',
+        message: 'You have not verified your ID. Please verify to book a vehicle.',
         icon: <IdcardOutlined className="text-5xl text-yellow-500" />
       };
     }
@@ -54,28 +54,28 @@ const BookingVerificationModal = ({
         </p>
 
         <div className="w-full bg-gradient-to-r from-orange-50 to-yellow-50 border-l-4 border-yellow-400 rounded-lg p-4 mb-4 text-left">
-          <h3 className="text-base font-semibold text-gray-800 mb-3">📑 Giấy tờ cần xác thực:</h3>
+          <h3 className="text-base font-semibold text-gray-800 mb-3">📑 Documents to verify:</h3>
           <ul className="space-y-2">
             {(verificationType === 'license' || verificationType === 'both') && (
-              <li className="flex items-center gap-2 text-gray-700">
-                <SafetyOutlined className="text-indigo-500" /> Giấy phép lái xe (còn hiệu lực)
+                <li className="flex items-center gap-2 text-gray-700">
+                <SafetyOutlined className="text-indigo-500" /> Valid driver's license
               </li>
             )}
             {(verificationType === 'cccd' || verificationType === 'both') && (
-              <li className="flex items-center gap-2 text-gray-700">
-                <IdcardOutlined className="text-indigo-500" /> CCCD/CMND (còn hiệu lực)
+                <li className="flex items-center gap-2 text-gray-700">
+                <IdcardOutlined className="text-indigo-500" /> Valid CCCD/ID
               </li>
             )}
           </ul>
         </div>
 
         <div className="w-full bg-gradient-to-r from-blue-50 to-indigo-50 border-l-4 border-indigo-400 rounded-lg p-4 mb-6 text-left">
-          <h3 className="text-base font-semibold text-gray-800 mb-3">✨ Lợi ích khi xác thực:</h3>
+          <h3 className="text-base font-semibold text-gray-800 mb-3">✨ Benefits of verification:</h3>
           <ul className="space-y-2 text-gray-700">
-            <li>⚡ Đặt xe trực tuyến nhanh chóng</li>
-            <li>🚀 Nhận xe ngay tại trạm</li>
-            <li>🎁 Ưu đãi dành riêng cho khách hàng xác thực</li>
-            <li>🔒 Bảo mật thông tin tuyệt đối</li>
+            <li>⚡ Quick online booking</li>
+            <li>🚀 Pick up vehicle at the station</li>
+            <li>🎁 Special offers for verified customers</li>
+            <li>🔒 Strong information security</li>
           </ul>
         </div>
 
@@ -84,20 +84,20 @@ const BookingVerificationModal = ({
             onClick={onClose}
             className="flex-1 px-6 py-3 rounded-xl font-semibold bg-gray-100 text-gray-700 border-2 border-gray-200 hover:bg-gray-200 hover:border-gray-300 transition-all duration-300"
           >
-            Để sau
+            Later
           </button>
           <button 
             onClick={onNavigateToVerification}
             className="flex-1 px-6 py-3 rounded-xl font-semibold bg-gradient-to-r from-indigo-500 to-purple-600 text-white shadow-lg hover:shadow-xl hover:-translate-y-0.5 transition-all duration-300 flex items-center justify-center gap-2"
           >
-            <SafetyOutlined /> Xác thực ngay
+            <SafetyOutlined /> Verify now
           </button>
         </div>
 
         <div className="mt-4 p-3 bg-yellow-50 border border-yellow-200 rounded-lg w-full">
           <small className="text-gray-600 text-xs">
-            ⚠️ <strong>Lưu ý:</strong> Quá trình xác thực thường mất 5-10 phút. 
-            Bạn sẽ nhận được thông báo khi xác thực thành công.
+            ⚠️ <strong>Note:</strong> Verification may take 5-10 minutes. 
+            You will receive a notification once verification is complete.
           </small>
         </div>
       </div>

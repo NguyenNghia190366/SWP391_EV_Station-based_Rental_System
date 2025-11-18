@@ -23,37 +23,37 @@ const AdminDashboard = () => {
     {
       key: "overview",
       icon: <DashboardOutlined />,
-      label: "Tổng quan",
+      label: "Overview",
     },
     {
       key: "verify-renter",
       icon: <UserAddOutlined />,
-      label: "Xác thực người dùng",
+      label: "Verify Users",
     },
     {
       key: "register-station",
       icon: <EnvironmentOutlined />,
-      label: "Đăng ký trạm",
+      label: "Register Station",
     },
     {
       key: "vehicle-status",
       icon: <CarOutlined />,
-      label: "Trạng thái xe",
+      label: "Vehicle Status",
     },
     {
       key: "vehicles",
       icon: <CarOutlined />,
-      label: "Quản lý xe",
+      label: "Manage Vehicles",
     },
     {
       key: "users",
       icon: <UserOutlined />,
-      label: "Quản lý user",
+      label: "Manage Users",
     },
     {
       key: "statistics",
       icon: <BarChartOutlined />,
-      label: "Thống kê",
+      label: "Statistics",
     },
   ];
 
@@ -61,7 +61,7 @@ const AdminDashboard = () => {
     useEffect(() => {
       const fetchData = async () => {
         try {
-          // 🔹 Nếu BE .NET của bạn có endpoint /api/Stations
+          // 🔹 If your .NET backend has /api/Stations endpoint
           const [vehiclesRes, stationsRes, usersRes] = await Promise.all([
             axios.get(
               "https://alani-uncorroboratory-sympetaly.ngrok-free.dev/api/Vehicles",
@@ -80,12 +80,12 @@ const AdminDashboard = () => {
             }),
           ]);
 
-          // 🔹 Cập nhật số lượng trạm
+          // 🔹 Update station counts
           setTotalStations(stationsRes.data.length);
           setTotalVehicles(vehiclesRes.data.length);
           setTotalUsers(usersRes.data.length);
         } catch (error) {
-          console.error("❌ Lỗi khi lấy danh sách trạm:", error);
+          console.error("❌ Error fetching stations list:", error);
         }
       };
 
@@ -97,14 +97,14 @@ const AdminDashboard = () => {
         return (
           <Card className="shadow-lg" style={{ minHeight: "500px" }}>
             <h2 className="text-3xl font-bold text-gray-800 mb-6">
-              📊 Tổng quan hệ thống
+              📊 System Overview
             </h2>
 
             {/* Quick Stats */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
               <Card className="shadow-md hover:shadow-lg transition-shadow">
                 <Statistic
-                  title="Tổng Trạm Xe"
+                  title="Total Stations"
                   value={totalStations}
                   prefix={<EnvironmentOutlined className="text-blue-500" />}
                   valueStyle={{ color: "#1890ff" }}
@@ -112,7 +112,7 @@ const AdminDashboard = () => {
               </Card>
               <Card className="shadow-md hover:shadow-lg transition-shadow">
                 <Statistic
-                  title="Tổng Xe"
+                  title="Total Vehicles"
                   value={totalVehicles}
                   prefix={<CarOutlined className="text-green-500" />}
                   valueStyle={{ color: "#52c41a" }}
@@ -120,7 +120,7 @@ const AdminDashboard = () => {
               </Card>
               <Card className="shadow-md hover:shadow-lg transition-shadow">
                 <Statistic
-                  title="Người Dùng"
+                  title="Total Users"
                   value={totalUsers}
                   prefix={<UserOutlined className="text-purple-500" />}
                   valueStyle={{ color: "#722ed1" }}
@@ -131,36 +131,36 @@ const AdminDashboard = () => {
             {/* Welcome Card */}
             <Card className="shadow-md bg-gradient-to-r from-green-50 to-emerald-50 border border-green-200">
               <h3 className="text-2xl font-bold text-indigo-900 mb-4">
-                🎯 Chào mừng đến Admin Dashboard
+                🎯 Welcome to Admin Dashboard
               </h3>
               <p className="text-gray-700 mb-4">
-                Quản lý toàn bộ hệ thống EV Rental - Station Based. Sử dụng menu
-                bên trái để truy cập các chức năng.
+                Manage the EV Rental Station-based system. Use the left menu
+                to access functions and admin tools.
               </p>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6">
                 
                 <div className="bg-white rounded-lg p-4 border border-indigo-200 hover:shadow-md transition-shadow">
                   <h4 className="font-semibold text-indigo-800 mb-2">
-                    👤 Xác thực người dùng  
+                    👤 Verify Users
                   </h4>
                   <p className="text-sm text-gray-600">
-                    Quản lý và xác minh người thuê
+                    Manage and verify renters
                   </p>
                 </div>
                 <div className="bg-white rounded-lg p-4 border border-indigo-200 hover:shadow-md transition-shadow">
                   <h4 className="font-semibold text-indigo-800 mb-2">
-                    🏢 Đăng ký trạm
+                    🏢 Register Station
                   </h4>
                   <p className="text-sm text-gray-600">
-                    Thêm trạm xe mới vào hệ thống
+                    Add a new charging station to the system
                   </p>
                 </div>
                 <div className="bg-white rounded-lg p-4 border border-indigo-200 hover:shadow-md transition-shadow">
                   <h4 className="font-semibold text-indigo-800 mb-2">
-                    � Quản lý xe
+                    🚗 Manage Vehicles
                   </h4>
                   <p className="text-sm text-gray-600">
-                    Xem và quản lý danh sách xe
+                    View and manage the vehicle inventory
                   </p>
                 </div>
               </div>
@@ -174,10 +174,10 @@ const AdminDashboard = () => {
             <div className="mb-6">
               <h2 className="text-3xl font-bold text-gray-800 flex items-center gap-2">
                 <UserAddOutlined className="text-blue-500" />
-                Xác thực người dùng
+                Verify Users
               </h2>
               <p className="text-gray-600 mt-2">
-                Quản lý và xác thực thông tin người thuê xe
+                Manage and verify renter information
               </p>
             </div>
             <VerifyRenterPage />
@@ -190,10 +190,10 @@ const AdminDashboard = () => {
             <div className="mb-6">
               <h2 className="text-3xl font-bold text-gray-800 flex items-center gap-2">
                 <EnvironmentOutlined className="text-purple-500" />
-                Đăng ký trạm xe
+                Register station
               </h2>
               <p className="text-gray-600 mt-2">
-                Thêm trạm xe mới vào hệ thống
+                Add a new charging station to the system
               </p>
             </div>
             <StationRegistrationPage />
@@ -213,16 +213,16 @@ const AdminDashboard = () => {
             <div className="mb-6">
               <h2 className="text-3xl font-bold text-gray-800 flex items-center gap-2">
                 <CarOutlined className="text-green-500" />
-                Quản lý xe
+                Manage Vehicles
               </h2>
               <p className="text-gray-600 mt-2">
-                Xem và quản lý danh sách xe trong hệ thống
+                View and manage the vehicle list in the system
               </p>
             </div>
             <div className="bg-gray-50 rounded-lg p-8 text-center">
               <CarOutlined className="text-6xl text-gray-300 mb-4" />
               <p className="text-gray-500 text-lg">
-                Chức năng đang phát triển...
+                Feature under development...
               </p>
             </div>
           </Card>
@@ -234,16 +234,16 @@ const AdminDashboard = () => {
             <div className="mb-6">
               <h2 className="text-3xl font-bold text-gray-800 flex items-center gap-2">
                 <UserOutlined className="text-orange-500" />
-                Quản lý người dùng
+                Manage Users
               </h2>
               <p className="text-gray-600 mt-2">
-                Quản lý tài khoản và phân quyền người dùng
+                Manage accounts and user roles
               </p>
             </div>
             <div className="bg-gray-50 rounded-lg p-8 text-center">
               <UserOutlined className="text-6xl text-gray-300 mb-4" />
               <p className="text-gray-500 text-lg">
-                Chức năng đang phát triển...
+                Feature under development...
               </p>
             </div>
           </Card>
@@ -255,16 +255,16 @@ const AdminDashboard = () => {
             <div className="mb-6">
               <h2 className="text-3xl font-bold text-gray-800 flex items-center gap-2">
                 <BarChartOutlined className="text-pink-500" />
-                Thống kê
+                Statistics
               </h2>
               <p className="text-gray-600 mt-2">
-                Xem báo cáo và thống kê hệ thống
+                View system reports and statistics
               </p>
             </div>
             <div className="bg-gray-50 rounded-lg p-8 text-center">
               <BarChartOutlined className="text-6xl text-gray-300 mb-4" />
               <p className="text-gray-500 text-lg">
-                Chức năng đang phát triển...
+                Feature under development...
               </p>
             </div>
           </Card>
@@ -294,7 +294,7 @@ const AdminDashboard = () => {
         {/* Header */}
         <div className="p-6 border-b border-gray-200 bg-gradient-to-r from-green-600 to-emerald-600">
           <h3 className="text-xl font-bold text-white mb-1">Admin Dashboard</h3>
-          <p className="text-indigo-100 text-sm">Quản lý hệ thống</p>
+          <p className="text-indigo-100 text-sm">System management</p>
         </div>
 
         {/* Menu */}

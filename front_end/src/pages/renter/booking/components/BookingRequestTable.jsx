@@ -4,13 +4,13 @@ import { EyeOutlined, SendOutlined } from "@ant-design/icons";
 
 export default function BookingRequestsTable({ bookings, loading, onViewDetail }) {
   const handleSendRequest = (record) => {
-    message.success("✅ Đã gửi yêu cầu đặt xe thành công!");
+    message.success("✅ Booking request sent successfully!");
   };
 
   const columns = [
-    { title: "Mã Booking", dataIndex: "bookingId", key: "id" },
+    { title: "Booking ID", dataIndex: "bookingId", key: "id" },
     {
-      title: "Khách hàng",
+      title: "Customer",
       render: (_, record) => (
         <div>
           <strong>{record.user?.fullName}</strong><br />
@@ -19,7 +19,7 @@ export default function BookingRequestsTable({ bookings, loading, onViewDetail }
       ),
     },
     {
-      title: "Trạng thái",
+      title: "Status",
       dataIndex: "status",
       key: "status",
       render: (status) => (
@@ -27,22 +27,22 @@ export default function BookingRequestsTable({ bookings, loading, onViewDetail }
       ),
     },
     {
-      title: "Hành động",
+      title: "Actions",
       render: (_, record) => (
         <Space>
           <Button
             icon={<EyeOutlined />}
             onClick={() => onViewDetail(record)}
           >
-            Xem
+            View
           </Button>
           {record.status === "payment_completed" && (
-            <Button 
+              <Button 
               type="primary" 
               icon={<SendOutlined />}
               onClick={() => handleSendRequest(record)}
             >
-              Gửi ảnh
+              Upload image
             </Button>
           )}
         </Space>

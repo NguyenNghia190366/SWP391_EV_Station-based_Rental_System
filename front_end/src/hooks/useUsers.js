@@ -4,21 +4,21 @@ import { useAxiosInstance } from "./useAxiosInstance";
 export const useUsers = () => {
   const instance = useAxiosInstance();
 
-  // 🔐 Đăng nhập người dùng
+  // 🔐 User login
   const loginUser = useCallback(
     async (payload) => {
       try {
         const res = await instance.post("/UserAccount/login", payload);
         return res.data;
       } catch (error) {
-        console.error("❌ Lỗi đăng nhập:", error.response?.data || error.message);
+        console.error("❌ Login error:", error.response?.data || error.message);
         
-        // Xử lý lỗi chi tiết
+        // Handle detailed errors
         if (error.response?.status === 401) {
-          throw new Error("Email hoặc mật khẩu không chính xác!");
+          throw new Error("Incorrect email or password!");
         }
         if (error.response?.status === 404) {
-          throw new Error("Email không tồn tại trong hệ thống!");
+          throw new Error("Email not found in the system!");
         }
         
         throw error.response?.data || error;
@@ -27,186 +27,186 @@ export const useUsers = () => {
     [instance]
   );
 
-  // 📝 Đăng ký tài khoản mới
+  // 📝 Register new account
   const registerUser = useCallback(
     async (payload) => {
       try {
         const res = await instance.post("/Users/Register", payload);
         return res.data;
       } catch (error) {
-        console.error("❌ Lỗi đăng ký:", error.response?.data || error.message);
+        console.error("❌ Register error:", error.response?.data || error.message);
         throw error.response?.data || error;
       }
     },
     [instance]
   );
 
-  // 👤 Lấy thông tin hồ sơ người dùng
+  // 👤 Get user profile
   const getProfile = useCallback(
     async (userId) => {
       try {
-        if (!userId) throw new Error("userId không hợp lệ!");
+        if (!userId) throw new Error("Invalid userId!");
         
         const res = await instance.get(`/Users/${userId}`);
         return res.data;
       } catch (error) {
-        console.error("❌ Lỗi lấy hồ sơ:", error.response?.data || error.message);
+        console.error("❌ Error fetching profile:", error.response?.data || error.message);
         throw error.response?.data || error;
       }
     },
     [instance]
   );
 
-  // ✏️ Cập nhật thông tin hồ sơ
+  // ✏️ Update user profile
   const updateProfile = useCallback(
     async (userId, payload) => {
       try {
-        if (!userId) throw new Error("userId không hợp lệ!");
+        if (!userId) throw new Error("Invalid userId!");
         
         const res = await instance.put(`/Users/${userId}`, payload);
         return res.data;
       } catch (error) {
-        console.error("❌ Lỗi cập nhật hồ sơ:", error.response?.data || error.message);
+        console.error("❌ Error updating profile:", error.response?.data || error.message);
         throw error.response?.data || error;
       }
     },
     [instance]
   );
 
-  // 🖼️ Tải ảnh đại diện
+  // 🖼️ Upload avatar
   const uploadAvatar = useCallback(
     async (userId, formData) => {
       try {
-        if (!userId) throw new Error("userId không hợp lệ!");
+        if (!userId) throw new Error("Invalid userId!");
         
         const res = await instance.post(`/User/${userId}/avatar`, formData, {
           headers: { "Content-Type": "multipart/form-data" },
         });
         return res.data;
       } catch (error) {
-        console.error("❌ Lỗi tải ảnh:", error.response?.data || error.message);
+        console.error("❌ Error uploading avatar:", error.response?.data || error.message);
         throw error.response?.data || error;
       }
     },
     [instance]
   );
 
-  // 🔑 Đổi mật khẩu
+  // 🔑 Change password
   const changePassword = useCallback(
     async (userId, payload) => {
       try {
-        if (!userId) throw new Error("userId không hợp lệ!");
+        if (!userId) throw new Error("Invalid userId!");
         
         const res = await instance.put(`/User/${userId}/change-password`, payload);
         return res.data;
       } catch (error) {
-        console.error("❌ Lỗi đổi mật khẩu:", error.response?.data || error.message);
+        console.error("❌ Error changing password:", error.response?.data || error.message);
         throw error.response?.data || error;
       }
     },
     [instance]
   );
 
-  // 📧 Quên mật khẩu - gửi email reset
+  // 📧 Forgot password - send reset email
   const forgotPassword = useCallback(
     async (email) => {
       try {
-        if (!email) throw new Error("Email không hợp lệ!");
+        if (!email) throw new Error("Invalid email!");
         
         const res = await instance.post("/auth/forgot-password", { email });
         return res.data;
       } catch (error) {
-        console.error("❌ Lỗi quên mật khẩu:", error.response?.data || error.message);
+        console.error("❌ Forgot password error:", error.response?.data || error.message);
         throw error.response?.data || error;
       }
     },
     [instance]
   );
 
-  // 🔄 Reset mật khẩu bằng token
+  // 🔄 Reset password with token
   const resetPassword = useCallback(
     async (payload) => {
       try {
         const res = await instance.post("/auth/reset-password", payload);
         return res.data;
       } catch (error) {
-        console.error("❌ Lỗi reset mật khẩu:", error.response?.data || error.message);
+        console.error("❌ Reset password error:", error.response?.data || error.message);
         throw error.response?.data || error;
       }
     },
     [instance]
   );
 
-  // 📋 Lấy danh sách tất cả người dùng (Admin)
+  // 📋 Get all users (Admin)
   const getAllUsers = useCallback(
     async (params = {}) => {
       try {
         const res = await instance.get("/User", { params });
         return res.data;
       } catch (error) {
-        console.error("❌ Lỗi lấy danh sách người dùng:", error.response?.data || error.message);
+        console.error("❌ Error fetching users list:", error.response?.data || error.message);
         throw error.response?.data || error;
       }
     },
     [instance]
   );
 
-  // 👥 Lấy danh sách người thuê xe (Renters)
+  // 👥 Get renters list
   const getRentersList = useCallback(
     async (params = {}) => {
       try {
         const res = await instance.get("/Renters", { params });
         return res.data;
       } catch (error) {
-        console.error("❌ Lỗi lấy danh sách người thuê:", error.response?.data || error.message);
+        console.error("❌ Error fetching renters list:", error.response?.data || error.message);
         throw error.response?.data || error;
       }
     },
     [instance]
   );
 
-  // 🔍 Lấy thông tin người thuê theo ID
+  // 🔍 Get renter information by ID
   const getRenterById = useCallback(
     async (renterId) => {
       try {
-        if (!renterId) throw new Error("renterId không hợp lệ!");
+        if (!renterId) throw new Error("Invalid renterId!");
         
         const res = await instance.get(`/Renters/${renterId}`);
         return res.data;
       } catch (error) {
-        console.error("❌ Lỗi lấy thông tin người thuê:", error.response?.data || error.message);
+        console.error("❌ Error fetching renter info:", error.response?.data || error.message);
         throw error.response?.data || error;
       }
     },
     [instance]
   );
 
-  // ✏️ Cập nhật thông tin người thuê
+  // ✏️ Update renter information
   const updateRenter = useCallback(
     async (renterId, payload) => {
       try {
-        if (!renterId) throw new Error("renterId không hợp lệ!");
+        if (!renterId) throw new Error("Invalid renterId!");
         
         const res = await instance.put(`/Renters/${renterId}`, payload);
         return res.data;
       } catch (error) {
-        console.error("❌ Lỗi cập nhật người thuê:", error.response?.data || error.message);
+        console.error("❌ Error updating renter:", error.response?.data || error.message);
         throw error.response?.data || error;
       }
     },
     [instance]
   );
 
-  // 🗑️ Xóa tài khoản người dùng
+  // 🗑️ Delete user account
   const deleteUser = useCallback(
     async (userId) => {
       try {
-        if (!userId) throw new Error("userId không hợp lệ!");
+        if (!userId) throw new Error("Invalid userId!");
         
         const res = await instance.delete(`/User/${userId}`);
         return res.data;
       } catch (error) {
-        console.error("❌ Lỗi xóa người dùng:", error.response?.data || error.message);
+        console.error("❌ Error deleting user:", error.response?.data || error.message);
         throw error.response?.data || error;
       }
     },

@@ -24,7 +24,7 @@ export default function StaffReturnSummaryPage() {
       const res = await axios.get(`/RentalOrders/${orderId}`);
       setOrder(res.data);
     } catch (err) {
-      message.error("Không thể tải dữ liệu đơn.");
+      message.error("Cannot load order data.");
     }
   };
 
@@ -108,7 +108,7 @@ export default function StaffReturnSummaryPage() {
               state?.order?.renterName ||
               "Renter",
             description:
-              refundResult?.description || `Hoàn tiền cho đơn #${orderId}`,
+              refundResult?.description || `Refund for order #${orderId}`,
             html:
               refundResult?.html ||
               refundResult?.paymentHtml ||
@@ -124,7 +124,7 @@ export default function StaffReturnSummaryPage() {
           return;
         } catch (refundErr) {
           console.error("Refund error:", refundErr);
-          message.warning("Không thể khởi tạo hoàn tiền. Vui lòng thử lại.");
+          message.warning("Cannot initiate refund. Please try again.");
           setLoading(false);
           return;
         }
@@ -137,31 +137,31 @@ export default function StaffReturnSummaryPage() {
       navigate("/staff/dashboard");
     } catch (err) {
       console.error(err);
-      message.error("Có lỗi xảy ra khi hoàn tất trả xe.");
+      message.error("An error occurred while completing the return.");
     }
     setLoading(false);
   };
 
   return (
     <div style={{ padding: 24 }}>
-      <Card title={`Tổng kết trả xe #${order.orderId}`}>
+      <Card title={`Return summary #${order.orderId}`}>
         <Descriptions bordered column={1}>
-          <Descriptions.Item label="Tiền cọc">
+          <Descriptions.Item label="Deposit">
             {formatCurrency(depositNum)}
           </Descriptions.Item>
 
-          <Descriptions.Item label="Tổng phí phát sinh">
+          <Descriptions.Item label="Total additional fees">
             {formatCurrency(totalFeeNum)}
           </Descriptions.Item>
 
-          <Descriptions.Item label="Số tiền cuối cùng">
+          <Descriptions.Item label="Final amount">
             {finalAmount >= 0 ? (
               <span style={{ color: "green" }}>
-                Hoàn lại cho renter: {formatCurrency(finalAmount)}
+                Refund to renter: {formatCurrency(finalAmount)}
               </span>
             ) : (
               <span style={{ color: "red" }}>
-                Renter phải trả thêm: {formatCurrency(Math.abs(finalAmount))}
+                Renter must pay additional: {formatCurrency(Math.abs(finalAmount))}
               </span>
             )}
           </Descriptions.Item>
@@ -174,7 +174,7 @@ export default function StaffReturnSummaryPage() {
           style={{ marginTop: 20 }}
           onClick={handleConfirmReturn}
         >
-          Xác nhận thanh toán cọc
+          Confirm deposit payment
         </Button>
       </Card>
     </div>

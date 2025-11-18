@@ -9,7 +9,7 @@
   }
   
   body {
-    /* Sử dụng nền đơn giản, không màu mè */
+    /* Use a simple background, minimal colors */
     @apply bg-gray-50 text-slate-900 min-h-screen font-inter;
   }
   

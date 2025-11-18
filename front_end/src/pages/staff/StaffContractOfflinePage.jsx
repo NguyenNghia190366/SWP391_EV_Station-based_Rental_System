@@ -57,18 +57,18 @@ export default function StaffContractOfflinePage() {
         // Compose vehicle name
         const composedVehicleName = vehicleModel && vehicle
           ? `${vehicleModel.brandName} ${vehicle.model}`
-          : vehicle?.vehicleName || orderData?.vehicleName || "(Không có)";
+          : vehicle?.vehicleName || orderData?.vehicleName || "(N/A)";
 
         // Merge data
         const mergedOrder = {
           ...orderData,
-          renterName: userInfo?.fullName || renter?.fullName || "(Không có)",
-          renterPhone: userInfo?.phoneNumber || renter?.phoneNumber || "(Không có)",
-          renterEmail: userInfo?.email || renter?.email || "(Không có)",
-          renterIdNumber: cccd?.id_Card_Number || renter?.cccd || "(Không có)",
+          renterName: userInfo?.fullName || renter?.fullName || "(N/A)",
+          renterPhone: userInfo?.phoneNumber || renter?.phoneNumber || "(N/A)",
+          renterEmail: userInfo?.email || renter?.email || "(N/A)",
+          renterIdNumber: cccd?.id_Card_Number || renter?.cccd || "(N/A)",
           vehicleName: composedVehicleName,
-          vehicleLicensePlate: vehicle?.licensePlate || "(Không có)",
-          vehicleColor: vehicle?.vehicleColor || "(Không có)",
+          vehicleLicensePlate: vehicle?.licensePlate || "(N/A)",
+          vehicleColor: vehicle?.vehicleColor || "(N/A)",
           pricePerHour: vehicleModel?.price_per_hour || 0,
           pickupStationId: orderData?.pickupStationId || 0,
           returnStationId: orderData?.returnStationId || 0,
@@ -95,22 +95,22 @@ export default function StaffContractOfflinePage() {
           const stationResults = await Promise.all(stationCalls);
           stationResults.forEach((result) => {
             if (result.type === "pickup" && result.data) {
-              mergedOrder.pickupStationName = result.data.stationName || "(Không có)";
+              mergedOrder.pickupStationName = result.data.stationName || "(N/A)";
             } else if (result.type === "return" && result.data) {
-              mergedOrder.returnStationName = result.data.stationName || "(Không có)";
+              mergedOrder.returnStationName = result.data.stationName || "(N/A)";
             }
           });
         } else {
-          mergedOrder.pickupStationName = "(Không có)";
-          mergedOrder.returnStationName = "(Không có)";
+          mergedOrder.pickupStationName = "(N/A)";
+          mergedOrder.returnStationName = "(N/A)";
         }
 
         setOrder(mergedOrder);
         setError(null);
       } catch (err) {
         console.error("Error fetching data:", err);
-        setError("Không thể tải thông tin đơn. Vui lòng thử lại.");
-        message.error("Không thể tải thông tin đơn.");
+        setError("Cannot load order data. Please try again.");
+        message.error("Cannot load order data.");
       } finally {
         setLoading(false);
       }
@@ -127,59 +127,59 @@ export default function StaffContractOfflinePage() {
 
   const renderContract = () => {
     if (error) return <div style={{ color: "red", padding: 20 }}>{error}</div>;
-    if (!order) return <div style={{ padding: 20 }}>Không có dữ liệu hợp đồng.</div>;
+    if (!order) return <div style={{ padding: 20 }}>No contract data available.</div>;
 
     const o = order;
     return (
       <div ref={contractRef} style={{ padding: 20, fontFamily: "Arial, sans-serif" }}>
         <div style={{ textAlign: "center", marginBottom: 30 }}>
-          <h2>HỢP ĐỒNG THUÊ XE</h2>
-          <p>Mã đơn: #{orderId}</p>
+          <h2>RENTAL AGREEMENT</h2>
+          <p>Order ID: #{orderId}</p>
         </div>
 
         <div style={{ marginBottom: 20 }}>
-          <p><b>Khách hàng:</b> {o.renterName}</p>
-          <p><b>Số điện thoại:</b> {o.renterPhone}</p>
+          <p><b>Customer:</b> {o.renterName}</p>
+          <p><b>Phone:</b> {o.renterPhone}</p>
           <p><b>Email:</b> {o.renterEmail}</p>
-          <p><b>CMND/CCCD:</b> {o.renterIdNumber}</p>
+          <p><b>ID Number:</b> {o.renterIdNumber}</p>
         </div>
 
         <div style={{ marginBottom: 20 }}>
-          <p><b>Tên Xe:</b> {o.vehicleName}</p>
-          <p><b>Biển số xe:</b> {o.vehicleLicensePlate}</p>
-          <p><b>Màu xe:</b> {o.vehicleColor}</p>
+          <p><b>Vehicle Name:</b> {o.vehicleName}</p>
+          <p><b>License Plate:</b> {o.vehicleLicensePlate}</p>
+          <p><b>Color:</b> {o.vehicleColor}</p>
         </div>
 
         <div style={{ marginBottom: 20 }}>
-          <p><b>Thời gian thuê:</b></p>
+          <p><b>Rental period:</b></p>
           <p style={{ marginLeft: 20 }}>
-            Từ: {o.startTime ? dayjs(o.startTime).format("DD/MM/YYYY HH:mm") : "(Không có)"}
+            From: {o.startTime ? dayjs(o.startTime).format("DD/MM/YYYY HH:mm") : "(N/A)"}
           </p>
           <p style={{ marginLeft: 20 }}>
-            Đến: {o.endTime ? dayjs(o.endTime).format("DD/MM/YYYY HH:mm") : "(Không có)"}
+            To: {o.endTime ? dayjs(o.endTime).format("DD/MM/YYYY HH:mm") : "(N/A)"}
           </p>
         </div>
 
         <div style={{ marginBottom: 20 }}>
-          <p><b>Trạm nhận:</b> {o.pickupStationName}</p>
-          <p><b>Trạm trả:</b> {o.returnStationName}</p>
-          <p><b>Ngày tạo đơn:</b> {o.createdAt ? dayjs(o.createdAt).format("DD/MM/YYYY HH:mm") : "(Không có)"}</p>
-          <p><b>Trạng thái:</b> {o.status === "APPROVED" ? "Đã duyệt" : o.status}</p>
+          <p><b>Pickup Station:</b> {o.pickupStationName}</p>
+          <p><b>Return Station:</b> {o.returnStationName}</p>
+          <p><b>Created At:</b> {o.createdAt ? dayjs(o.createdAt).format("DD/MM/YYYY HH:mm") : "(N/A)"}</p>
+          <p><b>Status:</b> {o.status === "APPROVED" ? "Approved" : o.status}</p>
         </div>
 
         <div style={{ marginTop: 20, borderTop: "1px solid #ccc", paddingTop: 20 }}>
-          <p><b>Điều khoản cơ bản:</b></p>
+          <p><b>Basic terms:</b></p>
           <ol style={{ marginLeft: 20 }}>
-            <li>Bên thuê cam kết nhận xe đúng thời gian và địa điểm quy định.</li>
-            <li>Phí thuê và các điều khoản thanh toán theo hợp đồng riêng.</li>
-            <li>Bên thuê chịu trách nhiệm về mọi hư hỏng và tai nạn trong thời gian sử dụng.</li>
-            <li>Mọi sửa đổi phải được hai bên xác nhận bằng văn bản.</li>
-            <li>Phải trả xe đúng thời gian, nếu trễ sẽ chịu phí phạt.</li>
+            <li>The renter agrees to pick up the vehicle at the specified time and location.</li>
+            <li>Rental fees and payment terms are governed by the separate contract.</li>
+            <li>The renter is responsible for any damage and accidents during the rental period.</li>
+            <li>Any modifications must be agreed upon in writing by both parties.</li>
+            <li>The vehicle must be returned on time; late returns will incur penalties.</li>
           </ol>
         </div>
 
         <div style={{ marginTop: 30, backgroundColor: "#f5f5f5", padding: 20, borderRadius: 8 }}>
-          <p style={{ fontSize: 16, fontWeight: "bold", marginBottom: 20 }}>BẢNG TÍNH CHI PHÍ</p>
+          <p style={{ fontSize: 16, fontWeight: "bold", marginBottom: 20 }}>PRICE BREAKDOWN</p>
           {(() => {
             const startTime = o.startTime ? dayjs(o.startTime) : null;
             const endTime = o.endTime ? dayjs(o.endTime) : null;
@@ -193,7 +193,7 @@ export default function StaffContractOfflinePage() {
               <table style={{ width: "100%", borderCollapse: "collapse" }}>
                 <tbody>
                   <tr style={{ borderBottom: "1px solid #ddd" }}>
-                    <td style={{ padding: 12, textAlign: "left" }}>Giá thuê / giờ:</td>
+                    <td style={{ padding: 12, textAlign: "left" }}>Price per hour:</td>
                     <td style={{ padding: 12, textAlign: "right", fontWeight: "bold" }}>
                       {new Intl.NumberFormat("vi-VN", {
                         style: "currency",
@@ -202,13 +202,13 @@ export default function StaffContractOfflinePage() {
                     </td>
                   </tr>
                   <tr style={{ borderBottom: "1px solid #ddd" }}>
-                    <td style={{ padding: 12, textAlign: "left" }}>Số giờ thuê:</td>
+                    <td style={{ padding: 12, textAlign: "left" }}>Number of hours:</td>
                     <td style={{ padding: 12, textAlign: "right", fontWeight: "bold" }}>
-                      {rentalHours.toFixed(2)} giờ
+                      {rentalHours.toFixed(2)} hours
                     </td>
                   </tr>
                   <tr style={{ borderBottom: "1px solid #ddd" }}>
-                    <td style={{ padding: 12, textAlign: "left" }}>Tiền thuê xe:</td>
+                    <td style={{ padding: 12, textAlign: "left" }}>Rental fee:</td>
                     <td style={{ padding: 12, textAlign: "right", fontWeight: "bold" }}>
                       {new Intl.NumberFormat("vi-VN", {
                         style: "currency",
@@ -217,7 +217,7 @@ export default function StaffContractOfflinePage() {
                     </td>
                   </tr>
                   <tr style={{ borderBottom: "1px solid #ddd" }}>
-                    <td style={{ padding: 12, textAlign: "left" }}>Tiền cọc (30%):</td>
+                    <td style={{ padding: 12, textAlign: "left" }}>Deposit (30%):</td>
                     <td style={{ padding: 12, textAlign: "right", fontWeight: "bold", color: "#fa8c16" }}>
                       {new Intl.NumberFormat("vi-VN", {
                         style: "currency",
@@ -226,7 +226,7 @@ export default function StaffContractOfflinePage() {
                     </td>
                   </tr>
                   <tr>
-                    <td style={{ padding: 12, textAlign: "left", fontWeight: "bold" }}>Tổng thanh toán:</td>
+                    <td style={{ padding: 12, textAlign: "left", fontWeight: "bold" }}>Total Payment:</td>
                     <td style={{ padding: 12, textAlign: "right", fontWeight: "bold", color: "#52c41a", fontSize: 16 }}>
                       {new Intl.NumberFormat("vi-VN", {
                         style: "currency",
@@ -239,31 +239,31 @@ export default function StaffContractOfflinePage() {
             );
           })()}
           <p style={{ marginTop: 16, fontSize: 12, color: "#666", fontStyle: "italic" }}>
-            Ghi chú: Tiền cọc (30%) sẽ được trừ vào khoản thanh toán cuối cùng khi khách hàng hoàn trả xe.
+            Note: The deposit (30%) will be deducted from the final payment when the vehicle is returned.
           </p>
         </div>
 
         <div style={{ marginTop: 40, borderTop: "1px solid #ccc", paddingTop: 20 }}>
-          <p><b>XÁC NHẬN CỦA CÁC BÊN:</b></p>
+          <p><b>CONFIRMATION BY PARTIES:</b></p>
           <table style={{ width: "100%", marginTop: 20 }}>
             <tbody>
               <tr>
                 <td style={{ width: "50%", paddingRight: 20, textAlign: "center" }}>
                   <div>
-                    <p style={{ fontWeight: "bold", marginBottom: 30 }}>BÊN CHO THUÊ</p>
-                    <p style={{ marginBottom: 40, fontSize: 12, color: "#666" }}>(Người đại diện công ty)</p>
+                    <p style={{ fontWeight: "bold", marginBottom: 30 }}>LESSOR</p>
+                    <p style={{ marginBottom: 40, fontSize: 12, color: "#666" }}>(Company representative)</p>
                     <div style={{ minHeight: 60, borderBottom: "1px solid #333", marginBottom: 10 }}></div>
-                    <p style={{ fontSize: 12 }}>Ký tên & Dấu</p>
-                    <p style={{ fontSize: 12, marginTop: 8, color: "#666" }}>Ngày: ___/___/______</p>
+                              <p style={{ fontSize: 12 }}>Signature & Stamp</p>
+                    <p style={{ fontSize: 12, marginTop: 8, color: "#666" }}>Date: ___/___/______</p>
                   </div>
                 </td>
                 <td style={{ width: "50%", paddingLeft: 20, textAlign: "center" }}>
                   <div>
-                    <p style={{ fontWeight: "bold", marginBottom: 30 }}>BÊN THUÊ</p>
+                    <p style={{ fontWeight: "bold", marginBottom: 30 }}>LESSEE</p>
                     <p style={{ marginBottom: 40, fontSize: 12, color: "#666" }}>({o.renterName})</p>
                     <div style={{ minHeight: 60, borderBottom: "1px solid #333", marginBottom: 10 }}></div>
-                    <p style={{ fontSize: 12 }}>Ký tên</p>
-                    <p style={{ fontSize: 12, marginTop: 8, color: "#666" }}>Ngày: ___/___/______</p>
+                    <p style={{ fontSize: 12 }}>Signature</p>
+                    <p style={{ fontSize: 12, marginTop: 8, color: "#666" }}>Date: ___/___/______</p>
                   </div>
                 </td>
               </tr>
@@ -277,18 +277,18 @@ export default function StaffContractOfflinePage() {
   return (
     <>
       <Card
-        title={`Hợp đồng offline #${orderId}`}
+      title={`Offline contract #${orderId}`}
         extra={
           <Space>
             <Button onClick={handlePrint}>
-              🖨️ In
+              🖨️ Print
             </Button>
           </Space>
         }
       >
-        {loading ? (
+          {loading ? (
           <div style={{ textAlign: "center", padding: 40 }}>
-            <Spin tip="Đang tải thông tin đơn..." />
+            <Spin tip="Loading order data..." />
           </div>
         ) : (
           renderContract()

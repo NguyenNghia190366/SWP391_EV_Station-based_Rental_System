@@ -77,10 +77,10 @@ export const normalizeVehicleData = (vehicle) => {
       if (brandFromVehicle || modelFromVehicle) {
         return `${(brandFromVehicle || "").trim()} ${(modelFromVehicle || "").trim()}`.trim();
       }
-      return vehicle.licensePlate || `Xe ${vehicle.vehicleId}`;
+      return vehicle.licensePlate || `Vehicle ${vehicle.vehicleId}`;
     })(),
     licensePlate: vehicle.licensePlate || "",
-    type: vehicle.type || vehicle.vehicleType || "Xe điện",
+    type: vehicle.type || vehicle.vehicleType || "Electric vehicle",
 
     // Battery & Range
     battery: vehicle.battery || vehicle.batteryCapacity || 100,

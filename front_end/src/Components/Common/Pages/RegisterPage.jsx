@@ -26,18 +26,18 @@ const RegisterPage = () => {
     setLoading(true);
     // Validate with Yup schema before submitting
     const schema = yup.object({
-      name: yup.string().required('Vui lòng nhập họ tên!').min(2, 'Họ tên phải có ít nhất 2 ký tự!'),
-      email: yup.string().required('Vui lòng nhập email!').email('Email không hợp lệ!'),
-      phone: yup.string().required('Vui lòng nhập số điện thoại!').matches(/^[0-9]{10}$/, 'Số điện thoại phải có 10 chữ số!'),
-      dateOfBirth: yup.mixed().required('Vui lòng chọn ngày sinh!').test('age', 'Bạn phải đủ 18 tuổi!', value => {
+      name: yup.string().required('Please enter full name!').min(2, 'Full name must be at least 2 characters!'),
+      email: yup.string().required('Please enter email!').email('Invalid email!'),
+      phone: yup.string().required('Please enter phone number!').matches(/^[0-9]{10}$/, 'Phone number must have 10 digits!'),
+      dateOfBirth: yup.mixed().required('Please select date of birth!').test('age', 'You must be at least 18 years old!', value => {
         if (!value) return false;
         // value is a moment object from DatePicker
         const year = value.year ? value.year() : (new Date(value)).getFullYear();
         return new Date().getFullYear() - year >= 18;
       }),
-      address: yup.string().required('Vui lòng nhập địa chỉ!').min(10, 'Địa chỉ phải có ít nhất 10 ký tự!'),
-      password: yup.string().required('Vui lòng nhập mật khẩu!').min(6, 'Mật khẩu phải có ít nhất 6 ký tự!'),
-      confirm: yup.string().required('Vui lòng xác nhận mật khẩu!').oneOf([yup.ref('password')], 'Mật khẩu không khớp!'),
+      address: yup.string().required('Please enter address!').min(10, 'Address must be at least 10 characters!'),
+      password: yup.string().required('Please enter password!').min(6, 'Password must be at least 6 characters!'),
+      confirm: yup.string().required('Please confirm password!').oneOf([yup.ref('password')], 'Passwords do not match!'),
     });
 
     try {
@@ -55,7 +55,7 @@ const RegisterPage = () => {
         dateOfBirth: values.dateOfBirth
           ? values.dateOfBirth.format('YYYY-MM-DD')
           : '2000-01-01',
-        address: values.address || 'chưa cập nhật',
+        address: values.address || 'N/A',
       };
 
       console.log('📝 Sending new user:', newUser);
@@ -63,15 +63,15 @@ const RegisterPage = () => {
 
       if (result) {
         // Show react-toastify toast and redirect to login after short delay
-        toast.success('Đã đăng ký thành công, bây giờ hãy đăng nhập', {
+          toast.success('Registration successful, please log in now', {
           position: 'top-right',
           autoClose: 2000,
         });
         // Also show antd message for accessibility/consistency
-        message.success('✅ Đăng ký thành công! Hãy đăng nhập để tiếp tục.');
+        message.success('✅ Registration successful! Please log in to continue.');
         setTimeout(() => navigate('/login'), 1800);
       } else {
-        message.error('Không thể tạo tài khoản, vui lòng thử lại!');
+        message.error('Unable to create account, please try again!');
       }
     } catch (err) {
       if (err.name === 'ValidationError') {
@@ -80,7 +80,7 @@ const RegisterPage = () => {
         form.setFields(fields);
       } else {
         console.error('❌ Register error:', err);
-        message.error(err.message || 'Lỗi khi đăng ký. Vui lòng thử lại!');
+        message.error(err.message || 'An error occurred while registering. Please try again!');
       }
     } finally {
       setLoading(false);
@@ -95,25 +95,25 @@ const RegisterPage = () => {
             <RocketOutlined className="text-2xl text-white" />
           </div>
           <Title level={2} className="mb-1 text-2xl text-gray-800">
-            Tạo tài khoản mới
+            Create a new account
           </Title>
           <Text className="text-gray-600 text-sm">
-            Tham gia để trải nghiệm dịch vụ thuê xe điện
+            Join to experience EV rental services
           </Text>
         </div>
 
         <Form form={form} layout="vertical" onFinish={handleRegister} requiredMark={false}>
-          {/* Họ tên */}
+          {/* Full name */}
           <Form.Item
             name="name"
             rules={[
-              { required: true, message: "Vui lòng nhập họ tên!" },
-              { min: 2, message: "Họ tên phải có ít nhất 2 ký tự!" },
+              { required: true, message: "Please enter full name!" },
+              { min: 2, message: "Full name must be at least 2 characters!" },
             ]}
           >
             <Input
               prefix={<UserOutlined className="text-purple-500" />}
-              placeholder="Họ và tên"
+              placeholder="Full name"
               size="large"
               disabled={loading}
               className="rounded-lg"
@@ -124,8 +124,8 @@ const RegisterPage = () => {
           <Form.Item
             name="email"
             rules={[
-              { required: true, message: "Vui lòng nhập email!" },
-              { type: "email", message: "Email không hợp lệ!" },
+              { required: true, message: "Please enter email!" },
+              { type: "email", message: "Invalid email!" },
             ]}
           >
             <Input
@@ -137,20 +137,20 @@ const RegisterPage = () => {
             />
           </Form.Item>
 
-          {/* Số điện thoại */}
+          {/* Phone number */}
           <Form.Item
             name="phone"
             rules={[
-              { required: true, message: "Vui lòng nhập số điện thoại!" },
+              { required: true, message: "Please enter phone number!" },
               {
                 pattern: /^[0-9]{10}$/,
-                message: "Số điện thoại phải có 10 chữ số!",
+                message: "Phone number must have 10 digits!",
               },
             ]}
           >
             <Input
               prefix={<PhoneOutlined className="text-purple-500" />}
-              placeholder="Số điện thoại"
+              placeholder="Phone number"
               size="large"
               disabled={loading}
               className="rounded-lg"
@@ -158,17 +158,17 @@ const RegisterPage = () => {
             />
           </Form.Item>
 
-          {/* Ngày sinh */}
+          {/* Date of birth */}
           <Form.Item
             name="dateOfBirth"
             rules={[
-              { required: true, message: "Vui lòng chọn ngày sinh!" },
+              { required: true, message: "Please select date of birth!" },
               {
                 validator: (_, value) => {
                   if (!value) return Promise.resolve();
                   const age = new Date().getFullYear() - value.year();
                   if (age < 18) {
-                    return Promise.reject("Bạn phải đủ 18 tuổi!");
+                    return Promise.reject("You must be at least 18 years old!");
                   }
                   return Promise.resolve();
                 },
@@ -176,7 +176,7 @@ const RegisterPage = () => {
             ]}
           >
             <DatePicker
-              placeholder="Ngày sinh"
+              placeholder="Date of birth"
               size="large"
               disabled={loading}
               className="rounded-lg w-full"
@@ -184,59 +184,59 @@ const RegisterPage = () => {
             />
           </Form.Item>
 
-          {/* Địa chỉ */}
+          {/* Address */}
           <Form.Item
             name="address"
             rules={[
-              { required: true, message: "Vui lòng nhập địa chỉ!" },
-              { min: 10, message: "Địa chỉ phải có ít nhất 10 ký tự!" },
+              { required: true, message: "Please enter address!" },
+              { min: 10, message: "Address must be at least 10 characters!" },
             ]}
           >
             <Input
               prefix={<HomeOutlined className="text-purple-500" />}
-              placeholder="Địa chỉ"
+              placeholder="Address"
               size="large"
               disabled={loading}
               className="rounded-lg"
             />
           </Form.Item>
 
-          {/* Mật khẩu */}
+          {/* Password */}
           <Form.Item
             name="password"
             rules={[
-              { required: true, message: "Vui lòng nhập mật khẩu!" },
-              { min: 6, message: "Mật khẩu phải có ít nhất 6 ký tự!" },
+              { required: true, message: "Please enter password!" },
+              { min: 6, message: "Password must be at least 6 characters!" },
             ]}
           >
             <Input.Password
               prefix={<LockOutlined className="text-purple-500" />}
-              placeholder="Mật khẩu"
+              placeholder="Password"
               size="large"
               disabled={loading}
               className="rounded-lg"
             />
           </Form.Item>
 
-          {/* Xác nhận mật khẩu */}
+          {/* Confirm password */}
           <Form.Item
             name="confirm"
             dependencies={["password"]}
             rules={[
-              { required: true, message: "Vui lòng xác nhận mật khẩu!" },
+              { required: true, message: "Please confirm password!" },
               ({ getFieldValue }) => ({
                 validator(_, value) {
                   if (!value || getFieldValue("password") === value) {
                     return Promise.resolve();
                   }
-                  return Promise.reject(new Error("Mật khẩu không khớp!"));
+                  return Promise.reject(new Error("Passwords do not match!"));
                 },
               }),
             ]}
           >
             <Input.Password
               prefix={<LockOutlined className="text-purple-500" />}
-              placeholder="Xác nhận mật khẩu"
+              placeholder="Confirm password"
               size="large"
               disabled={loading}
               className="rounded-lg"
@@ -253,18 +253,18 @@ const RegisterPage = () => {
               className="w-full h-12 bg-blue-600 hover:bg-blue-700 border-0 rounded text-white font-medium"
               block
             >
-              {loading ? "Đang xử lý..." : "Đăng ký"}
+              {loading ? "Processing..." : "Register"}
             </Button>
           </Form.Item>
 
           <div className="text-center">
             <Text className="text-gray-600">
-              Đã có tài khoản?{" "}
+              Already have an account?{" "}
               <Link
                 to="/login"
                 className="text-blue-600 hover:text-blue-700 font-medium"
               >
-                Đăng nhập
+                Login
               </Link>
             </Text>
           </div>
