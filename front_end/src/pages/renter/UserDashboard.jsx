@@ -19,7 +19,7 @@ import { useRentalOrders } from "@/hooks/useRentalOrders";
 import VerifyPage from "@/pages/renter/VerifyPage";
 import RentalHistoryPage from "@/pages/renter/RentalHistoryPage";
 
-const ProfilePage = () => {
+const UserDashboard = () => {
   const navigate = useNavigate();
   const instance = useAxiosInstance();
   const { getRenterIdByUserId } = useRenters();
@@ -380,7 +380,7 @@ const ProfilePage = () => {
       <div className="min-h-screen flex items-center justify-center">
         <Card className="text-center p-6">
           <UserOutlined className="text-4xl mb-3" />
-          <h3>Please log in to view profile</h3>
+          <h3>Please log in to view your dashboard</h3>
           <Button type="primary" onClick={() => navigate("/login")}>Log in</Button>
         </Card>
       </div>
@@ -432,4 +432,4 @@ const ProfilePage = () => {
   );
 };
 
-export default ProfilePage;
+export default UserDashboard;
