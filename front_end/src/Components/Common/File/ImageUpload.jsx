@@ -14,12 +14,12 @@ const UploadToCloudinary = ({onUpload}) => {
         const res = await fetch(url, { method: "POST", body: data });
         const result = await res.json();
         onSuccess(result);
-        message.success("Upload thành công!");
+        message.success("Upload successful!");
         console.log("URL:", result.secure_url);
         onUpload?.(result.secure_url);
       } catch (err) {
         onError(err);
-        message.error("Upload thất bại!");
+        message.error("Upload failed!");
       }
     },
   };

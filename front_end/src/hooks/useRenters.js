@@ -8,17 +8,17 @@ export const useRenter = () => {
   // Backup instance for /Reject endpoint (uses ngrok URL without /api path, like staff)
   const backupInstance = useAxiosInstance(true);
 
-  // 🔹 Lấy renterId từ database dựa vào userId
+  // 🔹 Get renterId from database by userId
   const getRenterIdByUserId = useCallback(
     async (userId) => {
       try {
         if (!userId) {
-          throw new Error("userId không hợp lệ!");
+          throw new Error("Invalid userId!");
         }
 
-        console.log("🔍 Lấy renterId từ database cho userId:", userId);
+        console.log("🔍 Fetching renterId from DB for userId:", userId);
 
-        // Query Renters table từ primary API (có /api path)
+          // Query Renters table from the primary API (includes /api path)
         const res = await instance.get("/Renters");
         const renters = Array.isArray(res.data)
           ? res.data
@@ -32,25 +32,25 @@ export const useRenter = () => {
         );
 
         if (!renter) {
-          throw new Error(`Không tìm thấy renter cho userId: ${userId}`);
+          throw new Error(`No renter found for userId: ${userId}`);
         }
 
         const renterId = renter.renter_Id || renter.renterId;
-        console.log("✅ Tìm thấy renterId từ DB:", renterId);
+        console.log("✅ Found renterId in DB:", renterId);
 
         return renterId;
       } catch (error) {
-        console.error("❌ Lỗi khi lấy renterId từ DB:", error);
+          console.error("❌ Error fetching renterId from DB:", error);
         throw error;
       }
     },
     [instance]
   );
 
-  // 🔹 Lấy renterId - tự động từ localStorage hoặc DB
+  // 🔹 Get renterId - automatically from localStorage or DB
   const getRenterId = useCallback(async () => {
     try {
-      // 1️⃣ Thử lấy từ localStorage trước (cache)
+        // 1️⃣ Try to get renterId from localStorage first (cache)
       const cachedRenterId =
         localStorage.getItem("renter_Id") ||
         localStorage.getItem("renterId") ||
@@ -62,44 +62,44 @@ export const useRenter = () => {
         cachedRenterId !== "1" &&
         cachedRenterId !== "undefined"
       ) {
-        console.log("✅ Dùng renterId từ localStorage cache:", cachedRenterId);
+        console.log("✅ Using cached renterId from localStorage:", cachedRenterId);
         return Number(cachedRenterId);
       }
 
-      // 2️⃣ Nếu không có cache hoặc là hardcoded renterId=1, query DB
+        // 2️⃣ If no cache or the cached value is the hardcoded renterId=1, query the DB
       const userId =
         localStorage.getItem("userId") || localStorage.getItem("user_id");
 
       if (!userId || userId === "undefined") {
         throw new Error(
-          "Không tìm thấy userId trong localStorage! Vui lòng đăng nhập lại."
+          "userId not found in localStorage! Please log in again."
         );
       }
 
       console.log(
-        "📡 Lấy renterId từ DB vì không có cache hoặc là hardcoded..."
+        "📡 Fetching renterId from DB because no cache or hardcoded value found..."
       );
       const renterId = await getRenterIdByUserId(Number(userId));
 
       if (!renterId || renterId === undefined) {
         throw new Error(
-          `User ${userId} không có record trong Renters table. Vui lòng kiểm tra dữ liệu backend.`
+          `User ${userId} has no record in Renters table. Please check the backend data.`
         );
       }
 
-      // 3️⃣ Lưu vào localStorage cache
+      // 3️⃣ Save to localStorage cache
       localStorage.setItem("renter_Id", renterId);
       localStorage.setItem("renterId", renterId);
       localStorage.setItem("renter_id", renterId);
 
       return Number(renterId);
     } catch (error) {
-      console.error("❌ Không thể lấy renterId:", error);
+        console.error("❌ Unable to fetch renterId:", error);
       throw error;
     }
   }, [getRenterIdByUserId]);
 
-  // từ chối đơn thuê
+  // Reject rental order
 
   const rejectRentalOrder = useCallback(
     async (orderId) => {
@@ -116,13 +116,13 @@ export const useRenter = () => {
           }
         );
 
-        message.success("Đã từ chối đơn thuê!");
+        message.success("Rental order rejected!");
         return res.data;
       } catch (error) {
         const errorMsg =
           error.response?.data?.title ||
           error.response?.data?.message ||
-          "Không thể từ chối đơn thuê!";
+          "Cannot reject rental order!";
 
         message.error(errorMsg);
         throw error;
@@ -134,5 +134,5 @@ export const useRenter = () => {
   return { getRenterId, getRenterIdByUserId, rejectRentalOrder };
 };
 
-// alias for backwards-compatibility: some files import `useRenters` or `useRenter`
+  // alias for backwards-compatibility: some files import `useRenters` or `useRenter`
 export const useRenters = useRenter;

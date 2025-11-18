@@ -73,7 +73,7 @@ const VehiclesByStation = ({ station }) => {
         setVehiclesByModel(grouped);
       } catch (err) {
         console.error("Error fetching vehicles for station:", err);
-        setError("Không thể tải danh sách xe. Vui lòng thử lại.");
+        setError("Cannot load vehicle list. Please try again.");
       } finally {
         setLoading(false);
       }
@@ -85,7 +85,7 @@ const VehiclesByStation = ({ station }) => {
   if (!station) {
     return (
       <div className="text-center py-12 bg-gray-50 rounded-lg">
-        <p className="text-gray-500 text-lg">Chọn một trạm để xem xe</p>
+          <p className="text-gray-500 text-lg">Select a station to view vehicles</p>
       </div>
     );
   }
@@ -93,7 +93,7 @@ const VehiclesByStation = ({ station }) => {
   if (loading) {
     return (
       <div className="flex justify-center py-12">
-        <Spin tip="Đang tải danh sách xe..." />
+        <Spin tip="Loading vehicle list..." />
       </div>
     );
   }
@@ -112,7 +112,7 @@ const VehiclesByStation = ({ station }) => {
   if (modelCount === 0) {
     return (
       <Empty
-        description="Không có xe nào tại trạm này"
+        description="No vehicles at this station"
         style={{ paddingTop: 40 }}
       />
     );
@@ -123,15 +123,15 @@ const VehiclesByStation = ({ station }) => {
       {/* Station Header */}
       <div className="mb-8 p-6 bg-gradient-to-r from-blue-50 to-cyan-50 rounded-lg border border-blue-200">
         <h3 className="text-2xl font-bold text-gray-800 mb-2">
-          📍 {station.stationName || "Trạm"}
+            📍 {station.stationName || "Station"}
         </h3>
         <p className="text-gray-600 mb-3">{station.address || ""}</p>
         <div className="flex gap-4">
           <Tag color="blue" className="text-base px-3 py-2">
-            🚗 {totalVehicles} xe
+              🚗 {totalVehicles} vehicles
           </Tag>
           <Tag color="cyan" className="text-base px-3 py-2">
-            📦 {modelCount} model
+              📦 {modelCount} models
           </Tag>
         </div>
       </div>
@@ -149,10 +149,10 @@ const VehiclesByStation = ({ station }) => {
               <div>
                 <h4 className="text-lg font-bold text-gray-800">{modelName}</h4>
                 <p className="text-sm text-gray-500 mt-1">
-                  Giá: {new Intl.NumberFormat("vi-VN", {
+                  Price: {new Intl.NumberFormat("vi-VN", {
                     style: "currency",
                     currency: "VND",
-                  }).format(data.modelInfo.pricePerHour)}/giờ
+                  }).format(data.modelInfo.pricePerHour)}/hr
                 </p>
               </div>
               <Badge
@@ -169,10 +169,10 @@ const VehiclesByStation = ({ station }) => {
             {/* Vehicle Details */}
             <div className="space-y-2 mb-4 bg-gray-50 p-3 rounded">
               <p className="text-sm text-gray-700">
-                <b>Còn lại:</b> {data.count} chiếc
+                <b>Remaining:</b> {data.count} vehicles
               </p>
               <p className="text-sm text-gray-700">
-                <b>Trạm:</b> {station.stationName}
+                <b>Station:</b> {station.stationName}
               </p>
             </div>
 
@@ -182,7 +182,7 @@ const VehiclesByStation = ({ station }) => {
               block
               onClick={() => navigate(`/vehicles?station=${station.stationId || station.id}&model=${modelName}`)}
             >
-              Xem chi tiết & Đặt xe
+                View details & Book
             </Button>
           </Card>
         ))}

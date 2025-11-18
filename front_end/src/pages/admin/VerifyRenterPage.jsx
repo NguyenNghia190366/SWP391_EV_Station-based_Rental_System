@@ -62,8 +62,8 @@ const VerifyRenterPage = () => {
 
       setRenters(mergedRenters);
     } catch (err) {
-      console.error("❌ Lỗi khi tải dữ liệu:", err);
-      message.error("Không thể tải danh sách người thuê: " + (err.message || ""));
+      console.error("❌ Error loading data:", err);
+      message.error("Cannot load renters list: " + (err.message || ""));
     } finally {
       setFetchingRenters(false);
     }
@@ -85,16 +85,16 @@ const VerifyRenterPage = () => {
       );
 
       if (email) {
-        try {
+          try {
           await api.post("/Notifications/SendEmail", {
             to: email,
-            subject: "✅ Xác thực tài khoản thành công",
-            body: `Chúc mừng! Tài khoản của bạn đã được xác thực thành công. Bạn có thể bắt đầu thuê xe ngay bây giờ.`,
+            subject: "✅ Account verification successful",
+            body: `Congratulations! Your account has been verified successfully. You can now start booking vehicles.`,
             type: "VERIFICATION_APPROVED",
           });
           console.log("📧 Email sent to:", email);
         } catch (emailErr) {
-          console.warn("⚠️ Không gửi được email thông báo:", emailErr);
+          console.warn("⚠️ Failed to send notification email:", emailErr);
         }
       }
 
@@ -111,14 +111,14 @@ const VerifyRenterPage = () => {
           }
         }
       } catch (e) {
-        console.warn("Không thể cập nhật localStorage:", e);
+        console.warn("Cannot update localStorage:", e);
       }
 
       await fetchRenters();
-      message.success("✅ Xác thực thành công - Email đã được gửi");
+      message.success("✅ Verified successfully - Email sent");
     } catch (err) {
-      console.error("Lỗi khi xác thực renter:", err);
-      message.error("Xác thực thất bại: " + (err.message || ""));
+      console.error("Error verifying renter:", err);
+      message.error("Verification failed: " + (err.message || ""));
     }
   };
 
@@ -139,24 +139,24 @@ const VerifyRenterPage = () => {
       );
 
       if (email) {
-        try {
+          try {
           await api.post("/Notifications/SendEmail", {
             to: email,
-            subject: "❌ Yêu cầu xác thực bị từ chối",
-            body: `Yêu cầu xác thực tài khoản của bạn đã bị từ chối.\n\nLý do: ${reason}\n\nVui lòng kiểm tra và tải lên lại giấy tờ.`,
+            subject: "❌ Verification request rejected",
+            body: `Your verification request has been rejected.\n\nReason: ${reason}\n\nPlease check and re-upload the documents.`,
             type: "VERIFICATION_REJECTED",
             metadata: { rejection_reason: reason },
           });
         } catch (emailErr) {
-          console.warn("⚠️ Không gửi được email từ chối:", emailErr);
+          console.warn("⚠️ Failed to send rejection email:", emailErr);
         }
       }
 
-      message.success("✅ Đã từ chối - Email đã được gửi");
+      message.success("✅ Rejected - Email sent");
       await fetchRenters();
     } catch (err) {
-      console.error("Lỗi khi từ chối renter:", err);
-      message.error("Từ chối thất bại: " + (err.message || ""));
+      console.error("Error rejecting renter:", err);
+      message.error("Rejection failed: " + (err.message || ""));
     }
   };
 

@@ -5,7 +5,7 @@ import { useNavigate } from "react-router-dom";
 import dayjs from "dayjs";
 import { useStationStaff } from "@/hooks/useStationStaff";
 
-export default function BookingTable({ bookings = [], loading, onRefresh }) {
+export default function BookingTable({ bookings = [], loading = false, onRefresh = () => {} }) {
   const navigate = useNavigate();
   const { approveRentalOrder, rejectRentalOrder } = useStationStaff();
 
@@ -19,7 +19,7 @@ export default function BookingTable({ bookings = [], loading, onRefresh }) {
 
     try {
       await approveRentalOrder(record.orderId);
-      message.success("Đã duyệt yêu cầu booking!");
+      message.success("Booking request approved!");
       setTimeout(() => onRefresh?.(), 500);
     } catch (error) {
       console.error("Approve error:", error);
@@ -33,8 +33,8 @@ export default function BookingTable({ bookings = [], loading, onRefresh }) {
     setRejectingId(record.orderId);
 
     try {
-      await rejectRentalOrder(record.orderId);
-      message.success("Đã từ chối yêu cầu booking!");
+    await rejectRentalOrder(record.orderId);
+    message.success("Booking request rejected!");
       setTimeout(() => onRefresh?.(), 500);
     } catch (error) {
       console.error("Reject error:", error);
@@ -46,7 +46,7 @@ export default function BookingTable({ bookings = [], loading, onRefresh }) {
   // ✅ Memoize columns definition
   const columns = useMemo(() => [
     {
-      title: "Mã đơn",
+      title: "Order ID",
       dataIndex: "orderId",
       key: "orderId",
       render: (id) => (
@@ -55,21 +55,21 @@ export default function BookingTable({ bookings = [], loading, onRefresh }) {
       width: 80,
     },
     {
-      title: "Khách hàng",
+      title: "Customer",
       dataIndex: "renterName",
       key: "renterName",
       render: (text) => text || "N/A",
       width: 180,
     },
     {
-      title: "Xe",
+      title: "Vehicle",
       dataIndex: "vehicleName",
       key: "vehicleName",
       render: (text) => text || "N/A",
       width: 180,
     },
     {
-      title: "Trạm (nhận → trả)",
+      title: "Stations (pickup → return)",
       key: "stations",
       render: (_, record) => (
         <span>
@@ -79,7 +79,7 @@ export default function BookingTable({ bookings = [], loading, onRefresh }) {
       width: 220,
     },
     {
-      title: "Thời gian thuê",
+      title: "Rental time",
       key: "rentalTime",
       render: (_, record) => (
         <span>
@@ -90,38 +90,38 @@ export default function BookingTable({ bookings = [], loading, onRefresh }) {
       width: 220,
     },
     {
-      title: "Trạng thái",
+      title: "Status",
       dataIndex: "status",
       key: "status",
       render: (status) => {
-        const statusMap = {
-          BOOKED: { color: "blue", text: "Chờ duyệt" },
-          APPROVED: { color: "green", text: "Đã duyệt" },
-          CANCELED: { color: "red", text: "Từ chối" },
-          IN_USE: { color: "orange", text: "Đang thuê" },
-          COMPLETED: { color: "cyan", text: "Hoàn tất" },
+          const statusMap = {
+          BOOKED: { color: "blue", text: "Pending" },
+          APPROVED: { color: "green", text: "Approved" },
+          CANCELED: { color: "red", text: "Canceled" },
+          IN_USE: { color: "orange", text: "In Use" },
+          COMPLETED: { color: "cyan", text: "Completed" },
         };
         const info = statusMap[status] || {
           color: "default",
-          text: "Không xác định",
+          text: "Unknown",
         };
         return <Tag color={info.color}>{info.text}</Tag>;
       },
       width: 140,
     },
     {
-      title: "Ngày tạo",
+      title: "Created At",
       dataIndex: "createdAt",
       key: "createdAt",
       render: (date) => dayjs(date).format("DD/MM/YYYY HH:mm"),
       width: 160,
     },
     {
-      title: "Hành động",
+      title: "Actions",
       key: "actions",
       render: (_, record) => (
         <Space size="small">
-          <Tooltip title="Xem chi tiết">
+          <Tooltip title="View details">
             <Button
               type="text"
               icon={<EyeOutlined />}
@@ -138,14 +138,14 @@ export default function BookingTable({ bookings = [], loading, onRefresh }) {
           {record.status === "BOOKED" && (
             <>
               <Popconfirm
-                title="Duyệt yêu cầu?"
-                description="Bạn có chắc muốn duyệt đơn thuê này?"
+                title="Approve request?"
+                  description="Are you sure you want to approve this rental request?"
                 onConfirm={(e) => {
                   e?.stopPropagation();
                   handleApprove(record);
                 }}
-                okText="Có"
-                cancelText="Không"
+                okText="Yes"
+                cancelText="No"
               >
                 <Button
                   type="primary"
@@ -158,14 +158,14 @@ export default function BookingTable({ bookings = [], loading, onRefresh }) {
               </Popconfirm>
 
               <Popconfirm
-                title="Từ chối yêu cầu?"
-                description="Bạn có chắc muốn từ chối đơn thuê này?"
+                title="Reject request?"
+                description="Are you sure you want to reject this rental request?"
                 onConfirm={(e) => {
                   e?.stopPropagation();
                   handleReject(record);
                 }}
-                okText="Có"
-                cancelText="Không"
+                okText="Yes"
+                cancelText="No"
               >
                 <Button
                   type="primary"
@@ -180,7 +180,7 @@ export default function BookingTable({ bookings = [], loading, onRefresh }) {
           )}
           {(record.status === "BOOKED" || record.status === "APPROVED") && (
             <Popconfirm
-              title="Chọn loại hợp đồng"
+              title="Choose contract type"
               description={
                 <Space direction="vertical" style={{ width: '100%' }}>
                   <Button 
@@ -191,7 +191,7 @@ export default function BookingTable({ bookings = [], loading, onRefresh }) {
                       navigate(`/staff/contract-online/${record.orderId}`);
                     }}
                   >
-                    Hợp đồng Online
+                    Online contract
                   </Button>
                   <Button 
                     block
@@ -200,7 +200,7 @@ export default function BookingTable({ bookings = [], loading, onRefresh }) {
                       navigate(`/staff/contract-offline/${record.orderId}`);
                     }}
                   >
-                    Hợp đồng Offline
+                    Offline contract
                   </Button>
                 </Space>
               }
@@ -208,7 +208,7 @@ export default function BookingTable({ bookings = [], loading, onRefresh }) {
               showCancel={false}
               okButtonProps={{ style: { display: 'none' } }}
             >
-              <Tooltip title="Tạo hợp đồng">
+              <Tooltip title="Create contract">
                 <Button
                   type="text"
                   icon={<FileTextOutlined />}
@@ -229,7 +229,7 @@ export default function BookingTable({ bookings = [], loading, onRefresh }) {
   // ✅ Memoize pagination config
   const paginationConfig = useMemo(() => ({
     pageSize: 10,
-    showTotal: (total) => `Tổng ${total} đơn`,
+    showTotal: (total) => `Total ${total} orders`,
   }), []);
 
   return (

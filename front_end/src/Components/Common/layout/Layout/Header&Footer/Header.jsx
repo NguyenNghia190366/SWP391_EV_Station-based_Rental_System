@@ -57,12 +57,12 @@ export default function Header() {
 
   // ------------------ User Menu ------------------
   const userMenuItems = [
-    {
-      key: "profile",
-      icon: <UserOutlined />,
-      label: "Trang cá nhân",
-      onClick: () => navigate("/profile"),
-    },
+      {
+        key: "profile",
+        icon: <UserOutlined />,
+        label: "Profile",
+        onClick: () => navigate("/profile"),
+      },
     ...(user?.role === "ADMIN"
       ? [
           {
@@ -85,36 +85,36 @@ export default function Header() {
       : []),
     ...(user?.role === "RENTER"
       ? [
-          {
-            key: "my-bookings",
-            icon: <CarOutlined />,
-            label: "Lịch sử thuê xe",
-            onClick: () => navigate("/my-bookings"),
-          },
+            {
+              key: "my-bookings",
+              icon: <CarOutlined />,
+              label: "My bookings",
+              onClick: () => navigate("/my-bookings"),
+            },
         ]
       : []),
-    {
-      key: "settings",
-      icon: <SettingOutlined />,
-      label: "Cài đặt",
-      onClick: () => navigate("/settings"),
-    },
+      {
+        key: "settings",
+        icon: <SettingOutlined />,
+        label: "Settings",
+        onClick: () => navigate("/settings"),
+      },
     { type: "divider" },
     {
-      key: "logout",
-      icon: <LogoutOutlined />,
-      label: "Đăng xuất",
-      onClick: handleLogout,
-      danger: true,
-    },
+        key: "logout",
+        icon: <LogoutOutlined />,
+        label: "Logout",
+        onClick: handleLogout,
+        danger: true,
+      },
   ];
 
   // ------------------ Navigation ------------------
   const navItems = [
-    { path: "/home", label: "Trang chủ" },
-    { path: "/vehicles", label: "Xe điện" },
-    { path: "/about", label: "Giới thiệu" },
-    { path: "/contact", label: "Liên hệ" },
+     { path: "/home", label: "Home" },
+     { path: "/vehicles", label: "Vehicles" },
+     { path: "/about", label: "About" },
+     { path: "/contact", label: "Contact" },
   ];
 
   const isActive = (path) => location.pathname === path;
@@ -176,14 +176,14 @@ export default function Header() {
                 onClick={() => navigate("/login")}
                 className="rounded-lg font-medium h-9 px-5 border-blue-300 text-white bg-transparent hover:border-blue-400 hover:text-blue-300"
               >
-                Đăng nhập
+                 Login
               </Button>
               <Button
                 type="primary"
                 onClick={() => navigate("/register")}
                 className="rounded-lg font-medium h-9 px-5 bg-blue-300 border-none text-[#1e2a38] hover:bg-blue-200"
               >
-                Đăng ký
+                 Register
               </Button>
             </div>
           )}
@@ -226,7 +226,7 @@ export default function Header() {
                 }}
                 className="rounded-lg font-medium border-blue-300 text-white bg-transparent hover:text-blue-300 hover:border-blue-400"
               >
-                Đăng nhập
+                  Login
               </Button>
               <Button
                 type="primary"
@@ -237,7 +237,7 @@ export default function Header() {
                 }}
                 className="rounded-lg font-medium bg-blue-300 text-[#1e2a38] hover:bg-blue-200"
               >
-                Đăng ký
+                  Register
               </Button>
             </div>
           )}

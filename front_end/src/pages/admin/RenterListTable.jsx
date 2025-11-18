@@ -21,30 +21,30 @@ const RenterListTable = ({ renters, loading, error, onVerify, onReject }) => {
 
   if (error) return <p className="text-red-500">{error}</p>;
 
-  // Kiểm tra xem có cả GPLX và CCCD không
+  // Check if both driver license and national ID are available
   const hasAllDocuments = (renter) => {
     const hasLicense = renter.driverLicenseFrontUrl || renter.driverLicenseBackUrl;
     const hasCCCD = renter.cccdFrontUrl || renter.cccdBackUrl;
     return hasLicense && hasCCCD;
   };
 
-  // Mở modal xem chi tiết
+  // Open details modal
   const handleViewDetails = (renter) => {
     setSelectedRenter(renter);
     setModalVisible(true);
   };
 
-  // Xác thực renter
+  // Verify renter
   const handleVerifyClick = async (id) => {
     await onVerify(id);
     setModalVisible(false);
   };
 
-  // Từ chối renter
+  // Reject renter
   const handleRejectClick = async () => {
     if (!selectedRenter) return;
     if (!rejectReason.trim()) {
-      alert("Vui lòng nhập lý do từ chối!");
+      alert("Please enter a reason for rejection!");
       return;
     }
     if (onReject) {
@@ -64,7 +64,7 @@ const RenterListTable = ({ renters, loading, error, onVerify, onReject }) => {
       align: "center",
     },
     {
-      title: "Thông tin người thuê",
+      title: "Renter details",
       key: "renter_info",
       render: (_, record) => (
         <div className="flex items-center gap-3">
@@ -86,7 +86,7 @@ const RenterListTable = ({ renters, loading, error, onVerify, onReject }) => {
       ),
     },
     {
-      title: "Giấy phép lái xe",
+      title: "Driver license",
       key: "driver_license",
       align: "center",
       render: (_, record) => {
@@ -96,7 +96,7 @@ const RenterListTable = ({ renters, loading, error, onVerify, onReject }) => {
             {record.driverLicenseFrontUrl && (
               <Image
                 src={record.driverLicenseFrontUrl}
-                alt="GPLX Mặt trước"
+                alt="Driver license front"
                 width={80}
                 height={50}
                 style={{ objectFit: "cover", borderRadius: 4 }}
@@ -106,16 +106,16 @@ const RenterListTable = ({ renters, loading, error, onVerify, onReject }) => {
               />
             )}
             <Tag icon={<CarOutlined />} color="blue">
-              GPLX
+              License
             </Tag>
           </Space>
         ) : (
-          <Tag color="default">Chưa có</Tag>
+          <Tag color="default">N/A</Tag>
         );
       },
     },
     {
-      title: "Căn cước công dân",
+      title: "National ID",
       key: "cccd",
       align: "center",
       render: (_, record) => {
@@ -125,7 +125,7 @@ const RenterListTable = ({ renters, loading, error, onVerify, onReject }) => {
             {record.cccdFrontUrl && (
               <Image
                 src={record.cccdFrontUrl}
-                alt="CCCD Mặt trước"
+                alt="National ID front"
                 width={80}
                 height={50}
                 style={{ objectFit: "cover", borderRadius: 4 }}
@@ -135,16 +135,16 @@ const RenterListTable = ({ renters, loading, error, onVerify, onReject }) => {
               />
             )}
             <Tag icon={<IdcardOutlined />} color="green">
-              CCCD
+              National ID
             </Tag>
           </Space>
         ) : (
-          <Tag color="default">Chưa có</Tag>
+          <Tag color="default">N/A</Tag>
         );
       },
     },
     {
-      title: "Trạng thái",
+      title: "Status",
       dataIndex: "isVerified",
       key: "isVerified",
       align: "center",
@@ -152,53 +152,53 @@ const RenterListTable = ({ renters, loading, error, onVerify, onReject }) => {
         const hasDocuments = hasAllDocuments(record);
         
         if (isVerified) {
-          return (
+              return (
             <Tag icon={<CheckCircleOutlined />} color="success">
-              Đã xác thực
+              Verified
             </Tag>
           );
         }
         
         if (!hasDocuments) {
-          return (
-            <Tag icon={<CloseCircleOutlined />} color="default">
-              Chưa xác thực
+            return (
+          <Tag icon={<CloseCircleOutlined />} color="default">
+              Not verified
             </Tag>
           );
         }
         
-        return (
+            return (
           <Tag icon={<CloseCircleOutlined />} color="warning">
-            Chờ duyệt
+            Pending verification
           </Tag>
         );
       },
     },
     {
-      title: "Hành động",
+      title: "Actions",
       key: "actions",
       align: "center",
       render: (_, record) => {
         const hasDocuments = hasAllDocuments(record);
         
-        // Nếu chưa có giấy tờ, không hiển thị nút nào
-        if (!hasDocuments) {
+        // If no documents, do not show actions
+          if (!hasDocuments) {
           return (
             <span className="text-gray-400 text-sm">
-              Chưa có giấy tờ
+              No documents
             </span>
           );
         }
         
         return (
           <Space>
-            <Button
+              <Button
               type="primary"
               icon={<EyeOutlined />}
               onClick={() => handleViewDetails(record)}
               size="small"
             >
-              Xem chi tiết
+              View details
             </Button>
             {!record.isVerified && (
               <>
@@ -210,7 +210,7 @@ const RenterListTable = ({ renters, loading, error, onVerify, onReject }) => {
                     setRejectModalVisible(true);
                   }}
                 >
-                  Từ chối
+                  Reject
                 </Button>
                 <Button
                   type="primary"
@@ -220,7 +220,7 @@ const RenterListTable = ({ renters, loading, error, onVerify, onReject }) => {
                   style={{ background: "#52c41a", borderColor: "#52c41a" }}
                   size="small"
                 >
-                  Xác thực
+                  Verify
                 </Button>
               </>
             )}
@@ -240,18 +240,18 @@ const RenterListTable = ({ renters, loading, error, onVerify, onReject }) => {
           loading={loading}
           pagination={{
             pageSize: 10,
-            showTotal: (total) => `Tổng ${total} người thuê`,
+            showTotal: (total) => `Total ${total} renters`,
           }}
           className="min-w-[1100px]"
         />
       </div>
 
-      {/* Modal xem chi tiết */}
+      {/* Detail modal */}
       <Modal
         title={
           <div className="flex items-center gap-2">
             <UserOutlined className="text-blue-500" />
-            <span>Chi tiết người thuê</span>
+              <span>Renter details</span>
           </div>
         }
         open={modalVisible}
@@ -260,13 +260,13 @@ const RenterListTable = ({ renters, loading, error, onVerify, onReject }) => {
         footer={
           selectedRenter && !selectedRenter.isVerified ? (
             <Space>
-              <Button onClick={() => setModalVisible(false)}>Đóng</Button>
-              <Button
+              <Button onClick={() => setModalVisible(false)}>Close</Button>
+                <Button
                 danger
                 icon={<CloseCircleOutlined />}
                 onClick={() => setRejectModalVisible(true)}
               >
-                ❌ Từ chối
+                ❌ Reject
               </Button>
               <Button
                 type="primary"
@@ -274,51 +274,51 @@ const RenterListTable = ({ renters, loading, error, onVerify, onReject }) => {
                 onClick={() => handleVerifyClick(selectedRenter.id)}
                 loading={loading}
                 style={{ background: "#52c41a", borderColor: "#52c41a" }}
-              >
-                ✅ Xác thực
+                >
+                ✅ Verify
               </Button>
             </Space>
           ) : (
-            <Button type="primary" onClick={() => setModalVisible(false)}>
-              Đóng
+                <Button type="primary" onClick={() => setModalVisible(false)}>
+              Close
             </Button>
           )
         }
       >
         {selectedRenter && (
           <div>
-            {/* Thông tin cá nhân */}
-            <Card title="📋 Thông tin cá nhân" style={{ marginBottom: 16 }}>
+            {/* Personal information */}
+            <Card title="📋 Personal information" style={{ marginBottom: 16 }}>
               <Descriptions column={2} bordered>
                 <Descriptions.Item label="ID">{selectedRenter.id}</Descriptions.Item>
-                <Descriptions.Item label="Họ tên">{selectedRenter.fullName}</Descriptions.Item>
+                <Descriptions.Item label="Full name">{selectedRenter.fullName}</Descriptions.Item>
                 <Descriptions.Item label="Email">{selectedRenter.email}</Descriptions.Item>
-                <Descriptions.Item label="Số điện thoại">
-                  {selectedRenter.phone || "Chưa cập nhật"}
+                <Descriptions.Item label="Phone number">
+                  {selectedRenter.phone || "N/A"}
                 </Descriptions.Item>
-                <Descriptions.Item label="Trạng thái" span={2}>
+                <Descriptions.Item label="Status" span={2}>
                   {selectedRenter.isVerified ? (
                     <Tag icon={<CheckCircleOutlined />} color="success">
-                      Đã xác thực
+                      Verified
                     </Tag>
                   ) : (
                     <Tag icon={<CloseCircleOutlined />} color="warning">
-                      Chờ duyệt
+                      Pending verification
                     </Tag>
                   )}
                 </Descriptions.Item>
               </Descriptions>
             </Card>
 
-            {/* Giấy tờ */}
-            <Card title="📄 Giấy tờ tùy thân">
+            {/* Documents */}
+            <Card title="📄 Documents">
               <Tabs defaultActiveKey="1">
                 {/* Tab GPLX */}
                 <TabPane
                   tab={
-                    <span>
+                      <span>
                       <CarOutlined />
-                      Giấy phép lái xe
+                      Driver license
                     </span>
                   }
                   key="1"
@@ -327,20 +327,20 @@ const RenterListTable = ({ renters, loading, error, onVerify, onReject }) => {
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       {selectedRenter.driverLicenseFrontUrl && (
                         <div>
-                          <h4 className="font-semibold mb-2 text-gray-700">Mặt trước</h4>
+                          <h4 className="font-semibold mb-2 text-gray-700">Front</h4>
                           <Image
                             src={selectedRenter.driverLicenseFrontUrl}
-                            alt="GPLX Mặt trước"
+                            alt="Driver license front"
                             style={{ borderRadius: 8 }}
                           />
                         </div>
                       )}
                       {selectedRenter.driverLicenseBackUrl && (
                         <div>
-                          <h4 className="font-semibold mb-2 text-gray-700">Mặt sau</h4>
+                          <h4 className="font-semibold mb-2 text-gray-700">Back</h4>
                           <Image
                             src={selectedRenter.driverLicenseBackUrl}
-                            alt="GPLX Mặt sau"
+                            alt="Driver license back"
                             style={{ borderRadius: 8 }}
                           />
                         </div>
@@ -349,7 +349,7 @@ const RenterListTable = ({ renters, loading, error, onVerify, onReject }) => {
                   ) : (
                     <div className="text-center py-8 text-gray-400">
                       <CarOutlined style={{ fontSize: 48 }} />
-                      <p className="mt-2">Chưa có giấy phép lái xe</p>
+                      <p className="mt-2">No driver license available</p>
                     </div>
                   )}
                 </TabPane>
@@ -357,9 +357,9 @@ const RenterListTable = ({ renters, loading, error, onVerify, onReject }) => {
                 {/* Tab CCCD */}
                 <TabPane
                   tab={
-                    <span>
+                      <span>
                       <IdcardOutlined />
-                      Căn cước công dân
+                      National ID
                     </span>
                   }
                   key="2"
@@ -368,20 +368,20 @@ const RenterListTable = ({ renters, loading, error, onVerify, onReject }) => {
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       {selectedRenter.cccdFrontUrl && (
                         <div>
-                          <h4 className="font-semibold mb-2 text-gray-700">Mặt trước</h4>
+                          <h4 className="font-semibold mb-2 text-gray-700">Front</h4>
                           <Image
                             src={selectedRenter.cccdFrontUrl}
-                            alt="CCCD Mặt trước"
+                            alt="National ID front"
                             style={{ borderRadius: 8 }}
                           />
                         </div>
                       )}
                       {selectedRenter.cccdBackUrl && (
                         <div>
-                          <h4 className="font-semibold mb-2 text-gray-700">Mặt sau</h4>
+                          <h4 className="font-semibold mb-2 text-gray-700">Back</h4>
                           <Image
                             src={selectedRenter.cccdBackUrl}
-                            alt="CCCD Mặt sau"
+                            alt="National ID back"
                             style={{ borderRadius: 8 }}
                           />
                         </div>
@@ -390,7 +390,7 @@ const RenterListTable = ({ renters, loading, error, onVerify, onReject }) => {
                   ) : (
                     <div className="text-center py-8 text-gray-400">
                       <IdcardOutlined style={{ fontSize: 48 }} />
-                      <p className="mt-2">Chưa có căn cước công dân</p>
+                      <p className="mt-2">No national ID available</p>
                     </div>
                   )}
                 </TabPane>
@@ -400,12 +400,12 @@ const RenterListTable = ({ renters, loading, error, onVerify, onReject }) => {
         )}
       </Modal>
 
-      {/* Modal từ chối */}
+      {/* Reject modal */}
       <Modal
         title={
           <div className="flex items-center gap-2">
             <CloseCircleOutlined className="text-red-500" />
-            <span>Từ chối xác thực</span>
+            <span>Reject verification</span>
           </div>
         }
         open={rejectModalVisible}
@@ -422,14 +422,14 @@ const RenterListTable = ({ renters, loading, error, onVerify, onReject }) => {
                 setRejectReason("");
               }}
             >
-              Hủy
+              Cancel
             </Button>
-            <Button
+              <Button
               danger
               onClick={handleRejectClick}
               loading={loading}
             >
-              ❌ Xác nhận từ chối
+              ❌ Confirm rejection
             </Button>
           </Space>
         }
@@ -437,21 +437,21 @@ const RenterListTable = ({ renters, loading, error, onVerify, onReject }) => {
         <div className="space-y-4">
           <div className="p-4 bg-red-50 border border-red-200 rounded-lg">
             <p className="font-semibold text-red-800">
-              ⚠️ Bạn sắp từ chối xác thực cho {selectedRenter?.fullName}
+              ⚠️ You are about to reject verification for {selectedRenter?.fullName}
             </p>
             <p className="text-sm text-red-700 mt-2">
-              Vui lòng nhập lý do từ chối để thông báo cho người dùng.
+              Please enter a reason for rejection so we can notify the user.
             </p>
           </div>
 
           <div>
             <label className="block text-sm font-semibold text-gray-700 mb-2">
-              Lý do từ chối:
+              Rejection reason:
             </label>
             <textarea
               className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:border-red-500 focus:ring-2 focus:ring-red-200"
               rows={4}
-              placeholder="Nhập lý do từ chối (vd: Ảnh không rõ, thông tin không khớp, ...)"
+              placeholder="Enter reason for rejection (e.g., unclear image, mismatched info, ...)"
               value={rejectReason}
               onChange={(e) => setRejectReason(e.target.value)}
             />

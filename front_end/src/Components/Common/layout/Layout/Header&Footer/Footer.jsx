@@ -21,32 +21,32 @@ export default function Footer() {
   ];
 
   const quickLinks = [
-    { to: "/home", label: "Trang chủ" },
-    { to: "/vehicles", label: "Xe điện" },
-    { to: "/stations", label: "Trạm sạc" },
-    { to: "/about", label: "Giới thiệu" },
-    { to: "/contact", label: "Liên hệ" },
+    { to: "/home", label: "Home" },
+    { to: "/vehicles", label: "Electric Vehicles" },
+    { to: "/stations", label: "Stations" },
+    { to: "/about", label: "About" },
+    { to: "/contact", label: "Contact" },
   ];
 
   const services = [
-    { to: "/rental", label: "Thuê xe theo giờ" },
-    { to: "/rental/daily", label: "Thuê xe theo ngày" },
-    { to: "/rental/monthly", label: "Thuê xe theo tháng" },
-    { to: "/charging", label: "Dịch vụ sạc" },
-    { to: "/maintenance", label: "Bảo dưỡng xe" },
+    { to: "/rental", label: "Hourly Rental" },
+    { to: "/rental/daily", label: "Daily Rental" },
+    { to: "/rental/monthly", label: "Monthly Rental" },
+    { to: "/charging", label: "Charging Service" },
+    { to: "/maintenance", label: "Vehicle Maintenance" },
   ];
 
   const supports = [
-    { to: "/help", label: "Trung tâm trợ giúp" },
-    { to: "/faq", label: "Câu hỏi thường gặp" },
-    { to: "/terms", label: "Điều khoản sử dụng" },
-    { to: "/privacy", label: "Chính sách bảo mật" },
-    { to: "/refund", label: "Chính sách hoàn tiền" },
+    { to: "/help", label: "Help Center" },
+    { to: "/faq", label: "FAQ" },
+    { to: "/terms", label: "Terms of Use" },
+    { to: "/privacy", label: "Privacy Policy" },
+    { to: "/refund", label: "Refund Policy" },
   ];
 
   const bottomLinks = [
-    { to: "/sitemap", label: "Sơ đồ trang" },
-    { to: "/accessibility", label: "Khả năng truy cập" },
+    { to: "/sitemap", label: "Sitemap" },
+    { to: "/accessibility", label: "Accessibility" },
     { to: "/cookies", label: "Cookie Policy" },
   ];
 
@@ -62,8 +62,7 @@ export default function Footer() {
               <span className="text-blue-100">EV Rental</span>
             </div>
             <p className="text-white/80 leading-relaxed mb-5">
-              Hệ thống cho thuê xe điện hàng đầu Việt Nam. Mang đến trải nghiệm
-              di chuyển xanh, sạch và thông minh cho mọi người.
+              Leading electric vehicle rental provider in Vietnam. Delivering a clean, green, and smart mobility experience.
             </p>
             <div className="flex gap-3">
               {socialLinks.map(({ Icon, url }, i) => (
@@ -81,22 +80,22 @@ export default function Footer() {
           </div>
 
           {/* Quick Links */}
-          <FooterColumn title="Liên kết nhanh" delay="0.2s" items={quickLinks} />
+          <FooterColumn title="Quick Links" delay="0.2s" items={quickLinks} />
 
           {/* Services */}
-          <FooterColumn title="Dịch vụ" delay="0.3s" items={services} />
+          <FooterColumn title="Services" delay="0.3s" items={services} />
 
           {/* Support */}
-          <FooterColumn title="Hỗ trợ" delay="0.4s" items={supports} />
+          <FooterColumn title="Support" delay="0.4s" items={supports} />
 
           {/* Contact Info */}
           <div className="animate-fadeInUp" style={{ animationDelay: "0.5s" }}>
-            <FooterHeading title="Liên hệ" />
+            <FooterHeading title="Contact" />
             <ul className="space-y-4">
               <li className="flex gap-3 text-white/80 leading-relaxed">
                 <EnvironmentOutlined className="text-lg text-blue-300 mt-0.5 flex-shrink-0" />
                 <span className="text-sm">
-                  Lô E2a-7, Đường D1, Long Thạnh Mỹ, TP Thủ Đức, TP. Hồ Chí Minh
+                  Lot E2a-7, D1 Street, Long Thanh My, Thu Duc City, Ho Chi Minh City
                 </span>
               </li>
               <li className="flex gap-3 text-white/80">
@@ -120,12 +119,12 @@ export default function Footer() {
             </ul>
 
             <div className="mt-5 p-4 bg-white/10 rounded-lg border-l-[3px] border-blue-300">
-              <strong className="block mb-2 text-blue-300">Giờ làm việc:</strong>
+              <strong className="block mb-2 text-blue-300">Business hours:</strong>
               <p className="my-1 text-white/80 text-sm">
-                Thứ 2 - Thứ 6: 8:00 - 18:00
+                Mon - Fri: 08:00 - 18:00
               </p>
               <p className="my-1 text-white/80 text-sm">
-                Thứ 7 - CN: 9:00 - 17:00
+                Sat - Sun: 09:00 - 17:00
               </p>
             </div>
           </div>

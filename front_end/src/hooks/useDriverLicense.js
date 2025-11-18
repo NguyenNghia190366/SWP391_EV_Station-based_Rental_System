@@ -6,7 +6,7 @@ export const useDriverLicense = () => {
   const instance = useAxiosInstance();
   const { getRenterId } = useRenters();
 
-  //Upload Giấy phép lái xe (URLs từ Cloudinary)
+  // Upload driver license (URLs from Cloudinary)
   const uploadDriverLicense = useCallback(
     async (payload) => {
       try {
@@ -108,14 +108,14 @@ export const useDriverLicense = () => {
           throw postError;
         }
       } catch (error) {
-        console.error("Upload Giấy phép lái xe failed:", error);
+        console.error("Upload driver license failed:", error);
         throw error;
       }
     },
     [instance, getRenterId]
   );
 
-  // 🔹 2. Lấy license theo ID
+  // 🔹 2. Get license by ID
   const getDriverLicenseById = useCallback(
     async (id) => {
       try {

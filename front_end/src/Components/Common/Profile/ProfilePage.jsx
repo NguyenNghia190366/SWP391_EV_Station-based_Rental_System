@@ -63,7 +63,7 @@ const ProfilePage = () => {
       setBookingsLoading(true);
       const userId = localStorage.getItem("userId");
       if (!userId) {
-        message.warning("Không tìm thấy userId!");
+        message.warning("User ID not found!");
         return;
       }
 
@@ -101,8 +101,8 @@ const ProfilePage = () => {
 
       setMyBookings(merged);
     } catch (err) {
-      console.error("❌ Lỗi tải lịch sử thuê:", err);
-      message.error("Không thể tải lịch sử thuê!");
+      console.error("❌ Error loading rental history:", err);
+      message.error("Cannot load rental history!");
     } finally {
       setBookingsLoading(false);
     }
@@ -113,7 +113,7 @@ const ProfilePage = () => {
     if (!record) return;
     // If already approved - don't allow cancellation by renter
     if (record.status === "APPROVED") {
-      message.warning("Đơn đã được duyệt, không thể hủy từ phía renter.");
+      message.warning("Order approved, cannot cancel from renter side.");
       return;
     }
 
@@ -122,12 +122,12 @@ const ProfilePage = () => {
     try {
       // Pass full record as orderData so backend receives existing fields
       await updateRentalOrderStatus(record.orderId, "CANCELED", record);
-      message.success("Đã hủy đơn thuê!");
+      message.success("Order canceled!");
       // refresh history
       setTimeout(() => fetchRentalHistory(), 400);
     } catch (err) {
-      console.error("❌ Lỗi hủy đơn:", err);
-      message.error("Hủy đơn thất bại. Vui lòng thử lại.");
+      console.error("❌ Error cancelling order:", err);
+      message.error("Order cancellation failed. Please try again.");
     } finally {
       setCancellingId(null);
     }
@@ -140,16 +140,16 @@ const ProfilePage = () => {
       const profileSchema = yup.object({
         fullName: yup
           .string()
-          .required("Vui lòng nhập họ tên!")
-          .min(2, "Họ tên phải có ít nhất 2 ký tự!"),
+          .required("Please enter full name!")
+          .min(2, "Full name must be at least 2 characters!"),
         email: yup
           .string()
-          .required("Vui lòng nhập email!")
-          .email("Email không hợp lệ!"),
+          .required("Please enter email!")
+          .email("Invalid email!"),
         phone_number: yup
           .string()
-          .required("Vui lòng nhập số điện thoại!")
-          .matches(/^[0-9]{10}$/, "Số điện thoại phải có 10 chữ số!"),
+          .required("Please enter phone number!")
+          .matches(/^[0-9]{10}$/, "Phone number must be 10 digits!"),
       });
 
       // Validate before submission
@@ -164,35 +164,35 @@ const ProfilePage = () => {
       }
 
       const userId = user?.user_id || user?.userId;
-      message.loading({ content: "Đang cập nhật...", key: "update" });
+      message.loading({ content: "Updating...", key: "update" });
       const res = await updateProfile(userId, updated);
       localStorage.setItem("currentUser", JSON.stringify(res));
       setUser(res);
-      message.success({ content: "Cập nhật thành công!", key: "update" });
+      message.success({ content: "Update successful!", key: "update" });
     } catch (err) {
       console.error("❌ Update profile error:", err);
-      message.error("Cập nhật thất bại!");
+      message.error("Update failed!");
     }
   };
 
   // ===== Update avatar =====
   const handleUpdateAvatar = async (file) => {
-    if (!file || !file.type.startsWith("image/")) return message.error("Chỉ chọn file ảnh!");
-    if (file.size > 5 * 1024 * 1024) return message.error("Tối đa 5MB!");
+    if (!file || !file.type.startsWith("image/")) return message.error("Only image files are allowed!");
+    if (file.size > 5 * 1024 * 1024) return message.error("Maximum 5MB allowed!");
     const reader = new FileReader();
     reader.onloadend = () => {
       const updatedUser = { ...user, avatar: reader.result };
       localStorage.setItem("currentUser", JSON.stringify(updatedUser));
       setUser(updatedUser);
-      message.success("Cập nhật ảnh đại diện thành công!");
+      message.success("Avatar updated successfully!");
     };
     reader.readAsDataURL(file);
   };
 
-  // ===== Upload giấy tờ =====
+  // ===== Upload documents =====
   const handleUploadFiles = async (files, apiFunc, type) => {
-    if (!files?.length) return message.warning("Chưa chọn ảnh!");
-    message.loading({ content: `Đang tải ${type}...`, key: type });
+    if (!files?.length) return message.warning("No image selected!");
+    message.loading({ content: `Loading ${type}...`, key: type });
     const base64 = await Promise.all(Array.from(files).map(f => new Promise(r => {
       const rd = new FileReader(); rd.onloadend = () => r(rd.result); rd.readAsDataURL(f);
     })));
@@ -204,19 +204,19 @@ const ProfilePage = () => {
     const updated = { ...user, [`${type}Images`]: base64 };
     localStorage.setItem("currentUser", JSON.stringify(updated));
     setUser(updated);
-    message.success({ content: `Đã tải ${type} thành công!`, key: type });
+    message.success({ content: `${type} uploaded successfully!`, key: type });
   };
 
   const handleSubmitVerification = async (licenseFiles, idCardFiles) => {
     if (!licenseFiles?.length && !idCardFiles?.length)
-      return message.warning("Vui lòng tải lên ít nhất 1 loại giấy tờ!");
+      return message.warning("Please upload at least 1 document!");
     const { uploadDriverLicense } = useDriverLicense();
     const { uploadCccd } = useCccd();
     await Promise.all([
       licenseFiles?.length && handleUploadFiles(licenseFiles, uploadDriverLicense, "license"),
       idCardFiles?.length && handleUploadFiles(idCardFiles, uploadCccd, "cccd")
     ]);
-    message.success("Đã gửi giấy tờ xác thực!");
+    message.success("Verification documents submitted!");
   };
 
   // ===== Avatar modal =====
@@ -239,23 +239,23 @@ const ProfilePage = () => {
   // ===== UI sections =====
   const renderInfo = () => (
     <Card className="shadow-lg">
-      <h2 className="text-2xl font-bold mb-4 flex items-center gap-2"><UserOutlined />Thông tin cá nhân</h2>
+      <h2 className="text-2xl font-bold mb-4 flex items-center gap-2"><UserOutlined />Personal Information</h2>
       {isEditing ? (
         <div className="space-y-4">
-          <Input name="fullName" placeholder="Họ tên" value={form.fullName} onChange={e => setForm({ ...form, fullName: e.target.value })} />
-          <Input name="phone_number" placeholder="Số điện thoại" value={form.phone_number} onChange={e => setForm({ ...form, phone_number: e.target.value })} />
+          <Input name="fullName" placeholder="Full name" value={form.fullName} onChange={e => setForm({ ...form, fullName: e.target.value })} />
+          <Input name="phone_number" placeholder="Phone number" value={form.phone_number} onChange={e => setForm({ ...form, phone_number: e.target.value })} />
           <div className="flex gap-2 mt-4">
-            <Button type="primary" onClick={() => { handleUpdateUser(form); setIsEditing(false); }}><SaveOutlined /> Lưu</Button>
-            <Button onClick={() => setIsEditing(false)}><CloseOutlined /> Hủy</Button>
+            <Button type="primary" onClick={() => { handleUpdateUser(form); setIsEditing(false); }}><SaveOutlined /> Save</Button>
+            <Button onClick={() => setIsEditing(false)}><CloseOutlined /> Cancel</Button>
           </div>
         </div>
       ) : (
         <div>
-          <p><b>Họ tên:</b> {user.fullName || "N/A"}</p>
+          <p><b>Full name:</b> {user.fullName || "N/A"}</p>
           <p><b>Email:</b> {user.email}</p>
-          <p><b>Điện thoại:</b> {user.phone || user.phone_number || "Chưa cập nhật"}</p>
+          <p><b>Phone:</b> {user.phone || user.phone_number || "Not updated"}</p>
           <Tag color="purple">{user.role || "RENTER"}</Tag>
-          <Button className="mt-3" onClick={() => { setIsEditing(true); setForm(user); }}><EditOutlined /> Chỉnh sửa</Button>
+          <Button className="mt-3" onClick={() => { setIsEditing(true); setForm(user); }}><EditOutlined /> Edit</Button>
         </div>
       )}
     </Card>
@@ -263,7 +263,7 @@ const ProfilePage = () => {
 
   const renderVerify = () => (
     <Card className="shadow-lg">
-      <h2 className="text-2xl font-bold mb-4 flex items-center gap-2"><SafetyOutlined />Xác minh giấy tờ</h2>
+      <h2 className="text-2xl font-bold mb-4 flex items-center gap-2"><SafetyOutlined />Document Verification</h2>
       <VerifyPage />
     </Card>
   );
@@ -271,25 +271,25 @@ const ProfilePage = () => {
   const renderHistory = () => {
     const historyColumns = [
       {
-        title: "Mã đơn",
+        title: "Order ID",
         dataIndex: "orderId",
         key: "orderId",
         render: (id) => <span className="font-semibold text-blue-600">#{id}</span>,
       },
       {
-        title: "Xe",
+            title: "Vehicle",
         dataIndex: "vehicleName",
         key: "vehicleName",
       },
       {
-        title: "Trạm (nhận → trả)",
+        title: "Stations (pickup → return)",
         key: "stations",
         render: (_, record) => (
           <span>{record.pickupStationName} → {record.returnStationName}</span>
         ),
       },
       {
-        title: "Thời gian thuê",
+        title: "Rental time",
         key: "rentalTime",
         render: (_, record) => (
           <span>
@@ -299,23 +299,23 @@ const ProfilePage = () => {
         ),
       },
       {
-        title: "Trạng thái",
+        title: "Status",
         dataIndex: "status",
         key: "status",
         render: (status) => {
-          const statusMap = {
-            BOOKED: { color: "blue", text: "Chờ duyệt" },
-            APPROVED: { color: "green", text: "Đã duyệt" },
-            CANCELED: { color: "red", text: "Từ chối" },
-            IN_USE: { color: "orange", text: "Đang sử dụng" },
-            COMPLETED: { color: "cyan", text: "Hoàn tất" },
+            const statusMap = {
+            BOOKED: { color: "blue", text: "Pending" },
+            APPROVED: { color: "green", text: "Approved" },
+            CANCELED: { color: "red", text: "Canceled" },
+            IN_USE: { color: "orange", text: "In use" },
+            COMPLETED: { color: "cyan", text: "Completed" },
           };
           const statusInfo = statusMap[status] || { color: "default", text: status };
           return <Tag color={statusInfo.color}>{statusInfo.text}</Tag>;
         },
       },
       {
-        title: "Hành động",
+        title: "Actions",
         key: "actions",
         render: (_, record) => {
           // show cancel for BOOKED and APPROVED (disabled when APPROVED)
@@ -325,14 +325,14 @@ const ProfilePage = () => {
 
           return (
             <Space>
-              <Popconfirm
-                title={disabled ? "Đơn đã được duyệt, không thể hủy." : "Xác nhận hủy đơn?"}
+                <Popconfirm
+                title={disabled ? "Order approved, cannot cancel." : "Confirm cancellation?"}
                 onConfirm={() => handleCancelOrder(record)}
-                okText="Có"
-                cancelText="Không"
+                okText="Yes"
+                cancelText="No"
                 disabled={disabled}
               >
-                <Tooltip title={disabled ? "Đã duyệt — không thể hủy" : "Hủy đơn"}>
+                <Tooltip title={disabled ? "Approved — cannot cancel" : "Cancel order"}>
                   <Button
                     type="primary"
                     danger
@@ -351,9 +351,9 @@ const ProfilePage = () => {
 
     return (
       <Card className="shadow-lg">
-        <h2 className="text-2xl font-bold mb-4 flex items-center gap-2"><ClockCircleOutlined />Lịch sử đặt xe</h2>
+        <h2 className="text-2xl font-bold mb-4 flex items-center gap-2"><ClockCircleOutlined />Booking History</h2>
         {bookingsLoading ? (
-          <Spin tip="Đang tải lịch sử..." />
+          <Spin tip="Loading history..." />
         ) : myBookings.length > 0 ? (
           <Table
             columns={historyColumns}
@@ -365,8 +365,8 @@ const ProfilePage = () => {
         ) : (
           <div className="text-center py-6">
             <CarOutlined style={{ fontSize: 40, color: "#bbb" }} />
-            <p>Chưa có lịch sử đặt xe</p>
-            <Button type="primary" onClick={() => navigate("/vehicles")}>Thuê xe ngay</Button>
+            <p>No booking history</p>
+              <Button type="primary" onClick={() => navigate("/vehicles")}>Book now</Button>
           </div>
         )}
       </Card>
@@ -380,8 +380,8 @@ const ProfilePage = () => {
       <div className="min-h-screen flex items-center justify-center">
         <Card className="text-center p-6">
           <UserOutlined className="text-4xl mb-3" />
-          <h3>Vui lòng đăng nhập để xem hồ sơ</h3>
-          <Button type="primary" onClick={() => navigate("/login")}>Đăng nhập</Button>
+          <h3>Please log in to view profile</h3>
+          <Button type="primary" onClick={() => navigate("/login")}>Log in</Button>
         </Card>
       </div>
     );
@@ -395,18 +395,18 @@ const ProfilePage = () => {
           <h3 className="font-bold mt-2">{user.userName || "User"}</h3>
           <Tag>{user.role}</Tag>
           <input id="avatar-input" type="file" accept="image/*" hidden onChange={handleAvatarUpload} />
-          <Button onClick={() => document.getElementById("avatar-input").click()} size="small" className="mt-2">Đổi ảnh</Button>
+          <Button onClick={() => document.getElementById("avatar-input").click()} size="small" className="mt-2">Change avatar</Button>
         </div>
         <Menu
           mode="inline"
           selectedKeys={[selectedMenu]}
           onClick={({ key }) => setSelectedMenu(key)}
           items={[
-              { key: "info", icon: <UserOutlined />, label: "Thông tin cá nhân" },
-              { key: "verify", icon: <SafetyOutlined />, label: "Xác minh giấy tờ" },
-              { key: "history", icon: <ClockCircleOutlined />, label: "Lịch sử đặt xe" },
-              { key: "payments", icon: <DashboardOutlined />, label: "Lịch sử giao dịch" },
-            ]}
+                { key: "info", icon: <UserOutlined />, label: "Personal Information" },
+                { key: "verify", icon: <SafetyOutlined />, label: "Document Verification" },
+                { key: "history", icon: <ClockCircleOutlined />, label: "Booking History" },
+                { key: "payments", icon: <DashboardOutlined />, label: "Payment History" },
+              ]}
         />
       </div>
 
@@ -420,7 +420,7 @@ const ProfilePage = () => {
 
       {/* Avatar Modal */}
       <Modal
-        title="Xác nhận ảnh đại diện"
+        title="Confirm Avatar Image"
         open={isAvatarModalVisible}
         onOk={confirmAvatarUpload}
         confirmLoading={isAvatarUploading}

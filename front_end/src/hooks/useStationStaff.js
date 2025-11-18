@@ -15,13 +15,13 @@ export const useStationStaff = () => {
         params: { id: cleanId }
       });
 
-      message.success("Duyệt đơn thuê thành công!");
+      message.success("Booking request approved successfully!");
       return res.data;
     } catch (error) {
       
       const errorMsg = error.response?.data?.title || 
                        error.response?.data?.message || 
-                       "Không thể duyệt đơn thuê!";
+                       "Cannot approve rental order!";
       
       message.error(errorMsg);
       throw error;
@@ -37,13 +37,13 @@ export const useStationStaff = () => {
         params: { id: cleanId }
       });
 
-      message.success("Đã từ chối đơn thuê!");
+      message.success("Booking request rejected!");
       return res.data;
     } catch (error) {
       
       const errorMsg = error.response?.data?.title || 
                        error.response?.data?.message || 
-                       "Không thể từ chối đơn thuê!";
+                       "Cannot reject rental order!";
       
       message.error(errorMsg);
       throw error;

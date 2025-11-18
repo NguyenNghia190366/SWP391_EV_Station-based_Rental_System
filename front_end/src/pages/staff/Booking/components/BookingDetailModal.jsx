@@ -18,7 +18,7 @@ export default function BookingDetailPage() {
       const { data } = await api.get(`/RentalOrders/${id}`);
       setBooking(data);
     } catch {
-      message.error("Không thể tải thông tin đơn thuê!");
+      message.error("Cannot load rental order info!");
     } finally {
       setLoading(false);
     }
@@ -30,10 +30,10 @@ export default function BookingDetailPage() {
         ...booking,
         status: approved ? "APPROVED" : "REJECTED",
       });
-      message.success(approved ? "✅ Đã duyệt đơn" : "❌ Đã từ chối đơn");
+      message.success(approved ? "✅ Order approved" : "❌ Order rejected");
       navigate("/staff/dashboard");
     } catch {
-      message.error("Không thể cập nhật trạng thái!");
+      message.error("Cannot update status!");
     }
   };
 
@@ -45,17 +45,17 @@ export default function BookingDetailPage() {
 
   return (
     <div className="max-w-4xl mx-auto py-10">
-      <Card title={`Chi tiết đơn thuê #${id}`} bordered={false}>
-        <p><b>Khách hàng:</b> {booking.renterId}</p>
-        <p><b>Xe:</b> {booking.vehicleId}</p>
-        <p>
-          <b>Thời gian:</b> {dayjs(booking.startTime).format("DD/MM HH:mm")} →{" "}
-          {dayjs(booking.endTime).format("DD/MM HH:mm")}
-        </p>
-        <p><b>Trạm nhận:</b> {booking.pickupStationId}</p>
-        <p><b>Trạm trả:</b> {booking.returnStationId}</p>
-        <p>
-          <b>Trạng thái:</b>{" "}
+      <Card title={`Booking details #${id}`} bordered={false}>
+            <p><b>Customer:</b> {booking.renterId}</p>
+            <p><b>Vehicle:</b> {booking.vehicleId}</p>
+            <p>
+              <b>Time:</b> {dayjs(booking.startTime).format("DD/MM HH:mm")} →{" "}
+              {dayjs(booking.endTime).format("DD/MM HH:mm")}
+            </p>
+            <p><b>Pickup station:</b> {booking.pickupStationId}</p>
+            <p><b>Return station:</b> {booking.returnStationId}</p>
+            <p>
+              <b>Status:</b>{" "}
           <Tag color={booking.status === "BOOKED" ? "blue" : "green"}>
             {booking.status}
           </Tag>
@@ -67,16 +67,16 @@ export default function BookingDetailPage() {
             icon={<CheckOutlined />}
             onClick={() => handleAction(true)}
           >
-            Duyệt
+            Approve
           </Button>
           <Button
             danger
             icon={<CloseOutlined />}
             onClick={() => handleAction(false)}
           >
-            Từ chối
+            Reject
           </Button>
-          <Button onClick={() => navigate(-1)}>Quay lại</Button>
+          <Button onClick={() => navigate(-1)}>Back</Button>
         </div>
       </Card>
     </div>

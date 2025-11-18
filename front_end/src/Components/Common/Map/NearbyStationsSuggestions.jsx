@@ -8,7 +8,7 @@ const NearbyStationsSuggestions = ({
 }) => {
   const [nearbyStations, setNearbyStations] = useState([]);
 
-  // Tính khoảng cách giữa 2 điểm (Haversine formula)
+  // Calculate distance between two points (Haversine formula)
   const calculateDistance = (lat1, lon1, lat2, lon2) => {
     const R = 6371; // Radius of the Earth in km
     const dLat = (lat2 - lat1) * Math.PI / 180;
@@ -62,13 +62,13 @@ const NearbyStationsSuggestions = ({
       <section className="bg-white rounded-2xl shadow-lg p-6">
         <div className="mb-4">
           <h4 className="text-xl font-bold text-gray-900 flex items-center gap-2">
-            📍 Trạm gần bạn
+            📍 Nearby stations
           </h4>
-          <p className="text-sm text-gray-600 mt-1">Vui lòng bật định vị để xem gợi ý</p>
+          <p className="text-sm text-gray-600 mt-1">Please enable location services to see suggestions</p>
         </div>
         <div className="text-center py-8">
           <div className="text-6xl mb-4">📍</div>
-          <p className="text-gray-600 font-medium">Nhấn "Vị trí của tôi" để tìm các trạm gần nhất</p>
+          <p className="text-gray-600 font-medium">Click "Use my location" to find the nearest stations</p>
         </div>
       </section>
     );
@@ -77,14 +77,14 @@ const NearbyStationsSuggestions = ({
   if (nearbyStations.length === 0) {
     return (
       <section className="bg-white rounded-2xl shadow-lg p-6">
-        <div className="mb-4">
+          <div className="mb-4">
           <h4 className="text-xl font-bold text-gray-900 flex items-center gap-2">
-            📍 Trạm gần bạn
+            📍 Nearby stations
           </h4>
         </div>
         <div className="text-center py-8">
           <div className="text-6xl mb-4">🔍</div>
-          <p className="text-gray-600 font-medium">Không tìm thấy trạm nào gần bạn</p>
+          <p className="text-gray-600 font-medium">No nearby stations found</p>
         </div>
       </section>
     );
@@ -92,11 +92,11 @@ const NearbyStationsSuggestions = ({
 
   return (
     <section className="bg-white rounded-2xl shadow-lg p-6 h-full max-h-[420px] flex flex-col">
-      <div className="mb-4 flex-shrink-0">
+        <div className="mb-4 flex-shrink-0">
         <h4 className="text-xl font-bold text-gray-900 flex items-center gap-2">
-          📍 {nearbyStations.length} trạm gần bạn
+          📍 {nearbyStations.length} nearby stations
         </h4>
-        <p className="text-sm text-gray-600 mt-1">Sắp xếp theo khoảng cách</p>
+        <p className="text-sm text-gray-600 mt-1">Sorted by distance</p>
       </div>
       
       <div className="flex-1 overflow-y-auto space-y-3 pr-2 custom-scrollbar">
@@ -111,7 +111,7 @@ const NearbyStationsSuggestions = ({
             </div>
             <div className="flex-1 min-w-0">
               <div className="font-bold text-gray-900 text-base mb-1 truncate">
-                {station.station_name || station.name || station.stationName || 'Trạm'}
+                {station.station_name || station.name || station.stationName || 'Station'}
               </div>
               {station.address && (
                 <div className="text-gray-600 text-xs mb-2 flex items-start gap-1 line-clamp-2">
@@ -124,13 +124,13 @@ const NearbyStationsSuggestions = ({
                   🚗 {station.distance.toFixed(2)} km
                 </span>
                 <span className="text-gray-500">
-                  ⏱️ ~{Math.ceil(station.distance / 40 * 60)} phút
+                  ⏱️ ~{Math.ceil(station.distance / 40 * 60)} min
                 </span> 
               </div>
             </div>
             <div className="flex-shrink-0">
-              <button className="px-3 py-1.5 bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 text-white text-sm font-semibold rounded-lg shadow-md transition-all">
-                Chọn
+                <button className="px-3 py-1.5 bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 text-white text-sm font-semibold rounded-lg shadow-md transition-all">
+                Select
               </button>
             </div>
           </div>
@@ -140,7 +140,7 @@ const NearbyStationsSuggestions = ({
       {nearbyStations.length >= limit && (
         <div className="mt-4 text-center flex-shrink-0">
           <button className="text-indigo-600 hover:text-indigo-700 font-bold transition-colors text-sm">
-            Xem tất cả trạm →
+            View all stations →
           </button>
         </div>
       )}

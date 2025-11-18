@@ -135,7 +135,7 @@ export const fetchHandoverOrdersFn = async (axios) => {
       .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
   } catch (err) {
     console.error(err);
-    message.error("Không thể tải yêu cầu nhận xe.");
+    message.error("Cannot load handover requests.");
     return [];
   }
 };
@@ -146,9 +146,9 @@ export const fetchHandoverOrdersFn = async (axios) => {
 export const approveHandoverFn = (axios, orderId) =>
   confirmAction(
     {
-      title: "Phê duyệt nhận xe",
-      content: "Xác nhận khách hàng đã nhận xe?",
-      okText: "Phê duyệt",
+      title: "Approve handover",
+      content: "Confirm customer has received the vehicle?",
+      okText: "Approve",
     },
 
     async () => {
@@ -156,10 +156,10 @@ export const approveHandoverFn = (axios, orderId) =>
 
       try {
         await instance.put(`/api/Inuse?id=${orderId}`);
-        message.success("Đã phê duyệt yêu cầu.");
+        message.success("Request approved.");
         return true;
       } catch {
-        message.error("Không thể phê duyệt.");
+        message.error("Cannot approve request.");
         return false;
       }
     }
@@ -171,10 +171,10 @@ export const approveHandoverFn = (axios, orderId) =>
 export const deliverVehicleFn = (axios, staffId, orderId) => {
   return new Promise((resolve) => {
     Modal.confirm({
-      title: "Giao xe",
-      content: "Xác nhận đã giao xe & tạo hợp đồng?",
-      okText: "Giao xe",
-      cancelText: "Hủy",
+      title: "Deliver vehicle",
+      content: "Confirm vehicle delivered & create contract?",
+      okText: "Deliver Vehicle",
+      cancelText: "Cancel",
       onOk: async () => {
         try {
           // Step 1: Get order to find vehicleId
@@ -188,14 +188,14 @@ export const deliverVehicleFn = (axios, staffId, orderId) => {
             SignedDate: new Date().toISOString(),
           });
 
-          // Step 3: Update vehicle - increment "đang cho thuê" count
+          // Step 3: Update vehicle - increment 'numberVehicleRenting' count
           if (vehicleId) {
             try {
               const vehicleRes = await axios.get(`/Vehicles/${vehicleId}`);
               const vehicle = vehicleRes.data;
               const currentRenting = vehicle.numberVehicleRenting || 0;
 
-              // Increment đang cho thuê by 1
+              // Increment renting count by 1
               await axios.put(`/Vehicles/${vehicleId}`, {
                 numberVehicleRenting: currentRenting + 1,
               });
@@ -213,13 +213,11 @@ export const deliverVehicleFn = (axios, staffId, orderId) => {
             handoverDeliveredAt: new Date().toISOString(),
           });
 
-          message.success(
-            "Đã giao xe và tạo hợp đồng. Cập nhật số xe đang cho thuê."
-          );
+          message.success("Vehicle delivered and contract created.");
           resolve(true);
         } catch (err) {
           console.error("Deliver vehicle error:", err);
-          message.error("Không thể giao xe.");
+          message.error("Cannot deliver vehicle.");
           resolve(false);
         }
       },
@@ -234,9 +232,9 @@ export const deliverVehicleFn = (axios, staffId, orderId) => {
 export const rejectHandoverFn = (axios, orderId) =>
   confirmAction(
     {
-      title: "Từ chối nhận xe",
-      content: "Đơn sẽ quay về trạng thái ĐÃ DUYỆT",
-      okText: "Từ chối",
+      title: "Reject handover",
+      content: "Order will revert to APPROVED status",
+      okText: "Reject",
       okButtonProps: { danger: true },
     },
     async () => {
@@ -244,17 +242,17 @@ export const rejectHandoverFn = (axios, orderId) =>
         await axios.put(`/RentalOrders/${orderId}`, {
           status: "APPROVED",
         });
-        message.success("Đã từ chối yêu cầu.");
+        message.success("Request rejected.");
         return true;
       } catch {
-        message.error("Không thể từ chối.");
+        message.error("Cannot reject request.");
         return false;
       }
     }
   );
 
 // ===============================
-// Main hook (gom API lại cho tiện dùng)
+// Main hook (group APIs for convenient use)
 // ===============================
 export const useContract = () => {
   const axios = useAxiosInstance();

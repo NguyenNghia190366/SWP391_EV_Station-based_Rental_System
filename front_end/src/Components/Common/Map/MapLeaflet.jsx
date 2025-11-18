@@ -124,7 +124,7 @@ const MapLeaflet = ({ stations = [], highlightedStation = null, height = '420px'
     setIsSearching(true);
     try {
       if (!navigator.geolocation) {
-        alert('Trình duyệt không hỗ trợ định vị!');
+        alert('Geolocation is not supported by your browser!');
         return;
       }
       
@@ -139,7 +139,7 @@ const MapLeaflet = ({ stations = [], highlightedStation = null, height = '420px'
         },
         (error) => {
           console.error('Error getting location:', error);
-          alert('Không thể lấy vị trí của bạn. Vui lòng cho phép truy cập vị trí.');
+          alert('Cannot get your location. Please allow location access.');
           setIsSearching(false);
         },
         { enableHighAccuracy: true, timeout: 10000 }
@@ -163,11 +163,11 @@ const MapLeaflet = ({ stations = [], highlightedStation = null, height = '420px'
         const [lat, lng] = parts;
         await onFindNearest({ lat, lng });
       } else {
-        alert('Vui lòng nhập tọa độ đúng định dạng: "vĩ độ, kinh độ"\nVí dụ: 10.7769, 106.7009');
+        alert('Please enter coordinates in the correct format: "lat, lng"\nExample: 10.7769, 106.7009');
       }
     } catch (err) {
       console.error('Error finding by coords:', err);
-      alert('Có lỗi khi tìm trạm. Vui lòng thử lại.');
+      alert('An error occurred while searching for stations. Please try again.');
     } finally {
       setIsSearching(false);
     }
@@ -189,7 +189,7 @@ const MapLeaflet = ({ stations = [], highlightedStation = null, height = '420px'
         <span style={{ fontSize: '16px' }}></span>
         <input
           type="text"
-          placeholder="Tìm kiếm trạm theo tên hoặc địa chỉ..."
+          placeholder="Search stations by name or address..."
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
           style={{
@@ -235,7 +235,7 @@ const MapLeaflet = ({ stations = [], highlightedStation = null, height = '420px'
             fontSize: '14px',
             marginBottom: '4px'
           }}>
-             Tìm trạm thuê xe gần nhất
+             Find nearest rental station
           </div>
           
           <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
@@ -265,7 +265,7 @@ const MapLeaflet = ({ stations = [], highlightedStation = null, height = '420px'
               onMouseEnter={(e) => !isSearching && (e.target.style.transform = 'translateY(-2px)')}
               onMouseLeave={(e) => (e.target.style.transform = 'translateY(0)')}
             >
-              {isSearching ? '' : ''} {isSearching ? 'Đang tìm...' : 'Dùng vị trí của tôi'}
+              {isSearching ? '' : ''} {isSearching ? 'Searching...' : 'Use my location'}
             </button>
             
             {/* Toggle to manual input */}
@@ -285,7 +285,7 @@ const MapLeaflet = ({ stations = [], highlightedStation = null, height = '420px'
               onMouseEnter={(e) => (e.target.style.background = 'rgba(255,255,255,0.3)')}
               onMouseLeave={(e) => (e.target.style.background = 'rgba(255,255,255,0.2)')}
             >
-              {searchMode === 'name' ? '️ Nhập tọa độ' : ' Tìm theo tên'}
+              {searchMode === 'name' ? 'Enter coordinates' : ' Search by name'}
             </button>
           </div>
 
@@ -294,7 +294,7 @@ const MapLeaflet = ({ stations = [], highlightedStation = null, height = '420px'
             <div style={{ display: 'flex', gap: '8px', marginTop: '4px' }}>
               <input
                 type="text"
-                placeholder="Nhập tọa độ (vĩ độ, kinh độ)..."
+                placeholder="Enter coordinates (lat, lng)..."
                 value={locationInput}
                 onChange={(e) => setLocationInput(e.target.value)}
                 style={{
@@ -322,7 +322,7 @@ const MapLeaflet = ({ stations = [], highlightedStation = null, height = '420px'
                   transition: 'all 0.2s'
                 }}
               >
-                 Tìm
+                 Find
               </button>
             </div>
           )}
@@ -391,7 +391,7 @@ const MapLeaflet = ({ stations = [], highlightedStation = null, height = '420px'
                         color: '#92400e',
                         fontWeight: '500'
                       }}>
-                         Trạm gần nhất
+                         Nearest station
                       </div>
                     )}
                   </div>

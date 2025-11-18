@@ -73,13 +73,13 @@ export default function StaffReturnCheckPage() {
       setFeeTypes(fees || []);
     } catch (err) {
       console.error("Load error:", err);
-      message.error("Không thể tải thông tin đơn.");
+      message.error("Cannot load order data.");
     } finally {
       setLoading(false);
     }
   };
 
-  // Lấy giá trị xe để tính phí %
+  // Get vehicle value for % calculations
   const getVehicleValue = () => {
     const value = vehicle?.price || vehicle?.pricePerHour || vehicle?.price_per_hour || 0;
     console.log('Vehicle data:', vehicle);
@@ -87,7 +87,7 @@ export default function StaffReturnCheckPage() {
     return value;
   };
 
-  // Lấy tổng giá trị đơn thuê (số giờ * giá/giờ)
+  // Get total order value (hours * price/hour)
   const getOrderTotalValue = () => {
     try {
       const pricePerHour =
@@ -112,7 +112,7 @@ export default function StaffReturnCheckPage() {
     }
   };
 
-  // Tính phí trễ hạn dựa trên thời gian
+  // Calculate late fee based on time
   const calculateLateFee = () => {
     if (!order?.endTime) return 0;
 
@@ -122,19 +122,19 @@ export default function StaffReturnCheckPage() {
 
     if (hoursLate <= 0) return 0;
 
-    // feeTypeId: 32 là "Phí trả xe trễ giờ"
+    // feeTypeId: 32 is 'Late return fee'
     const lateFeType = feeTypes.find((f) => f.feeTypeId === 32);
 
     if (lateFeType?.amount) {
       const orderTotal = getOrderTotalValue();
-      // amount là tỉ lệ (ví dụ 0.01 == 1%) áp lên tổng giá trị đơn thuê
+      // amount is a percentage (e.g., 0.01 == 1%) applied to total order value
       return hoursLate * (lateFeType.amount * orderTotal);
     }
 
     return 0;
   };
 
-  // Thêm phí phát sinh - tính % dựa trên giá xe
+  // Add additional fee - calculate % based on vehicle value
   const addFee = (feeTypeId) => {
     if (!feeTypeId) return;
 
@@ -142,7 +142,7 @@ export default function StaffReturnCheckPage() {
     if (!selectedFeeType) return;
 
     const orderTotal = getOrderTotalValue();
-    const feeAmount = selectedFeeType.amount * orderTotal; // amount là %, convert to value
+    const feeAmount = selectedFeeType.amount * orderTotal; // amount is %, convert to value
 
     const newFee = {
       id: Date.now(),
@@ -156,12 +156,12 @@ export default function StaffReturnCheckPage() {
     setSelectedFees([...selectedFees, newFee]);
   };
 
-  // Xóa phí phát sinh
+  // Remove additional fee
   const removeFee = (feeId) => {
     setSelectedFees(selectedFees.filter((f) => f.id !== feeId));
   };
 
-  // Tính tổng phí
+  // Calculate total fees
   const calculateTotalFee = () => {
     const trafficFee = form.getFieldValue("trafficFee") || 0;
     const lateFee = form.getFieldValue("lateFee") || 0;
@@ -205,18 +205,18 @@ export default function StaffReturnCheckPage() {
 
   const feeTableColumns = [
     {
-      title: "Loại phí",
+      title: "Fee Type",
       dataIndex: "feeType1",
       key: "feeType1",
       render: (text, record) => (
         <div>
           <div>{text}</div>
-          <small style={{ color: "#999" }}>({(record.percentage * 100).toFixed(0)}% giá xe)</small>
+          <small style={{ color: "#999" }}>({(record.percentage * 100).toFixed(0)}% of vehicle value)</small>
         </div>
       ),
     },
     {
-      title: "Số tiền",
+      title: "Amount",
       dataIndex: "amount",
       key: "amount",
       render: (amount) =>
@@ -226,16 +226,16 @@ export default function StaffReturnCheckPage() {
         }),
     },
     {
-      title: "Hành động",
+      title: "Action",
       key: "action",
       render: (_, record) => (
-        <Button
+              <Button
           type="text"
           danger
           onClick={() => removeFee(record.id)}
           size="small"
         >
-          Xóa
+          Remove
         </Button>
       ),
     },
@@ -243,61 +243,61 @@ export default function StaffReturnCheckPage() {
 
   return (
     <div style={{ padding: 24 }}>
-      <Card title={`Xử lý trả xe - Đơn #${order.orderId || order.order_id}`}>
+      <Card title={`Process Vehicle Return - Order #${order.orderId || order.order_id}`}>
         <Row gutter={16} style={{ marginBottom: 24 }}>
           <Col xs={24} sm={12}>
-            <Card size="small" title="Thông tin đơn thuê">
+            <Card size="small" title="Rental Order Information">
               <p>
-                <strong>Khách hàng:</strong> {order.renter?.fullName || order.renter?.renterName || "N/A"}
+                <strong>Customer:</strong> {order.renter?.fullName || order.renter?.renterName || "N/A"}
               </p>
               <p>
-                <strong>Xe:</strong> {vehicle?.vehicleNumber || vehicle?.licensePlate || "N/A"}
+                <strong>Vehicle:</strong> {vehicle?.vehicleNumber || vehicle?.licensePlate || "N/A"}
               </p>
               <p>
-                <strong>Mẫu:</strong> {vehicle?.vehicleModel?.modelName || "N/A"}
+                <strong>Model:</strong> {vehicle?.vehicleModel?.modelName || "N/A"}
               </p>
               <p>
-                <strong>Thời gian bắt đầu:</strong>{" "}
+                <strong>Start time:</strong>{" "}
                 {dayjs(order.startTime).format("DD/MM/YYYY HH:mm") || "N/A"}
               </p>
               <p>
-                <strong>Thời gian kết thúc:</strong>{" "}
+                <strong>End time:</strong>{" "}
                 {dayjs(order.endTime).format("DD/MM/YYYY HH:mm") || "N/A"}
               </p>
             </Card>
           </Col>
 
           <Col xs={24} sm={12}>
-            <Card size="small" title="Thông tin giá trị xe">
+            <Card size="small" title="Vehicle Value Information">
               <p>
-                <strong>Tổng giá trị đơn thuê (dùng để tính %):</strong>{" "}
+                <strong>Order total value (used for % calculation):</strong>{" "}
                 {getOrderTotalValue().toLocaleString("vi-VN", {
                   style: "currency",
                   currency: "VND",
                 })}
               </p>
               <p>
-                <strong>Mô tả:</strong> {order.description || "Không có"}
+                <strong>Description:</strong> {order.description || "N/A"}
               </p>
               <p>
-                <strong>Trạng thái:</strong> {order.status || "N/A"}
+                <strong>Status:</strong> {order.status || "N/A"}
               </p>
             </Card>
           </Col>
         </Row>
 
-        <Divider>TÍNH PHÍ PHÁT SINH</Divider>
+          <Divider>CALCULATE ADDITIONAL FEES</Divider>
 
         <Form form={form} layout="vertical" onFinish={onFinish}>
           <Row gutter={16}>
             <Col xs={24} sm={12}>
-              <Form.Item label="Phí vi phạm giao thông (VNĐ)" name="trafficFee">
-                <InputNumber min={0} className="w-full" placeholder="Nhập số tiền" />
+              <Form.Item label="Traffic fine (VND)" name="trafficFee">
+                <InputNumber min={0} className="w-full" placeholder="Enter amount" />
               </Form.Item>
             </Col>
 
             <Col xs={24} sm={12}>
-              <Form.Item label="Phí trễ hạn (VNĐ)" name="lateFee" initialValue={0}>
+              <Form.Item label="Late fee (VND)" name="lateFee" initialValue={0}>
                 <InputNumber
                   min={0}
                   className="w-full"
@@ -307,12 +307,12 @@ export default function StaffReturnCheckPage() {
             </Col>
           </Row>
 
-          <Divider>THÊM PHÍ PHÁT SINH KHÁC</Divider>
+          <Divider>ADD ADDITIONAL FEES</Divider>
 
           <Row gutter={16} style={{ marginBottom: 16 }}>
             <Col xs={24} sm={18}>
               <Select
-                placeholder="Chọn loại phí tổn hại"
+                placeholder="Select a damage fee type"
                 allowClear
                 style={{ width: '10 %' }}
                 dropdownMatchSelectWidth={false}
@@ -320,7 +320,7 @@ export default function StaffReturnCheckPage() {
                 options={feeTypes
                   .filter(
                     (f) =>
-                      f.feeTypeId >= 1 && f.feeTypeId <= 31 && // Các phí tổn hại
+                      f.feeTypeId >= 1 && f.feeTypeId <= 31 && // damage related fees
                       !selectedFees.find((sf) => sf.feeTypeId === f.feeTypeId)
                   )
                   .map((f) => {
@@ -350,10 +350,10 @@ export default function StaffReturnCheckPage() {
             </Card>
           )}
 
-          <Form.Item label="Ghi chú" name="note">
+            <Form.Item label="Notes" name="note">
             <Input.TextArea
               rows={3}
-              placeholder="Ghi chú về tình trạng xe hoặc lý do phí phát sinh"
+              placeholder="Notes about vehicle condition or reason for additional fees"
             />
           </Form.Item>
 
@@ -364,8 +364,8 @@ export default function StaffReturnCheckPage() {
               textAlign: "right",
             }}
           >
-            <h3>
-              Tổng phí phát sinh:{" "}
+              <h3>
+              Total additional fees:{" "}
               <span style={{ color: "#ff4d4f", fontSize: "1.2em" }}>
                 {calculateTotalFee().toLocaleString("vi-VN", {
                   style: "currency",
@@ -376,11 +376,11 @@ export default function StaffReturnCheckPage() {
           </Card>
 
           <Space style={{ width: "100%" }}>
-            <Button block onClick={() => navigate(-1)}>
-              Quay lại
+              <Button block onClick={() => navigate(-1)}>
+              Go Back
             </Button>
             <Button type="primary" htmlType="submit" block>
-              Tiếp tục
+              Continue
             </Button>
           </Space>
         </Form>

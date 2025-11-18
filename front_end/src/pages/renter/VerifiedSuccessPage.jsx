@@ -8,10 +8,10 @@ export default function VerifiedSuccessPage() {
         <div className="text-center">
           <div className="text-6xl mb-4">🎉</div>
           <h1 className="text-4xl font-bold text-green-600 mb-4">
-            Bạn đã xác thực, hãy bắt đầu đặt xe nào!
+            You're verified! Start booking vehicles now!
           </h1>
           <p className="text-gray-600 text-lg mb-8">
-            Tài khoản của bạn đã được xác thực thành công. Bạn có thể tiến hành đặt xe ngay bây giờ.
+            Your account has been verified successfully. You can start booking vehicles now.
           </p>
           
           <div className="flex gap-4 justify-center">
@@ -21,14 +21,14 @@ export default function VerifiedSuccessPage() {
               className="bg-green-600 hover:bg-green-700"
               onClick={() => window.location.href = '/home'}
             >
-              🏠 Quay về trang chủ
+              🏠 Back to home
             </Button>
             <Button
               type="default"
               size="large"
               onClick={() => window.location.href = '/vehicles'}
             >
-              🚗 Xem xe có sẵn
+              🚗 View available vehicles
             </Button>
           </div>
         </div>

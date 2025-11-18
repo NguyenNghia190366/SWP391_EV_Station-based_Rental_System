@@ -58,10 +58,10 @@ const VehiclesByModel = ({ vehicles = [], onSelectModel, onBookVehicle, getModel
     return Object.values(groups);
   }, [vehicles]);
 
-  // Fetch prices for all models - giống như VehicleCard
+  // Fetch prices for all models - similar to VehicleCard
   useEffect(() => {
     const fetchAllModelPrices = async () => {
-      // Kiểm tra token như VehicleCard
+      // Check token like VehicleCard
       const token = localStorage.getItem("token");
       if (!token) {
         setLoadingPrices(false);
@@ -83,8 +83,8 @@ const VehiclesByModel = ({ vehicles = [], onSelectModel, onBookVehicle, getModel
           try {
             const model = await getModelById(modelGroup.modelId);
             prices[modelGroup.modelId] = model.price_per_hour || 0;
-          } catch (error) {
-            console.error(`❌ Lỗi lấy model ${modelGroup.modelId}:`, error);
+            } catch (error) {
+            console.error(`❌ Failed to fetch model ${modelGroup.modelId}:`, error);
             prices[modelGroup.modelId] = 0;
           }
         })
@@ -102,7 +102,7 @@ const VehiclesByModel = ({ vehicles = [], onSelectModel, onBookVehicle, getModel
   }, [groupedByModel, getModelById]);
 
   if (vehicles.length === 0) {
-    return <Empty description="Không có xe nào" style={{ paddingTop: 40 }} />;
+    return <Empty description="No vehicles" style={{ paddingTop: 40 }} />;
   }
 
   return (
@@ -123,17 +123,17 @@ const VehiclesByModel = ({ vehicles = [], onSelectModel, onBookVehicle, getModel
                   {modelGroup.modelName}
                 </h4>
                 <p className="text-sm text-gray-500">
-                  Giá: {loadingPrices ? (
+                  Price: {loadingPrices ? (
                     <Spin size="small" />
                   ) : price_per_hour > 0 ? (
                     <>
                       <span className="text-green-600 font-semibold">
                         {(price_per_hour / 1000).toLocaleString("vi-VN")}k
                       </span>
-                      <span className="text-gray-400">/giờ</span>
+                      <span className="text-gray-400">/hr</span>
                     </>
                   ) : (
-                    <span className="text-gray-400">Đang cập nhật</span>
+                    <span className="text-gray-400">Updating</span>
                   )}
                 </p>
               </div>
@@ -152,18 +152,18 @@ const VehiclesByModel = ({ vehicles = [], onSelectModel, onBookVehicle, getModel
             <div className="space-y-2 mb-4 bg-gray-50 p-3 rounded">
               <div className="flex justify-between text-sm">
                 <span className="text-gray-700">
-                  <span className="font-semibold text-green-600">{modelGroup.availableCount}</span> có sẵn
+                  <span className="font-semibold text-green-600">{modelGroup.availableCount}</span> available
                 </span>
               </div>
               <div className="flex justify-between text-sm">
                 <span className="text-gray-700">
-                  <span className="font-semibold text-amber-600">{modelGroup.rentedCount}</span> đang cho thuê
+                  <span className="font-semibold text-amber-600">{modelGroup.rentedCount}</span> rented
                 </span>
               </div>
               {modelGroup.unavailableCount > 0 && (
                 <div className="flex justify-between text-sm">
-                  <span className="text-gray-700">
-                    <span className="font-semibold text-red-600">{modelGroup.unavailableCount}</span> hết xe
+                    <span className="text-gray-700">
+                    <span className="font-semibold text-red-600">{modelGroup.unavailableCount}</span> out of stock
                   </span>
                 </div>
               )}
@@ -172,13 +172,13 @@ const VehiclesByModel = ({ vehicles = [], onSelectModel, onBookVehicle, getModel
             {/* Status Tags */}
             <div className="mb-4 flex flex-wrap gap-2">
               {modelGroup.availableCount > 0 && (
-                <Tag color="green">Còn {modelGroup.availableCount}</Tag>
+                <Tag color="green">Available {modelGroup.availableCount}</Tag>
               )}
               {modelGroup.rentedCount > 0 && (
-                <Tag color="orange">Cho thuê {modelGroup.rentedCount}</Tag>
+                <Tag color="orange">Rented {modelGroup.rentedCount}</Tag>
               )}
               {modelGroup.unavailableCount > 0 && (
-                <Tag color="red">Hết {modelGroup.unavailableCount}</Tag>
+                <Tag color="red">Out of stock {modelGroup.unavailableCount}</Tag>
               )}
             </div>
 
@@ -190,12 +190,12 @@ const VehiclesByModel = ({ vehicles = [], onSelectModel, onBookVehicle, getModel
                   block
                   onClick={() => navigate(`/booking/${modelGroup.vehicles[0]?.id || modelGroup.modelId}`)}
                 >
-                  Đặt xe
+                  Book
                 </Button>
               )}
               {modelGroup.availableCount === 0 && (
                 <Button disabled block>
-                  {modelGroup.rentedCount > 0 ? "Đang cho thuê" : "Hết xe"}
+                  {modelGroup.rentedCount > 0 ? "Rented" : "Out of stock"}
                 </Button>
               )}
             </div>

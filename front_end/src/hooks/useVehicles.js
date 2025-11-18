@@ -4,21 +4,21 @@ import { useCallback } from "react";
 export const useVehicleAPI = () => {
   const instance = useAxiosInstance();
 
-  // 🔹 Lấy tất cả xe
+  // 🔹 Fetch all vehicles
   const getAll = useCallback(async () => {
     try {
       const res = await instance.get("/Vehicles");
       return res.data;
     } catch (error) {
-      console.error("❌ Không thể tải danh sách phương tiện:", error);
+      console.error("❌ Cannot load vehicle list:", error);
       throw (
         error.response?.data?.message ||
-        new Error("Không thể tải danh sách phương tiện")
+        new Error("Cannot load vehicle list")
       );
     }
   }, [instance]);
 
-  // 🔹 Lấy xe theo ID
+  // 🔹 Fetch vehicle by ID
   const getById = useCallback(
     async (id) => {
       try {
@@ -26,33 +26,33 @@ export const useVehicleAPI = () => {
         return res.data;
       } catch (error) {
         console.error(
-          `❌ Không thể tải thông tin phương tiện ID=${id}:`,
+          `❌ Cannot load vehicle info ID=${id}:`,
           error
         );
         throw (
           error.response?.data?.message ||
-          new Error("Không thể tải thông tin phương tiện")
+          new Error("Cannot load vehicle info")
         );
       }
     },
     [instance]
   );
 
-  // 🔹 Lấy tất cả VehicleModels (để lấy giá tiền)
+  // 🔹 Fetch all VehicleModels (to get prices)
   const getAllModels = useCallback(async () => {
     try {
       const res = await instance.get("/VehicleModels");
       return res.data;
     } catch (error) {
-      console.error("❌ Không thể tải danh sách model xe:", error);
+      console.error("❌ Cannot load vehicle model list:", error);
       throw (
         error.response?.data?.message ||
-        new Error("Không thể tải danh sách model xe")
+        new Error("Cannot load vehicle model list")
       );
     }
   }, [instance]);
 
-  // 🔹 Lấy VehicleModel theo ID (để lấy price_per_hour)
+  // 🔹 Fetch VehicleModel by ID (to get price_per_hour)
   const getModelById = useCallback(
     async (id) => {
       try {
@@ -60,36 +60,36 @@ export const useVehicleAPI = () => {
         return res.data;
       } catch (error) {
         console.error(
-          `❌ Không thể tải model xe ID=${id}:`,
+          `❌ Cannot load vehicle model ID=${id}:`,
           error
         );
         throw (
           error.response?.data?.message ||
-          new Error("Không thể tải thông tin model xe")
+          new Error("Cannot load vehicle model")
         );
       }
     },
     [instance]
   );
 
-  // 🔹 Tạo booking mới
+  // 🔹 Create booking
   const createBooking = useCallback(
     async (bookingPayload) => {
       try {
         const res = await instance.post("/Bookings", bookingPayload);
         return res.data;
       } catch (error) {
-        console.error("❌ Không thể tạo booking:", error);
+        console.error("❌ Cannot create booking:", error);
         throw (
           error.response?.data?.message ||
-          new Error("Không thể tạo booking")
+          new Error("Cannot create booking")
         );
       }
     },
     [instance]
   );
 
-  // 🔹 Tạo xe mới (dành cho staff)
+  // 🔹 Create new vehicle (for staff)
   const createVehicle = useCallback(
     async (vehiclePayload) => {
       try {
@@ -97,9 +97,9 @@ export const useVehicleAPI = () => {
         return res.data;
       } catch (error) {
         // Log detailed axios error info for debugging
-        console.error("❌ Không thể tạo xe: status=", error.response?.status, "data=", error.response?.data);
+        console.error("❌ Cannot create vehicle: status=", error.response?.status, "data=", error.response?.data);
         // Re-throw a useful message or the original error object for callers to inspect
-        const message = error.response?.data?.message || error.response?.data || error.message || "Không thể tạo xe";
+        const message = error.response?.data?.message || error.response?.data || error.message || "Cannot create vehicle";
         // Throw the original axios error so caller can inspect response if needed
         const errToThrow = message instanceof Error ? message : new Error(String(message));
         errToThrow.response = error.response;

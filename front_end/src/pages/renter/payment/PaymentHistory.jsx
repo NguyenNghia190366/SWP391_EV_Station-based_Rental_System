@@ -17,7 +17,7 @@ export default function PaymentHistory() {
         // Get userId from localStorage (same approach as RentalHistoryPage)
         const userId = localStorage.getItem('userId');
         if (!userId) {
-          console.warn('Không tìm thấy userId!');
+          console.warn('User ID not found!');
           return;
         }
         
@@ -118,25 +118,25 @@ export default function PaymentHistory() {
 
   const columns = [
     {
-      title: 'Mã thanh toán',
+      title: 'Payment ID',
       dataIndex: 'paymentId',
       key: 'paymentId',
       render: (v) => v || '-',
     },
     {
-      title: 'Mã đơn',
+      title: 'Order ID',
       dataIndex: 'orderId',
       key: 'orderId',
       render: (v) => v || '-',
     },
     {
-      title: 'Loại',
+      title: 'Type',
       dataIndex: 'typePayment',
       key: 'typePayment',
       render: (v) => v || '-',
     },
     {
-      title: 'Số tiền',
+      title: 'Amount',
       dataIndex: 'amount',
       key: 'amount',
       align: 'right',
@@ -146,18 +146,18 @@ export default function PaymentHistory() {
       }
     },
     {
-      title: 'Phương thức',
+      title: 'Method',
       dataIndex: 'paymentMethod',
       key: 'paymentMethod',
     },
     {
-      title: 'Trạng thái',
+      title: 'Status',
       dataIndex: 'paymentStatus',
       key: 'paymentStatus',
       render: (v) => v ? <Tag color={v === 'PAID' ? 'green' : 'red'}>{v}</Tag> : '-'
     },
     {
-      title: 'Thời gian',
+      title: 'Time',
       dataIndex: 'paymentDate',
       key: 'paymentDate',
       render: (v) => v ? dayjs(v).format('DD/MM/YYYY HH:mm') : '-'
@@ -167,23 +167,23 @@ export default function PaymentHistory() {
   return (
     <div className="min-h-screen bg-gray-50 p-6">
       <div className="max-w-6xl mx-auto">
-        <Card title="Lịch sử giao dịch">
+        <Card title="Payment History">
           {loading ? (
             <div style={{ textAlign: 'center', padding: 40 }}><Spin /></div>
           ) : apiMissing && !useMock ? (
-            <Alert
-              message="API chưa có: /Payments"
-              description={"Backend chưa cung cấp endpoint /Payments (404). Bạn có thể dùng dữ liệu giả lập (mock) để phát triển giao diện hoặc chờ backend hỗ trợ."}
+              <Alert
+              message="API missing: /Payments"
+              description={"Backend does not expose the /Payments endpoint (404). You can enable mock data for UI development or wait for backend support."}
               type="warning"
               showIcon
               action={
                 <Button size="small" type="primary" onClick={() => setUseMock(true)}>
-                  Hiển thị dữ liệu giả lập
+                  Show mock data
                 </Button>
               }
             />
           ) : payments.length === 0 ? (
-            <Empty description="Chưa có giao dịch" />
+            <Empty description="No payments yet" />
           ) : (
             <Table dataSource={payments} columns={columns} rowKey={(r) => r.paymentId || `${r.orderId}-${r.paymentDate}`} pagination={{ pageSize: 10 }} />
           )}

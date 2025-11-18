@@ -28,7 +28,7 @@ const CreateVehicleForm = ({ onSuccess }) => {
         setStations(stationsList);
       } catch (error) {
         console.error("Error fetching data:", error);
-        message.error("Không thể tải dữ liệu mô hình xe hoặc trạm");
+        message.error("Cannot load vehicle models or stations");
       } finally {
         setModelsLoading(false);
       }
@@ -62,7 +62,7 @@ const CreateVehicleForm = ({ onSuccess }) => {
       console.log("Creating vehicle payload:", payload);
 
       const result = await createVehicle(payload);
-      message.success("Xe được tạo thành công!");
+      message.success("Vehicle created successfully!");
       form.resetFields();
       if (onSuccess) onSuccess();
     } catch (error) {
@@ -110,12 +110,12 @@ const CreateVehicleForm = ({ onSuccess }) => {
             console.warn("Failed to set form fields from server errors", e);
           }
           // show general message too
-          message.error(respData.message || "Có lỗi xác thực. Vui lòng kiểm tra trường dữ liệu.");
+          message.error(respData.message || "Validation error. Please check form fields.");
         } else {
-          message.error(respData.message || JSON.stringify(respData) || "Không thể tạo xe. Vui lòng thử lại.");
+          message.error(respData.message || JSON.stringify(respData) || "Cannot create vehicle. Please try again.");
         }
       } else {
-        message.error(error.message || "Không thể tạo xe. Vui lòng thử lại.");
+        message.error(error.message || "Cannot create vehicle. Please try again.");
       }
     } finally {
       setLoading(false);
@@ -123,9 +123,9 @@ const CreateVehicleForm = ({ onSuccess }) => {
   };
 
   const conditionOptions = [
-    { label: "Tốt (Good)", value: "GOOD" },
-    { label: "Trung bình (Fair)", value: "FAIR" },
-    { label: "Kém (Poor)", value: "POOR" },
+    { label: "Good", value: "GOOD" },
+    { label: "Fair", value: "FAIR" },
+    { label: "Poor", value: "POOR" },
   ];
 
   return (
@@ -139,14 +139,14 @@ const CreateVehicleForm = ({ onSuccess }) => {
         {/* License Plate */}
         <Form.Item
           name="licensePlate"
-          label="Biển số xe"
+          label="License plate"
           rules={[
-            { required: true, message: "Vui lòng nhập biển số xe" },
-            { min: 3, message: "Biển số xe phải có ít nhất 3 ký tự" },
+            { required: true, message: "Please enter license plate" },
+            { min: 3, message: "License plate must be at least 3 characters" },
           ]}
         >
           <Input 
-            placeholder="VD: 51K-123456" 
+            placeholder="e.g., 51K-123456" 
             size="large"
             disabled={loading}
           />
@@ -155,11 +155,11 @@ const CreateVehicleForm = ({ onSuccess }) => {
         {/* Vehicle Model */}
         <Form.Item
           name="vehicleModelId"
-          label="Mô hình xe"
-          rules={[{ required: true, message: "Vui lòng chọn mô hình xe" }]}
+          label="Vehicle model"
+          rules={[{ required: true, message: "Please select vehicle model" }]}
         >
           <Select 
-            placeholder="Chọn mô hình xe"
+            placeholder="Select vehicle model"
             size="large"
             disabled={loading || modelsLoading}
           >
@@ -174,10 +174,10 @@ const CreateVehicleForm = ({ onSuccess }) => {
         {/* Station */}
         <Form.Item
           name="stationId"
-          label="Trạm"
+          label="Station"
         >
           <Select 
-            placeholder="Chọn trạm (tùy chọn)"
+            placeholder="Select station (optional)"
             size="large"
             disabled={loading}
             allowClear
@@ -193,7 +193,7 @@ const CreateVehicleForm = ({ onSuccess }) => {
         {/* Release Year */}
         <Form.Item
           name="releaseYear"
-          label="Năm sản xuất"
+          label="Release year"
         >
           <InputNumber 
             min={1900}
@@ -208,7 +208,7 @@ const CreateVehicleForm = ({ onSuccess }) => {
         {/* Battery Capacity */}
         <Form.Item
           name="batteryCapacity"
-          label="Dung lượng pin (kWh)"
+          label="Battery capacity (kWh)"
         >
           <InputNumber 
             min={0}
@@ -223,7 +223,7 @@ const CreateVehicleForm = ({ onSuccess }) => {
         {/* Current Mileage */}
         <Form.Item
           name="currentMileage"
-          label="Quãng đường hiện tại (km)"
+          label="Current mileage (km)"
         >
           <InputNumber 
             min={0}
@@ -237,7 +237,7 @@ const CreateVehicleForm = ({ onSuccess }) => {
         {/* Image URL */}
         <Form.Item
           name="imgCarUrl"
-          label="URL ảnh xe"
+          label="Image URL"
         >
           <Input 
             placeholder="https://example.com/image.jpg"
@@ -249,7 +249,7 @@ const CreateVehicleForm = ({ onSuccess }) => {
         {/* Condition */}
         <Form.Item
           name="condition"
-          label="Tình trạng"
+          label="Status"
           initialValue="GOOD"
         >
           <Select 
@@ -265,7 +265,7 @@ const CreateVehicleForm = ({ onSuccess }) => {
           valuePropName="checked"
           initialValue={true}
         >
-          <Checkbox disabled={loading}>Xe có sẵn cho thuê</Checkbox>
+          <Checkbox disabled={loading}>Available for rent</Checkbox>
         </Form.Item>
 
         {/* Submit Button */}
@@ -277,7 +277,7 @@ const CreateVehicleForm = ({ onSuccess }) => {
             loading={loading}
             className="w-full bg-green-600 hover:bg-green-700"
           >
-            {loading ? "Đang tạo..." : "Tạo xe"}
+            {loading ? "Creating..." : "Create vehicle"}
           </Button>
         </Form.Item>
       </Form>

@@ -16,7 +16,7 @@ export default function PaymentPage() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50">
       <Card style={{ width: 480, textAlign: "center" }}>
-        <h3>Đang chuyển tới trang thanh toán...</h3>
+        <h3>Redirecting to payment page...</h3>
         <div style={{ marginTop: 24 }}><Spin /></div>
       </Card>
     </div>
@@ -48,7 +48,7 @@ const PaymentPage = () => {
         setOrder(response.data);
       } catch (error) {
         console.error("Error fetching order:", error);
-        message.error("Không thể tải thông tin đơn hàng");
+        message.error("Cannot load order details");
         navigate("/my-bookings");
       } finally {
         setLoading(false);
@@ -67,26 +67,26 @@ const PaymentPage = () => {
     setProcessing(true);
     try {
       if (paymentMethod === "vnpay") {
-        // Tính tổng tiền: tiền thuê + tiền cọc (30%)
+        // Calculate total: rental + deposit (30%)
         const rentalPrice = order.rentalPrice || 0;
         const depositPrice = rentalPrice * 0.3;
         const totalAmount = rentalPrice + depositPrice;
 
-        // Gọi API tạo thanh toán VNPay
+        // Call API to create VNPay payment
         const paymentResponse = await createPayment(orderId, totalAmount, "rental");
 
         if (paymentResponse?.paymentUrl) {
-          // Redirect đến VNPay
+          // Redirect to VNPay
           window.location.href = paymentResponse.paymentUrl;
         } else {
-          message.error("Không thể khởi tạo thanh toán VNPay");
+          message.error("Cannot initialize VNPay payment");
         }
       } else {
-        message.info(`Phương thức thanh toán "${paymentMethod}" sẽ được triển khai sau`);
+        message.info(`Payment method "${paymentMethod}" will be implemented later`);
       }
     } catch (error) {
       console.error("Payment error:", error);
-      message.error("Lỗi khi xử lý thanh toán");
+      message.error("Error processing payment");
     } finally {
       setProcessing(false);
     }
@@ -99,7 +99,7 @@ const PaymentPage = () => {
   if (loading) {
     return (
       <div className="flex items-center justify-center h-screen">
-        <Spin tip="Đang tải thông tin thanh toán..." />
+        <Spin tip="Loading payment details..." />
       </div>
     );
   }
@@ -108,12 +108,12 @@ const PaymentPage = () => {
     return (
       <div className="flex items-center justify-center h-screen">
         <div className="text-center">
-          <h2 className="text-xl font-bold text-red-600">Không tìm thấy đơn hàng</h2>
+          <h2 className="text-xl font-bold text-red-600">Order not found</h2>
           <button
             onClick={() => navigate("/my-bookings")}
             className="mt-4 px-4 py-2 bg-blue-500 text-white rounded"
           >
-            Quay lại lịch sử
+            Back to history
           </button>
         </div>
       </div>
@@ -130,42 +130,42 @@ const PaymentPage = () => {
         {/* Header */}
         <div className="text-center mb-8">
           <h1 className="text-4xl font-bold bg-gradient-to-r from-green-600 to-emerald-600 bg-clip-text text-transparent mb-2">
-            THANH TOÁN
+            PAYMENT
           </h1>
-          <p className="text-gray-600">Hoàn tất thanh toán để xác nhận đơn thuê xe</p>
+          <p className="text-gray-600">Complete the payment to confirm your rental order</p>
         </div>
 
         <div className="grid lg:grid-cols-2 gap-8">
           {/* ======= Order Summary ======= */}
           <div className="bg-white rounded-2xl shadow-lg p-6">
             <h2 className="text-2xl font-bold text-gray-800 mb-6">
-              📋 Thông tin đơn hàng
+              📋 Order information
             </h2>
             <div className="space-y-6">
               <div className="p-4 bg-gray-50 rounded-xl">
                 <p className="text-gray-700">
-                  <b>Mã đơn:</b> #{order.orderId}
+                  <b>Order ID:</b> #{order.orderId}
                 </p>
-                <p className="text-gray-700 mt-2">
-                  <b>Thời gian:</b> {order.startTime && new Date(order.startTime).toLocaleDateString("vi-VN")} → {order.endTime && new Date(order.endTime).toLocaleDateString("vi-VN")}
+                  <p className="text-gray-700 mt-2">
+                  <b>Time:</b> {order.startTime && new Date(order.startTime).toLocaleDateString("vi-VN")} → {order.endTime && new Date(order.endTime).toLocaleDateString("vi-VN")}
                 </p>
               </div>
 
               <div className="space-y-3">
                 <div className="flex justify-between py-2 border-b border-gray-200">
-                  <span className="text-gray-700">Tiền thuê xe:</span>
+                  <span className="text-gray-700">Rental fee:</span>
                   <span className="font-semibold text-gray-900">
                     {new Intl.NumberFormat("vi-VN", { style: "currency", currency: "VND" }).format(rentalPrice)}
                   </span>
                 </div>
                 <div className="flex justify-between py-2 border-b border-gray-200">
-                  <span className="text-gray-700">Tiền cọc (30%):</span>
+                  <span className="text-gray-700">Deposit (30%):</span>
                   <span className="font-semibold text-orange-600">
                     {new Intl.NumberFormat("vi-VN", { style: "currency", currency: "VND" }).format(depositPrice)}
                   </span>
                 </div>
                 <div className="flex justify-between py-3 bg-gradient-to-r from-green-50 to-emerald-50 rounded-lg px-4">
-                  <span className="text-lg font-bold text-gray-900">TỔNG THANH TOÁN:</span>
+                  <span className="text-lg font-bold text-gray-900">TOTAL PAYMENT:</span>
                   <span className="text-2xl font-bold text-green-600">
                     {new Intl.NumberFormat("vi-VN", { style: "currency", currency: "VND" }).format(totalPrice)}
                   </span>
@@ -174,7 +174,7 @@ const PaymentPage = () => {
 
               <div className="bg-blue-50 rounded-xl p-4">
                 <p className="text-sm text-gray-600">
-                  � Tiền cọc sẽ được trừ từ khoản thanh toán cuối cùng khi bạn hoàn trả xe
+                  � The deposit will be deducted from the final payment when you return the vehicle
                 </p>
               </div>
             </div>
@@ -183,15 +183,15 @@ const PaymentPage = () => {
           {/* ======= Payment Methods ======= */}
           <div className="bg-white rounded-2xl shadow-lg p-6">
             <h2 className="text-2xl font-bold text-gray-800 mb-6">
-              💳 Phương thức thanh toán
+              💳 Payment method
             </h2>
 
             <div className="space-y-3 mb-6">
               {[
-                { value: "vnpay", label: "VNPay", description: "An toàn, nhanh chóng" },
-                { value: "momo", label: "Ví MoMo", description: "Sắp có" },
-                { value: "zalopay", label: "ZaloPay", description: "Sắp có" },
-                { value: "bank", label: "Chuyển khoản ngân hàng", description: "Sắp có" },
+                { value: "vnpay", label: "VNPay", description: "Secure, fast" },
+                { value: "momo", label: "MoMo", description: "Coming soon" },
+                { value: "zalopay", label: "ZaloPay", description: "Coming soon" },
+                { value: "bank", label: "Bank transfer", description: "Coming soon" },
               ].map((m) => (
                 <label
                   key={m.value}
@@ -219,8 +219,8 @@ const PaymentPage = () => {
             </div>
 
             <div className="bg-gradient-to-r from-green-50 to-emerald-50 rounded-xl p-4 space-y-2 mb-6">
-              <p className="text-sm text-gray-700">✔️ Thông tin thanh toán được mã hóa và bảo mật</p>
-              <p className="text-sm text-gray-700">🕐 Bạn có thể hủy đơn miễn phí trước 24h</p>
+              <p className="text-sm text-gray-700">✔️ Payment information is encrypted and secured</p>
+              <p className="text-sm text-gray-700">🕐 You can cancel for free up to 24 hours before the start time</p>
             </div>
 
             {/* ======= Payment Buttons ======= */}
@@ -230,7 +230,7 @@ const PaymentPage = () => {
                 onClick={handleBack}
                 disabled={processing}
               >
-                ← Quay lại
+                ← Back
               </button>
               <button
                 className="flex-[2] px-6 py-4 bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white font-bold rounded-lg shadow-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed"
@@ -240,10 +240,10 @@ const PaymentPage = () => {
                 {processing ? (
                   <span className="flex items-center justify-center gap-2">
                     <span className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
-                    Đang xử lý...
+                    Processing...
                   </span>
                 ) : (
-                  `Thanh toán ${new Intl.NumberFormat("vi-VN", { style: "currency", currency: "VND" }).format(totalPrice)}`
+                  `Pay ${new Intl.NumberFormat("vi-VN", { style: "currency", currency: "VND" }).format(totalPrice)}`
                 )}
               </button>
             </div>

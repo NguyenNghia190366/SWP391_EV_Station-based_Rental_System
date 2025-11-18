@@ -36,12 +36,12 @@ const SendVehiclePreview = () => {
           range: found.vehicle?.range || 0
         }));
       } else {
-        message.error('Không tìm thấy booking');
+        message.error('Booking not found');
         navigate('/staff/bookings');
       }
     } catch (error) {
       console.error('Error loading booking:', error);
-      message.error('Lỗi tải thông tin booking');
+      message.error('Error loading booking info');
     }
   };
 
@@ -70,13 +70,13 @@ const SendVehiclePreview = () => {
 
   const handleSendPreview = async () => {
     if (photos.length === 0) {
-      message.warning('Vui lòng chụp ít nhất 1 ảnh xe!');
+      message.warning('Please take at least 1 vehicle photo!');
       return;
     }
 
     try {
       setSending(true);
-      message.loading({ content: 'Đang gửi thông tin xe...', key: 'send' });
+      message.loading({ content: 'Sending vehicle info...', key: 'send' });
 
       // In real app: Upload photos to server and send notification
       // const formData = new FormData();
@@ -115,8 +115,8 @@ const SendVehiclePreview = () => {
       const newNotification = {
         id: `notif_${Date.now()}`,
         type: 'vehicle_preview',
-        title: 'Thông tin xe đã sẵn sàng! 🚗',
-        message: `Nhân viên đã gửi thông tin và hình ảnh xe ${booking.vehicle?.name}. Vui lòng kiểm tra và xác nhận.`,
+        title: 'Vehicle information ready! 🚗',
+        message: `Staff has sent the vehicle information and photos for ${booking.vehicle?.name}. Please check and confirm.`,
         bookingId: bookingId,
         vehicleName: booking.vehicle?.name,
         read: false,
@@ -126,7 +126,7 @@ const SendVehiclePreview = () => {
       localStorage.setItem('userNotifications', JSON.stringify(userNotifications));
 
       message.success({
-        content: 'Đã gửi thông tin xe cho khách hàng!',
+        content: 'Vehicle information sent to customer!',
         key: 'send',
         duration: 3
       });
@@ -138,7 +138,7 @@ const SendVehiclePreview = () => {
     } catch (error) {
       console.error('Error sending preview:', error);
       message.error({
-        content: 'Không thể gửi thông tin. Vui lòng thử lại!',
+        content: 'Cannot send data. Please try again!',
         key: 'send'
       });
     } finally {
@@ -150,7 +150,7 @@ const SendVehiclePreview = () => {
     return (
       <div className="send-preview-loading">
         <div className="spinner"></div>
-        <p>Đang tải...</p>
+        <p>Loading...</p>
       </div>
     );
   }
@@ -159,33 +159,33 @@ const SendVehiclePreview = () => {
     <div className="send-preview-container">
       <div className="send-preview-header">
         <button className="btn-back" onClick={() => navigate(-1)}>
-          ← Quay lại
+          ← Back
         </button>
         <div>
-          <h1>📸 Gửi Thông Tin Xe Cho Khách</h1>
-          <p>Mã booking: <strong>{bookingId}</strong></p>
+          <h1>📸 Send Vehicle Info to Customer</h1>
+            <p>Booking ID: <strong>{bookingId}</strong></p>
         </div>
       </div>
 
       <div className="send-preview-content">
         {/* Booking Info */}
         <div className="booking-info-card">
-          <h3>Thông tin booking</h3>
+          <h3>Booking information</h3>
           <div className="info-grid">
             <div className="info-item">
-              <span>Khách hàng:</span>
+              <span>Customer:</span>
               <strong>{booking.user?.fullName}</strong>
             </div>
             <div className="info-item">
-              <span>Xe:</span>
+              <span>Vehicle:</span>
               <strong>{booking.vehicle?.name}</strong>
             </div>
             <div className="info-item">
-              <span>Thời gian nhận:</span>
+              <span>Pickup time:</span>
               <strong>{new Date(booking.bookingData?.startDate).toLocaleString('vi-VN')}</strong>
             </div>
             <div className="info-item">
-              <span>Trạm:</span>
+              <span>Station:</span>
               <strong>{booking.bookingData?.pickupLocation}</strong>
             </div>
           </div>
@@ -193,8 +193,8 @@ const SendVehiclePreview = () => {
 
         {/* Photo Upload Section */}
         <div className="photo-upload-section">
-          <h3>📷 Chụp ảnh xe</h3>
-          <p className="section-note">Chụp ít nhất 4 ảnh: trước, sau, 2 bên, và nội thất</p>
+          <h3>📷 Vehicle Photos</h3>
+          <p className="section-note">Take at least 4 photos: front, rear, both sides, and interior</p>
           
           <div className="upload-area">
             <input
@@ -207,9 +207,9 @@ const SendVehiclePreview = () => {
               style={{ display: 'none' }}
             />
             <label htmlFor="photo-input" className="upload-btn">
-              📸 Chụp/Chọn ảnh
+              📸 Capture/Choose photos
             </label>
-            <p className="upload-hint">Đã chọn {photos.length} ảnh</p>
+            <p className="upload-hint">{photos.length} photos selected</p>
           </div>
 
           {photos.length > 0 && (
@@ -217,9 +217,9 @@ const SendVehiclePreview = () => {
               {photos.map((photo, index) => (
                 <div key={index} className="preview-photo-card">
                   <img src={photo.preview} alt={`Preview ${index + 1}`} />
-                  <input
+                    <input
                     type="text"
-                    placeholder="Mô tả vị trí (VD: Phía trước)"
+                    placeholder="Location description (e.g., Front)"
                     value={photo.caption}
                     onChange={(e) => handlePhotoCaption(index, e.target.value)}
                     className="photo-caption-input"
@@ -238,35 +238,35 @@ const SendVehiclePreview = () => {
 
         {/* Vehicle Condition Form */}
         <div className="condition-form-section">
-          <h3>📋 Tình trạng xe</h3>
+          <h3>📋 Vehicle Condition</h3>
           
           <div className="form-grid">
             <div className="form-group">
-              <label>Ngoại thất</label>
+              <label>Exterior</label>
               <select 
                 value={vehicleCondition.exteriorCondition}
                 onChange={(e) => setVehicleCondition({...vehicleCondition, exteriorCondition: e.target.value})}
               >
-                <option value="good">✓ Tốt - Không trầy xước</option>
-                <option value="fair">⚠ Khá - Trầy xước nhẹ</option>
-                <option value="damaged">✗ Có vấn đề - Hư hỏng rõ</option>
+                <option value="good">✓ Good - No scratches</option>
+                <option value="fair">⚠ Fair - Minor scratches</option>
+                <option value="damaged">✗ Damaged - Significant issues</option>
               </select>
             </div>
 
             <div className="form-group">
-              <label>Nội thất</label>
+              <label>Interior</label>
               <select 
                 value={vehicleCondition.interiorCondition}
                 onChange={(e) => setVehicleCondition({...vehicleCondition, interiorCondition: e.target.value})}
               >
-                <option value="good">✓ Tốt - Sạch sẽ</option>
-                <option value="fair">⚠ Khá - Hơi bẩn</option>
-                <option value="damaged">✗ Có vấn đề - Bẩn/hư</option>
+                <option value="good">✓ Good - Clean</option>
+                <option value="fair">⚠ Fair - Slightly dirty</option>
+                <option value="damaged">✗ Damaged - Dirty/issue</option>
               </select>
             </div>
 
             <div className="form-group">
-              <label>Mức pin (%)</label>
+              <label>Battery level (%)</label>
               <input
                 type="number"
                 min="0"
@@ -277,7 +277,7 @@ const SendVehiclePreview = () => {
             </div>
 
             <div className="form-group">
-              <label>Quãng đường còn lại (km)</label>
+              <label>Remaining range (km)</label>
               <input
                 type="number"
                 min="0"
@@ -287,11 +287,11 @@ const SendVehiclePreview = () => {
             </div>
           </div>
 
-          <div className="form-group full-width">
-            <label>Ghi chú cho khách (nếu có)</label>
-            <textarea
+            <div className="form-group full-width">
+            <label>Note for customer (optional)</label>
+              <textarea
               rows="3"
-              placeholder="VD: Xe có vết xước nhỏ ở cánh cửa phải, đã kiểm tra đầy đủ..."
+              placeholder="e.g., Minor scratch on right door, full inspection completed..."
               value={vehicleCondition.notes}
               onChange={(e) => setVehicleCondition({...vehicleCondition, notes: e.target.value})}
             />
@@ -305,14 +305,14 @@ const SendVehiclePreview = () => {
             onClick={() => navigate(-1)}
             disabled={sending}
           >
-            Hủy
+            Cancel
           </button>
           <button 
             className="btn-send"
             onClick={handleSendPreview}
             disabled={sending || photos.length === 0}
           >
-            {sending ? 'Đang gửi...' : '✉️ Gửi cho khách hàng'}
+            {sending ? 'Sending...' : '✉️ Send to customer'}
           </button>
         </div>
       </div>

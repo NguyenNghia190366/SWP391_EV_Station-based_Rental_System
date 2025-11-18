@@ -8,15 +8,15 @@ export default function BookingDetailModal({ visible, booking, onClose }) {
     <Modal
       open={visible}
       onCancel={onClose}
-      title={`Chi tiết booking #${booking.bookingId}`}
+      title={`Booking details #${booking.bookingId}`}
       footer={null}
       width={700}
     >
-      <p><strong>Tên khách:</strong> {booking.user?.fullName}</p>
+      <p><strong>Customer name:</strong> {booking.user?.fullName}</p>
       <p><strong>Email:</strong> {booking.user?.email}</p>
-      <p><strong>Xe:</strong> {booking.vehicle?.name}</p>
-      <p><strong>Tổng tiền:</strong> {booking.totalPrice?.toLocaleString("vi-VN")} đ</p>
-      <p><strong>Trạng thái:</strong> <Tag>{booking.status}</Tag></p>
+      <p><strong>Vehicle:</strong> {booking.vehicle?.name}</p>
+      <p><strong>Total amount:</strong> {booking.totalPrice?.toLocaleString("vi-VN")} VND</p>
+      <p><strong>Status:</strong> <Tag>{booking.status}</Tag></p>
     </Modal>
   );
 }

@@ -35,7 +35,7 @@ export default function StaffReturnRequestPage() {
       const vehicleMap = new Map(vehicles.map((v) => [v.vehicleId ?? v.id, v]));
       const stationMap = new Map(stations.map((s) => [s.stationId ?? s.id, s]));
 
-      // lấy thông tin đơn thuê
+      // fetch order info
       const merged = ordersRaw.map((order) => {
   const renter = renterMap.get(order.renterId ?? order.renter_id);
   const vehicle = vehicleMap.get(order.vehicleId ?? order.vehicle_id ?? order.vehicle);
@@ -69,7 +69,7 @@ export default function StaffReturnRequestPage() {
       setOrders(filtered);
     } catch (err) {
       console.error("Error loading return requests:", err);
-      message.error("Không thể tải danh sách trả xe.");
+      message.error("Cannot load return requests list.");
     }
   };
 
@@ -89,33 +89,33 @@ export default function StaffReturnRequestPage() {
 
   const columns = [
     {
-      title: "Mã đơn",
+      title: "Order ID",
       dataIndex: "orderId",
       render: (id) => <b>#{id}</b>,
     },
     {
-      title: "Khách Hàng  ",
+      title: "Customer",
       dataIndex: "renterName",
     },
     {
-      title: "Xe",
+      title: "Vehicle",
       dataIndex: "vehicleName",
     },
     {
-      title: "Trạm trả yêu cầu",
+      title: "Return station",
       dataIndex: "returnStationName",
     },
     {
-      title: "Thời gian yêu cầu",
+      title: "Request time",
       render: (_, r) =>
         r.returnRequestedAt ? dayjs(r.returnRequestedAt).format("DD/MM/YYYY HH:mm") : "-",
     },
     {
-      title: "Hành động",
+      title: "Actions",
       render: (_, row) => (
         <Space>
           <Button type="default" onClick={() => navigate(`/staff/return-check/${row.orderId}`)}>
-            Xử lý trả xe
+            Process return
           </Button>
          
           <Button 
@@ -123,7 +123,7 @@ export default function StaffReturnRequestPage() {
             danger
             onClick={() => handleCompleteOrder(row.orderId)}
           >
-            Trả xe
+            Return vehicle
           </Button>
         </Space>
       ),
@@ -132,7 +132,7 @@ export default function StaffReturnRequestPage() {
 
   return (
     <div style={{ padding: 24 }}>
-      <Card title="Yêu cầu trả xe">
+      <Card title="Return Requests">
         <Table rowKey={(r) => r.orderId ?? r.id} dataSource={orders} columns={columns} />
       </Card>
     </div>

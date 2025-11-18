@@ -50,8 +50,8 @@ export default function BookingFormPage() {
           setPrice("N/A");
         }
       } catch (err) {
-        console.error("❌ Lỗi khi lấy dữ liệu xe:", err);
-        message.error("Không thể tải thông tin xe!");
+        console.error("❌ Error fetching vehicle data:", err);
+        message.error("Unable to load vehicle information!");
       } finally {
         setLoading(false);
       }
@@ -71,8 +71,8 @@ export default function BookingFormPage() {
         console.log("📍 Stations fetched:", stationsList);
         setStations(stationsList);
       } catch (err) {
-        console.error("❌ Lỗi khi lấy danh sách trạm:", err);
-        message.warning("Không thể tải danh sách trạm");
+        console.error("❌ Error fetching station list:", err);
+        message.warning("Unable to load station list");
       }
     };
     fetchStations();
@@ -84,11 +84,11 @@ export default function BookingFormPage() {
 
       // Yup validation schema
       const schema = yup.object({
-        startDate: yup.mixed().required('Vui lòng chọn ngày bắt đầu').test('is-date', 'Ngày bắt đầu không hợp lệ', value => !!value && (value.isValid ? value.isValid() : !isNaN(new Date(value).getTime()))),
-        endDate: yup.mixed().required('Vui lòng chọn ngày kết thúc').test('is-date', 'Ngày kết thúc không hợp lệ', value => !!value && (value.isValid ? value.isValid() : !isNaN(new Date(value).getTime()))),
-        pickupStation: yup.string().required('Vui lòng chọn trạm đặt xe'),
-        returnStation: yup.string().required('Vui lòng chọn trạm trả xe').notOneOf([yup.ref('pickupStation')], 'Trạm trả phải khác trạm đặt'),
-      }).test('date-order', 'Ngày kết thúc phải sau ngày bắt đầu', function(value) {
+        startDate: yup.mixed().required('Please select start date').test('is-date', 'Invalid start date', value => !!value && (value.isValid ? value.isValid() : !isNaN(new Date(value).getTime()))),
+        endDate: yup.mixed().required('Please select end date').test('is-date', 'Invalid end date', value => !!value && (value.isValid ? value.isValid() : !isNaN(new Date(value).getTime()))),
+        pickupStation: yup.string().required('Please select pickup station'),
+        returnStation: yup.string().required('Please select return station').notOneOf([yup.ref('pickupStation')], 'Return station must be different from pickup station'),
+      }).test('date-order', 'End date must be after start date', function(value) {
         const { startDate, endDate } = value || {};
         if (!startDate || !endDate) return true; // handled by required
         const s = startDate.isValid ? startDate : dayjs(startDate);
@@ -113,7 +113,7 @@ export default function BookingFormPage() {
         localStorage.getItem("renterId");
 
       if (!renterId) {
-        toast.error("❌ Không tìm thấy thông tin người thuê!", {
+        toast.error("❌ Renter information not found!", {
           position: "top-right",
           autoClose: 3000,
         });
@@ -133,7 +133,7 @@ export default function BookingFormPage() {
       console.log("📦 Sending orderData:", JSON.stringify(orderData, null, 2));
       const res = await createRentalOrder(orderData);
       
-      toast.success("✅ Đã gửi yêu cầu đặt xe thành công!", {
+      toast.success("✅ Booking request submitted successfully!", {
         position: "top-right",
         autoClose: 3000,
         hideProgressBar: false,
@@ -149,7 +149,7 @@ export default function BookingFormPage() {
       }, 2000);
     } catch (error) {
       console.error("❌ Booking error:", error);
-      toast.error("❌ Không thể tạo đơn thuê. Vui lòng thử lại!", {
+      toast.error("❌ Unable to create rental order. Please try again!", {
         position: "top-right",
         autoClose: 3000,
       });
@@ -161,7 +161,7 @@ export default function BookingFormPage() {
   if (loading || !vehicle) {
     return (
       <div className="flex items-center justify-center min-h-screen bg-gray-50">
-        <Spin size="large" tip="Đang tải dữ liệu..." />
+        <Spin size="large" tip="Loading data..." />
       </div>
     );
   }
@@ -184,40 +184,40 @@ export default function BookingFormPage() {
         bodyStyle={{ padding: "48px" }}
       >
         <div className="text-center mb-10">
-          <h1 className="text-4xl font-extrabold text-gray-900 mb-3 tracking-tight">
-            Đặt xe điện nhanh chóng ⚡
+            <h1 className="text-4xl font-extrabold text-gray-900 mb-3 tracking-tight">
+            Quick EV Booking ⚡
           </h1>
           <p className="text-gray-600 text-lg">
-            Điền thông tin chi tiết để hoàn tất yêu cầu thuê xe
+            Fill in the details to complete your booking request
           </p>
         </div>
 
         {/* ✅ Vehicle Info Section */}
         <div className="bg-blue-50 border border-blue-200 rounded-xl p-6 mb-10">
-          <h3 className="text-xl font-semibold text-gray-800 mb-5">Thông tin xe</h3>
+          <h3 className="text-xl font-semibold text-gray-800 mb-5">Vehicle information</h3>
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
             <div>
-              <p className="text-sm text-gray-600">Tên xe</p>
+              <p className="text-sm text-gray-600">Vehicle name</p>
               <p className="font-bold text-gray-900 text-lg">
                 {vehicle.vehicleName || "N/A"}
               </p>
             </div>
             <div>
-              <p className="text-sm text-gray-600">Biển số</p>
+              <p className="text-sm text-gray-600">License plate</p>
               <p className="font-bold text-gray-900 text-lg">
                 {vehicle.licensePlate || "N/A"}
               </p>
             </div>
             <div>
-              <p className="text-sm text-gray-600">Hãng</p>
+              <p className="text-sm text-gray-600">Brand</p>
               <p className="font-bold text-gray-900 text-lg">
                 {vehicle.brand || vehicle.brandName || "N/A"}
               </p>
             </div>
             <div>
-              <p className="text-sm text-gray-600">Giá thuê / giờ</p>
+              <p className="text-sm text-gray-600">Rental price / hr</p>
               <p className="font-bold text-green-600 text-lg">
-                {price ? `${price.toLocaleString("vi-VN")}₫` : "Đang tải..."}
+                {price ? `${price.toLocaleString("vi-VN")}₫` : "Loading..."}
               </p>
             </div>
           </div>
@@ -232,9 +232,9 @@ export default function BookingFormPage() {
           className="grid grid-cols-1 md:grid-cols-2 gap-8"
         >
           <Form.Item
-            label={<span className="font-medium text-gray-700 text-base">Ngày bắt đầu</span>}
+            label={<span className="font-medium text-gray-700 text-base">Start Date</span>}
             name="startDate"
-            rules={[{ required: true, message: "Vui lòng chọn ngày bắt đầu" }]}
+            rules={[{ required: true, message: "Please select a start date" }]}
           >
             <DatePicker
               className="w-full text-lg"
@@ -245,9 +245,9 @@ export default function BookingFormPage() {
           </Form.Item>
 
           <Form.Item
-            label={<span className="font-medium text-gray-700 text-base">Ngày kết thúc</span>}
+            label={<span className="font-medium text-gray-700 text-base">End Date</span>}
             name="endDate"
-            rules={[{ required: true, message: "Vui lòng chọn ngày kết thúc" }]}
+            rules={[{ required: true, message: "Please select an end date" }]}
           >
             <DatePicker
               className="w-full text-lg"
@@ -261,12 +261,12 @@ export default function BookingFormPage() {
           </Form.Item>
 
           <Form.Item
-            label={<span className="font-medium text-gray-700 text-base">Trạm đặt xe</span>}
+            label={<span className="font-medium text-gray-700 text-base">Pickup Station</span>}
             name="pickupStation"
-            rules={[{ required: true, message: "Vui lòng chọn trạm đặt xe" }]}
+            rules={[{ required: true, message: "Please select a pickup station" }]}
           >
             <Select
-              placeholder="Chọn trạm đặt xe"
+                placeholder="Select pickup station"
               size="large"
               options={stations.map((station) => {
                 const stationId = station.id || station.station_id || station.stationId;
@@ -281,12 +281,12 @@ export default function BookingFormPage() {
           </Form.Item>
 
           <Form.Item
-            label={<span className="font-medium text-gray-700 text-base">Trạm trả xe</span>}
+            label={<span className="font-medium text-gray-700 text-base">Return Station</span>}
             name="returnStation"
-            rules={[{ required: true, message: "Vui lòng chọn trạm trả xe" }]}
+            rules={[{ required: true, message: "Please select a return station" }]}
           >
             <Select
-              placeholder="Chọn trạm trả xe"
+                placeholder="Select return station"
               size="large"
               options={stations.map((station) => {
                 const stationId = station.id || station.station_id || station.stationId;
@@ -301,26 +301,26 @@ export default function BookingFormPage() {
           </Form.Item>
 
           <Form.Item
-            label={<span className="font-medium text-gray-700 text-base">Yêu cầu đặc biệt</span>}
+            label={<span className="font-medium text-gray-700 text-base">Special requests</span>}
             name="specialRequests"
             className="md:col-span-2"
           >
             <Input.TextArea
-              placeholder="Nhập yêu cầu đặc biệt (nếu có)"
+              placeholder="Enter special requests (optional)"
               rows={4}
               className="text-lg"
             />
           </Form.Item>
 
           <Form.Item className="md:col-span-2">
-            <Button
+              <Button
               type="primary"
               htmlType="submit"
               size="large"
               loading={loading}
               className="w-full h-14 text-lg font-semibold bg-blue-600 hover:bg-blue-700 rounded-xl shadow-md"
             >
-              Gửi yêu cầu đặt xe
+              Submit booking request
             </Button>
           </Form.Item>
         </Form>
@@ -333,7 +333,7 @@ export default function BookingFormPage() {
             onClick={() => navigate("/vehicles")}
             disabled={loading}
           >
-            Quay lại danh sách xe
+            Back to vehicle list
           </Button>
         </div>
       </Card>

@@ -6,7 +6,7 @@ export const useRentalOrders = (withApi = false) => {
   const instance = useAxiosInstance(withApi);
   const axiosInstance = useAxiosInstance();
 
-  // 🔹 1. Lấy danh sách đơn thuê theo renterId
+  // 🔹 1. Get rental orders by renterId
   const getRentalOrdersByRenterId = useCallback(
     async (renterId) => {
       try {
@@ -23,28 +23,28 @@ export const useRentalOrders = (withApi = false) => {
     [instance]
   );
 
-  // 🔹 2. Tạo đơn thuê
+  // 🔹 2. Create rental order
   const createRentalOrder = useCallback(
     async (orderData) => {
       try {
-        console.log("📤 POST /RentalOrders với data:", JSON.stringify(orderData, null, 2));
+        console.log("📤 POST /RentalOrders with data:", JSON.stringify(orderData, null, 2));
         const res = await instance.post(`/RentalOrders`, orderData, {
           headers: { "Content-Type": "application/json" },
         });
-        console.log("✅ Response từ server:", res.data);
+        console.log("✅ Response from server:", res.data);
         return res.data;
       } catch (error) {
-        console.error("❌ Lỗi tạo đơn thuê:");
+        console.error("❌ Error creating rental order:");
         console.error("  Status:", error.response?.status);
         console.error("  Response Data:", JSON.stringify(error.response?.data, null, 2));
         console.error("  Error Message:", error.message);
         console.error("  Full Error:", error);
         
-        // Hiển thị chi tiết lỗi từ backend
+        // Show backend error details
         const errorMsg = error.response?.data?.message || 
                         error.response?.data?.error ||
                         error.response?.data?.title ||
-                        "Không thể tạo đơn thuê. Vui lòng thử lại!";
+                        "Cannot create rental order. Please try again!";
         
         message.error(`❌ ${errorMsg}`);
         throw error;
@@ -53,7 +53,7 @@ export const useRentalOrders = (withApi = false) => {
     [instance]
   );
 
-  // 🔹 3. Duyệt booking (Approve)
+  // 🔹 3. Approve booking
   const approveRentalOrder = useCallback(
     async (orderId, orderData) => {
       try {
@@ -61,50 +61,50 @@ export const useRentalOrders = (withApi = false) => {
           ...orderData,
           status: "APPROVED",
         });
-        message.success("✅ Đã duyệt yêu cầu booking!");
+        message.success("✅ Booking request approved!");
         return res.data;
       } catch (error) {
-        console.error("❌ Lỗi approve:", error);
-        message.error("Không thể duyệt yêu cầu. Vui lòng thử lại!");
+        console.error("❌ Approve error:", error);
+        message.error("Cannot approve request. Please try again!");
         throw error;
       }
     },
     [instance]
   );
 
-  // Giao xe
+  // Hand over vehicle
   const handOverOrder = useCallback(
     async (orderId) => {
       try {
         const res = await instance.put(`/Inuse?id=${orderId}`);
-        message.success("✅ Đã bàn giao xe thành công!");
+        message.success("✅ Vehicle delivered successfully!");
         return res.data;
       } catch (error) {
-        console.error("❌ Lỗi approve:", error);
-        message.error("Không thể duyệt yêu cầu. Vui lòng thử lại!");
+        console.error("❌ Hand over error:", error);
+        message.error("Cannot approve request. Please try again!");
         throw error;
       }
     },
     [instance]
   );
 
-  // Trả xe
+  // Return vehicle
   const handOverReturnOrder = useCallback(
     async (orderId) => {
       try {
         const res = await instance.put(`/Complete?id=${orderId}`);
-        message.success("✅ Đã tiếp nhận xe thành công!");
+        message.success("✅ Vehicle return received successfully!");
         return res.data;
       } catch (error) {
-        console.error("❌ Lỗi approve:", error);
-        message.error("Không thể duyệt yêu cầu. Vui lòng thử lại!");
+        console.error("❌ Return error:", error);
+        message.error("Cannot approve request. Please try again!");
         throw error;
       }
     },
     [instance]
   );
 
-  // 🔹 4. Từ chối booking (Reject)
+  // 🔹 4. Reject booking
   const rejectRentalOrder = useCallback(
     async (orderId, orderData) => {
       try {
@@ -112,18 +112,18 @@ export const useRentalOrders = (withApi = false) => {
           ...orderData,
           status: "REJECTED",
         });
-        message.success("✅ Đã từ chối yêu cầu booking!");
+        message.success("✅ Booking request rejected!");
         return res.data;
       } catch (error) {
-        console.error("❌ Lỗi reject:", error);
-        message.error("Không thể từ chối yêu cầu. Vui lòng thử lại!");
+        console.error("❌ Reject error:", error);
+        message.error("Cannot reject request. Please try again!");
         throw error;
       }
     },
     [instance]
   );
 
-  // 🔹 5. Cập nhật trạng thái booking
+  // 🔹 5. Update booking status
   const updateRentalOrderStatus = useCallback(
     async (orderId, status, orderData) => {
       try {
@@ -133,7 +133,7 @@ export const useRentalOrders = (withApi = false) => {
         });
         return res.data;
       } catch (error) {
-        console.error("❌ Lỗi cập nhật trạng thái:", error);
+        console.error("❌ Error updating status:", error);
         throw error;
       }
     },
@@ -150,11 +150,11 @@ export const useRentalOrders = (withApi = false) => {
         const res = await instance.put(`/api/RentalOrders/Complete?id=${orderId}`);
         console.debug("completeRentalOrder response:", res)
 
-        message.success("✅ Đã hoàn tất trả xe!");
+        message.success("✅ Vehicle return completed successfully!");
         return res.data;
       } catch (error) {
         console.error("Error completing rental order:", error);
-        message.error("Không thể hoàn tất trả xe. Vui lòng thử lại!");
+        message.error("Cannot complete vehicle return. Please try again!");
         throw error;
       }
     },

@@ -16,12 +16,12 @@ const StaffDashboard = () => {
   const [selectedMenu, setSelectedMenu] = useState("overview");
 
   const menuItems = useMemo(() => [
-    { key: "overview", icon: <DashboardOutlined />, label: "Tổng quan" },
-    { key: "bookings", icon: <BookOutlined />, label: "Quản lý Booking" },
-    { key: "confirm-handover", icon: <BookOutlined />, label: "Xác nhận nhận xe" },
-    { key: "vehicle-status", icon: <CarOutlined />, label: "Trạng thái xe" },
-    { key: "return-requests", icon: <CarOutlined />, label: "Yêu cầu trả xe" },
-    { key: "create-vehicle", icon: <PlusOutlined />, label: "Tạo xe mới" },
+    { key: "overview", icon: <DashboardOutlined />, label: "Overview" },
+    { key: "bookings", icon: <BookOutlined />, label: "Manage Bookings" },
+    { key: "confirm-handover", icon: <BookOutlined />, label: "Confirm Handover" },
+    { key: "vehicle-status", icon: <CarOutlined />, label: "Vehicle Status" },
+    { key: "return-requests", icon: <CarOutlined />, label: "Return Requests" },
+    { key: "create-vehicle", icon: <PlusOutlined />, label: "Create Vehicle" },
   ], []);
 
   return (
@@ -33,7 +33,7 @@ const StaffDashboard = () => {
       >
         <div className="p-6 border-b bg-gradient-to-r from-green-600 to-emerald-600">
           <h3 className="text-xl font-bold text-white mb-1">Staff Dashboard</h3>
-          <p className="text-blue-100 text-sm">Quản lý hỗ trợ</p>
+          <p className="text-blue-100 text-sm">Support Management</p>
         </div>
         <Menu
           mode="inline"
@@ -50,13 +50,13 @@ const StaffDashboard = () => {
         {/* Keep all components mounted but hide with CSS */}
         <div style={{ display: selectedMenu === "overview" ? "block" : "none" }}>
           <Card className="shadow-lg p-6 rounded-xl bg-white">
-            <h2 className="text-2xl font-bold text-gray-800 mb-4">Tổng quan hệ thống</h2>
+            <h2 className="text-2xl font-bold text-gray-800 mb-4">System Overview</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <Card className="shadow-sm">
-                <Statistic title="Booking đang chờ" value={10} prefix={<BookOutlined />} />
+                <Statistic title="Pending bookings" value={10} prefix={<BookOutlined />} />
               </Card>
               <Card className="shadow-sm">
-                <Statistic title="Trạm đang quản lý" value={3} prefix={<DashboardOutlined />} />
+                <Statistic title="Stations managed" value={3} prefix={<DashboardOutlined />} />
               </Card>
             </div>
           </Card>
@@ -80,7 +80,7 @@ const StaffDashboard = () => {
 
         <div style={{ display: selectedMenu === "create-vehicle" ? "block" : "none" }}>
           <Card className="shadow-lg p-6 rounded-xl bg-white">
-            <h2 className="text-2xl font-bold text-gray-800 mb-4">Tạo xe mới</h2>
+            <h2 className="text-2xl font-bold text-gray-800 mb-4">Create new vehicle</h2>
             <CreateVehicleForm onSuccess={() => setSelectedMenu("vehicle-status")} />
           </Card>
         </div>
