@@ -57,12 +57,16 @@ export default function Header() {
 
   // ------------------ User Menu ------------------
   const userMenuItems = [
-      {
-        key: "profile",
-        icon: <UserOutlined />,
-        label: "Profile",
-        onClick: () => navigate("/profile"),
-      },
+      ...(user?.role === "RENTER"
+        ? [
+            {
+              key: "user-dashboard",
+              icon: <UserOutlined />,
+              label: "User Dashboard",
+              onClick: () => navigate("/user-dashboard"),
+            },
+          ]
+        : []),
     ...(user?.role === "ADMIN"
       ? [
           {
@@ -91,7 +95,7 @@ export default function Header() {
               label: "My bookings",
               onClick: () => navigate("/my-bookings"),
             },
-        ]
+          ]
       : []),
       {
         key: "settings",

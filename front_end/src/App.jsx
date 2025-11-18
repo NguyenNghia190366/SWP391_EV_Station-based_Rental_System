@@ -3,9 +3,8 @@ import { Routes, Route, Navigate } from "react-router-dom";
 import LoginPage from "./Components/Common/Pages/LoginPage.jsx";
 import HomePage from "./Components/Common/Pages/HomePage.jsx";
 import RegisterPage from "./Components/Common/Pages/RegisterPage.jsx";
-// Shared
-import ProfilePage from "./Components/Common/Profile/ProfilePage.jsx";
 // Renter
+import UserDashboard from "./pages/renter/UserDashboard.jsx";
 import VehiclesPage from "./pages/renter/vehicles/VehiclesPage.jsx";
 import BookingRequestPage from "./pages/renter/booking/BookingRequestPage.jsx";
 import BookingFormPage from "./pages/renter/booking/BookingFormPage.jsx";
@@ -31,7 +30,7 @@ import StaffReturnCheckPage from "./pages/staff/return/StaffReturnCheckPage.jsx"
 import StaffReturnSummaryPage from "./pages/staff/return/StaffReturnSummaryPage.jsx";
 import ReturnCashSuccessful from "./pages/staff/return/ReturnCashSuccessful.jsx";
 // Common
-import { roles } from "./Constant/Role";  
+import { roles } from "./Constant/Role";
 import { RequireAuth } from "./Router/RequireAuth.jsx";
 import AuthRoute from "./Router/AuthRoute";
 import Layout from "./Components/Common/layout/Layout/Layout.jsx";
@@ -47,7 +46,15 @@ function App() {
         <Route path="/" element={<Navigate to="/home" replace />} />
         <Route path="/home" element={<HomePage />} />
         <Route path="/vehicles" element={<VehiclesPage />} />
-        <Route path="/profile" element={<ProfilePage />} />
+        <Route
+          path="/user-dashboard"
+          element={
+            <RequireAuth allowRole={[roles.RENTER]}>
+              {" "}
+              <UserDashboard />{" "}
+            </RequireAuth>
+          }
+        />
         <Route path="/verify" element={<VerifyPage />} />
 
         {/* Booking Flow Routes */}
