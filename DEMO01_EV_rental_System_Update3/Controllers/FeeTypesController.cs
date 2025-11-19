@@ -1,17 +1,38 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using DEMO01_EV_rental_System.Data;
 using DEMO01_EV_rental_System.Entities;
+using Microsoft.AspNetCore.Authorization;
+using System.Linq;
+
+// ===================================================================
+// DTOs cho FeeType (Loại phí)
+// ===================================================================
+public class FeeTypeCreateDto
+{
+    public string FeeTypeName { get; set; } = string.Empty; // Map vào FeeType1
+    public decimal Amount { get; set; }
+}
+
+public class FeeTypeUpdateDto
+{
+    public string FeeTypeName { get; set; } = string.Empty;
+    public decimal Amount { get; set; }
+}
+
+public class FeeTypeViewDto
+{
+    public int FeeTypeId { get; set; }
+    public string FeeTypeName { get; set; } = string.Empty;
+    public decimal Amount { get; set; }
+}
+// ===================================================================
 
 namespace DEMO01_EV_rental_System.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize(Roles = "ADMIN")] 
     public class FeeTypesController : ControllerBase
     {
         private readonly RentalEvSystemFinalContext _context;
@@ -23,86 +44,112 @@ namespace DEMO01_EV_rental_System.Controllers
 
         // GET: api/FeeTypes
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<FeeType>>> GetFeeTypes()
+        public async Task<ActionResult<IEnumerable<FeeTypeViewDto>>> GetFeeTypes()
         {
-            return await _context.FeeTypes.ToListAsync();
+            return await _context.FeeTypes
+                .AsNoTracking()
+                .Select(f => new FeeTypeViewDto 
+                {
+                    FeeTypeId = f.FeeTypeId,
+                    FeeTypeName = f.FeeType1, // Lưu ý: DB của Nghĩa tên cột là FeeType1
+                    Amount = f.Amount
+                })
+                .ToListAsync();
         }
 
         // GET: api/FeeTypes/5
         [HttpGet("{id}")]
-        public async Task<ActionResult<FeeType>> GetFeeType(int id)
+        public async Task<ActionResult<FeeTypeViewDto>> GetFeeType(int id)
         {
             var feeType = await _context.FeeTypes.FindAsync(id);
 
-            if (feeType == null)
+            if (feeType == null) return NotFound();
+
+            return new FeeTypeViewDto
             {
-                return NotFound();
-            }
-
-            return feeType;
-        }
-
-        // PUT: api/FeeTypes/5
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        [HttpPut("{id}")]
-        public async Task<IActionResult> PutFeeType(int id, FeeType feeType)
-        {
-            if (id != feeType.FeeTypeId)
-            {
-                return BadRequest();
-            }
-
-            _context.Entry(feeType).State = EntityState.Modified;
-
-            try
-            {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!FeeTypeExists(id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
-            }
-
-            return NoContent();
+                FeeTypeId = feeType.FeeTypeId,
+                FeeTypeName = feeType.FeeType1,
+                Amount = feeType.Amount
+            };
         }
 
         // POST: api/FeeTypes
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
+        // [Authorize(Roles = "ADMIN")]
         [HttpPost]
-        public async Task<ActionResult<FeeType>> PostFeeType(FeeType feeType)
+        public async Task<ActionResult<FeeTypeViewDto>> PostFeeType(FeeTypeCreateDto dto)
         {
+            // 1. Validate Logic (Của Huy): Tên không được trùng
+            var normalizedName = dto.FeeTypeName.Trim();
+            var exists = await _context.FeeTypes.AnyAsync(f => f.FeeType1 == normalizedName);
+            
+            if (exists)
+            {
+                return BadRequest("Loại phí với tên này đã tồn tại.");
+            }
+
+            // 2. Map DTO -> Entity
+            var feeType = new FeeType
+            {
+                FeeType1 = normalizedName,
+                Amount = dto.Amount
+            };
+
             _context.FeeTypes.Add(feeType);
             await _context.SaveChangesAsync();
 
-            return CreatedAtAction("GetFeeType", new { id = feeType.FeeTypeId }, feeType);
+            // 3. Trả về
+            var viewDto = new FeeTypeViewDto
+            {
+                FeeTypeId = feeType.FeeTypeId,
+                FeeTypeName = feeType.FeeType1,
+                Amount = feeType.Amount
+            };
+
+            return CreatedAtAction(nameof(GetFeeType), new { id = feeType.FeeTypeId }, viewDto);
+        }
+
+        // PUT: api/FeeTypes/5
+        // [Authorize(Roles = "ADMIN")]
+        [HttpPut("{id}")]
+        public async Task<IActionResult> PutFeeType(int id, FeeTypeUpdateDto dto)
+        {
+            var feeType = await _context.FeeTypes.FindAsync(id);
+            if (feeType == null) return NotFound();
+
+            // 1. Validate Logic (Của Huy): Check trùng tên (trừ chính nó)
+            var normalizedName = dto.FeeTypeName.Trim();
+            if (feeType.FeeType1 != normalizedName)
+            {
+                var exists = await _context.FeeTypes.AnyAsync(f => f.FeeType1 == normalizedName);
+                if (exists) return BadRequest("Tên loại phí này đã được sử dụng.");
+            }
+
+            // 2. Update
+            feeType.FeeType1 = normalizedName;
+            feeType.Amount = dto.Amount;
+
+            await _context.SaveChangesAsync();
+            return NoContent();
         }
 
         // DELETE: api/FeeTypes/5
+        // [Authorize(Roles = "ADMIN")]
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteFeeType(int id)
         {
             var feeType = await _context.FeeTypes.FindAsync(id);
-            if (feeType == null)
+            if (feeType == null) return NotFound();
+
+            // Validate: Nếu loại phí này đã được dùng trong ExtraFee thì không được xóa (tránh lỗi FK)
+            var isUsed = await _context.ExtraFees.AnyAsync(e => e.FeeTypeId == id);
+            if (isUsed)
             {
-                return NotFound();
+                return BadRequest("Không thể xóa loại phí này vì đã có hóa đơn sử dụng nó.");
             }
 
             _context.FeeTypes.Remove(feeType);
             await _context.SaveChangesAsync();
-
             return NoContent();
-        }
-
-        private bool FeeTypeExists(int id)
-        {
-            return _context.FeeTypes.Any(e => e.FeeTypeId == id);
         }
     }
 }
