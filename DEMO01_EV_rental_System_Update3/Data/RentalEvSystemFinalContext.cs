@@ -54,7 +54,10 @@ public partial class RentalEvSystemFinalContext : DbContext
                     .AddJsonFile("appsettings.json", true, true)
                     .Build();
         var strConn = config["ConnectionStrings:DefaultConnection"];
-
+        if (string.IsNullOrEmpty(strConn))
+        {
+            throw new InvalidOperationException("Connection string 'DefaultConnection' not found in appsettings.json.");
+        }
         return strConn;
     }
 
