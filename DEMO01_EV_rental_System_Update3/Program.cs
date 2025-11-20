@@ -1,13 +1,4 @@
-﻿
-using DEMO01_EV_rental_System.Data;
-using DEMO01_EV_rental_System.VNPAY;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.IdentityModel.Tokens;
-using Microsoft.OpenApi.Models;
-using System.Text;
-
-namespace DEMO01_EV_rental_System
+﻿namespace DEMO01_EV_rental_System
 {
     public class Program
     {
@@ -102,7 +93,9 @@ namespace DEMO01_EV_rental_System
             builder.Services.AddScoped<JwtService>();
             builder.Services.AddScoped<PasswordHasher>();
             builder.Services.AddScoped<IVnPayService, VnpayService>();
+            builder.Services.AddScoped<ICurrentUserAccessor, CurrentUserAccessor>();
 
+            builder.Services.AddHttpContextAccessor();
 
 
             var app = builder.Build();

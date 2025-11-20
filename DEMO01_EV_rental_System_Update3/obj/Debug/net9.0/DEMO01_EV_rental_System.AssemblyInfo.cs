@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("DEMO01_EV_rental_System")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+ff72b1ec618d4dd5e9513175ae0fde51b05421fe")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+45c158c4eebcd64aa7ec2495733699107d31e98b")]
 [assembly: System.Reflection.AssemblyProductAttribute("DEMO01_EV_rental_System")]
 [assembly: System.Reflection.AssemblyTitleAttribute("DEMO01_EV_rental_System")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
