@@ -1,32 +1,99 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
+﻿using DEMO01_EV_rental_System.Data;
+using DEMO01_EV_rental_System.Entities;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using DEMO01_EV_rental_System.Data;
-using DEMO01_EV_rental_System.Entities;
+using DEMO01_EV_rental_System.Data.CurrentUserAccessor; // <-- Import interface của cậu
+
+// DTO upload (Chỉ chứa thông tin CCCD, không chứa RenterId vì lấy từ Token)
+public class CccdUpsertDto
+{
+    public string IdCardNumber { get; set; } = string.Empty;
+    public string UrlFront { get; set; } = string.Empty;
+    public string UrlBack { get; set; } = string.Empty;
+}
 
 namespace DEMO01_EV_rental_System.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize] // Bắt buộc đăng nhập
     public class CccdsController : ControllerBase
     {
         private readonly RentalEvSystemFinalContext _context;
+        private readonly ICurrentUserAccessor _currentUserAccessor; // <-- Inject cái này
 
-        public CccdsController(RentalEvSystemFinalContext context)
+        public CccdsController(RentalEvSystemFinalContext context, ICurrentUserAccessor currentUserAccessor)
         {
             _context = context;
+            _currentUserAccessor = currentUserAccessor;
         }
 
-        // GET: api/Cccds
-        [HttpGet]
-        public async Task<ActionResult<IEnumerable<Cccd>>> GetCccds()
+        // API này dành cho Renter tự xem CCCD của mình
+        [HttpGet("MyCccd")]
+        public async Task<ActionResult<Cccd>> GetMyCccd()
         {
-            return await _context.Cccds.ToListAsync();
+            var userId = _currentUserAccessor.UserId;
+            var renter = await _context.Renters.FirstOrDefaultAsync(r => r.UserId == userId);
+            if (renter == null) return NotFound("Bạn chưa có hồ sơ Renter.");
+
+            var cccd = await _context.Cccds.FindAsync(renter.RenterId);
+            if (cccd == null) return NotFound("Bạn chưa upload CCCD.");
+
+            return cccd;
         }
+
+        // API Upload/Update CCCD (Logic của Huy: Upsert)
+        [HttpPost("UploadMyCccd")]
+        public async Task<ActionResult> UploadMyCccd(CccdUpsertDto dto)
+        {
+            // 1. Lấy Renter từ Token (Bảo mật)
+            var userId = _currentUserAccessor.UserId;
+            var renter = await _context.Renters.FirstOrDefaultAsync(r => r.UserId == userId);
+            
+            if (renter == null) return BadRequest("Tài khoản này không phải là Renter.");
+
+            // 2. Tìm CCCD hiện tại (nếu có)
+            var cccd = await _context.Cccds.FindAsync(renter.RenterId);
+
+            if (cccd == null)
+            {
+                // Chưa có -> Tạo mới
+                cccd = new Cccd
+                {
+                    Renter_Id = renter.RenterId,
+                    id_Card_Number = dto.IdCardNumber,
+                    url_Cccd_Cmnd_front = dto.UrlFront,
+                    url_Cccd_Cmnd_back = dto.UrlBack
+                };
+                _context.Cccds.Add(cccd);
+            }
+            else
+            {
+                // Đã có -> Cập nhật
+                cccd.id_Card_Number = dto.IdCardNumber;
+                cccd.url_Cccd_Cmnd_front = dto.UrlFront;
+                cccd.url_Cccd_Cmnd_back = dto.UrlBack;
+                _context.Entry(cccd).State = EntityState.Modified;
+            }
+
+            // 3. Logic của Huy: Reset trạng thái verified về false để Admin duyệt lại
+            renter.IsVerified = false;
+
+            try
+            {
+                await _context.SaveChangesAsync();
+            }
+            catch (DbUpdateException ex)
+            {
+                 return BadRequest("Lỗi lưu dữ liệu: " + ex.Message);
+            }
+
+            return Ok(new { message = "Upload CCCD thành công. Vui lòng chờ duyệt.", data = cccd });
+        }
+
+        // (Các hàm GET/PUT/DELETE theo ID cũ của Nghĩa có thể giữ lại cho Admin dùng, 
+        // nhưng nhớ thêm [Authorize(Roles="ADMIN")] để bảo mật)
 
         // GET: api/Cccds/5
         [HttpGet("{id}")]
@@ -73,63 +140,7 @@ namespace DEMO01_EV_rental_System.Controllers
             return NoContent();
         }
 
-        // POST: api/Cccds
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        [HttpPost]
-        public async Task<ActionResult<Cccd>> PostCccd(Cccd cccd)
-        {
-            _context.Cccds.Add(cccd);
-            try
-            {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateException)
-            {
-                if (CccdExists(cccd.Renter_Id))
-                {
-                    return Conflict();
-                }
-                else
-                {
-                    throw;
-                }
-            }
-
-            return CreatedAtAction("GetCccd", new { id = cccd.Renter_Id }, cccd);
-        }
-
-        [HttpPost("UploadCanCuoc")]
-        public async Task<ActionResult<Cccd>> UploadCanCuoc(PostCCCDDTO postCCCDDTO)
-        {
-
-            Cccd cccd = new Cccd()
-            {
-                Renter_Id = postCCCDDTO.Renter_Id,
-                url_Cccd_Cmnd_back = postCCCDDTO.url_Cccd_Cmnd_back,
-                url_Cccd_Cmnd_front = postCCCDDTO.url_Cccd_Cmnd_front,
-                id_Card_Number = postCCCDDTO.id_Card_Number
-            };
-            _context.Cccds.Add(cccd);
-            try
-            {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateException)
-            {
-                if (CccdExists(cccd.Renter_Id))
-                {
-                    return Conflict();
-                }
-                else
-                {
-                    throw;
-                }
-            }
-
-            return CreatedAtAction("GetCccd", new { id = cccd.Renter_Id }, postCCCDDTO);
-        }
-
-        // DELETE: api/Cccds/5
+         // DELETE: api/Cccds/5
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteCccd(int id)
         {
