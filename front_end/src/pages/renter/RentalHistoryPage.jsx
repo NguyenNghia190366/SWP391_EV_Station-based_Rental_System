@@ -244,13 +244,13 @@ export default function RentalHistoryPage() {
       key: "actions",
       render: (_, record) => {
         const showCancel = record.status === "BOOKED" || record.status === "APPROVED";
-        const showContract = record.status === "APPROVED" || record.status === "CONTRACT_SENT";
+        const showContract = record.status === "APPROVED";
         const disabled = record.status === "APPROVED";
         const isPaid = paidOrderIds.has(record.orderId);
         
         return (
           <Space>
-            {showContract && !isPaid && (
+            {showContract && (
               <Button
                 type="primary"
                 ghost

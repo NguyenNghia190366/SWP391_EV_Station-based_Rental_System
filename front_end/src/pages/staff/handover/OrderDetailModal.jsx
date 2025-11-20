@@ -23,8 +23,8 @@ export default function OrderDetailModal({ open, order, onClose }) {
       width={700}
     >
       <Descriptions column={1} style={{ marginTop: 16 }}>
-        <Descriptions.Item label="Customer">{order.renterName}</Descriptions.Item>
-        <Descriptions.Item label="Phone">{order.renterPhone}</Descriptions.Item>
+          
+        
         <Descriptions.Item label="Vehicle">{order.vehicleName}</Descriptions.Item>
         <Descriptions.Item label="License plate">{order.vehicleLicensePlate}</Descriptions.Item>
         <Descriptions.Item label="Pickup station">{order.pickupStationName}</Descriptions.Item>
@@ -40,9 +40,7 @@ export default function OrderDetailModal({ open, order, onClose }) {
             {ORDER_STATUS[order.status]?.text}
           </Tag>
         </Descriptions.Item>
-        <Descriptions.Item label="Total amount">
-          {order.totalAmount?.toLocaleString("vi-VN") || "N/A"} VND
-        </Descriptions.Item>
+        
       </Descriptions>
     </Modal>
   );

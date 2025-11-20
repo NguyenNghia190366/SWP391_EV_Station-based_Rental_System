@@ -145,7 +145,7 @@ export default function BookingFormPage() {
       console.log("📥 Response:", res);
 
       setTimeout(() => {
-        navigate("/profile");
+        navigate("/user-dashboard");
       }, 2000);
     } catch (error) {
       console.error("❌ Booking error:", error);

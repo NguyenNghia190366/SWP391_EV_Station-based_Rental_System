@@ -1,6 +1,8 @@
 import { useCallback } from "react";
 import { useAxiosInstance } from "./useAxiosInstance";
 import { message, notification } from "antd";
+import { toast } from "react-toastify";
+import axios from "axios";
 
 export const useRentalOrders = (withApi = false) => {
   const instance = useAxiosInstance(withApi);
@@ -27,7 +29,10 @@ export const useRentalOrders = (withApi = false) => {
   const createRentalOrder = useCallback(
     async (orderData) => {
       try {
-        console.log("📤 POST /RentalOrders with data:", JSON.stringify(orderData, null, 2));
+        console.log(
+          "📤 POST /RentalOrders with data:",
+          JSON.stringify(orderData, null, 2)
+        );
         const res = await instance.post(`/RentalOrders`, orderData, {
           headers: { "Content-Type": "application/json" },
         });
@@ -36,16 +41,20 @@ export const useRentalOrders = (withApi = false) => {
       } catch (error) {
         console.error("❌ Error creating rental order:");
         console.error("  Status:", error.response?.status);
-        console.error("  Response Data:", JSON.stringify(error.response?.data, null, 2));
+        console.error(
+          "  Response Data:",
+          JSON.stringify(error.response?.data, null, 2)
+        );
         console.error("  Error Message:", error.message);
         console.error("  Full Error:", error);
-        
+
         // Show backend error details
-        const errorMsg = error.response?.data?.message || 
-                        error.response?.data?.error ||
-                        error.response?.data?.title ||
-                        "Cannot create rental order. Please try again!";
-        
+        const errorMsg =
+          error.response?.data?.message ||
+          error.response?.data?.error ||
+          error.response?.data?.title ||
+          "Cannot create rental order. Please try again!";
+
         message.error(`❌ ${errorMsg}`);
         throw error;
       }
@@ -93,11 +102,11 @@ export const useRentalOrders = (withApi = false) => {
     async (orderId) => {
       try {
         const res = await instance.put(`/Complete?id=${orderId}`);
-        message.success("✅ Vehicle return received successfully!");
+        toast.success("🚗 Xe đã được trả thành công!");
         return res.data;
       } catch (error) {
         console.error("❌ Return error:", error);
-        message.error("Cannot approve request. Please try again!");
+        toast.error("Không thể xác nhận trả xe. Vui lòng thử lại!");
         throw error;
       }
     },
@@ -141,25 +150,37 @@ export const useRentalOrders = (withApi = false) => {
   );
 
   // Complete rental order (set status from IN_USE to COMPLETED)
-  const completeRentalOrder = useCallback(
-    async (orderId) => {
-      try {
-        console.debug("completeRentalOrder -> orderId:", orderId);
-        
-        // Update order status to COMPLETED using /Complete endpoint
-        const res = await instance.put(`/api/RentalOrders/Complete?id=${orderId}`);
-        console.debug("completeRentalOrder response:", res)
-
-        message.success("✅ Vehicle return completed successfully!");
-        return res.data;
-      } catch (error) {
-        console.error("Error completing rental order:", error);
-        message.error("Cannot complete vehicle return. Please try again!");
-        throw error;
-      }
-    },
-    [instance]
-  );
+const completeRentalOrder = useCallback(
+  async (orderId) => {
+    try {
+      console.debug("completeRentalOrder -> orderId:", orderId);
+      
+      // Lấy token từ localStorage (hoặc nơi bạn lưu token)
+      const token = localStorage.getItem('token'); // Hoặc tên key bạn dùng để lưu token
+      
+      // Gọi trực tiếp URL đầy đủ với Authorization header
+      const res = await axios.put(
+        `https://alani-uncorroboratory-sympetaly.ngrok-free.dev/Complete?id=${orderId}`,
+        null,
+        {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          }
+        }
+      );
+      
+      console.debug("completeRentalOrder response:", res);
+      message.success("✅ Vehicle return completed successfully!");
+      return res.data;
+    } catch (error) {
+      console.error("Error completing rental order:", error);
+      message.error("Cannot complete vehicle return. Please try again!");
+      throw error;
+    }
+  },
+  []
+);
 
   return {
     getRentalOrdersByRenterId,
