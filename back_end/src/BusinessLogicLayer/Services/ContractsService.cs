@@ -122,7 +122,7 @@ namespace BusinessLogicLayer.Services
             // 7. Lưu thay đổi
             await _context.SaveChangesAsync();
             // === GỌI NOTIFICATION SERVICE ===
-            if (order.renter != null)
+            if (order.renter != null)    
             {
                 await _notificationService.CreateNotificationAsync(
                     order.renter.user_id,
