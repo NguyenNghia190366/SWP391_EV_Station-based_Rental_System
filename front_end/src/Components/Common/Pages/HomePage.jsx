@@ -5,8 +5,8 @@ import { findNearestStation } from "@/utils/geo";
 import { clearUserData } from "@/utils/auth";
 import BookingVerificationModal from "@/pages/renter/booking/BookingVerificationModal";
 import { useAxiosInstance } from "@/hooks/useAxiosInstance";
-import MapLeaflet from "@/components/common/Map/MapLeaflet";
-import NearbyStationsSuggestions from "@/components/common/Map/NearbyStationsSuggestions";
+import MapLeaflet from "@/Components/Common/Map/MapLeaflet";
+import NearbyStationsSuggestions from "@/Components/Common/Map/NearbyStationsSuggestions";
 import VehiclesByStation from "@/pages/renter/vehicles/VehiclesByStation";
 
 const HomePage = () => {
