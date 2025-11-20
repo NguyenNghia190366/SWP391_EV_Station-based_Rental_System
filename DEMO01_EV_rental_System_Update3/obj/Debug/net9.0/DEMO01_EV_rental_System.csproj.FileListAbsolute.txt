@@ -282,3 +282,17 @@ C:\SE1839__Csharp\DEMO01_EV_rental_System\DEMO01_EV_rental_System\bin\Debug\net9
 C:\SE1839__Csharp\DEMO01_EV_rental_System\DEMO01_EV_rental_System\bin\Debug\net9.0\BCrypt.Net-Next.dll
 C:\SE1839__Csharp\DEMO01_EV_rental_System\DEMO01_EV_rental_System\obj\Debug\net9.0\DEMO01_EV_rental_System.RazorAssemblyInfo.cache
 C:\SE1839__Csharp\DEMO01_EV_rental_System\DEMO01_EV_rental_System\obj\Debug\net9.0\DEMO01_EV_rental_System.RazorAssemblyInfo.cs
+D:\Linh tinh\studying\Semester_5\swT301\Assigments\lab4\repo\DEMO01_EV_rental_System_Update3\obj\Debug\net9.0\DEMO01_EV_rental_System.csproj.AssemblyReference.cache
+D:\Linh tinh\studying\Semester_5\swT301\Assigments\lab4\repo\DEMO01_EV_rental_System_Update3\obj\Debug\net9.0\rpswa.dswa.cache.json
+D:\Linh tinh\studying\Semester_5\swT301\Assigments\lab4\repo\DEMO01_EV_rental_System_Update3\obj\Debug\net9.0\DEMO01_EV_rental_System.GeneratedMSBuildEditorConfig.editorconfig
+D:\Linh tinh\studying\Semester_5\swT301\Assigments\lab4\repo\DEMO01_EV_rental_System_Update3\obj\Debug\net9.0\DEMO01_EV_rental_System.AssemblyInfoInputs.cache
+D:\Linh tinh\studying\Semester_5\swT301\Assigments\lab4\repo\DEMO01_EV_rental_System_Update3\obj\Debug\net9.0\DEMO01_EV_rental_System.AssemblyInfo.cs
+D:\Linh tinh\studying\Semester_5\swT301\Assigments\lab4\repo\DEMO01_EV_rental_System_Update3\obj\Debug\net9.0\DEMO01_EV_rental_System.csproj.CoreCompileInputs.cache
+D:\Linh tinh\studying\Semester_5\swT301\Assigments\lab4\repo\DEMO01_EV_rental_System_Update3\obj\Debug\net9.0\DEMO01_EV_rental_System.MvcApplicationPartsAssemblyInfo.cs
+D:\Linh tinh\studying\Semester_5\swT301\Assigments\lab4\repo\DEMO01_EV_rental_System_Update3\obj\Debug\net9.0\DEMO01_EV_rental_System.MvcApplicationPartsAssemblyInfo.cache
+D:\Linh tinh\studying\Semester_5\swT301\Assigments\lab4\repo\DEMO01_EV_rental_System_Update3\obj\Debug\net9.0\DEMO01_EV_rental_System.RazorAssemblyInfo.cache
+D:\Linh tinh\studying\Semester_5\swT301\Assigments\lab4\repo\DEMO01_EV_rental_System_Update3\obj\Debug\net9.0\DEMO01_EV_rental_System.RazorAssemblyInfo.cs
+D:\Linh tinh\studying\Semester_5\swT301\Assigments\lab4\repo\DEMO01_EV_rental_System_Update3\obj\Debug\net9.0\DEMO01_EV_rental_System.sourcelink.json
+D:\Linh tinh\studying\Semester_5\swT301\Assigments\lab4\repo\DEMO01_EV_rental_System_Update3\obj\Debug\net9.0\DEMO01_EV_rental_System.dll
+D:\Linh tinh\studying\Semester_5\swT301\Assigments\lab4\repo\DEMO01_EV_rental_System_Update3\obj\Debug\net9.0\refint\DEMO01_EV_rental_System.dll
+D:\Linh tinh\studying\Semester_5\swT301\Assigments\lab4\repo\DEMO01_EV_rental_System_Update3\obj\Debug\net9.0\DEMO01_EV_rental_System.pdb

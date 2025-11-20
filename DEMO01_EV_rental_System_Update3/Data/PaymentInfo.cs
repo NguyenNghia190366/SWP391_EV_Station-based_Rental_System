@@ -1,4 +1,4 @@
-﻿namespace DEMO01_EV_rental_System.Data
+﻿namespace DEMO01_EV_rental_System.Data.DTO
 {
     public class PaymentInfo
     {
