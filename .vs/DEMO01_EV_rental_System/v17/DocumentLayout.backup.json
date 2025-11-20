@@ -1,0 +1,889 @@
+{
+  "Version": 1,
+  "WorkspaceRootPath": "C:\\SE1839__Csharp\\DEMO01_EV_rental_System\\",
+  "Documents": [
+    {
+      "AbsoluteMoniker": "D:0:0:{CADBE86E-342C-442D-A452-AC7978C25CF4}|DEMO01_EV_rental_System\\DEMO01_EV_rental_System.csproj|c:\\se1839__csharp\\demo01_ev_rental_system\\demo01_ev_rental_system\\vnpay\\vnpayservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{CADBE86E-342C-442D-A452-AC7978C25CF4}|DEMO01_EV_rental_System\\DEMO01_EV_rental_System.csproj|solutionrelative:demo01_ev_rental_system\\vnpay\\vnpayservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{CADBE86E-342C-442D-A452-AC7978C25CF4}|DEMO01_EV_rental_System\\DEMO01_EV_rental_System.csproj|c:\\se1839__csharp\\demo01_ev_rental_system\\demo01_ev_rental_system\\vnpay\\ivnpayservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{CADBE86E-342C-442D-A452-AC7978C25CF4}|DEMO01_EV_rental_System\\DEMO01_EV_rental_System.csproj|solutionrelative:demo01_ev_rental_system\\vnpay\\ivnpayservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{CADBE86E-342C-442D-A452-AC7978C25CF4}|DEMO01_EV_rental_System\\DEMO01_EV_rental_System.csproj|c:\\se1839__csharp\\demo01_ev_rental_system\\demo01_ev_rental_system\\controllers\\paymentscontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{CADBE86E-342C-442D-A452-AC7978C25CF4}|DEMO01_EV_rental_System\\DEMO01_EV_rental_System.csproj|solutionrelative:demo01_ev_rental_system\\controllers\\paymentscontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{CADBE86E-342C-442D-A452-AC7978C25CF4}|DEMO01_EV_rental_System\\DEMO01_EV_rental_System.csproj|c:\\se1839__csharp\\demo01_ev_rental_system\\demo01_ev_rental_system\\controllers\\paymentsscontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{CADBE86E-342C-442D-A452-AC7978C25CF4}|DEMO01_EV_rental_System\\DEMO01_EV_rental_System.csproj|solutionrelative:demo01_ev_rental_system\\controllers\\paymentsscontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{CADBE86E-342C-442D-A452-AC7978C25CF4}|DEMO01_EV_rental_System\\DEMO01_EV_rental_System.csproj|c:\\se1839__csharp\\demo01_ev_rental_system\\demo01_ev_rental_system\\appsettings.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}",
+      "RelativeMoniker": "D:0:0:{CADBE86E-342C-442D-A452-AC7978C25CF4}|DEMO01_EV_rental_System\\DEMO01_EV_rental_System.csproj|solutionrelative:demo01_ev_rental_system\\appsettings.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{CADBE86E-342C-442D-A452-AC7978C25CF4}|DEMO01_EV_rental_System\\DEMO01_EV_rental_System.csproj|c:\\se1839__csharp\\demo01_ev_rental_system\\demo01_ev_rental_system\\appsettings.development.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}",
+      "RelativeMoniker": "D:0:0:{CADBE86E-342C-442D-A452-AC7978C25CF4}|DEMO01_EV_rental_System\\DEMO01_EV_rental_System.csproj|solutionrelative:demo01_ev_rental_system\\appsettings.development.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{CADBE86E-342C-442D-A452-AC7978C25CF4}|DEMO01_EV_rental_System\\DEMO01_EV_rental_System.csproj|c:\\se1839__csharp\\demo01_ev_rental_system\\demo01_ev_rental_system\\controllers\\rentalorderscontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{CADBE86E-342C-442D-A452-AC7978C25CF4}|DEMO01_EV_rental_System\\DEMO01_EV_rental_System.csproj|solutionrelative:demo01_ev_rental_system\\controllers\\rentalorderscontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{CADBE86E-342C-442D-A452-AC7978C25CF4}|DEMO01_EV_rental_System\\DEMO01_EV_rental_System.csproj|c:\\se1839__csharp\\demo01_ev_rental_system\\demo01_ev_rental_system\\entities\\rentalorder.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{CADBE86E-342C-442D-A452-AC7978C25CF4}|DEMO01_EV_rental_System\\DEMO01_EV_rental_System.csproj|solutionrelative:demo01_ev_rental_system\\entities\\rentalorder.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{CADBE86E-342C-442D-A452-AC7978C25CF4}|DEMO01_EV_rental_System\\DEMO01_EV_rental_System.csproj|c:\\se1839__csharp\\demo01_ev_rental_system\\demo01_ev_rental_system\\vnpay\\vnpaymentresponsemodel.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{CADBE86E-342C-442D-A452-AC7978C25CF4}|DEMO01_EV_rental_System\\DEMO01_EV_rental_System.csproj|solutionrelative:demo01_ev_rental_system\\vnpay\\vnpaymentresponsemodel.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{CADBE86E-342C-442D-A452-AC7978C25CF4}|DEMO01_EV_rental_System\\DEMO01_EV_rental_System.csproj|c:\\se1839__csharp\\demo01_ev_rental_system\\demo01_ev_rental_system\\vnpay\\vnpaymentrequestmodelwithanpayment.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{CADBE86E-342C-442D-A452-AC7978C25CF4}|DEMO01_EV_rental_System\\DEMO01_EV_rental_System.csproj|solutionrelative:demo01_ev_rental_system\\vnpay\\vnpaymentrequestmodelwithanpayment.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{CADBE86E-342C-442D-A452-AC7978C25CF4}|DEMO01_EV_rental_System\\DEMO01_EV_rental_System.csproj|c:\\se1839__csharp\\demo01_ev_rental_system\\demo01_ev_rental_system\\vnpay\\vnpaymentrequestmodel.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{CADBE86E-342C-442D-A452-AC7978C25CF4}|DEMO01_EV_rental_System\\DEMO01_EV_rental_System.csproj|solutionrelative:demo01_ev_rental_system\\vnpay\\vnpaymentrequestmodel.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{CADBE86E-342C-442D-A452-AC7978C25CF4}|DEMO01_EV_rental_System\\DEMO01_EV_rental_System.csproj|c:\\se1839__csharp\\demo01_ev_rental_system\\demo01_ev_rental_system\\vnpay\\vnpaylibrary.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{CADBE86E-342C-442D-A452-AC7978C25CF4}|DEMO01_EV_rental_System\\DEMO01_EV_rental_System.csproj|solutionrelative:demo01_ev_rental_system\\vnpay\\vnpaylibrary.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{CADBE86E-342C-442D-A452-AC7978C25CF4}|DEMO01_EV_rental_System\\DEMO01_EV_rental_System.csproj|c:\\se1839__csharp\\demo01_ev_rental_system\\demo01_ev_rental_system\\controllers\\vehiclescontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{CADBE86E-342C-442D-A452-AC7978C25CF4}|DEMO01_EV_rental_System\\DEMO01_EV_rental_System.csproj|solutionrelative:demo01_ev_rental_system\\controllers\\vehiclescontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{CADBE86E-342C-442D-A452-AC7978C25CF4}|DEMO01_EV_rental_System\\DEMO01_EV_rental_System.csproj|c:\\se1839__csharp\\demo01_ev_rental_system\\demo01_ev_rental_system\\controllers\\vehiclemodelscontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{CADBE86E-342C-442D-A452-AC7978C25CF4}|DEMO01_EV_rental_System\\DEMO01_EV_rental_System.csproj|solutionrelative:demo01_ev_rental_system\\controllers\\vehiclemodelscontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{CADBE86E-342C-442D-A452-AC7978C25CF4}|DEMO01_EV_rental_System\\DEMO01_EV_rental_System.csproj|c:\\se1839__csharp\\demo01_ev_rental_system\\demo01_ev_rental_system\\entities\\loghistory.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{CADBE86E-342C-442D-A452-AC7978C25CF4}|DEMO01_EV_rental_System\\DEMO01_EV_rental_System.csproj|solutionrelative:demo01_ev_rental_system\\entities\\loghistory.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{CADBE86E-342C-442D-A452-AC7978C25CF4}|DEMO01_EV_rental_System\\DEMO01_EV_rental_System.csproj|c:\\se1839__csharp\\demo01_ev_rental_system\\demo01_ev_rental_system\\entities\\extrafeebytrafficviolations.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{CADBE86E-342C-442D-A452-AC7978C25CF4}|DEMO01_EV_rental_System\\DEMO01_EV_rental_System.csproj|solutionrelative:demo01_ev_rental_system\\entities\\extrafeebytrafficviolations.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{CADBE86E-342C-442D-A452-AC7978C25CF4}|DEMO01_EV_rental_System\\DEMO01_EV_rental_System.csproj|c:\\se1839__csharp\\demo01_ev_rental_system\\demo01_ev_rental_system\\controllers\\extrafeescontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{CADBE86E-342C-442D-A452-AC7978C25CF4}|DEMO01_EV_rental_System\\DEMO01_EV_rental_System.csproj|solutionrelative:demo01_ev_rental_system\\controllers\\extrafeescontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{CADBE86E-342C-442D-A452-AC7978C25CF4}|DEMO01_EV_rental_System\\DEMO01_EV_rental_System.csproj|c:\\se1839__csharp\\demo01_ev_rental_system\\demo01_ev_rental_system\\controllers\\renterscontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{CADBE86E-342C-442D-A452-AC7978C25CF4}|DEMO01_EV_rental_System\\DEMO01_EV_rental_System.csproj|solutionrelative:demo01_ev_rental_system\\controllers\\renterscontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{CADBE86E-342C-442D-A452-AC7978C25CF4}|DEMO01_EV_rental_System\\DEMO01_EV_rental_System.csproj|c:\\se1839__csharp\\demo01_ev_rental_system\\demo01_ev_rental_system\\controllers\\useraccountcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{CADBE86E-342C-442D-A452-AC7978C25CF4}|DEMO01_EV_rental_System\\DEMO01_EV_rental_System.csproj|solutionrelative:demo01_ev_rental_system\\controllers\\useraccountcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{CADBE86E-342C-442D-A452-AC7978C25CF4}|DEMO01_EV_rental_System\\DEMO01_EV_rental_System.csproj|c:\\se1839__csharp\\demo01_ev_rental_system\\demo01_ev_rental_system\\entities\\payment.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{CADBE86E-342C-442D-A452-AC7978C25CF4}|DEMO01_EV_rental_System\\DEMO01_EV_rental_System.csproj|solutionrelative:demo01_ev_rental_system\\entities\\payment.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{CADBE86E-342C-442D-A452-AC7978C25CF4}|DEMO01_EV_rental_System\\DEMO01_EV_rental_System.csproj|c:\\se1839__csharp\\demo01_ev_rental_system\\demo01_ev_rental_system\\entities\\contract.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{CADBE86E-342C-442D-A452-AC7978C25CF4}|DEMO01_EV_rental_System\\DEMO01_EV_rental_System.csproj|solutionrelative:demo01_ev_rental_system\\entities\\contract.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{CADBE86E-342C-442D-A452-AC7978C25CF4}|DEMO01_EV_rental_System\\DEMO01_EV_rental_System.csproj|c:\\se1839__csharp\\demo01_ev_rental_system\\demo01_ev_rental_system\\data\\paymentrequestdto.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{CADBE86E-342C-442D-A452-AC7978C25CF4}|DEMO01_EV_rental_System\\DEMO01_EV_rental_System.csproj|solutionrelative:demo01_ev_rental_system\\data\\paymentrequestdto.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{CADBE86E-342C-442D-A452-AC7978C25CF4}|DEMO01_EV_rental_System\\DEMO01_EV_rental_System.csproj|c:\\se1839__csharp\\demo01_ev_rental_system\\demo01_ev_rental_system\\controllers\\userscontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{CADBE86E-342C-442D-A452-AC7978C25CF4}|DEMO01_EV_rental_System\\DEMO01_EV_rental_System.csproj|solutionrelative:demo01_ev_rental_system\\controllers\\userscontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{CADBE86E-342C-442D-A452-AC7978C25CF4}|DEMO01_EV_rental_System\\DEMO01_EV_rental_System.csproj|c:\\se1839__csharp\\demo01_ev_rental_system\\demo01_ev_rental_system\\controllers\\staffscontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{CADBE86E-342C-442D-A452-AC7978C25CF4}|DEMO01_EV_rental_System\\DEMO01_EV_rental_System.csproj|solutionrelative:demo01_ev_rental_system\\controllers\\staffscontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{CADBE86E-342C-442D-A452-AC7978C25CF4}|DEMO01_EV_rental_System\\DEMO01_EV_rental_System.csproj|c:\\se1839__csharp\\demo01_ev_rental_system\\demo01_ev_rental_system\\controllers\\stationscontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{CADBE86E-342C-442D-A452-AC7978C25CF4}|DEMO01_EV_rental_System\\DEMO01_EV_rental_System.csproj|solutionrelative:demo01_ev_rental_system\\controllers\\stationscontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{CADBE86E-342C-442D-A452-AC7978C25CF4}|DEMO01_EV_rental_System\\DEMO01_EV_rental_System.csproj|c:\\se1839__csharp\\demo01_ev_rental_system\\demo01_ev_rental_system\\entities\\extrafee.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{CADBE86E-342C-442D-A452-AC7978C25CF4}|DEMO01_EV_rental_System\\DEMO01_EV_rental_System.csproj|solutionrelative:demo01_ev_rental_system\\entities\\extrafee.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{CADBE86E-342C-442D-A452-AC7978C25CF4}|DEMO01_EV_rental_System\\DEMO01_EV_rental_System.csproj|c:\\se1839__csharp\\demo01_ev_rental_system\\demo01_ev_rental_system\\data\\rentalevsystemfinalcontext.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{CADBE86E-342C-442D-A452-AC7978C25CF4}|DEMO01_EV_rental_System\\DEMO01_EV_rental_System.csproj|solutionrelative:demo01_ev_rental_system\\data\\rentalevsystemfinalcontext.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{CADBE86E-342C-442D-A452-AC7978C25CF4}|DEMO01_EV_rental_System\\DEMO01_EV_rental_System.csproj|c:\\se1839__csharp\\demo01_ev_rental_system\\demo01_ev_rental_system\\entities\\feetype.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{CADBE86E-342C-442D-A452-AC7978C25CF4}|DEMO01_EV_rental_System\\DEMO01_EV_rental_System.csproj|solutionrelative:demo01_ev_rental_system\\entities\\feetype.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{CADBE86E-342C-442D-A452-AC7978C25CF4}|DEMO01_EV_rental_System\\DEMO01_EV_rental_System.csproj|c:\\se1839__csharp\\demo01_ev_rental_system\\demo01_ev_rental_system\\entities\\driverlicense.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{CADBE86E-342C-442D-A452-AC7978C25CF4}|DEMO01_EV_rental_System\\DEMO01_EV_rental_System.csproj|solutionrelative:demo01_ev_rental_system\\entities\\driverlicense.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{CADBE86E-342C-442D-A452-AC7978C25CF4}|DEMO01_EV_rental_System\\DEMO01_EV_rental_System.csproj|c:\\se1839__csharp\\demo01_ev_rental_system\\demo01_ev_rental_system\\entities\\otherfee.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{CADBE86E-342C-442D-A452-AC7978C25CF4}|DEMO01_EV_rental_System\\DEMO01_EV_rental_System.csproj|solutionrelative:demo01_ev_rental_system\\entities\\otherfee.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{CADBE86E-342C-442D-A452-AC7978C25CF4}|DEMO01_EV_rental_System\\DEMO01_EV_rental_System.csproj|c:\\se1839__csharp\\demo01_ev_rental_system\\demo01_ev_rental_system\\controllers\\feetypescontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{CADBE86E-342C-442D-A452-AC7978C25CF4}|DEMO01_EV_rental_System\\DEMO01_EV_rental_System.csproj|solutionrelative:demo01_ev_rental_system\\controllers\\feetypescontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{CADBE86E-342C-442D-A452-AC7978C25CF4}|DEMO01_EV_rental_System\\DEMO01_EV_rental_System.csproj|c:\\se1839__csharp\\demo01_ev_rental_system\\demo01_ev_rental_system\\controllers\\cccdscontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{CADBE86E-342C-442D-A452-AC7978C25CF4}|DEMO01_EV_rental_System\\DEMO01_EV_rental_System.csproj|solutionrelative:demo01_ev_rental_system\\controllers\\cccdscontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{CADBE86E-342C-442D-A452-AC7978C25CF4}|DEMO01_EV_rental_System\\DEMO01_EV_rental_System.csproj|c:\\se1839__csharp\\demo01_ev_rental_system\\demo01_ev_rental_system\\controllers\\contractscontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{CADBE86E-342C-442D-A452-AC7978C25CF4}|DEMO01_EV_rental_System\\DEMO01_EV_rental_System.csproj|solutionrelative:demo01_ev_rental_system\\controllers\\contractscontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{CADBE86E-342C-442D-A452-AC7978C25CF4}|DEMO01_EV_rental_System\\DEMO01_EV_rental_System.csproj|c:\\se1839__csharp\\demo01_ev_rental_system\\demo01_ev_rental_system\\controllers\\driverlicensescontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{CADBE86E-342C-442D-A452-AC7978C25CF4}|DEMO01_EV_rental_System\\DEMO01_EV_rental_System.csproj|solutionrelative:demo01_ev_rental_system\\controllers\\driverlicensescontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{CADBE86E-342C-442D-A452-AC7978C25CF4}|DEMO01_EV_rental_System\\DEMO01_EV_rental_System.csproj|c:\\se1839__csharp\\demo01_ev_rental_system\\demo01_ev_rental_system\\data\\jwtservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{CADBE86E-342C-442D-A452-AC7978C25CF4}|DEMO01_EV_rental_System\\DEMO01_EV_rental_System.csproj|solutionrelative:demo01_ev_rental_system\\data\\jwtservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{CADBE86E-342C-442D-A452-AC7978C25CF4}|DEMO01_EV_rental_System\\DEMO01_EV_rental_System.csproj|c:\\se1839__csharp\\demo01_ev_rental_system\\demo01_ev_rental_system\\data\\loginrequestdto.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{CADBE86E-342C-442D-A452-AC7978C25CF4}|DEMO01_EV_rental_System\\DEMO01_EV_rental_System.csproj|solutionrelative:demo01_ev_rental_system\\data\\loginrequestdto.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{CADBE86E-342C-442D-A452-AC7978C25CF4}|DEMO01_EV_rental_System\\DEMO01_EV_rental_System.csproj|c:\\se1839__csharp\\demo01_ev_rental_system\\demo01_ev_rental_system\\data\\loginresponsedto.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{CADBE86E-342C-442D-A452-AC7978C25CF4}|DEMO01_EV_rental_System\\DEMO01_EV_rental_System.csproj|solutionrelative:demo01_ev_rental_system\\data\\loginresponsedto.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{CADBE86E-342C-442D-A452-AC7978C25CF4}|DEMO01_EV_rental_System\\DEMO01_EV_rental_System.csproj|c:\\se1839__csharp\\demo01_ev_rental_system\\demo01_ev_rental_system\\data\\passwordhasher.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{CADBE86E-342C-442D-A452-AC7978C25CF4}|DEMO01_EV_rental_System\\DEMO01_EV_rental_System.csproj|solutionrelative:demo01_ev_rental_system\\data\\passwordhasher.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{CADBE86E-342C-442D-A452-AC7978C25CF4}|DEMO01_EV_rental_System\\DEMO01_EV_rental_System.csproj|c:\\se1839__csharp\\demo01_ev_rental_system\\demo01_ev_rental_system\\data\\paymentinfo.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{CADBE86E-342C-442D-A452-AC7978C25CF4}|DEMO01_EV_rental_System\\DEMO01_EV_rental_System.csproj|solutionrelative:demo01_ev_rental_system\\data\\paymentinfo.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{CADBE86E-342C-442D-A452-AC7978C25CF4}|DEMO01_EV_rental_System\\DEMO01_EV_rental_System.csproj|c:\\se1839__csharp\\demo01_ev_rental_system\\demo01_ev_rental_system\\data\\postcccddto.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{CADBE86E-342C-442D-A452-AC7978C25CF4}|DEMO01_EV_rental_System\\DEMO01_EV_rental_System.csproj|solutionrelative:demo01_ev_rental_system\\data\\postcccddto.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{CADBE86E-342C-442D-A452-AC7978C25CF4}|DEMO01_EV_rental_System\\DEMO01_EV_rental_System.csproj|c:\\se1839__csharp\\demo01_ev_rental_system\\demo01_ev_rental_system\\data\\postdriverlisencedto.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{CADBE86E-342C-442D-A452-AC7978C25CF4}|DEMO01_EV_rental_System\\DEMO01_EV_rental_System.csproj|solutionrelative:demo01_ev_rental_system\\data\\postdriverlisencedto.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{CADBE86E-342C-442D-A452-AC7978C25CF4}|DEMO01_EV_rental_System\\DEMO01_EV_rental_System.csproj|c:\\se1839__csharp\\demo01_ev_rental_system\\demo01_ev_rental_system\\entities\\vehiclemodel.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{CADBE86E-342C-442D-A452-AC7978C25CF4}|DEMO01_EV_rental_System\\DEMO01_EV_rental_System.csproj|solutionrelative:demo01_ev_rental_system\\entities\\vehiclemodel.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{CADBE86E-342C-442D-A452-AC7978C25CF4}|DEMO01_EV_rental_System\\DEMO01_EV_rental_System.csproj|c:\\se1839__csharp\\demo01_ev_rental_system\\demo01_ev_rental_system\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{CADBE86E-342C-442D-A452-AC7978C25CF4}|DEMO01_EV_rental_System\\DEMO01_EV_rental_System.csproj|solutionrelative:demo01_ev_rental_system\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{CADBE86E-342C-442D-A452-AC7978C25CF4}|DEMO01_EV_rental_System\\DEMO01_EV_rental_System.csproj|c:\\se1839__csharp\\demo01_ev_rental_system\\demo01_ev_rental_system\\entities\\notification.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{CADBE86E-342C-442D-A452-AC7978C25CF4}|DEMO01_EV_rental_System\\DEMO01_EV_rental_System.csproj|solutionrelative:demo01_ev_rental_system\\entities\\notification.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{CADBE86E-342C-442D-A452-AC7978C25CF4}|DEMO01_EV_rental_System\\DEMO01_EV_rental_System.csproj|c:\\se1839__csharp\\demo01_ev_rental_system\\demo01_ev_rental_system\\demo01_ev_rental_system.http||{5703B403-55E7-4C63-8C88-A8F52C7A45C5}",
+      "RelativeMoniker": "D:0:0:{CADBE86E-342C-442D-A452-AC7978C25CF4}|DEMO01_EV_rental_System\\DEMO01_EV_rental_System.csproj|solutionrelative:demo01_ev_rental_system\\demo01_ev_rental_system.http||{5703B403-55E7-4C63-8C88-A8F52C7A45C5}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{CADBE86E-342C-442D-A452-AC7978C25CF4}|DEMO01_EV_rental_System\\DEMO01_EV_rental_System.csproj|c:\\se1839__csharp\\demo01_ev_rental_system\\demo01_ev_rental_system\\entities\\renter.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{CADBE86E-342C-442D-A452-AC7978C25CF4}|DEMO01_EV_rental_System\\DEMO01_EV_rental_System.csproj|solutionrelative:demo01_ev_rental_system\\entities\\renter.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{CADBE86E-342C-442D-A452-AC7978C25CF4}|DEMO01_EV_rental_System\\DEMO01_EV_rental_System.csproj|c:\\se1839__csharp\\demo01_ev_rental_system\\demo01_ev_rental_system\\entities\\staff.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{CADBE86E-342C-442D-A452-AC7978C25CF4}|DEMO01_EV_rental_System\\DEMO01_EV_rental_System.csproj|solutionrelative:demo01_ev_rental_system\\entities\\staff.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{CADBE86E-342C-442D-A452-AC7978C25CF4}|DEMO01_EV_rental_System\\DEMO01_EV_rental_System.csproj|c:\\se1839__csharp\\demo01_ev_rental_system\\demo01_ev_rental_system\\entities\\cccd.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{CADBE86E-342C-442D-A452-AC7978C25CF4}|DEMO01_EV_rental_System\\DEMO01_EV_rental_System.csproj|solutionrelative:demo01_ev_rental_system\\entities\\cccd.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{CADBE86E-342C-442D-A452-AC7978C25CF4}|DEMO01_EV_rental_System\\DEMO01_EV_rental_System.csproj|c:\\se1839__csharp\\demo01_ev_rental_system\\demo01_ev_rental_system\\entities\\complaint.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{CADBE86E-342C-442D-A452-AC7978C25CF4}|DEMO01_EV_rental_System\\DEMO01_EV_rental_System.csproj|solutionrelative:demo01_ev_rental_system\\entities\\complaint.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{CADBE86E-342C-442D-A452-AC7978C25CF4}|DEMO01_EV_rental_System\\DEMO01_EV_rental_System.csproj|c:\\se1839__csharp\\demo01_ev_rental_system\\demo01_ev_rental_system\\entities\\station.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{CADBE86E-342C-442D-A452-AC7978C25CF4}|DEMO01_EV_rental_System\\DEMO01_EV_rental_System.csproj|solutionrelative:demo01_ev_rental_system\\entities\\station.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{CADBE86E-342C-442D-A452-AC7978C25CF4}|DEMO01_EV_rental_System\\DEMO01_EV_rental_System.csproj|c:\\se1839__csharp\\demo01_ev_rental_system\\demo01_ev_rental_system\\entities\\user.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{CADBE86E-342C-442D-A452-AC7978C25CF4}|DEMO01_EV_rental_System\\DEMO01_EV_rental_System.csproj|solutionrelative:demo01_ev_rental_system\\entities\\user.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{CADBE86E-342C-442D-A452-AC7978C25CF4}|DEMO01_EV_rental_System\\DEMO01_EV_rental_System.csproj|c:\\se1839__csharp\\demo01_ev_rental_system\\demo01_ev_rental_system\\entities\\vehicle.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{CADBE86E-342C-442D-A452-AC7978C25CF4}|DEMO01_EV_rental_System\\DEMO01_EV_rental_System.csproj|solutionrelative:demo01_ev_rental_system\\entities\\vehicle.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{CADBE86E-342C-442D-A452-AC7978C25CF4}|DEMO01_EV_rental_System\\DEMO01_EV_rental_System.csproj|c:\\se1839__csharp\\demo01_ev_rental_system\\demo01_ev_rental_system\\demo01_ev_rental_system.csproj||{04B8AB82-A572-4FEF-95CE-5222444B6B64}|",
+      "RelativeMoniker": "D:0:0:{CADBE86E-342C-442D-A452-AC7978C25CF4}|DEMO01_EV_rental_System\\DEMO01_EV_rental_System.csproj|solutionrelative:demo01_ev_rental_system\\demo01_ev_rental_system.csproj||{04B8AB82-A572-4FEF-95CE-5222444B6B64}|"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{CADBE86E-342C-442D-A452-AC7978C25CF4}|DEMO01_EV_rental_System\\DEMO01_EV_rental_System.csproj|c:\\se1839__csharp\\demo01_ev_rental_system\\demo01_ev_rental_system\\properties\\launchsettings.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}",
+      "RelativeMoniker": "D:0:0:{CADBE86E-342C-442D-A452-AC7978C25CF4}|DEMO01_EV_rental_System\\DEMO01_EV_rental_System.csproj|solutionrelative:demo01_ev_rental_system\\properties\\launchsettings.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}"
+    }
+  ],
+  "DocumentGroupContainers": [
+    {
+      "Orientation": 0,
+      "VerticalTabListWidth": 256,
+      "DocumentGroups": [
+        {
+          "DockedWidth": 200,
+          "SelectedChildIndex": 1,
+          "Children": [
+            {
+              "$type": "Document",
+              "DocumentIndex": 44,
+              "Title": "DEMO01_EV_rental_System.http",
+              "DocumentMoniker": "C:\\SE1839__Csharp\\DEMO01_EV_rental_System\\DEMO01_EV_rental_System\\DEMO01_EV_rental_System.http",
+              "RelativeDocumentMoniker": "DEMO01_EV_rental_System\\DEMO01_EV_rental_System.http",
+              "ToolTip": "C:\\SE1839__Csharp\\DEMO01_EV_rental_System\\DEMO01_EV_rental_System\\DEMO01_EV_rental_System.http",
+              "RelativeToolTip": "DEMO01_EV_rental_System\\DEMO01_EV_rental_System.http",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003502|",
+              "WhenOpened": "2025-10-09T08:07:12.748Z",
+              "IsPinned": true
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "VnpayService.cs",
+              "DocumentMoniker": "C:\\SE1839__Csharp\\DEMO01_EV_rental_System\\DEMO01_EV_rental_System\\VNPAY\\VnpayService.cs",
+              "RelativeDocumentMoniker": "DEMO01_EV_rental_System\\VNPAY\\VnpayService.cs",
+              "ToolTip": "C:\\SE1839__Csharp\\DEMO01_EV_rental_System\\DEMO01_EV_rental_System\\VNPAY\\VnpayService.cs",
+              "RelativeToolTip": "DEMO01_EV_rental_System\\VNPAY\\VnpayService.cs",
+              "ViewState": "AgIAABUAAAAAAAAAAAAYwCwAAAAsAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-11-08T06:40:57.386Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 4,
+              "Title": "appsettings.json",
+              "DocumentMoniker": "C:\\SE1839__Csharp\\DEMO01_EV_rental_System\\DEMO01_EV_rental_System\\appsettings.json",
+              "RelativeDocumentMoniker": "DEMO01_EV_rental_System\\appsettings.json",
+              "ToolTip": "C:\\SE1839__Csharp\\DEMO01_EV_rental_System\\DEMO01_EV_rental_System\\appsettings.json",
+              "RelativeToolTip": "DEMO01_EV_rental_System\\appsettings.json",
+              "ViewState": "AgIAAAYAAAAAAAAAAAAAABcAAAAaAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001642|",
+              "WhenOpened": "2025-10-09T07:59:39.611Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 3,
+              "Title": "PaymentssController.cs",
+              "DocumentMoniker": "C:\\SE1839__Csharp\\DEMO01_EV_rental_System\\DEMO01_EV_rental_System\\Controllers\\PaymentssController.cs",
+              "RelativeDocumentMoniker": "DEMO01_EV_rental_System\\Controllers\\PaymentssController.cs",
+              "ToolTip": "C:\\SE1839__Csharp\\DEMO01_EV_rental_System\\DEMO01_EV_rental_System\\Controllers\\PaymentssController.cs",
+              "RelativeToolTip": "DEMO01_EV_rental_System\\Controllers\\PaymentssController.cs",
+              "ViewState": "AgIAABYAAAAAAAAAAAAQwCgAAAAJAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-11-12T18:34:12.773Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 2,
+              "Title": "PaymentsController.cs",
+              "DocumentMoniker": "C:\\SE1839__Csharp\\DEMO01_EV_rental_System\\DEMO01_EV_rental_System\\Controllers\\PaymentsController.cs",
+              "RelativeDocumentMoniker": "DEMO01_EV_rental_System\\Controllers\\PaymentsController.cs",
+              "ToolTip": "C:\\SE1839__Csharp\\DEMO01_EV_rental_System\\DEMO01_EV_rental_System\\Controllers\\PaymentsController.cs",
+              "RelativeToolTip": "DEMO01_EV_rental_System\\Controllers\\PaymentsController.cs",
+              "ViewState": "AgIAACQAAAAAAAAAAAAYwDMAAAA7AAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-11-08T08:52:46.126Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "IVnPayService.cs",
+              "DocumentMoniker": "C:\\SE1839__Csharp\\DEMO01_EV_rental_System\\DEMO01_EV_rental_System\\VNPAY\\IVnPayService.cs",
+              "RelativeDocumentMoniker": "DEMO01_EV_rental_System\\VNPAY\\IVnPayService.cs",
+              "ToolTip": "C:\\SE1839__Csharp\\DEMO01_EV_rental_System\\DEMO01_EV_rental_System\\VNPAY\\IVnPayService.cs",
+              "RelativeToolTip": "DEMO01_EV_rental_System\\VNPAY\\IVnPayService.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAQAAAAPAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-11-07T18:04:20.213Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 6,
+              "Title": "RentalOrdersController.cs",
+              "DocumentMoniker": "C:\\SE1839__Csharp\\DEMO01_EV_rental_System\\DEMO01_EV_rental_System\\Controllers\\RentalOrdersController.cs",
+              "RelativeDocumentMoniker": "DEMO01_EV_rental_System\\Controllers\\RentalOrdersController.cs",
+              "ToolTip": "C:\\SE1839__Csharp\\DEMO01_EV_rental_System\\DEMO01_EV_rental_System\\Controllers\\RentalOrdersController.cs",
+              "RelativeToolTip": "DEMO01_EV_rental_System\\Controllers\\RentalOrdersController.cs",
+              "ViewState": "AgIAAB4AAAAAAAAAAAAYwE0AAAATAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-10-24T06:46:30.712Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 5,
+              "Title": "appsettings.Development.json",
+              "DocumentMoniker": "C:\\SE1839__Csharp\\DEMO01_EV_rental_System\\DEMO01_EV_rental_System\\appsettings.Development.json",
+              "RelativeDocumentMoniker": "DEMO01_EV_rental_System\\appsettings.Development.json",
+              "ToolTip": "C:\\SE1839__Csharp\\DEMO01_EV_rental_System\\DEMO01_EV_rental_System\\appsettings.Development.json",
+              "RelativeToolTip": "DEMO01_EV_rental_System\\appsettings.Development.json",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001642|",
+              "WhenOpened": "2025-11-06T16:52:45.257Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 7,
+              "Title": "RentalOrder.cs",
+              "DocumentMoniker": "C:\\SE1839__Csharp\\DEMO01_EV_rental_System\\DEMO01_EV_rental_System\\Entities\\RentalOrder.cs",
+              "RelativeDocumentMoniker": "DEMO01_EV_rental_System\\Entities\\RentalOrder.cs",
+              "ToolTip": "C:\\SE1839__Csharp\\DEMO01_EV_rental_System\\DEMO01_EV_rental_System\\Entities\\RentalOrder.cs",
+              "RelativeToolTip": "DEMO01_EV_rental_System\\Entities\\RentalOrder.cs",
+              "ViewState": "AgIAAAMAAAAAAAAAAAAAACAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-10-12T09:32:18.374Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 8,
+              "Title": "VnpaymentResponseModel.cs",
+              "DocumentMoniker": "C:\\SE1839__Csharp\\DEMO01_EV_rental_System\\DEMO01_EV_rental_System\\VNPAY\\VnpaymentResponseModel.cs",
+              "RelativeDocumentMoniker": "DEMO01_EV_rental_System\\VNPAY\\VnpaymentResponseModel.cs",
+              "ToolTip": "C:\\SE1839__Csharp\\DEMO01_EV_rental_System\\DEMO01_EV_rental_System\\VNPAY\\VnpaymentResponseModel.cs",
+              "RelativeToolTip": "DEMO01_EV_rental_System\\VNPAY\\VnpaymentResponseModel.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAsAAAAfAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-11-07T17:58:21.516Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 9,
+              "Title": "VnPaymentRequestModelWithAnPayment.cs",
+              "DocumentMoniker": "C:\\SE1839__Csharp\\DEMO01_EV_rental_System\\DEMO01_EV_rental_System\\VNPAY\\VnPaymentRequestModelWithAnPayment.cs",
+              "RelativeDocumentMoniker": "DEMO01_EV_rental_System\\VNPAY\\VnPaymentRequestModelWithAnPayment.cs",
+              "ToolTip": "C:\\SE1839__Csharp\\DEMO01_EV_rental_System\\DEMO01_EV_rental_System\\VNPAY\\VnPaymentRequestModelWithAnPayment.cs",
+              "RelativeToolTip": "DEMO01_EV_rental_System\\VNPAY\\VnPaymentRequestModelWithAnPayment.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAQAAAAzAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-11-15T03:57:56.488Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 10,
+              "Title": "VnPaymentRequestModel.cs",
+              "DocumentMoniker": "C:\\SE1839__Csharp\\DEMO01_EV_rental_System\\DEMO01_EV_rental_System\\VNPAY\\VnPaymentRequestModel.cs",
+              "RelativeDocumentMoniker": "DEMO01_EV_rental_System\\VNPAY\\VnPaymentRequestModel.cs",
+              "ToolTip": "C:\\SE1839__Csharp\\DEMO01_EV_rental_System\\DEMO01_EV_rental_System\\VNPAY\\VnPaymentRequestModel.cs",
+              "RelativeToolTip": "DEMO01_EV_rental_System\\VNPAY\\VnPaymentRequestModel.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAoAAAAhAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-11-07T18:05:35.67Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 11,
+              "Title": "VnPayLibrary.cs",
+              "DocumentMoniker": "C:\\SE1839__Csharp\\DEMO01_EV_rental_System\\DEMO01_EV_rental_System\\VNPAY\\VnPayLibrary.cs",
+              "RelativeDocumentMoniker": "DEMO01_EV_rental_System\\VNPAY\\VnPayLibrary.cs",
+              "ToolTip": "C:\\SE1839__Csharp\\DEMO01_EV_rental_System\\DEMO01_EV_rental_System\\VNPAY\\VnPayLibrary.cs",
+              "RelativeToolTip": "DEMO01_EV_rental_System\\VNPAY\\VnPayLibrary.cs",
+              "ViewState": "AgIAAKUAAAAAAAAAAAAIwBQAAAANAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-11-05T07:06:29.64Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 12,
+              "Title": "VehiclesController.cs",
+              "DocumentMoniker": "C:\\SE1839__Csharp\\DEMO01_EV_rental_System\\DEMO01_EV_rental_System\\Controllers\\VehiclesController.cs",
+              "RelativeDocumentMoniker": "DEMO01_EV_rental_System\\Controllers\\VehiclesController.cs",
+              "ToolTip": "C:\\SE1839__Csharp\\DEMO01_EV_rental_System\\DEMO01_EV_rental_System\\Controllers\\VehiclesController.cs",
+              "RelativeToolTip": "DEMO01_EV_rental_System\\Controllers\\VehiclesController.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAF0AAAArAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-10-24T03:03:05.19Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 13,
+              "Title": "VehicleModelsController.cs",
+              "DocumentMoniker": "C:\\SE1839__Csharp\\DEMO01_EV_rental_System\\DEMO01_EV_rental_System\\Controllers\\VehicleModelsController.cs",
+              "RelativeDocumentMoniker": "DEMO01_EV_rental_System\\Controllers\\VehicleModelsController.cs",
+              "ToolTip": "C:\\SE1839__Csharp\\DEMO01_EV_rental_System\\DEMO01_EV_rental_System\\Controllers\\VehicleModelsController.cs",
+              "RelativeToolTip": "DEMO01_EV_rental_System\\Controllers\\VehicleModelsController.cs",
+              "ViewState": "AgIAAAkAAAAAAAAAAAAmwBsAAABTAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-10-24T06:44:01.352Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 14,
+              "Title": "LogHistory.cs",
+              "DocumentMoniker": "C:\\SE1839__Csharp\\DEMO01_EV_rental_System\\DEMO01_EV_rental_System\\Entities\\LogHistory.cs",
+              "RelativeDocumentMoniker": "DEMO01_EV_rental_System\\Entities\\LogHistory.cs",
+              "ToolTip": "C:\\SE1839__Csharp\\DEMO01_EV_rental_System\\DEMO01_EV_rental_System\\Entities\\LogHistory.cs",
+              "RelativeToolTip": "DEMO01_EV_rental_System\\Entities\\LogHistory.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-10-12T09:32:16.211Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 15,
+              "Title": "ExtraFeeByTrafficViolations.cs",
+              "DocumentMoniker": "C:\\SE1839__Csharp\\DEMO01_EV_rental_System\\DEMO01_EV_rental_System\\Entities\\ExtraFeeByTrafficViolations.cs",
+              "RelativeDocumentMoniker": "DEMO01_EV_rental_System\\Entities\\ExtraFeeByTrafficViolations.cs",
+              "ToolTip": "C:\\SE1839__Csharp\\DEMO01_EV_rental_System\\DEMO01_EV_rental_System\\Entities\\ExtraFeeByTrafficViolations.cs",
+              "RelativeToolTip": "DEMO01_EV_rental_System\\Entities\\ExtraFeeByTrafficViolations.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAQAAAAgAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-11-14T17:55:47.917Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 16,
+              "Title": "ExtraFeesController.cs",
+              "DocumentMoniker": "C:\\SE1839__Csharp\\DEMO01_EV_rental_System\\DEMO01_EV_rental_System\\Controllers\\ExtraFeesController.cs",
+              "RelativeDocumentMoniker": "DEMO01_EV_rental_System\\Controllers\\ExtraFeesController.cs",
+              "ToolTip": "C:\\SE1839__Csharp\\DEMO01_EV_rental_System\\DEMO01_EV_rental_System\\Controllers\\ExtraFeesController.cs",
+              "RelativeToolTip": "DEMO01_EV_rental_System\\Controllers\\ExtraFeesController.cs",
+              "ViewState": "AgIAAEsAAAAAAAAAAAAowGQAAAAPAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-11-14T17:12:27.06Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 17,
+              "Title": "RentersController.cs",
+              "DocumentMoniker": "C:\\SE1839__Csharp\\DEMO01_EV_rental_System\\DEMO01_EV_rental_System\\Controllers\\RentersController.cs",
+              "RelativeDocumentMoniker": "DEMO01_EV_rental_System\\Controllers\\RentersController.cs",
+              "ToolTip": "C:\\SE1839__Csharp\\DEMO01_EV_rental_System\\DEMO01_EV_rental_System\\Controllers\\RentersController.cs",
+              "RelativeToolTip": "DEMO01_EV_rental_System\\Controllers\\RentersController.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAA4AAAATAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-10-15T05:38:21.961Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 18,
+              "Title": "UserAccountController.cs",
+              "DocumentMoniker": "C:\\SE1839__Csharp\\DEMO01_EV_rental_System\\DEMO01_EV_rental_System\\Controllers\\UserAccountController.cs",
+              "RelativeDocumentMoniker": "DEMO01_EV_rental_System\\Controllers\\UserAccountController.cs",
+              "ToolTip": "C:\\SE1839__Csharp\\DEMO01_EV_rental_System\\DEMO01_EV_rental_System\\Controllers\\UserAccountController.cs",
+              "RelativeToolTip": "DEMO01_EV_rental_System\\Controllers\\UserAccountController.cs",
+              "ViewState": "AgIAAAsAAAAAAAAAAAAAwA0AAAAkAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-10-22T10:00:48.514Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 19,
+              "Title": "Payment.cs",
+              "DocumentMoniker": "C:\\SE1839__Csharp\\DEMO01_EV_rental_System\\DEMO01_EV_rental_System\\Entities\\Payment.cs",
+              "RelativeDocumentMoniker": "DEMO01_EV_rental_System\\Entities\\Payment.cs",
+              "ToolTip": "C:\\SE1839__Csharp\\DEMO01_EV_rental_System\\DEMO01_EV_rental_System\\Entities\\Payment.cs",
+              "RelativeToolTip": "DEMO01_EV_rental_System\\Entities\\Payment.cs",
+              "ViewState": "AgIAAAgAAAAAAAAAAAAAwBAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-10-12T09:32:19.376Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 20,
+              "Title": "Contract.cs",
+              "DocumentMoniker": "C:\\SE1839__Csharp\\DEMO01_EV_rental_System\\DEMO01_EV_rental_System\\Entities\\Contract.cs",
+              "RelativeDocumentMoniker": "DEMO01_EV_rental_System\\Entities\\Contract.cs",
+              "ToolTip": "C:\\SE1839__Csharp\\DEMO01_EV_rental_System\\DEMO01_EV_rental_System\\Entities\\Contract.cs",
+              "RelativeToolTip": "DEMO01_EV_rental_System\\Entities\\Contract.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAA0AAAAsAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-10-12T09:32:10.029Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 21,
+              "Title": "PaymentRequestDTO.cs",
+              "DocumentMoniker": "C:\\SE1839__Csharp\\DEMO01_EV_rental_System\\DEMO01_EV_rental_System\\Data\\PaymentRequestDTO.cs",
+              "RelativeDocumentMoniker": "DEMO01_EV_rental_System\\Data\\PaymentRequestDTO.cs",
+              "ToolTip": "C:\\SE1839__Csharp\\DEMO01_EV_rental_System\\DEMO01_EV_rental_System\\Data\\PaymentRequestDTO.cs",
+              "RelativeToolTip": "DEMO01_EV_rental_System\\Data\\PaymentRequestDTO.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAYAAAAoAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-11-12T08:53:05.537Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 22,
+              "Title": "UsersController.cs",
+              "DocumentMoniker": "C:\\SE1839__Csharp\\DEMO01_EV_rental_System\\DEMO01_EV_rental_System\\Controllers\\UsersController.cs",
+              "RelativeDocumentMoniker": "DEMO01_EV_rental_System\\Controllers\\UsersController.cs",
+              "ToolTip": "C:\\SE1839__Csharp\\DEMO01_EV_rental_System\\DEMO01_EV_rental_System\\Controllers\\UsersController.cs",
+              "RelativeToolTip": "DEMO01_EV_rental_System\\Controllers\\UsersController.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAMMAAAAYAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-10-09T08:22:36.817Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 23,
+              "Title": "StaffsController.cs",
+              "DocumentMoniker": "C:\\SE1839__Csharp\\DEMO01_EV_rental_System\\DEMO01_EV_rental_System\\Controllers\\StaffsController.cs",
+              "RelativeDocumentMoniker": "DEMO01_EV_rental_System\\Controllers\\StaffsController.cs",
+              "ToolTip": "C:\\SE1839__Csharp\\DEMO01_EV_rental_System\\DEMO01_EV_rental_System\\Controllers\\StaffsController.cs",
+              "RelativeToolTip": "DEMO01_EV_rental_System\\Controllers\\StaffsController.cs",
+              "ViewState": "AgIAABYAAAAAAAAAAAAQwAsAAAAtAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-10-15T05:43:45.075Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 24,
+              "Title": "StationsController.cs",
+              "DocumentMoniker": "C:\\SE1839__Csharp\\DEMO01_EV_rental_System\\DEMO01_EV_rental_System\\Controllers\\StationsController.cs",
+              "RelativeDocumentMoniker": "DEMO01_EV_rental_System\\Controllers\\StationsController.cs",
+              "ToolTip": "C:\\SE1839__Csharp\\DEMO01_EV_rental_System\\DEMO01_EV_rental_System\\Controllers\\StationsController.cs",
+              "RelativeToolTip": "DEMO01_EV_rental_System\\Controllers\\StationsController.cs",
+              "ViewState": "AgIAAEMAAAAAAAAAAAAmwFUAAABaAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-10-15T08:18:43.467Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 25,
+              "Title": "ExtraFee.cs",
+              "DocumentMoniker": "C:\\SE1839__Csharp\\DEMO01_EV_rental_System\\DEMO01_EV_rental_System\\Entities\\ExtraFee.cs",
+              "RelativeDocumentMoniker": "DEMO01_EV_rental_System\\Entities\\ExtraFee.cs",
+              "ToolTip": "C:\\SE1839__Csharp\\DEMO01_EV_rental_System\\DEMO01_EV_rental_System\\Entities\\ExtraFee.cs",
+              "RelativeToolTip": "DEMO01_EV_rental_System\\Entities\\ExtraFee.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAA4AAAAaAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-10-12T09:32:14.125Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 26,
+              "Title": "RentalEvSystemFinalContext.cs",
+              "DocumentMoniker": "C:\\SE1839__Csharp\\DEMO01_EV_rental_System\\DEMO01_EV_rental_System\\Data\\RentalEvSystemFinalContext.cs",
+              "RelativeDocumentMoniker": "DEMO01_EV_rental_System\\Data\\RentalEvSystemFinalContext.cs",
+              "ToolTip": "C:\\SE1839__Csharp\\DEMO01_EV_rental_System\\DEMO01_EV_rental_System\\Data\\RentalEvSystemFinalContext.cs",
+              "RelativeToolTip": "DEMO01_EV_rental_System\\Data\\RentalEvSystemFinalContext.cs",
+              "ViewState": "AgIAAKMAAAAAAAAAAAAkwIYAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-10-09T07:58:30.467Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 27,
+              "Title": "FeeType.cs",
+              "DocumentMoniker": "C:\\SE1839__Csharp\\DEMO01_EV_rental_System\\DEMO01_EV_rental_System\\Entities\\FeeType.cs",
+              "RelativeDocumentMoniker": "DEMO01_EV_rental_System\\Entities\\FeeType.cs",
+              "ToolTip": "C:\\SE1839__Csharp\\DEMO01_EV_rental_System\\DEMO01_EV_rental_System\\Entities\\FeeType.cs",
+              "RelativeToolTip": "DEMO01_EV_rental_System\\Entities\\FeeType.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAsAAAAEAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-10-12T09:32:15.286Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 28,
+              "Title": "DriverLicense.cs",
+              "DocumentMoniker": "C:\\SE1839__Csharp\\DEMO01_EV_rental_System\\DEMO01_EV_rental_System\\Entities\\DriverLicense.cs",
+              "RelativeDocumentMoniker": "DEMO01_EV_rental_System\\Entities\\DriverLicense.cs",
+              "ToolTip": "C:\\SE1839__Csharp\\DEMO01_EV_rental_System\\DEMO01_EV_rental_System\\Entities\\DriverLicense.cs",
+              "RelativeToolTip": "DEMO01_EV_rental_System\\Entities\\DriverLicense.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAcAAAAEAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-10-12T09:26:24.255Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 29,
+              "Title": "OtherFee.cs",
+              "DocumentMoniker": "C:\\SE1839__Csharp\\DEMO01_EV_rental_System\\DEMO01_EV_rental_System\\Entities\\OtherFee.cs",
+              "RelativeDocumentMoniker": "DEMO01_EV_rental_System\\Entities\\OtherFee.cs",
+              "ToolTip": "C:\\SE1839__Csharp\\DEMO01_EV_rental_System\\DEMO01_EV_rental_System\\Entities\\OtherFee.cs",
+              "RelativeToolTip": "DEMO01_EV_rental_System\\Entities\\OtherFee.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-11-14T18:07:26.53Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 30,
+              "Title": "FeeTypesController.cs",
+              "DocumentMoniker": "C:\\SE1839__Csharp\\DEMO01_EV_rental_System\\DEMO01_EV_rental_System\\Controllers\\FeeTypesController.cs",
+              "RelativeDocumentMoniker": "DEMO01_EV_rental_System\\Controllers\\FeeTypesController.cs",
+              "ToolTip": "C:\\SE1839__Csharp\\DEMO01_EV_rental_System\\DEMO01_EV_rental_System\\Controllers\\FeeTypesController.cs",
+              "RelativeToolTip": "DEMO01_EV_rental_System\\Controllers\\FeeTypesController.cs",
+              "ViewState": "AgIAAAYAAAAAAAAAAAAAABsAAAAMAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-11-14T13:06:39.802Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 31,
+              "Title": "CccdsController.cs",
+              "DocumentMoniker": "C:\\SE1839__Csharp\\DEMO01_EV_rental_System\\DEMO01_EV_rental_System\\Controllers\\CccdsController.cs",
+              "RelativeDocumentMoniker": "DEMO01_EV_rental_System\\Controllers\\CccdsController.cs",
+              "ToolTip": "C:\\SE1839__Csharp\\DEMO01_EV_rental_System\\DEMO01_EV_rental_System\\Controllers\\CccdsController.cs",
+              "RelativeToolTip": "DEMO01_EV_rental_System\\Controllers\\CccdsController.cs",
+              "ViewState": "AgIAAIkAAAAAAAAAAAAuwGcAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-10-19T15:45:36.422Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 32,
+              "Title": "ContractsController.cs",
+              "DocumentMoniker": "C:\\SE1839__Csharp\\DEMO01_EV_rental_System\\DEMO01_EV_rental_System\\Controllers\\ContractsController.cs",
+              "RelativeDocumentMoniker": "DEMO01_EV_rental_System\\Controllers\\ContractsController.cs",
+              "ToolTip": "C:\\SE1839__Csharp\\DEMO01_EV_rental_System\\DEMO01_EV_rental_System\\Controllers\\ContractsController.cs",
+              "RelativeToolTip": "DEMO01_EV_rental_System\\Controllers\\ContractsController.cs",
+              "ViewState": "AgIAAGwAAAAAAAAAAAAAABMAAAAJAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-11-12T06:54:55.752Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 33,
+              "Title": "DriverLicensesController.cs",
+              "DocumentMoniker": "C:\\SE1839__Csharp\\DEMO01_EV_rental_System\\DEMO01_EV_rental_System\\Controllers\\DriverLicensesController.cs",
+              "RelativeDocumentMoniker": "DEMO01_EV_rental_System\\Controllers\\DriverLicensesController.cs",
+              "ToolTip": "C:\\SE1839__Csharp\\DEMO01_EV_rental_System\\DEMO01_EV_rental_System\\Controllers\\DriverLicensesController.cs",
+              "RelativeToolTip": "DEMO01_EV_rental_System\\Controllers\\DriverLicensesController.cs",
+              "ViewState": "AgIAAHoAAAAAAAAAAAAqwGkAAAAmAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-10-27T06:52:15.917Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 34,
+              "Title": "JwtService.cs",
+              "DocumentMoniker": "C:\\SE1839__Csharp\\DEMO01_EV_rental_System\\DEMO01_EV_rental_System\\Data\\JwtService.cs",
+              "RelativeDocumentMoniker": "DEMO01_EV_rental_System\\Data\\JwtService.cs",
+              "ToolTip": "C:\\SE1839__Csharp\\DEMO01_EV_rental_System\\DEMO01_EV_rental_System\\Data\\JwtService.cs",
+              "RelativeToolTip": "DEMO01_EV_rental_System\\Data\\JwtService.cs",
+              "ViewState": "AgIAAE4AAAAAAAAAAAAAAGMAAAAJAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-10-22T09:28:52.227Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 35,
+              "Title": "LoginRequestDTO.cs",
+              "DocumentMoniker": "C:\\SE1839__Csharp\\DEMO01_EV_rental_System\\DEMO01_EV_rental_System\\Data\\LoginRequestDTO.cs",
+              "RelativeDocumentMoniker": "DEMO01_EV_rental_System\\Data\\LoginRequestDTO.cs",
+              "ToolTip": "C:\\SE1839__Csharp\\DEMO01_EV_rental_System\\DEMO01_EV_rental_System\\Data\\LoginRequestDTO.cs",
+              "RelativeToolTip": "DEMO01_EV_rental_System\\Data\\LoginRequestDTO.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAUAAAAsAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-10-22T09:44:57.626Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 36,
+              "Title": "LoginResponseDTO.cs",
+              "DocumentMoniker": "C:\\SE1839__Csharp\\DEMO01_EV_rental_System\\DEMO01_EV_rental_System\\Data\\LoginResponseDTO.cs",
+              "RelativeDocumentMoniker": "DEMO01_EV_rental_System\\Data\\LoginResponseDTO.cs",
+              "ToolTip": "C:\\SE1839__Csharp\\DEMO01_EV_rental_System\\DEMO01_EV_rental_System\\Data\\LoginResponseDTO.cs",
+              "RelativeToolTip": "DEMO01_EV_rental_System\\Data\\LoginResponseDTO.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAgAAAAUAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-10-22T09:27:55.987Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 37,
+              "Title": "PasswordHasher.cs",
+              "DocumentMoniker": "C:\\SE1839__Csharp\\DEMO01_EV_rental_System\\DEMO01_EV_rental_System\\Data\\PasswordHasher.cs",
+              "RelativeDocumentMoniker": "DEMO01_EV_rental_System\\Data\\PasswordHasher.cs",
+              "ToolTip": "C:\\SE1839__Csharp\\DEMO01_EV_rental_System\\DEMO01_EV_rental_System\\Data\\PasswordHasher.cs",
+              "RelativeToolTip": "DEMO01_EV_rental_System\\Data\\PasswordHasher.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAA0AAAAFAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-10-23T17:15:01.336Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 38,
+              "Title": "PaymentInfo.cs",
+              "DocumentMoniker": "C:\\SE1839__Csharp\\DEMO01_EV_rental_System\\DEMO01_EV_rental_System\\Data\\PaymentInfo.cs",
+              "RelativeDocumentMoniker": "DEMO01_EV_rental_System\\Data\\PaymentInfo.cs",
+              "ToolTip": "C:\\SE1839__Csharp\\DEMO01_EV_rental_System\\DEMO01_EV_rental_System\\Data\\PaymentInfo.cs",
+              "RelativeToolTip": "DEMO01_EV_rental_System\\Data\\PaymentInfo.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAUAAAAaAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-11-06T17:00:25.688Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 39,
+              "Title": "PostCCCDDTO.cs",
+              "DocumentMoniker": "C:\\SE1839__Csharp\\DEMO01_EV_rental_System\\DEMO01_EV_rental_System\\Data\\PostCCCDDTO.cs",
+              "RelativeDocumentMoniker": "DEMO01_EV_rental_System\\Data\\PostCCCDDTO.cs",
+              "ToolTip": "C:\\SE1839__Csharp\\DEMO01_EV_rental_System\\DEMO01_EV_rental_System\\Data\\PostCCCDDTO.cs",
+              "RelativeToolTip": "DEMO01_EV_rental_System\\Data\\PostCCCDDTO.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAIAwwAoAAAAzAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-11-03T06:12:30.891Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 40,
+              "Title": "PostDriverLisenceDTO.cs",
+              "DocumentMoniker": "C:\\SE1839__Csharp\\DEMO01_EV_rental_System\\DEMO01_EV_rental_System\\Data\\PostDriverLisenceDTO.cs",
+              "RelativeDocumentMoniker": "DEMO01_EV_rental_System\\Data\\PostDriverLisenceDTO.cs",
+              "ToolTip": "C:\\SE1839__Csharp\\DEMO01_EV_rental_System\\DEMO01_EV_rental_System\\Data\\PostDriverLisenceDTO.cs",
+              "RelativeToolTip": "DEMO01_EV_rental_System\\Data\\PostDriverLisenceDTO.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAIAwwAoAAAA5AAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-11-03T06:12:56.288Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 41,
+              "Title": "VehicleModel.cs",
+              "DocumentMoniker": "C:\\SE1839__Csharp\\DEMO01_EV_rental_System\\DEMO01_EV_rental_System\\Entities\\VehicleModel.cs",
+              "RelativeDocumentMoniker": "DEMO01_EV_rental_System\\Entities\\VehicleModel.cs",
+              "ToolTip": "C:\\SE1839__Csharp\\DEMO01_EV_rental_System\\DEMO01_EV_rental_System\\Entities\\VehicleModel.cs",
+              "RelativeToolTip": "DEMO01_EV_rental_System\\Entities\\VehicleModel.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAABAAAAAcAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-10-12T09:32:25.763Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 42,
+              "Title": "Program.cs",
+              "DocumentMoniker": "C:\\SE1839__Csharp\\DEMO01_EV_rental_System\\DEMO01_EV_rental_System\\Program.cs",
+              "RelativeDocumentMoniker": "DEMO01_EV_rental_System\\Program.cs",
+              "ToolTip": "C:\\SE1839__Csharp\\DEMO01_EV_rental_System\\DEMO01_EV_rental_System\\Program.cs",
+              "RelativeToolTip": "DEMO01_EV_rental_System\\Program.cs",
+              "ViewState": "AgIAAGQAAAAAAAAAAAAjwH0AAAAMAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-10-09T07:55:25.15Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 43,
+              "Title": "Notification.cs",
+              "DocumentMoniker": "C:\\SE1839__Csharp\\DEMO01_EV_rental_System\\DEMO01_EV_rental_System\\Entities\\Notification.cs",
+              "RelativeDocumentMoniker": "DEMO01_EV_rental_System\\Entities\\Notification.cs",
+              "ToolTip": "C:\\SE1839__Csharp\\DEMO01_EV_rental_System\\DEMO01_EV_rental_System\\Entities\\Notification.cs",
+              "RelativeToolTip": "DEMO01_EV_rental_System\\Entities\\Notification.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-10-12T09:32:17.247Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 45,
+              "Title": "Renter.cs",
+              "DocumentMoniker": "C:\\SE1839__Csharp\\DEMO01_EV_rental_System\\DEMO01_EV_rental_System\\Entities\\Renter.cs",
+              "RelativeDocumentMoniker": "DEMO01_EV_rental_System\\Entities\\Renter.cs",
+              "ToolTip": "C:\\SE1839__Csharp\\DEMO01_EV_rental_System\\DEMO01_EV_rental_System\\Entities\\Renter.cs",
+              "RelativeToolTip": "DEMO01_EV_rental_System\\Entities\\Renter.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAABkAAAAzAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-10-12T09:24:47.103Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 46,
+              "Title": "Staff.cs",
+              "DocumentMoniker": "C:\\SE1839__Csharp\\DEMO01_EV_rental_System\\DEMO01_EV_rental_System\\Entities\\Staff.cs",
+              "RelativeDocumentMoniker": "DEMO01_EV_rental_System\\Entities\\Staff.cs",
+              "ToolTip": "C:\\SE1839__Csharp\\DEMO01_EV_rental_System\\DEMO01_EV_rental_System\\Entities\\Staff.cs",
+              "RelativeToolTip": "DEMO01_EV_rental_System\\Entities\\Staff.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAuwAcAAAABAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-10-12T09:23:01.146Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 47,
+              "Title": "Cccd.cs",
+              "DocumentMoniker": "C:\\SE1839__Csharp\\DEMO01_EV_rental_System\\DEMO01_EV_rental_System\\Entities\\Cccd.cs",
+              "RelativeDocumentMoniker": "DEMO01_EV_rental_System\\Entities\\Cccd.cs",
+              "ToolTip": "C:\\SE1839__Csharp\\DEMO01_EV_rental_System\\DEMO01_EV_rental_System\\Entities\\Cccd.cs",
+              "RelativeToolTip": "DEMO01_EV_rental_System\\Entities\\Cccd.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAcAAAAEAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-10-12T09:25:47.504Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 48,
+              "Title": "Complaint.cs",
+              "DocumentMoniker": "C:\\SE1839__Csharp\\DEMO01_EV_rental_System\\DEMO01_EV_rental_System\\Entities\\Complaint.cs",
+              "RelativeDocumentMoniker": "DEMO01_EV_rental_System\\Entities\\Complaint.cs",
+              "ToolTip": "C:\\SE1839__Csharp\\DEMO01_EV_rental_System\\DEMO01_EV_rental_System\\Entities\\Complaint.cs",
+              "RelativeToolTip": "DEMO01_EV_rental_System\\Entities\\Complaint.cs",
+              "ViewState": "AgIAAAwAAAAAAAAAAAAIwBkAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-10-12T09:32:11.574Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 49,
+              "Title": "Station.cs",
+              "DocumentMoniker": "C:\\SE1839__Csharp\\DEMO01_EV_rental_System\\DEMO01_EV_rental_System\\Entities\\Station.cs",
+              "RelativeDocumentMoniker": "DEMO01_EV_rental_System\\Entities\\Station.cs",
+              "ToolTip": "C:\\SE1839__Csharp\\DEMO01_EV_rental_System\\DEMO01_EV_rental_System\\Entities\\Station.cs",
+              "RelativeToolTip": "DEMO01_EV_rental_System\\Entities\\Station.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAA4AAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-10-12T09:31:00.019Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 50,
+              "Title": "User.cs",
+              "DocumentMoniker": "C:\\SE1839__Csharp\\DEMO01_EV_rental_System\\DEMO01_EV_rental_System\\Entities\\User.cs",
+              "RelativeDocumentMoniker": "DEMO01_EV_rental_System\\Entities\\User.cs",
+              "ToolTip": "C:\\SE1839__Csharp\\DEMO01_EV_rental_System\\DEMO01_EV_rental_System\\Entities\\User.cs",
+              "RelativeToolTip": "DEMO01_EV_rental_System\\Entities\\User.cs",
+              "ViewState": "AgIAAAsAAAAAAAAAAAAxwBIAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-10-14T10:27:33.801Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 51,
+              "Title": "Vehicle.cs",
+              "DocumentMoniker": "C:\\SE1839__Csharp\\DEMO01_EV_rental_System\\DEMO01_EV_rental_System\\Entities\\Vehicle.cs",
+              "RelativeDocumentMoniker": "DEMO01_EV_rental_System\\Entities\\Vehicle.cs",
+              "ToolTip": "C:\\SE1839__Csharp\\DEMO01_EV_rental_System\\DEMO01_EV_rental_System\\Entities\\Vehicle.cs",
+              "RelativeToolTip": "DEMO01_EV_rental_System\\Entities\\Vehicle.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAoAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-10-12T09:32:24.697Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 52,
+              "Title": "DEMO01_EV_rental_System",
+              "DocumentMoniker": "C:\\SE1839__Csharp\\DEMO01_EV_rental_System\\DEMO01_EV_rental_System\\DEMO01_EV_rental_System.csproj",
+              "RelativeDocumentMoniker": "DEMO01_EV_rental_System\\DEMO01_EV_rental_System.csproj",
+              "ToolTip": "C:\\SE1839__Csharp\\DEMO01_EV_rental_System\\DEMO01_EV_rental_System\\DEMO01_EV_rental_System.csproj",
+              "RelativeToolTip": "DEMO01_EV_rental_System\\DEMO01_EV_rental_System.csproj",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000758|",
+              "WhenOpened": "2025-10-09T11:50:02.717Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 53,
+              "Title": "launchSettings.json",
+              "DocumentMoniker": "C:\\SE1839__Csharp\\DEMO01_EV_rental_System\\DEMO01_EV_rental_System\\Properties\\launchSettings.json",
+              "RelativeDocumentMoniker": "DEMO01_EV_rental_System\\Properties\\launchSettings.json",
+              "ToolTip": "C:\\SE1839__Csharp\\DEMO01_EV_rental_System\\DEMO01_EV_rental_System\\Properties\\launchSettings.json",
+              "RelativeToolTip": "DEMO01_EV_rental_System\\Properties\\launchSettings.json",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAwAAAAcAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001642|",
+              "WhenOpened": "2025-10-09T10:03:32.27Z"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{56df62a4-05a3-4e5b-aa1a-99371ccfb997}"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
