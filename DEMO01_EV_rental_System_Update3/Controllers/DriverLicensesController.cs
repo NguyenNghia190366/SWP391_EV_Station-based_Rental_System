@@ -1,151 +1,95 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
+﻿using DEMO01_EV_rental_System.Data;
+using DEMO01_EV_rental_System.Data.CurrentUserAccessor;
+using DEMO01_EV_rental_System.Entities;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using DEMO01_EV_rental_System.Data;
-using DEMO01_EV_rental_System.Entities;
+
+// DTO upload
+public class DriverLicenseUpsertDto
+{
+    public string LicenseNumber { get; set; } = string.Empty;
+    public string UrlFront { get; set; } = string.Empty;
+    public string UrlBack { get; set; } = string.Empty;
+}
 
 namespace DEMO01_EV_rental_System.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize]
     public class DriverLicensesController : ControllerBase
     {
         private readonly RentalEvSystemFinalContext _context;
+        private readonly ICurrentUserAccessor _currentUserAccessor; // <-- Inject
 
-        public DriverLicensesController(RentalEvSystemFinalContext context)
+        public DriverLicensesController(RentalEvSystemFinalContext context, ICurrentUserAccessor currentUserAccessor)
         {
             _context = context;
+            _currentUserAccessor = currentUserAccessor;
         }
 
-        // GET: api/DriverLicenses
-        [HttpGet]
-        public async Task<ActionResult<IEnumerable<DriverLicense>>> GetDriverLicenses()
+        // API xem bằng lái của chính mình
+        [HttpGet("MyLicense")]
+        public async Task<ActionResult<DriverLicense>> GetMyLicense()
         {
-            return await _context.DriverLicenses.ToListAsync();
+            var userId = _currentUserAccessor.UserId;
+            var renter = await _context.Renters.FirstOrDefaultAsync(r => r.UserId == userId);
+            if (renter == null) return NotFound("Bạn chưa có hồ sơ Renter.");
+
+            var license = await _context.DriverLicenses.FindAsync(renter.RenterId);
+            if (license == null) return NotFound("Bạn chưa upload Bằng lái.");
+
+            return license;
         }
 
-        // GET: api/DriverLicenses/5
-        [HttpGet("{id}")]
-        public async Task<ActionResult<DriverLicense>> GetDriverLicense(int id)
+        // API Upload/Update Bằng lái (Logic của Huy: Upsert)
+        [HttpPost("UploadMyLicense")]
+        public async Task<ActionResult> UploadMyLicense(DriverLicenseUpsertDto dto)
         {
-            var driverLicense = await _context.DriverLicenses.FindAsync(id);
+            // 1. Lấy Renter từ Token
+            var userId = _currentUserAccessor.UserId;
+            var renter = await _context.Renters.FirstOrDefaultAsync(r => r.UserId == userId);
+            
+            if (renter == null) return BadRequest("Tài khoản này không phải là Renter.");
 
-            if (driverLicense == null)
+            // 2. Tìm Bằng lái hiện tại
+            var dl = await _context.DriverLicenses.FindAsync(renter.RenterId);
+
+            if (dl == null)
             {
-                return NotFound();
+                // Tạo mới
+                dl = new DriverLicense
+                {
+                    Renter_Id = renter.RenterId,
+                    DriverLicenseNumber = dto.LicenseNumber,
+                    url_Driver_License_front = dto.UrlFront,
+                    url_Driver_License_back = dto.UrlBack
+                };
+                _context.DriverLicenses.Add(dl);
+            }
+            else
+            {
+                // Cập nhật
+                dl.DriverLicenseNumber = dto.LicenseNumber;
+                dl.url_Driver_License_front = dto.UrlFront;
+                dl.url_Driver_License_back = dto.UrlBack;
+                _context.Entry(dl).State = EntityState.Modified;
             }
 
-            return driverLicense;
-        }
-
-        // PUT: api/DriverLicenses/5
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        [HttpPut("{id}")]
-        public async Task<IActionResult> PutDriverLicense(int id, DriverLicense driverLicense)
-        {
-            if (id != driverLicense.Renter_Id)
-            {
-                return BadRequest();
-            }
-
-            _context.Entry(driverLicense).State = EntityState.Modified;
+            // 3. Reset trạng thái verified
+            renter.IsVerified = false;
 
             try
             {
                 await _context.SaveChangesAsync();
             }
-            catch (DbUpdateConcurrencyException)
+            catch (DbUpdateException ex)
             {
-                if (!DriverLicenseExists(id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
+                 return BadRequest("Lỗi lưu dữ liệu: " + ex.Message);
             }
 
-            return NoContent();
-        }
-
-        // POST: api/DriverLicenses
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        [HttpPost]
-        public async Task<ActionResult<DriverLicense>> PostDriverLicense(DriverLicense driverLicense)
-        {
-            _context.DriverLicenses.Add(driverLicense);
-            try
-            {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateException)
-            {
-                if (DriverLicenseExists(driverLicense.Renter_Id))
-                {
-                    return Conflict();
-                }
-                else
-                {
-                    throw;
-                }
-            }
-
-            return CreatedAtAction("GetDriverLicense", new { id = driverLicense.Renter_Id }, driverLicense);
-        }
-
-        [HttpPost("UploadBang")]
-        public async Task<ActionResult<DriverLicense>> UploadBangLaiXe(PostDriverLisenceDTO postDriverLisenceDTO)
-        {
-            DriverLicense driverLicense = new DriverLicense
-            {
-                DriverLicenseNumber = postDriverLisenceDTO.DriverLicenseNumber,
-                url_Driver_License_back = postDriverLisenceDTO.url_Driver_License_back,
-                url_Driver_License_front = postDriverLisenceDTO.url_Driver_License_front,
-                Renter_Id = postDriverLisenceDTO.Renter_Id,
-            };
-            _context.DriverLicenses.Add(driverLicense);
-            try
-            {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateException)
-            {
-                if (DriverLicenseExists(driverLicense.Renter_Id))
-                {
-                    return Conflict();
-                }
-                else
-                {
-                    throw;
-                }
-            }
-
-            return CreatedAtAction("GetDriverLicense", new { id = driverLicense.Renter_Id }, postDriverLisenceDTO);
-        }
-        // DELETE: api/DriverLicenses/5
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteDriverLicense(int id)
-        {
-            var driverLicense = await _context.DriverLicenses.FindAsync(id);
-            if (driverLicense == null)
-            {
-                return NotFound();
-            }
-
-            _context.DriverLicenses.Remove(driverLicense);
-            await _context.SaveChangesAsync();
-
-            return NoContent();
-        }
-
-        private bool DriverLicenseExists(int id)
-        {
-            return _context.DriverLicenses.Any(e => e.Renter_Id == id);
+            return Ok(new { message = "Upload Bằng lái thành công. Vui lòng chờ duyệt.", data = dl });
         }
     }
 }
