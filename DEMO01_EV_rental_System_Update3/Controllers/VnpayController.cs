@@ -16,7 +16,7 @@ namespace DEMO01_EV_rental_System.Controllers
         private readonly IVnPayService _vnPayService;
         private readonly RentalEvSystemFinalContext _context;
 
-        public PaymentsController(IVnPayService vnPayService)
+        public VnpayController(IVnPayService vnPayService)
         {
             _vnPayService = vnPayService;
             _context = new RentalEvSystemFinalContext();

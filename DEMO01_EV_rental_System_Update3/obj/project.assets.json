@@ -8388,23 +8388,23 @@
     ]
   },
   "packageFolders": {
-    "C:\\Users\\Admin\\.nuget\\packages\\": {},
+    "C:\\Users\\onggi\\.nuget\\packages\\": {},
     "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages": {}
   },
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\SE1839__Csharp\\DEMO01_EV_rental_System\\DEMO01_EV_rental_System\\DEMO01_EV_rental_System.csproj",
+      "projectUniqueName": "D:\\Linh tinh\\studying\\Semester_5\\swP391\\merge_Nghia\\DEMO01_EV_rental_System_Update3\\DEMO01_EV_rental_System.csproj",
       "projectName": "DEMO01_EV_rental_System",
-      "projectPath": "C:\\SE1839__Csharp\\DEMO01_EV_rental_System\\DEMO01_EV_rental_System\\DEMO01_EV_rental_System.csproj",
-      "packagesPath": "C:\\Users\\Admin\\.nuget\\packages\\",
-      "outputPath": "C:\\SE1839__Csharp\\DEMO01_EV_rental_System\\DEMO01_EV_rental_System\\obj\\",
+      "projectPath": "D:\\Linh tinh\\studying\\Semester_5\\swP391\\merge_Nghia\\DEMO01_EV_rental_System_Update3\\DEMO01_EV_rental_System.csproj",
+      "packagesPath": "C:\\Users\\onggi\\.nuget\\packages\\",
+      "outputPath": "D:\\Linh tinh\\studying\\Semester_5\\swP391\\merge_Nghia\\DEMO01_EV_rental_System_Update3\\obj\\",
       "projectStyle": "PackageReference",
       "fallbackFolders": [
         "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
       ],
       "configFilePaths": [
-        "C:\\Users\\Admin\\AppData\\Roaming\\NuGet\\NuGet.Config",
+        "C:\\Users\\onggi\\AppData\\Roaming\\NuGet\\NuGet.Config",
         "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
         "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
       ],
@@ -8509,7 +8509,7 @@
             "privateAssets": "all"
           }
         },
-        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\9.0.305/PortableRuntimeIdentifierGraph.json"
+        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\9.0.307/PortableRuntimeIdentifierGraph.json"
       }
     }
   }
