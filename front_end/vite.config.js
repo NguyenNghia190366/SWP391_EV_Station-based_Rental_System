@@ -52,7 +52,7 @@ export default defineConfig({
     host: "0.0.0.0",
     port: 5173,
 
-    // ❗ REMOVE proxy because Vercel doesn't run a local backend
+    // ❗ XÓA proxy vì Vercel không chạy backend local
     proxy: {},
   },
 

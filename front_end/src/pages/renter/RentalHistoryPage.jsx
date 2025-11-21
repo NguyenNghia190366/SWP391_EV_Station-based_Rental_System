@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import axios from "axios";
 import { Card, Table, Tag, Spin, Empty, Button, message, Space, Popconfirm, Tooltip } from "antd";
 import { useNavigate } from "react-router-dom";
 import dayjs from "dayjs";
@@ -12,6 +13,7 @@ export default function RentalHistoryPage() {
   const navigate = useNavigate();
   const { getRenterIdByUserId, rejectRentalOrder } = useRenters();
   const [orders, setOrders] = useState([]);
+  const [customerName, setCustomerName] = useState("");
   const [loading, setLoading] = useState(false);
   const [cancellingId, setCancellingId] = useState(null);
   const [paidOrderIds, setPaidOrderIds] = useState(new Set());
@@ -23,6 +25,13 @@ export default function RentalHistoryPage() {
       if (!userId) {
         message.warning("User ID not found!");
         return;
+      }
+      // Lấy tên khách hàng từ API Users
+      try {
+        const userRes = await axios.get(`/Users/${userId}`);
+        setCustomerName(userRes.data?.fullName || userRes.data?.name || "");
+      } catch {
+        setCustomerName("");
       }
 
       // Get renterId from userId
@@ -153,6 +162,13 @@ export default function RentalHistoryPage() {
   };
 
   const columns = [
+    {
+      title: "Customer",
+      dataIndex: "customerName",
+      key: "customerName",
+      render: () => customerName || "N/A",
+      width: 180,
+    },
     {
       title: "Order ID",
       dataIndex: "orderId",

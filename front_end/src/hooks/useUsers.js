@@ -141,7 +141,7 @@ export const useUsers = () => {
   const getAllUsers = useCallback(
     async (params = {}) => {
       try {
-        const res = await instance.get("/User", { params });
+        const res = await instance.get("/Users", { params });
         return res.data;
       } catch (error) {
         console.error("❌ Error fetching users list:", error.response?.data || error.message);

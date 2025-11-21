@@ -1,6 +1,7 @@
 import React from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { Card, Button } from "antd";
+import { CheckCircleTwoTone } from "@ant-design/icons";
 
 export default function PaymentSuccessPage() {
   const location = useLocation();
@@ -36,27 +37,26 @@ export default function PaymentSuccessPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 p-6">
-      <div style={{ width: "100%", maxWidth: 900 }}>
-        <Card>
-          <div style={{ textAlign: "center", padding: 24 }}>
-            <h1 style={{ color: "#22c55e", fontSize: 28, marginBottom: 8 }}>Payment successful ✅</h1>
-            <p style={{ color: "#374151", marginBottom: 18 }}>Thank you for your payment. Details are below.</p>
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-green-50 to-blue-50 p-6">
+      <div style={{ width: "100%", maxWidth: 500 }}>
+        <Card bordered={false} style={{ borderRadius: 16, boxShadow: "0 4px 24px #0001" }}>
+          <div style={{ textAlign: "center", padding: 32 }}>
+            <CheckCircleTwoTone twoToneColor="#52c41a" style={{ fontSize: 64, marginBottom: 12 }} />
+            <h1 style={{ color: "#22c55e", fontSize: 32, marginBottom: 8, fontWeight: 700 }}>Thanh toán thành công!</h1>
 
-            <div style={{ textAlign: "left", maxWidth: 680, margin: "0 auto" }}>
-              {amount !== null && <p><strong>Amount:</strong> {formatCurrency(amount)}</p>}
-              {description && <p><strong>Description:</strong> {description}</p>}
-            </div>
 
-            <div style={{ marginTop: 22 }}>
-              <Button type="primary" onClick={() => navigate(`/renter/contract-online/${orderId}`)} style={{ marginRight: 12 }}>
-                Back to contract
+
+            <div style={{ marginTop: 32, display: 'flex', justifyContent: 'center', gap: 16 }}>
+              <Button type="primary" size="large" onClick={() => navigate(`/renter/contract-online/${orderId}`)}>
+                Xem hợp đồng
               </Button>
-              <Button onClick={() => navigate('/my-bookings')}>View history</Button>
+              <Button size="large" onClick={() => navigate('/user-dashboard')}>
+                Lịch sử đặt xe
+              </Button>
             </div>
 
             {rawHtml && (
-              <div style={{ marginTop: 24, textAlign: "left" }}>
+              <div style={{ marginTop: 32, textAlign: "left" }}>
                 <h3>Server response</h3>
                 <div style={{ border: '1px solid #e5e7eb', padding: 12, borderRadius: 6 }} dangerouslySetInnerHTML={{ __html: rawHtml }} />
               </div>

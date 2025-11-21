@@ -14,33 +14,37 @@ export default function BookingRequestsManagement() {
       setLoading(true);
       
       // ✅ Fetch all APIs in parallel (not sequential)
-      const [ordersRes, rentersRes, vehiclesRes, stationsRes] = await Promise.all([
+      const [ordersRes, rentersRes, vehiclesRes, stationsRes, usersRes] = await Promise.all([
         api.get("/RentalOrders").catch(() => ({ data: [] })),
         api.get("/Renters").catch(() => ({ data: [] })),
         api.get("/Vehicles").catch(() => ({ data: [] })),
         api.get("/Stations").catch(() => ({ data: [] })),
+        api.get("/Users").catch(() => ({ data: [] })),
       ]);
 
       const orders = Array.isArray(ordersRes.data) ? ordersRes.data : [];
       const renters = Array.isArray(rentersRes.data) ? rentersRes.data : [];
       const vehicles = Array.isArray(vehiclesRes.data) ? vehiclesRes.data : [];
       const stations = Array.isArray(stationsRes.data) ? stationsRes.data : [];
+      const users = Array.isArray(usersRes.data) ? usersRes.data : [];
 
-      // ✅ Create lookup maps (O(1) instead of O(n) for each find)
+      // Create lookup maps
       const renterMap = new Map(renters.map(r => [r.renterId, r]));
       const vehicleMap = new Map(vehicles.map(v => [v.vehicleId, v]));
       const stationMap = new Map(stations.map(s => [s.stationId, s]));
+      const userMap = new Map(users.map(u => [u.userId, u]));
 
-      // ✅ Merge data using maps
+      // Merge data using maps
       const merged = orders.map((order) => {
         const renter = renterMap.get(order.renterId);
+        const user = renter && userMap.get(renter.userId);
         const vehicle = vehicleMap.get(order.vehicleId);
         const pickupStation = stationMap.get(order.pickupStationId);
         const returnStation = stationMap.get(order.returnStationId);
 
         return {
           ...order,
-          renterName: renter?.fullName || `#${order.renterId}`,
+          renterName: user?.fullName || user?.name || renter?.fullName || `#${order.renterId}`,
           vehicleName: vehicle?.vehicleName || `#${order.vehicleId}`,
           pickupStationName: pickupStation?.stationName || `#${order.pickupStationId}`,
           returnStationName: returnStation?.stationName || `#${order.returnStationId}`,

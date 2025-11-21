@@ -8,6 +8,7 @@ export const useAxiosInstance = (backup = false) => {
     
     // Create axios instance with interceptor immediately (not waiting for useEffect)
     const instance = useMemo(() => {
+        console.log("🔧 useAxiosInstance creating new instance. Token:", token ? "✅ Present" : "❌ Missing", "Backup:", backup);
         const newInstance = axios.create({ 
             baseURL: !backup ? apiUrl : 'https://alani-uncorroboratory-sympetaly.ngrok-free.dev',
             headers: {
@@ -21,11 +22,18 @@ export const useAxiosInstance = (backup = false) => {
         // Set up request interceptor to ensure token is always attached
         newInstance.interceptors.request.use((config) => {
             const currentToken = localStorage.getItem("token");
+            console.log("📤 Request to:", config.url, "Token:", currentToken ? "✅" : "❌");
             if (currentToken) {
                 config.headers["Authorization"] = `Bearer ${currentToken}`;
             }
             return config;
         }, (error) => {
+            return Promise.reject(error);
+        });
+        
+        // Log response errors
+        newInstance.interceptors.response.use((response) => response, (error) => {
+            console.error("❌ API Error:", error.response?.status, error.response?.statusText, "URL:", error.config?.url);
             return Promise.reject(error);
         });
         
