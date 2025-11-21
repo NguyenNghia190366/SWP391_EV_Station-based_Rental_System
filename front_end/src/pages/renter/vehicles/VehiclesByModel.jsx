@@ -118,8 +118,8 @@ const VehiclesByModel = ({ vehicles = [], onSelectModel, onBookVehicle, getModel
           >
             {/* Model Name and Badge */}
             <div className="flex justify-between items-start mb-4">
-              <div>
-                <h4 className="text-lg font-bold text-gray-800 mb-1">
+              <div style={{cursor:'pointer'}} onClick={() => navigate(`/vehicles/model/${modelGroup.modelId}`)}>
+                <h4 className="text-lg font-bold text-gray-800 mb-1 underline hover:text-blue-600">
                   {modelGroup.modelName}
                 </h4>
                 <p className="text-sm text-gray-500">
@@ -198,6 +198,18 @@ const VehiclesByModel = ({ vehicles = [], onSelectModel, onBookVehicle, getModel
                   {modelGroup.rentedCount > 0 ? "Rented" : "Out of stock"}
                 </Button>
               )}
+              <Button
+                block
+                onClick={() => {
+                  const firstVehicleId = modelGroup.vehicles[0]?.id || modelGroup.vehicles[0]?.vehicleId;
+                  if (firstVehicleId) {
+                    navigate(`/vehicle/${firstVehicleId}`);
+                  }
+                }}
+                style={{ marginTop: 4 }}
+              >
+                Details
+              </Button>
             </div>
           </Card>
         );

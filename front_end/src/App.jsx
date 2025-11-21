@@ -5,6 +5,7 @@ import HomePage from "./Components/Common/Pages/HomePage.jsx";
 import RegisterPage from "./Components/Common/Pages/RegisterPage.jsx";
 // Renter
 import UserDashboard from "./pages/renter/UserDashboard.jsx";
+import VehicleDetailsPage from "./pages/renter/vehicles/VehicleDetailsPage.jsx";
 import VehiclesPage from "./pages/renter/vehicles/VehiclesPage.jsx";
 import BookingRequestPage from "./pages/renter/booking/BookingRequestPage.jsx";
 import BookingFormPage from "./pages/renter/booking/BookingFormPage.jsx";
@@ -46,6 +47,7 @@ function App() {
         <Route path="/" element={<Navigate to="/home" replace />} />
         <Route path="/home" element={<HomePage />} />
         <Route path="/vehicles" element={<VehiclesPage />} />
+        <Route path="/vehicle/:vehicleId" element={<VehicleDetailsPage />} />
         <Route
           path="/user-dashboard"
           element={

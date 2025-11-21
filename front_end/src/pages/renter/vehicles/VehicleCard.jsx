@@ -221,7 +221,7 @@ const VehicleCard = ({
         `}
         >
           <button
-            onClick={() => onViewDetails && onViewDetails(vehicle.id)}
+            onClick={() => onViewDetails && onViewDetails(vehicle.vehicleId || vehicle.id)}
             className="
               px-5 py-3.5 rounded-xl font-bold uppercase tracking-wide
               bg-white text-sdz-500 border-2 border-sdz-500

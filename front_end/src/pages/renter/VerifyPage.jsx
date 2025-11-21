@@ -143,7 +143,6 @@ export default function VerifyPage() {
       }
 
       setLoadingCccd(true);
-      toast.info("Uploading CCCD images to Cloudinary...");
 
       const frontUrl = await uploadToCloudinary(frontFile);
       const backUrl = await uploadToCloudinary(backFile);
